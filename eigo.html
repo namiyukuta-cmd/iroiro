@@ -11,8 +11,8 @@
       --bg: #f7f7f5;
       --text: #202020;
       --line: #d8d8d3;
-      --yellow: #f3c84b;
-      --yellow-bg: #fff8d7;
+      --yellow: #efc84e;
+      --yellow-bg: #fff8d9;
     }
 
     html, body {
@@ -26,156 +26,186 @@
       overscroll-behavior: none;
     }
 
-    button { font: inherit; }
+    button, input { font: inherit; }
 
     .app {
       width: 100%;
       height: 100dvh;
       display: grid;
-      grid-template-rows: minmax(0, 44%) minmax(0, 56%);
+      grid-template-columns: minmax(0, 1fr) 66px;
+      grid-template-rows: minmax(0, 43%) minmax(0, 57%);
+      gap: 8px;
       overflow: hidden;
       padding:
-        max(10px, env(safe-area-inset-top))
-        10px
-        max(10px, env(safe-area-inset-bottom));
-      gap: 10px;
-    }
-
-    .top-area {
-      min-height: 0;
-      display: grid;
-      grid-template-columns: minmax(0, 1fr) 76px;
-      gap: 10px;
+        max(8px, env(safe-area-inset-top))
+        8px
+        max(8px, env(safe-area-inset-bottom));
     }
 
     .sentence-panel {
+      grid-column: 1;
+      grid-row: 1;
       min-width: 0;
       min-height: 0;
       overflow-y: auto;
       overscroll-behavior: contain;
       -webkit-overflow-scrolling: touch;
-      border: 3px solid var(--yellow);
-      border-radius: 22px;
+      border: 2px solid var(--yellow);
+      border-radius: 20px;
       background: var(--yellow-bg);
-      padding: 16px;
-    }
-
-    .sentence-placeholder {
-      color: #9b8a4e;
-      font-size: 17px;
-      line-height: 1.6;
+      padding: 12px;
     }
 
     .sentence {
       display: flex;
       flex-wrap: wrap;
       align-content: flex-start;
-      gap: 9px 7px;
+      gap: 7px 6px;
       min-height: 100%;
     }
 
+    .sentence-placeholder {
+      color: #9a874a;
+      font-size: 14px;
+      line-height: 1.5;
+    }
+
     .sentence-word {
-      min-height: 44px;
+      min-height: 38px;
       border: 2px solid #d6b23d;
-      border-radius: 12px;
+      border-radius: 10px;
       background: #fff;
-      padding: 8px 12px;
+      padding: 6px 10px;
       color: #181818;
-      font-size: 19px;
-      font-weight: 650;
+      font-size: 17px;
+      font-weight: 700;
       cursor: pointer;
     }
 
     .category-rail {
+      grid-column: 2;
+      grid-row: 1 / 3;
       min-height: 0;
       overflow-y: auto;
       overscroll-behavior: contain;
       -webkit-overflow-scrolling: touch;
       display: flex;
       flex-direction: column;
-      gap: 7px;
+      gap: 5px;
       scrollbar-width: none;
-      padding: 1px 1px 1px 0;
     }
 
     .category-rail::-webkit-scrollbar { display: none; }
 
     .category-button {
-      flex: 0 0 46px;
+      flex: 0 0 39px;
       width: 100%;
-      min-height: 46px;
+      min-height: 39px;
       border: 2px solid var(--cat);
-      border-radius: 12px;
+      border-radius: 11px;
       background: #fff;
       color: #222;
-      font-size: 15px;
-      font-weight: 750;
+      font-size: 12px;
+      font-weight: 800;
       line-height: 1.05;
-      padding: 4px 3px;
+      padding: 2px 1px;
       cursor: pointer;
+      white-space: nowrap;
     }
 
     .category-button.active {
-      background: color-mix(in srgb, var(--cat) 22%, white);
+      background: color-mix(in srgb, var(--cat) 20%, white);
       box-shadow: inset 0 0 0 1px var(--cat);
     }
 
     .palette {
+      grid-column: 1;
+      grid-row: 2;
+      min-width: 0;
       min-height: 0;
       overflow-y: auto;
       overscroll-behavior: contain;
       -webkit-overflow-scrolling: touch;
-      border: 3px solid var(--accent, #e18aae);
-      border-radius: 24px;
+      border: 2px solid var(--accent, #df7fa7);
+      border-radius: 20px;
       background: #fff;
-      padding: 14px;
+      padding: 8px;
     }
 
     .palette-head {
       position: sticky;
-      top: -14px;
+      top: -8px;
       z-index: 2;
-      margin: -14px -14px 14px;
-      padding: 13px 14px 11px;
+      margin: -8px -8px 8px;
+      padding: 8px;
       background: #fff;
       border-bottom: 1px solid var(--line);
     }
 
     .palette-title {
-      margin: 0;
-      font-size: 19px;
+      margin: 0 0 6px;
+      font-size: 17px;
       font-weight: 800;
     }
 
-    .palette-note {
-      margin-top: 4px;
-      color: #777;
+    .custom-row {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 50px;
+      gap: 5px;
+    }
+
+    .custom-input {
+      width: 100%;
+      min-width: 0;
+      height: 34px;
+      border: 1.5px solid var(--accent, #df7fa7);
+      border-radius: 9px;
+      background: #fff;
+      padding: 5px 8px;
       font-size: 14px;
+      outline: none;
+    }
+
+    .custom-input:focus {
+      box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent) 22%, transparent);
+    }
+
+    .custom-add {
+      height: 34px;
+      border: 1.5px solid var(--accent, #df7fa7);
+      border-radius: 9px;
+      background: #fff;
+      font-size: 12px;
+      font-weight: 800;
+      cursor: pointer;
     }
 
     .word-grid {
       display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 10px;
-      padding-bottom: 8px;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 6px;
+      padding-bottom: 4px;
     }
 
     .word-button {
-      min-height: 52px;
-      border: 2px solid var(--accent, #e18aae);
-      border-radius: 14px;
+      min-width: 0;
+      min-height: 41px;
+      border: 1.5px solid var(--accent, #df7fa7);
+      border-radius: 10px;
       background: #fff;
       color: #1f1f1f;
-      font-size: 18px;
-      font-weight: 650;
-      padding: 8px 7px;
+      font-size: 15px;
+      font-weight: 700;
+      line-height: 1.15;
+      padding: 5px 3px;
       cursor: pointer;
       overflow-wrap: anywhere;
     }
 
     .word-button:active,
     .sentence-word:active,
-    .category-button:active {
+    .category-button:active,
+    .custom-add:active {
       transform: scale(0.97);
     }
 
@@ -191,20 +221,21 @@
 </head>
 <body>
   <main class="app">
-    <section class="top-area" aria-label="英文作成エリア">
-      <div class="sentence-panel" id="sentencePanel">
-        <div class="sentence" id="sentence">
-          <div class="sentence-placeholder" id="placeholder">下の単語を押すと、ここに英文が並びます。</div>
-        </div>
+    <section class="sentence-panel" id="sentencePanel" aria-label="英文作成エリア">
+      <div class="sentence" id="sentence">
+        <div class="sentence-placeholder" id="placeholder">下の単語を押すと、ここに英文が並びます。</div>
       </div>
-
-      <nav class="category-rail" id="categoryRail" aria-label="単語グループ"></nav>
     </section>
+
+    <nav class="category-rail" id="categoryRail" aria-label="単語グループ"></nav>
 
     <section class="palette" id="palette" aria-label="選択中の単語グループ">
       <div class="palette-head">
         <h1 class="palette-title" id="paletteTitle">主語</h1>
-        <div class="palette-note">単語を押すと上に追加</div>
+        <div class="custom-row">
+          <input class="custom-input" id="customInput" type="text" autocomplete="off" autocapitalize="none" placeholder="自由入力" />
+          <button class="custom-add" id="customAdd" type="button">追加</button>
+        </div>
       </div>
       <div class="word-grid" id="wordGrid"></div>
     </section>
@@ -216,7 +247,7 @@
         id: 'subject',
         label: '主語',
         color: '#df7fa7',
-        words: ['I', 'you', 'he', 'she', 'it', 'we', 'they', 'this', 'that', 'these', 'those', 'Tom', 'my mother', 'my father', 'my friend', 'the dog']
+        words: ['I', 'you', 'he', 'she', 'it', 'we', 'they', 'this', 'that', 'these', 'those']
       },
       {
         id: 'be',
@@ -287,40 +318,60 @@
     ];
 
     const sentence = document.getElementById('sentence');
-    const placeholder = document.getElementById('placeholder');
     const categoryRail = document.getElementById('categoryRail');
     const palette = document.getElementById('palette');
     const paletteTitle = document.getElementById('paletteTitle');
     const wordGrid = document.getElementById('wordGrid');
+    const customInput = document.getElementById('customInput');
+    const customAdd = document.getElementById('customAdd');
 
     let activeGroupId = groups[0].id;
 
+    function showPlaceholderIfEmpty() {
+      if (!sentence.querySelector('.sentence-word') && !document.getElementById('placeholder')) {
+        const empty = document.createElement('div');
+        empty.className = 'sentence-placeholder';
+        empty.id = 'placeholder';
+        empty.textContent = '下の単語を押すと、ここに英文が並びます。';
+        sentence.appendChild(empty);
+      }
+    }
+
     function addWord(word) {
+      const value = String(word).trim();
+      if (!value) return;
+
+      const placeholder = document.getElementById('placeholder');
       if (placeholder) placeholder.remove();
 
       const button = document.createElement('button');
       button.type = 'button';
       button.className = 'sentence-word';
-      button.textContent = word;
+      button.textContent = value;
       button.title = '押すと削除';
       button.addEventListener('click', () => {
         button.remove();
-        if (!sentence.querySelector('.sentence-word')) {
-          const empty = document.createElement('div');
-          empty.className = 'sentence-placeholder';
-          empty.id = 'placeholder';
-          empty.textContent = '下の単語を押すと、ここに英文が並びます。';
-          sentence.appendChild(empty);
-        }
+        showPlaceholderIfEmpty();
       });
 
       sentence.appendChild(button);
       button.scrollIntoView({ block: 'nearest', inline: 'nearest' });
     }
 
+    function addCustomWord() {
+      const value = customInput.value.trim();
+      if (!value) return;
+      addWord(value);
+      customInput.value = '';
+      customInput.focus();
+    }
+
     function renderPalette(group) {
       paletteTitle.textContent = group.label;
       palette.style.setProperty('--accent', group.color);
+      customInput.style.setProperty('--accent', group.color);
+      customAdd.style.setProperty('--accent', group.color);
+      customInput.placeholder = `${group.label}を入力`;
       wordGrid.innerHTML = '';
 
       group.words.forEach(word => {
@@ -356,6 +407,11 @@
       button.textContent = group.label;
       button.addEventListener('click', () => setActiveGroup(group.id));
       categoryRail.appendChild(button);
+    });
+
+    customAdd.addEventListener('click', addCustomWord);
+    customInput.addEventListener('keydown', event => {
+      if (event.key === 'Enter') addCustomWord();
     });
 
     setActiveGroup(activeGroupId);
