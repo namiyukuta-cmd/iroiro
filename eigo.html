@@ -6,226 +6,95 @@
   <title>英語</title>
   <style>
     * { box-sizing: border-box; }
-
     :root {
-      --bg: #f7f7f5;
-      --text: #202020;
-      --line: #d8d8d3;
-      --yellow: #efc84e;
-      --yellow-bg: #fff8d9;
+      --bg:#f7f7f5; --text:#202020; --line:#d8d8d3;
+      --yellow:#efc84e; --yellow-bg:#fff8d9;
     }
-
-    html, body {
-      width: 100%;
-      height: 100%;
-      margin: 0;
-      overflow: hidden;
-      background: var(--bg);
-      color: var(--text);
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-      overscroll-behavior: none;
+    html,body{
+      width:100%;height:100%;margin:0;overflow:hidden;background:var(--bg);color:var(--text);
+      font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;overscroll-behavior:none;
     }
-
-    button, input { font: inherit; }
-
-    .app {
-      width: 100%;
-      height: 100dvh;
-      display: grid;
-      grid-template-columns: minmax(0, 1fr) 66px;
-      grid-template-rows: minmax(0, 43%) minmax(0, 57%);
-      gap: 8px;
-      overflow: hidden;
-      padding:
-        max(8px, env(safe-area-inset-top))
-        8px
-        max(8px, env(safe-area-inset-bottom));
+    button,input{font:inherit}
+    .app{
+      width:100%;height:100dvh;display:grid;
+      grid-template-columns:minmax(0,1fr) 66px;
+      grid-template-rows:minmax(0,38%) 44px minmax(0,1fr);
+      gap:7px;overflow:hidden;
+      padding:max(8px,env(safe-area-inset-top)) 8px max(8px,env(safe-area-inset-bottom));
     }
-
-    .sentence-panel {
-      grid-column: 1;
-      grid-row: 1;
-      min-width: 0;
-      min-height: 0;
-      overflow-y: auto;
-      overscroll-behavior: contain;
-      -webkit-overflow-scrolling: touch;
-      border: 2px solid var(--yellow);
-      border-radius: 20px;
-      background: var(--yellow-bg);
-      padding: 12px;
+    .sentence-panel{
+      grid-column:1;grid-row:1;min-width:0;min-height:0;overflow-y:auto;overscroll-behavior:contain;
+      -webkit-overflow-scrolling:touch;border:2px solid var(--yellow);border-radius:20px;background:var(--yellow-bg);padding:10px;
     }
-
-    .sentence {
-      display: flex;
-      flex-wrap: wrap;
-      align-content: flex-start;
-      gap: 7px 6px;
-      min-height: 100%;
+    .confirmed-list{display:grid;gap:6px;margin-bottom:8px}
+    .confirmed-item{
+      background:#fff;border:1.5px solid #d9bc52;border-radius:10px;padding:7px 9px;font-size:15px;font-weight:700;line-height:1.35;
     }
-
-    .sentence-placeholder {
-      color: #9a874a;
-      font-size: 14px;
-      line-height: 1.5;
+    .current-label{font-size:11px;font-weight:800;color:#8f7b37;margin:2px 0 5px}
+    .sentence{display:flex;flex-wrap:wrap;align-content:flex-start;gap:6px 5px;min-height:46px}
+    .sentence-placeholder{color:#9a874a;font-size:13px;line-height:1.5}
+    .sentence-word{
+      min-height:34px;border:1.5px solid #d6b23d;border-radius:9px;background:#fff;padding:5px 9px;color:#181818;
+      font-size:15px;font-weight:700;cursor:pointer;
     }
-
-    .sentence-word {
-      min-height: 38px;
-      border: 2px solid #d6b23d;
-      border-radius: 10px;
-      background: #fff;
-      padding: 6px 10px;
-      color: #181818;
-      font-size: 17px;
-      font-weight: 700;
-      cursor: pointer;
+    .action-bar{grid-column:1;grid-row:2;display:grid;grid-template-columns:repeat(3,1fr);gap:6px;min-width:0}
+    .action-button{
+      min-width:0;border:1.5px solid #b8b8b2;border-radius:10px;background:#fff;font-size:13px;font-weight:800;cursor:pointer;
     }
-
-    .category-rail {
-      grid-column: 2;
-      grid-row: 1 / 3;
-      min-height: 0;
-      overflow-y: auto;
-      overscroll-behavior: contain;
-      -webkit-overflow-scrolling: touch;
-      display: flex;
-      flex-direction: column;
-      gap: 5px;
-      scrollbar-width: none;
+    .action-button.decide{border-color:#c39b1c;background:#fff9df}
+    .action-button.save{border-color:#6e9c76;background:#f2fbf4}
+    .category-rail{
+      grid-column:2;grid-row:1/4;min-height:0;overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;
+      display:flex;flex-direction:column;gap:5px;scrollbar-width:none;
     }
-
-    .category-rail::-webkit-scrollbar { display: none; }
-
-    .category-button {
-      flex: 0 0 39px;
-      width: 100%;
-      min-height: 39px;
-      border: 2px solid var(--cat);
-      border-radius: 11px;
-      background: #fff;
-      color: #222;
-      font-size: 12px;
-      font-weight: 800;
-      line-height: 1.05;
-      padding: 2px 1px;
-      cursor: pointer;
-      white-space: nowrap;
+    .category-rail::-webkit-scrollbar{display:none}
+    .category-button{
+      flex:0 0 39px;width:100%;min-height:39px;border:2px solid var(--cat);border-radius:11px;background:#fff;color:#222;
+      font-size:12px;font-weight:800;line-height:1.05;padding:2px 1px;cursor:pointer;white-space:nowrap;
     }
-
-    .category-button.active {
-      background: color-mix(in srgb, var(--cat) 20%, white);
-      box-shadow: inset 0 0 0 1px var(--cat);
+    .category-button.active{background:color-mix(in srgb,var(--cat) 20%,white);box-shadow:inset 0 0 0 1px var(--cat)}
+    .palette{
+      grid-column:1;grid-row:3;min-width:0;min-height:0;overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;
+      border:2px solid var(--accent,#df7fa7);border-radius:20px;background:#fff;padding:8px;
     }
-
-    .palette {
-      grid-column: 1;
-      grid-row: 2;
-      min-width: 0;
-      min-height: 0;
-      overflow-y: auto;
-      overscroll-behavior: contain;
-      -webkit-overflow-scrolling: touch;
-      border: 2px solid var(--accent, #df7fa7);
-      border-radius: 20px;
-      background: #fff;
-      padding: 8px;
+    .palette-head{
+      position:sticky;top:-8px;z-index:2;margin:-8px -8px 8px;padding:8px;background:#fff;border-bottom:1px solid var(--line);
     }
-
-    .palette-head {
-      position: sticky;
-      top: -8px;
-      z-index: 2;
-      margin: -8px -8px 8px;
-      padding: 8px;
-      background: #fff;
-      border-bottom: 1px solid var(--line);
+    .palette-title{margin:0 0 6px;font-size:16px;font-weight:800}
+    .custom-row{display:grid;grid-template-columns:minmax(0,1fr) 48px;gap:5px}
+    .custom-input{
+      width:100%;min-width:0;height:32px;border:1.5px solid var(--accent,#df7fa7);border-radius:8px;background:#fff;
+      padding:4px 7px;font-size:13px;outline:none;
     }
-
-    .palette-title {
-      margin: 0 0 6px;
-      font-size: 17px;
-      font-weight: 800;
+    .custom-add{height:32px;border:1.5px solid var(--accent,#df7fa7);border-radius:8px;background:#fff;font-size:11px;font-weight:800;cursor:pointer}
+    .word-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:5px;padding-bottom:4px}
+    .word-button{
+      min-width:0;min-height:38px;border:1.5px solid var(--accent,#df7fa7);border-radius:9px;background:#fff;color:#1f1f1f;
+      font-size:14px;font-weight:700;line-height:1.1;padding:4px 2px;cursor:pointer;overflow-wrap:anywhere;
     }
-
-    .custom-row {
-      display: grid;
-      grid-template-columns: minmax(0, 1fr) 50px;
-      gap: 5px;
+    .status{
+      position:fixed;left:50%;bottom:max(12px,env(safe-area-inset-bottom));transform:translateX(-50%);
+      max-width:calc(100vw - 30px);padding:7px 11px;border-radius:10px;background:#222;color:#fff;font-size:12px;font-weight:700;
+      opacity:0;pointer-events:none;transition:opacity .15s;z-index:20;text-align:center;
     }
-
-    .custom-input {
-      width: 100%;
-      min-width: 0;
-      height: 34px;
-      border: 1.5px solid var(--accent, #df7fa7);
-      border-radius: 9px;
-      background: #fff;
-      padding: 5px 8px;
-      font-size: 14px;
-      outline: none;
-    }
-
-    .custom-input:focus {
-      box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent) 22%, transparent);
-    }
-
-    .custom-add {
-      height: 34px;
-      border: 1.5px solid var(--accent, #df7fa7);
-      border-radius: 9px;
-      background: #fff;
-      font-size: 12px;
-      font-weight: 800;
-      cursor: pointer;
-    }
-
-    .word-grid {
-      display: grid;
-      grid-template-columns: repeat(3, minmax(0, 1fr));
-      gap: 6px;
-      padding-bottom: 4px;
-    }
-
-    .word-button {
-      min-width: 0;
-      min-height: 41px;
-      border: 1.5px solid var(--accent, #df7fa7);
-      border-radius: 10px;
-      background: #fff;
-      color: #1f1f1f;
-      font-size: 15px;
-      font-weight: 700;
-      line-height: 1.15;
-      padding: 5px 3px;
-      cursor: pointer;
-      overflow-wrap: anywhere;
-    }
-
-    .word-button:active,
-    .sentence-word:active,
-    .category-button:active,
-    .custom-add:active {
-      transform: scale(0.97);
-    }
-
-    @media (min-width: 700px) {
-      .app {
-        max-width: 520px;
-        margin: 0 auto;
-        border-left: 1px solid #e2e2df;
-        border-right: 1px solid #e2e2df;
-      }
-    }
+    .status.show{opacity:1}
+    .word-button:active,.sentence-word:active,.category-button:active,.custom-add:active,.action-button:active{transform:scale(.97)}
+    @media(min-width:700px){.app{max-width:520px;margin:0 auto;border-left:1px solid #e2e2df;border-right:1px solid #e2e2df}}
   </style>
 </head>
 <body>
   <main class="app">
     <section class="sentence-panel" id="sentencePanel" aria-label="英文作成エリア">
-      <div class="sentence" id="sentence">
-        <div class="sentence-placeholder" id="placeholder">下の単語を押すと、ここに英文が並びます。</div>
-      </div>
+      <div class="confirmed-list" id="confirmedList"></div>
+      <div class="current-label">作成中</div>
+      <div class="sentence" id="sentence"></div>
     </section>
+
+    <div class="action-bar">
+      <button class="action-button" id="deleteButton" type="button">削除</button>
+      <button class="action-button decide" id="decideButton" type="button">決定</button>
+      <button class="action-button save" id="saveButton" type="button">保存</button>
+    </div>
 
     <nav class="category-rail" id="categoryRail" aria-label="単語グループ"></nav>
 
@@ -241,180 +110,164 @@
     </section>
   </main>
 
+  <div class="status" id="status"></div>
+
   <script>
-    const groups = [
-      {
-        id: 'subject',
-        label: '主語',
-        color: '#df7fa7',
-        words: ['I', 'you', 'he', 'she', 'it', 'we', 'they', 'this', 'that', 'these', 'those']
-      },
-      {
-        id: 'be',
-        label: 'be動詞',
-        color: '#79a6e8',
-        words: ['am', 'is', 'are', 'was', 'were', 'be', 'been']
-      },
-      {
-        id: 'verb',
-        label: '一般動詞',
-        color: '#6f98df',
-        words: ['play', 'like', 'love', 'have', 'go', 'come', 'eat', 'drink', 'see', 'look', 'watch', 'read', 'write', 'speak', 'study', 'use', 'make', 'take', 'get', 'give', 'know', 'want', 'need', 'live', 'work']
-      },
-      {
-        id: 'modal',
-        label: '助動詞',
-        color: '#91c77d',
-        words: ['can', 'could', 'will', 'would', 'may', 'must', 'should']
-      },
-      {
-        id: 'wh',
-        label: 'WH',
-        color: '#b68bd0',
-        words: ['what', 'who', 'whose', 'which', 'where', 'when', 'why', 'how', 'how many', 'how much', 'how old', 'how long']
-      },
-      {
-        id: 'noun',
-        label: '名詞',
-        color: '#ef9b66',
-        words: ['book', 'school', 'student', 'teacher', 'friend', 'family', 'dog', 'cat', 'music', 'English', 'Japan', 'park', 'station', 'home', 'food', 'water', 'time', 'day', 'week', 'year']
-      },
-      {
-        id: 'pronoun',
-        label: '代名詞',
-        color: '#d992ae',
-        words: ['me', 'you', 'him', 'her', 'it', 'us', 'them', 'my', 'your', 'his', 'her', 'its', 'our', 'their', 'mine', 'yours', 'hers', 'ours', 'theirs']
-      },
-      {
-        id: 'adjective',
-        label: '形容詞',
-        color: '#e2be57',
-        words: ['good', 'bad', 'big', 'small', 'new', 'old', 'young', 'happy', 'sad', 'busy', 'free', 'beautiful', 'interesting', 'difficult', 'easy', 'favorite']
-      },
-      {
-        id: 'adverb',
-        label: '副詞',
-        color: '#65b8aa',
-        words: ['very', 'well', 'often', 'usually', 'always', 'sometimes', 'never', 'today', 'yesterday', 'tomorrow', 'now', 'here', 'there', 'also', 'too']
-      },
-      {
-        id: 'article',
-        label: '冠詞',
-        color: '#9c9c9c',
-        words: ['a', 'an', 'the']
-      },
-      {
-        id: 'preposition',
-        label: '前置詞',
-        color: '#a9846a',
-        words: ['in', 'on', 'at', 'to', 'from', 'for', 'with', 'by', 'of', 'about', 'under', 'over', 'near', 'before', 'after', 'between', 'into']
-      },
-      {
-        id: 'conjunction',
-        label: '接続詞',
-        color: '#555555',
-        words: ['and', 'but', 'or', 'because', 'so', 'if', 'when', 'that', 'than']
-      }
+    const groups=[
+      {id:'subject',label:'主語',color:'#df7fa7',words:['I','you','he','she','it','we','they','this','that','these','those']},
+      {id:'be',label:'be動詞',color:'#79a6e8',words:['am','is','are','was','were','be','been']},
+      {id:'verb',label:'一般動詞',color:'#6f98df',words:['play','like','love','have','go','come','eat','drink','see','look','watch','read','write','speak','study','use','make','take','get','give','know','want','need','live','work']},
+      {id:'modal',label:'助動詞',color:'#91c77d',words:['can','could','will','would','may','must','should']},
+      {id:'wh',label:'WH',color:'#b68bd0',words:['what','who','whose','which','where','when','why','how','how many','how much','how old','how long']},
+      {id:'noun',label:'名詞',color:'#ef9b66',words:['book','school','student','teacher','friend','family','dog','cat','music','English','Japan','park','station','home','food','water','time','day','week','year']},
+      {id:'pronoun',label:'代名詞',color:'#d992ae',words:['me','you','him','her','it','us','them','my','your','his','her','its','our','their','mine','yours','hers','ours','theirs']},
+      {id:'adjective',label:'形容詞',color:'#e2be57',words:['good','bad','big','small','new','old','young','happy','sad','busy','free','beautiful','interesting','difficult','easy','favorite']},
+      {id:'adverb',label:'副詞',color:'#65b8aa',words:['very','well','often','usually','always','sometimes','never','today','yesterday','tomorrow','now','here','there','also','too']},
+      {id:'article',label:'冠詞',color:'#9c9c9c',words:['a','an','the']},
+      {id:'preposition',label:'前置詞',color:'#a9846a',words:['in','on','at','to','from','for','with','by','of','about','under','over','near','before','after','between','into']},
+      {id:'conjunction',label:'接続詞',color:'#555555',words:['and','but','or','because','so','if','when','that','than']}
     ];
 
-    const sentence = document.getElementById('sentence');
-    const categoryRail = document.getElementById('categoryRail');
-    const palette = document.getElementById('palette');
-    const paletteTitle = document.getElementById('paletteTitle');
-    const wordGrid = document.getElementById('wordGrid');
-    const customInput = document.getElementById('customInput');
-    const customAdd = document.getElementById('customAdd');
+    const LOCAL_KEY='iroiro_eigo_save_v1';
+    const TOKEN_KEYS=['private_game_github_token_v1','homedeco_github_token_v1'];
+    const CLOUD={owner:'namiyukuta-cmd',repo:'private-game-data',path:'eigo/save.json'};
 
-    let activeGroupId = groups[0].id;
+    const sentence=document.getElementById('sentence');
+    const confirmedList=document.getElementById('confirmedList');
+    const sentencePanel=document.getElementById('sentencePanel');
+    const categoryRail=document.getElementById('categoryRail');
+    const palette=document.getElementById('palette');
+    const paletteTitle=document.getElementById('paletteTitle');
+    const wordGrid=document.getElementById('wordGrid');
+    const customInput=document.getElementById('customInput');
+    const customAdd=document.getElementById('customAdd');
+    const deleteButton=document.getElementById('deleteButton');
+    const decideButton=document.getElementById('decideButton');
+    const saveButton=document.getElementById('saveButton');
+    const statusBox=document.getElementById('status');
 
-    function showPlaceholderIfEmpty() {
-      if (!sentence.querySelector('.sentence-word') && !document.getElementById('placeholder')) {
-        const empty = document.createElement('div');
-        empty.className = 'sentence-placeholder';
-        empty.id = 'placeholder';
-        empty.textContent = '下の単語を押すと、ここに英文が並びます。';
+    let activeGroupId=groups[0].id;
+    let state=loadLocal()||{version:1,updatedAt:null,confirmedSentences:[],currentWords:[]};
+    if(!Array.isArray(state.confirmedSentences))state.confirmedSentences=[];
+    if(!Array.isArray(state.currentWords))state.currentWords=[];
+
+    function flash(message){
+      statusBox.textContent=message;statusBox.classList.add('show');
+      clearTimeout(flash.timer);flash.timer=setTimeout(()=>statusBox.classList.remove('show'),1600);
+    }
+
+    function loadLocal(){
+      try{const raw=localStorage.getItem(LOCAL_KEY);return raw?JSON.parse(raw):null;}catch(e){return null;}
+    }
+    function saveLocal(){
+      state.updatedAt=new Date().toISOString();
+      localStorage.setItem(LOCAL_KEY,JSON.stringify(state));
+    }
+    function renderState(){
+      confirmedList.innerHTML='';
+      state.confirmedSentences.forEach(item=>{
+        const row=document.createElement('div');row.className='confirmed-item';row.textContent=typeof item==='string'?item:item.text;
+        confirmedList.appendChild(row);
+      });
+      sentence.innerHTML='';
+      if(!state.currentWords.length){
+        const empty=document.createElement('div');empty.className='sentence-placeholder';empty.textContent='下の単語を押すと、ここに英文が並びます。';
         sentence.appendChild(empty);
+      }else{
+        state.currentWords.forEach((word,index)=>{
+          const button=document.createElement('button');button.type='button';button.className='sentence-word';button.textContent=word;
+          button.title='押すと削除';button.addEventListener('click',()=>{state.currentWords.splice(index,1);saveLocal();renderState();});
+          sentence.appendChild(button);
+        });
       }
+      sentencePanel.scrollTop=sentencePanel.scrollHeight;
+    }
+    function addWord(word){
+      const value=String(word).trim();if(!value)return;
+      state.currentWords.push(value);saveLocal();renderState();
+    }
+    function deleteLast(){
+      if(!state.currentWords.length){flash('削除する単語がありません');return;}
+      state.currentWords.pop();saveLocal();renderState();
+    }
+    function decideSentence(){
+      if(!state.currentWords.length){flash('英文がありません');return;}
+      const text=state.currentWords.join(' ');
+      state.confirmedSentences.push({text,createdAt:new Date().toISOString()});
+      state.currentWords=[];saveLocal();renderState();flash('決定しました');
+    }
+    function addCustomWord(){
+      const value=customInput.value.trim();if(!value)return;
+      addWord(value);customInput.value='';customInput.focus();
     }
 
-    function addWord(word) {
-      const value = String(word).trim();
-      if (!value) return;
-
-      const placeholder = document.getElementById('placeholder');
-      if (placeholder) placeholder.remove();
-
-      const button = document.createElement('button');
-      button.type = 'button';
-      button.className = 'sentence-word';
-      button.textContent = value;
-      button.title = '押すと削除';
-      button.addEventListener('click', () => {
-        button.remove();
-        showPlaceholderIfEmpty();
+    function renderPalette(group){
+      paletteTitle.textContent=group.label;palette.style.setProperty('--accent',group.color);
+      customInput.style.setProperty('--accent',group.color);customAdd.style.setProperty('--accent',group.color);
+      customInput.placeholder=`${group.label}を入力`;wordGrid.innerHTML='';
+      group.words.forEach(word=>{
+        const button=document.createElement('button');button.type='button';button.className='word-button';button.textContent=word;
+        button.addEventListener('click',()=>addWord(word));wordGrid.appendChild(button);
       });
-
-      sentence.appendChild(button);
-      button.scrollIntoView({ block: 'nearest', inline: 'nearest' });
+      palette.scrollTop=0;
     }
-
-    function addCustomWord() {
-      const value = customInput.value.trim();
-      if (!value) return;
-      addWord(value);
-      customInput.value = '';
-      customInput.focus();
-    }
-
-    function renderPalette(group) {
-      paletteTitle.textContent = group.label;
-      palette.style.setProperty('--accent', group.color);
-      customInput.style.setProperty('--accent', group.color);
-      customAdd.style.setProperty('--accent', group.color);
-      customInput.placeholder = `${group.label}を入力`;
-      wordGrid.innerHTML = '';
-
-      group.words.forEach(word => {
-        const button = document.createElement('button');
-        button.type = 'button';
-        button.className = 'word-button';
-        button.textContent = word;
-        button.addEventListener('click', () => addWord(word));
-        wordGrid.appendChild(button);
-      });
-
-      palette.scrollTop = 0;
-    }
-
-    function setActiveGroup(id) {
-      activeGroupId = id;
-      const group = groups.find(item => item.id === id);
-      if (!group) return;
-
-      categoryRail.querySelectorAll('.category-button').forEach(button => {
-        button.classList.toggle('active', button.dataset.group === id);
-      });
-
+    function setActiveGroup(id){
+      activeGroupId=id;const group=groups.find(item=>item.id===id);if(!group)return;
+      categoryRail.querySelectorAll('.category-button').forEach(button=>button.classList.toggle('active',button.dataset.group===id));
       renderPalette(group);
     }
-
-    groups.forEach(group => {
-      const button = document.createElement('button');
-      button.type = 'button';
-      button.className = 'category-button';
-      button.dataset.group = group.id;
-      button.style.setProperty('--cat', group.color);
-      button.textContent = group.label;
-      button.addEventListener('click', () => setActiveGroup(group.id));
+    groups.forEach(group=>{
+      const button=document.createElement('button');button.type='button';button.className='category-button';button.dataset.group=group.id;
+      button.style.setProperty('--cat',group.color);button.textContent=group.label;button.addEventListener('click',()=>setActiveGroup(group.id));
       categoryRail.appendChild(button);
     });
 
-    customAdd.addEventListener('click', addCustomWord);
-    customInput.addEventListener('keydown', event => {
-      if (event.key === 'Enter') addCustomWord();
+    function cleanToken(token){return String(token||'').replace(/\s+/g,'');}
+    function getToken(){
+      for(const key of TOKEN_KEYS){const token=cleanToken(localStorage.getItem(key)||'');if(token)return token;}
+      return '';
+    }
+    function rememberToken(token){
+      const t=cleanToken(token);if(!t)return '';
+      localStorage.setItem(TOKEN_KEYS[0],t);return t;
+    }
+    function cloudUrl(){
+      return 'https://api.github.com/repos/'+encodeURIComponent(CLOUD.owner)+'/'+encodeURIComponent(CLOUD.repo)+'/contents/'+CLOUD.path.split('/').map(encodeURIComponent).join('/');
+    }
+    function headers(token){return {'Accept':'application/vnd.github+json','Authorization':'Bearer '+token,'X-GitHub-Api-Version':'2022-11-28'};}
+    function encodeBase64Utf8(text){
+      const bytes=new TextEncoder().encode(text);let binary='';for(let i=0;i<bytes.length;i++)binary+=String.fromCharCode(bytes[i]);return btoa(binary);
+    }
+    async function saveCloud(){
+      saveLocal();
+      let token=getToken();
+      if(!token){
+        const entered=prompt('private-game-data に保存するGitHubトークンを入力してください');
+        if(!entered)throw new Error('保存を中止しました');
+        token=rememberToken(entered);
+      }
+      let sha='';
+      const read=await fetch(cloudUrl(),{headers:headers(token)});
+      if(read.ok){const file=await read.json();sha=file.sha||'';}
+      else if(read.status!==404)throw new Error('private-game-data を読み込めませんでした ('+read.status+')');
+      const body={message:'Update English game save',content:encodeBase64Utf8(JSON.stringify(state,null,2))};
+      if(sha)body.sha=sha;
+      const res=await fetch(cloudUrl(),{method:'PUT',headers:Object.assign({'Content-Type':'application/json'},headers(token)),body:JSON.stringify(body)});
+      if(!res.ok)throw new Error('private-game-data へ保存できませんでした ('+res.status+')');
+    }
+
+    customAdd.addEventListener('click',addCustomWord);
+    customInput.addEventListener('keydown',event=>{if(event.key==='Enter')addCustomWord();});
+    deleteButton.addEventListener('click',deleteLast);
+    decideButton.addEventListener('click',decideSentence);
+    saveButton.addEventListener('click',async()=>{
+      saveButton.disabled=true;saveButton.textContent='保存中';
+      try{await saveCloud();flash('private-game-data に保存しました');}
+      catch(e){flash(e.message||'保存できませんでした');}
+      finally{saveButton.disabled=false;saveButton.textContent='保存';}
     });
 
-    setActiveGroup(activeGroupId);
+    renderState();setActiveGroup(activeGroupId);
   </script>
 </body>
 </html>
