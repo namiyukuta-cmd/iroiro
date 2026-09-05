@@ -1,8 +1,8 @@
 // 砂漠都市生活 専用NPCデータ
-// category は "客" または "NPC"
+// category は "客" / "NPC" / "家族"
 
 window.DESERT_NPC_DATA = {
-  categories: ["客", "NPC"],
+  categories: ["客", "NPC", "家族"],
 
   characters: [
     {
