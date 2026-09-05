@@ -126,7 +126,7 @@
       </div>
     </section>
 
-    <section class="choice-wrap" aria-label="選択肢">
+    <section class="choice-wrap" id="choiceWrap" aria-label="選択肢">
       <div class="choice-scroll" id="choiceScroll">
         <div class="choice-grid" id="choiceGrid"></div>
       </div>
@@ -157,11 +157,7 @@
   <script>
     (()=>{
       const phases=["朝","昼","夕方","深夜"];
-      const state={
-        day:1,phase:0,money:3,debt:30,energy:6,rep:0,regulars:0,risk:0,
-        view:"room",outsidePlace:null,message:"",log:[{day:1,phase:"朝",text:"借り部屋で目を覚ました。"}]
-      };
-
+      const state={day:1,phase:0,money:3,debt:30,energy:6,rep:0,regulars:0,risk:0,view:"room",outsidePlace:null,message:"",log:[{day:1,phase:"朝",text:"借り部屋で目を覚ました。"}]};
       const places={
         well:{name:"共同水場",text:"近所の人や水売りが出入りする。水を汲みながら、街の噂も耳に入る。"},
         market:{name:"小市場",text:"食べ物、布、香油、安い化粧品や日用品が並ぶ。大市場ほど品は多くない。"},
@@ -169,163 +165,25 @@
         edge:{name:"水路沿い",text:"街外れへ続く水路沿い。少し歩けば花や香草を摘める場所がある。人通りは少ない。"},
         pleasure:{name:"歓楽の通り",text:"日が落ちると灯りと音楽が増える。仕事の話も集まるが、夜は揉め事も起こりやすい。"}
       };
-
       const $=id=>document.getElementById(id);
-
-      function clamp(){
-        state.energy=Math.max(0,Math.min(10,state.energy));
-        state.risk=Math.max(0,Math.min(10,state.risk));
-        state.rep=Math.max(0,state.rep);
-      }
-
-      function addLog(text,day=state.day,phase=phases[state.phase]){
-        state.log.unshift({day,phase,text});
-        if(state.log.length>60)state.log.length=60;
-      }
-
-      function advance(text){
-        addLog(text);
-        state.message=text;
-        state.phase++;
-        if(state.phase>=phases.length){
-          state.phase=0;state.day++;state.energy=Math.min(10,state.energy+3);
-          state.view="room";state.outsidePlace=null;
-          if(state.day%7===0){state.debt+=4;addLog("週の部屋代4が借金に加わった。",state.day,"朝");}
-        }
-        clamp();render();
-      }
-
-      function rumor(){
-        const r=Math.random();
-        if(r<.35){state.risk++;return"近くで役人が聞き込みをしている、という噂を聞いた。";}
-        if(r<.7)return"隊商が到着したらしい。今夜は旅人が増えるかもしれない。";
-        return"この辺りは今夜、比較的静かだという。";
-      }
-
-      function work(){
-        if(state.phase<2){state.message="客を取る仕事は、主に夕方以降だ。";render();return;}
-        if(state.energy<=0){advance("今日はもう客を取れる状態ではなかった。");return;}
-        const chance=.45+state.rep*.03+state.regulars*.04-state.risk*.03;
-        if(Math.random()>chance){state.energy--;advance("待ったが、今日は客がつかなかった。");return;}
-        const pay=3+Math.floor(Math.random()*5);state.money+=pay;state.energy-=2;state.rep++;
-        let text=`客を一人取った。${pay}を得た。`;
-        if(Math.random()<.18+state.rep*.01){state.regulars++;text+=" また来たいと言われた。常連になるかもしれない。";}
-        advance(text);
-      }
-
-      function payDebt(){
-        if(state.money<=0||state.debt<=0){state.message="今は返せる金がない。";render();return;}
-        const amount=Math.min(5,state.money,state.debt);state.money-=amount;state.debt-=amount;
-        state.message=`${amount}を借金の返済に回した。`;addLog(state.message);render();
-      }
-
-      function button(label,fn,opt={}){
-        const b=document.createElement("button");b.type="button";b.className="choice-btn";b.textContent=label;
-        if(opt.primary)b.classList.add("primary");if(opt.back)b.classList.add("back");b.disabled=!!opt.disabled;b.addEventListener("click",fn);return b;
-      }
-
-      function setView(view){
-        state.view=view;
-        if(view!=="outsidePlace")state.outsidePlace=null;
-        state.message="";render();
-      }
-
-      function selectPlace(key){state.view="outsidePlace";state.outsidePlace=key;state.message="";render();}
-
-      function availablePlaces(){
-        const list=[];
-        if(state.phase!==3){list.push("well","market","edge");}
-        if(state.phase<=2)list.push("bath");
-        if(state.phase>=2)list.push("pleasure");
-        return list;
-      }
-
-      function renderRoom(grid){
-        $("screenTitle").textContent="部屋の中";
-        $("sceneText").textContent=state.message||"古い貸家の二階。寝台と水差し、小さな箱だけがある。ここで暮らし、夜には客を迎えることもある。";
-        $("notice").textContent=state.debt>0?`借金は残り${state.debt}。`:"借金は返し終えた。この部屋を出ることもできる。";
-        grid.append(button("休む",()=>{state.energy+=2;advance("横になって休んだ。体力が少し戻った。");},{primary:true}));
-        grid.append(button("借金を返す",payDebt,{disabled:state.money<=0||state.debt<=0}));
-        grid.append(button("何もせず時間を進める",()=>advance("しばらく時間を過ごした。")));
-      }
-
-      function renderOutsideSelect(grid){
-        $("screenTitle").textContent="部屋の外";
-        $("sceneText").textContent="行く場所を選ぶ。";
-        $("notice").textContent="場所を選ぶと、その場所の画面に移る。";
-        availablePlaces().forEach(key=>grid.append(button(places[key].name,()=>selectPlace(key))));
-      }
-
-      function renderOutsidePlace(grid){
-        const key=state.outsidePlace;
-        if(!key||!places[key]){state.view="outsideSelect";render();return;}
-        const p=places[key];
-        $("screenTitle").textContent=p.name;
-        $("sceneText").textContent=state.message||p.text;
-        $("notice").textContent="";
-
-        if(key==="well")grid.append(button("水を汲む・噂を聞く",()=>advance(rumor()),{primary:true}));
-        if(key==="market"){
-          grid.append(button("食事を買う（2）",()=>{if(state.money<2){state.message="金が足りない。";render();return;}state.money-=2;state.energy+=2;advance("食事を買って食べた。");},{primary:true}));
-          grid.append(button("香油を買う（3）",()=>{if(state.money<3){state.message="金が足りない。";render();return;}state.money-=3;state.rep++;advance("安い香油を買った。身支度が少し整った。");}));
-        }
-        if(key==="bath")grid.append(button("浴場を使う（2）",()=>{if(state.money<2){state.message="金が足りない。";render();return;}state.money-=2;state.energy+=3;advance("浴場を使った。身体が少し軽くなった。");},{primary:true,disabled:state.phase===3}));
-        if(key==="edge")grid.append(button("花や香草を摘む",()=>{state.energy--;const gain=1+Math.floor(Math.random()*3);state.money+=gain;advance(`花や香草を集め、${gain}で売れる分を得た。`);},{primary:true,disabled:state.phase===3}));
-        if(key==="pleasure"){
-          grid.append(button("今夜、客を取る",work,{primary:true}));
-          grid.append(button("今日は取らずに帰る",()=>{state.view="room";state.outsidePlace=null;advance("今日は客を取らず、部屋へ戻った。");}));
-        }
-        grid.append(button("場所選択へ戻る",()=>{state.view="outsideSelect";state.outsidePlace=null;state.message="";render();},{back:true}));
-      }
-
-      function renderJournal(){
-        $("screenTitle").textContent="記録";$("sceneText").textContent="";$("notice").textContent="";
-        const box=$("journalList");box.hidden=false;box.replaceChildren();
-        state.log.forEach(entry=>{
-          const row=document.createElement("div");row.className="journal-entry";
-          const time=document.createElement("div");time.className="journal-time";time.textContent=`${entry.day}日目・${entry.phase}`;
-          const text=document.createElement("div");text.textContent=entry.text;row.append(time,text);box.append(row);
-        });
-      }
-
-      function render(){
-        clamp();
-        $("dayText").textContent=`${state.day}日目`;$("phaseText").textContent=phases[state.phase];
-        $("moneyText").textContent=state.money;$("debtText").textContent=state.debt;$("energyText").textContent=state.energy;
-        $("menuMoney").textContent=state.money;$("menuDebt").textContent=state.debt;$("menuEnergy").textContent=state.energy;
-        $("menuRep").textContent=state.rep;$("menuRegular").textContent=state.regulars;$("menuRisk").textContent=state.risk;
-
-        const grid=$("choiceGrid");grid.replaceChildren();$("journalList").hidden=true;$("journalList").replaceChildren();
-        $("sceneText").textContent="";$("notice").textContent="";
-
-        $("roomTab").classList.toggle("active",state.view==="room");
-        $("outsideTab").classList.toggle("active",state.view==="outsideSelect"||state.view==="outsidePlace");
-        $("journalTab").classList.toggle("active",state.view==="journal");
-
-        if(state.view==="room")renderRoom(grid);
-        if(state.view==="outsideSelect")renderOutsideSelect(grid);
-        if(state.view==="outsidePlace")renderOutsidePlace(grid);
-        if(state.view==="journal")renderJournal();
-
-        $("choiceWrap").hidden=state.view==="journal";
-        $("choiceScroll").scrollTop=0;$("sceneBody").scrollTop=0;
-      }
-
-      function openMenu(open){$("menuLayer").classList.toggle("open",open);$("menuLayer").setAttribute("aria-hidden",String(!open));}
-
-      document.addEventListener("touchmove",e=>{
-        const scrollArea=e.target.closest&&e.target.closest(".scene-body,.choice-scroll");
-        if(!scrollArea)e.preventDefault();
-      },{passive:false});
-
-      $("roomTab").addEventListener("click",()=>setView("room"));
-      $("outsideTab").addEventListener("click",()=>setView("outsideSelect"));
-      $("journalTab").addEventListener("click",()=>setView("journal"));
-      $("menuBtn").addEventListener("click",()=>openMenu(true));
-      $("menuClose").addEventListener("click",()=>openMenu(false));
-      $("menuLayer").addEventListener("click",e=>{if(e.target===$("menuLayer"))openMenu(false);});
-
-      render();
+      function clamp(){state.energy=Math.max(0,Math.min(10,state.energy));state.risk=Math.max(0,Math.min(10,state.risk));state.rep=Math.max(0,state.rep)}
+      function addLog(text,day=state.day,phase=phases[state.phase]){state.log.unshift({day,phase,text});if(state.log.length>60)state.log.length=60}
+      function advance(text){addLog(text);state.message=text;state.phase++;if(state.phase>=phases.length){state.phase=0;state.day++;state.energy=Math.min(10,state.energy+3);state.view="room";state.outsidePlace=null;if(state.day%7===0){state.debt+=4;addLog("週の部屋代4が借金に加わった。",state.day,"朝")}}clamp();render()}
+      function rumor(){const r=Math.random();if(r<.35){state.risk++;return"近くで役人が聞き込みをしている、という噂を聞いた。"}if(r<.7)return"隊商が到着したらしい。今夜は旅人が増えるかもしれない。";return"この辺りは今夜、比較的静かだという。"}
+      function work(){if(state.phase<2){state.message="客を取る仕事は、主に夕方以降だ。";render();return}if(state.energy<=0){advance("今日はもう客を取れる状態ではなかった。");return}const chance=.45+state.rep*.03+state.regulars*.04-state.risk*.03;if(Math.random()>chance){state.energy--;advance("待ったが、今日は客がつかなかった。");return}const pay=3+Math.floor(Math.random()*5);state.money+=pay;state.energy-=2;state.rep++;let text=`客を一人取った。${pay}を得た。`;if(Math.random()<.18+state.rep*.01){state.regulars++;text+=" また来たいと言われた。常連になるかもしれない。"}advance(text)}
+      function payDebt(){if(state.money<=0||state.debt<=0){state.message="今は返せる金がない。";render();return}const amount=Math.min(5,state.money,state.debt);state.money-=amount;state.debt-=amount;state.message=`${amount}を借金の返済に回した。`;addLog(state.message);render()}
+      function button(label,fn,opt={}){const b=document.createElement("button");b.type="button";b.className="choice-btn";b.textContent=label;if(opt.primary)b.classList.add("primary");if(opt.back)b.classList.add("back");b.disabled=!!opt.disabled;b.addEventListener("click",fn);return b}
+      function setView(view){state.view=view;if(view!=="outsidePlace")state.outsidePlace=null;state.message="";render()}
+      function selectPlace(key){state.view="outsidePlace";state.outsidePlace=key;state.message="";render()}
+      function availablePlaces(){const list=[];if(state.phase!==3)list.push("well","market","edge");if(state.phase<=2)list.push("bath");if(state.phase>=2)list.push("pleasure");return list}
+      function renderRoom(grid){$("screenTitle").textContent="部屋の中";$("sceneText").textContent=state.message||"古い貸家の二階。寝台と水差し、小さな箱だけがある。ここで暮らし、夜には客を迎えることもある。";$("notice").textContent=state.debt>0?`借金は残り${state.debt}。`:"借金は返し終えた。この部屋を出ることもできる。";grid.append(button("休む",()=>{state.energy+=2;advance("横になって休んだ。体力が少し戻った。")},{primary:true}));grid.append(button("借金を返す",payDebt,{disabled:state.money<=0||state.debt<=0}));grid.append(button("何もせず時間を進める",()=>advance("しばらく時間を過ごした。")))}
+      function renderOutsideSelect(grid){$("screenTitle").textContent="部屋の外";$("sceneText").textContent="行く場所を選ぶ。";$("notice").textContent="場所を選ぶと、その場所の画面に移る。";availablePlaces().forEach(key=>grid.append(button(places[key].name,()=>selectPlace(key))))}
+      function renderOutsidePlace(grid){const key=state.outsidePlace;if(!key||!places[key]){state.view="outsideSelect";render();return}const p=places[key];$("screenTitle").textContent=p.name;$("sceneText").textContent=state.message||p.text;$("notice").textContent="";if(key==="well")grid.append(button("水を汲む・噂を聞く",()=>advance(rumor()),{primary:true}));if(key==="market"){grid.append(button("食事を買う（2）",()=>{if(state.money<2){state.message="金が足りない。";render();return}state.money-=2;state.energy+=2;advance("食事を買って食べた。")},{primary:true}));grid.append(button("香油を買う（3）",()=>{if(state.money<3){state.message="金が足りない。";render();return}state.money-=3;state.rep++;advance("安い香油を買った。身支度が少し整った。")}))}if(key==="bath")grid.append(button("浴場を使う（2）",()=>{if(state.money<2){state.message="金が足りない。";render();return}state.money-=2;state.energy+=3;advance("浴場を使った。身体が少し軽くなった。")},{primary:true,disabled:state.phase===3}));if(key==="edge")grid.append(button("花や香草を摘む",()=>{state.energy--;const gain=1+Math.floor(Math.random()*3);state.money+=gain;advance(`花や香草を集め、${gain}で売れる分を得た。`)},{primary:true,disabled:state.phase===3}));if(key==="pleasure"){grid.append(button("今夜、客を取る",work,{primary:true}));grid.append(button("今日は取らずに帰る",()=>{state.view="room";state.outsidePlace=null;advance("今日は客を取らず、部屋へ戻った。")}))}grid.append(button("場所選択へ戻る",()=>{state.view="outsideSelect";state.outsidePlace=null;state.message="";render()},{back:true}))}
+      function renderJournal(){$("screenTitle").textContent="記録";$("sceneText").textContent="";$("notice").textContent="";const box=$("journalList");box.hidden=false;box.replaceChildren();state.log.forEach(entry=>{const row=document.createElement("div");row.className="journal-entry";const time=document.createElement("div");time.className="journal-time";time.textContent=`${entry.day}日目・${entry.phase}`;const text=document.createElement("div");text.textContent=entry.text;row.append(time,text);box.append(row)})}
+      function render(){clamp();$("dayText").textContent=`${state.day}日目`;$("phaseText").textContent=phases[state.phase];$("moneyText").textContent=state.money;$("debtText").textContent=state.debt;$("energyText").textContent=state.energy;$("menuMoney").textContent=state.money;$("menuDebt").textContent=state.debt;$("menuEnergy").textContent=state.energy;$("menuRep").textContent=state.rep;$("menuRegular").textContent=state.regulars;$("menuRisk").textContent=state.risk;const grid=$("choiceGrid");grid.replaceChildren();$("journalList").hidden=true;$("journalList").replaceChildren();$("sceneText").textContent="";$("notice").textContent="";$("roomTab").classList.toggle("active",state.view==="room");$("outsideTab").classList.toggle("active",state.view==="outsideSelect"||state.view==="outsidePlace");$("journalTab").classList.toggle("active",state.view==="journal");if(state.view==="room")renderRoom(grid);if(state.view==="outsideSelect")renderOutsideSelect(grid);if(state.view==="outsidePlace")renderOutsidePlace(grid);if(state.view==="journal")renderJournal();$("choiceWrap").hidden=state.view==="journal";$("choiceScroll").scrollTop=0;$("sceneBody").scrollTop=0}
+      function openMenu(open){$("menuLayer").classList.toggle("open",open);$("menuLayer").setAttribute("aria-hidden",String(!open))}
+      document.addEventListener("touchmove",e=>{const scrollArea=e.target.closest&&e.target.closest(".scene-body,.choice-scroll");if(!scrollArea)e.preventDefault()},{passive:false});
+      $("roomTab").addEventListener("click",()=>setView("room"));$("outsideTab").addEventListener("click",()=>setView("outsideSelect"));$("journalTab").addEventListener("click",()=>setView("journal"));$("menuBtn").addEventListener("click",()=>openMenu(true));$("menuClose").addEventListener("click",()=>openMenu(false));$("menuLayer").addEventListener("click",e=>{if(e.target===$("menuLayer"))openMenu(false)});render();
     })();
   </script>
 </body>
