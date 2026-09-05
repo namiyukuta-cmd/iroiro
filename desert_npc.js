@@ -9,17 +9,26 @@ window.DESERT_NPC_DATA = {
 
   categories: ["客", "NPC", "家族"],
 
+  rules: {
+    firstCustomer: {
+      source: "貸主の紹介",
+      referrerId: "npc_landlord_01",
+      customerId: null,
+      notes: "サフィラが最初に取る客は、貸主が紹介して連れてくる客。客本人の詳細は未設定。"
+    }
+  },
+
   characters: [
     {
       id: "npc_landlord_01",
       category: "NPC",
       name: "貸主",
       role: "部屋の貸主",
-      location: "主人公が借りている部屋のある建物",
+      location: "サフィラが借りている部屋のある建物",
       relation: "サフィラに狭い一部屋を貸している",
       status: "生存",
-      tags: ["貸主", "住居", "慈悲"],
-      notes: "サフィラに部屋を貸し、その代わり、宿を必要とする者をサフィラの部屋に泊め、もてなすよう求めた。"
+      tags: ["貸主", "住居", "慈悲", "最初の客の紹介者"],
+      notes: "サフィラに部屋を貸し、その代わり、宿を必要とする者をサフィラの部屋に泊め、もてなすよう求めた。サフィラが最初に取る客は、この貸主の紹介で来る。"
     },
     {
       id: "family_sister_01",
