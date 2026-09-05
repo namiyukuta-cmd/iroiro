@@ -9,7 +9,7 @@
     *{box-sizing:border-box}
     html,body{width:100%;height:100%;margin:0;overflow:hidden;overscroll-behavior:none;background:var(--bg);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Yu Gothic",sans-serif;font-size:18px;line-height:1.45}
     body{position:fixed;inset:0;touch-action:none}
-    button{font:inherit;color:inherit}
+    button,textarea{font:inherit;color:inherit}
     .game{position:absolute;inset:0;width:min(100%,720px);margin:0 auto;overflow:hidden;background:var(--panel);border-left:2px solid var(--dark);border-right:2px solid var(--dark);display:grid;grid-template-rows:auto minmax(0,1fr) 178px 70px;padding-top:env(safe-area-inset-top);padding-bottom:env(safe-area-inset-bottom)}
     .hud{min-height:104px;padding:12px 16px;border-top:2px solid var(--dark);border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;gap:14px}
     .stats{display:flex;gap:18px;flex-wrap:wrap;font-size:17px;font-weight:800;padding-right:82px}
@@ -31,14 +31,26 @@
     .choice-btn.back{background:var(--accent-soft);border-color:var(--accent)}
     .choice-btn:disabled{opacity:.35}
     .choice-grid .choice-btn:last-child:nth-child(odd){grid-column:1/-1}
-    .nav{display:grid;grid-template-columns:repeat(3,1fr);border-top:1px solid var(--line);border-bottom:2px solid var(--dark);background:var(--panel)}
-    .nav-btn{position:relative;border:0;background:transparent;font-size:18px;font-weight:900;touch-action:manipulation}
+    .nav{display:grid;grid-template-columns:repeat(4,1fr);border-top:1px solid var(--line);border-bottom:2px solid var(--dark);background:var(--panel)}
+    .nav-btn{position:relative;border:0;background:transparent;font-size:17px;font-weight:900;touch-action:manipulation}
     .nav-btn+.nav-btn{border-left:1px solid rgba(215,205,189,.7)}
     .nav-btn.active::before{content:"";position:absolute;top:0;left:16%;right:16%;height:4px;background:var(--dark)}
     .journal-list{font-size:17px;line-height:1.55}
     .journal-entry{padding:10px 0;border-bottom:1px solid var(--line)}
     .journal-entry:last-child{border-bottom:0}
     .journal-time{color:var(--muted);font-size:16px;font-weight:700;margin-bottom:3px}
+    .memo-view{height:100%;display:flex;flex-direction:column;gap:12px}
+    .memo-view[hidden]{display:none}
+    .memo-input{width:100%;min-height:180px;flex:1;padding:12px 13px;resize:none;outline:none;border:1.5px solid var(--line);border-radius:12px;background:rgba(255,255,255,.74);font-size:17px;line-height:1.7;touch-action:pan-y}
+    .memo-heading{font-size:14px;font-weight:900;color:var(--muted)}
+    .memo-list{max-height:42%;overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;touch-action:pan-y;border-top:1px solid var(--line)}
+    .memo-row{display:grid;grid-template-columns:minmax(0,1fr) 58px;align-items:stretch;border-bottom:1px solid var(--line)}
+    .memo-open,.memo-delete{border:0;background:transparent;touch-action:manipulation}
+    .memo-open{min-height:66px;padding:10px 8px 11px 0;text-align:left}
+    .memo-delete{font-size:14px;color:#8b3e32;border-left:1px solid var(--line)}
+    .memo-time{font-size:12px;color:var(--muted);font-weight:800;margin-bottom:4px}
+    .memo-preview{display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow:hidden;white-space:pre-wrap;overflow-wrap:anywhere;font-size:15px;line-height:1.45}
+    .memo-empty{padding:14px 0;color:var(--muted);font-size:14px}
     .menu-btn{position:absolute;top:calc(env(safe-area-inset-top) + 10px);right:12px;z-index:20;min-width:78px;min-height:42px;border:2px solid var(--dark);border-radius:23px;background:#fff;font-weight:900;touch-action:manipulation}
     .menu-layer{position:absolute;inset:0;z-index:30;display:none;background:rgba(34,31,27,.30);touch-action:none}
     .menu-layer.open{display:block}
@@ -51,7 +63,7 @@
     .cloud-btn:disabled{opacity:.5}
     .cloud-status{min-height:22px;margin:4px 0 12px;color:var(--muted);font-size:15px;font-weight:700;line-height:1.4}
     .menu-close{width:100%;min-height:46px;border:2px solid var(--dark);border-radius:12px;background:var(--accent-soft);font-weight:850}
-    @media(max-height:720px){.game{grid-template-rows:auto minmax(0,1fr) 150px 62px}.hud{min-height:88px;padding:10px 14px}.stats{gap:12px}.title{font-size:24px;margin-bottom:12px}.scene{padding:14px}.choice-btn{min-height:50px}.nav-btn{font-size:17px}}
+    @media(max-height:720px){.game{grid-template-rows:auto minmax(0,1fr) 150px 62px}.hud{min-height:88px;padding:10px 14px}.stats{gap:12px}.title{font-size:24px;margin-bottom:12px}.scene{padding:14px}.choice-btn{min-height:50px}.nav-btn{font-size:15px}.memo-input{min-height:130px}}
   </style>
 </head>
 <body>
@@ -74,6 +86,11 @@
         <p class="scene-text" id="sceneText"></p>
         <div class="notice" id="notice"></div>
         <div class="journal-list" id="journalList" hidden></div>
+        <section class="memo-view" id="memoView" hidden aria-label="自由メモ">
+          <textarea class="memo-input" id="memoInput" aria-label="メモを書く"></textarea>
+          <div class="memo-heading">残したメモ</div>
+          <div class="memo-list" id="memoList"></div>
+        </section>
       </div>
     </section>
     <section class="choice-wrap" id="choiceWrap" aria-label="選択肢">
@@ -83,6 +100,7 @@
       <button class="nav-btn active" id="roomTab" type="button">部屋の中</button>
       <button class="nav-btn" id="outsideTab" type="button">部屋の外</button>
       <button class="nav-btn" id="journalTab" type="button">記録</button>
+      <button class="nav-btn" id="memoTab" type="button">メモ</button>
     </nav>
     <div class="menu-layer" id="menuLayer" aria-hidden="true">
       <section class="menu-card">
@@ -102,25 +120,62 @@
     (()=>{
       const phases=["朝","昼","夕方","深夜"];
       const TOKEN_KEYS=['private_game_github_token_v1','homedeco_github_token_v1'];
+      const MEMO_DRAFT_KEY='iroiro-desert-life-memo-draft';
       const CLOUD={owner:'namiyukuta-cmd',repo:'private-game-data',path:'desert_life/save.json'};
-      const state={day:1,phase:0,money:3,debt:30,energy:6,rep:0,regulars:0,risk:0,view:"room",outsidePlace:null,message:"",log:[{day:1,phase:"朝",text:"借り部屋で目を覚ました。"}]};
+      const BACKGROUND=`彼女は罪人である。
+彼女の一家が村から追い出されたのは彼女のついた一つの嘘が原因だった。
+
+彼女には少し歳上の姉がいた。
+姉には心を通わせている男がいた。
+父親が従事する商人の息子だった。
+
+ある日、姉に縁談が持ち込まれた。
+彼女は姉を助けるつもりでつい大袈裟に誇張して言った。
+「姉と商人の息子は口付けするほど愛し合っている。」
+
+その一言が、全てを壊した。
+
+一家は住居を追われた。
+姉は商人の息子から引き離された。
+商人は一従業員の娘風情が、自分の息子に近づいたことを決して許さなかった。
+近づいたのは息子の方かもしれなかったが関係無かった。
+
+商人は息子をすぐに別の女性と結婚させた。
+姉には条件の悪い、遠方の足の悪い元兵士に嫁がせ、身持ちの悪い娘と口の軽い娘を育てた罪で両親は別の貧しい土地に追放された。
+
+そして、嘘をついた彼女は罰として髪を切られ、砂漠へと放り出された。
+
+土地も与えられず。
+寝場所もなく。
+全ての関係を断ち切られ、その所領内の立ち入りを禁止された。
+
+彼女は三日三晩、ほぼ飲まず食わずで歩き通した。
+生きていただけで奇跡ですらあった。
+
+罪を抱えなが罪を贖うつもりで別の罪を重ねていく`;
+      const state={day:1,phase:0,money:3,debt:30,energy:6,rep:0,regulars:0,risk:0,view:"room",outsidePlace:null,message:"",log:[{day:1,phase:"朝",text:"借り部屋で目を覚ました。"}],memos:[{time:"背景",text:BACKGROUND}]};
       const places={well:{name:"共同水場",text:"近所の人や水売りが出入りする。水を汲みながら、街の噂も耳に入る。"},market:{name:"小市場",text:"食べ物、布、香油、安い化粧品や日用品が並ぶ。大市場ほど品は多くない。"},bath:{name:"公衆浴場",text:"石造りの浴場。使える時間は限られている。入浴すれば疲れが少し取れる。"},edge:{name:"水路沿い",text:"街外れへ続く水路沿い。少し歩けば花や香草を摘める場所がある。人通りは少ない。"},pleasure:{name:"歓楽の通り",text:"日が落ちると灯りと音楽が増える。仕事の話も集まるが、夜は揉め事も起こりやすい。"}};
       const $=id=>document.getElementById(id);
-      function clamp(){state.energy=Math.max(0,Math.min(10,Number(state.energy)||0));state.risk=Math.max(0,Math.min(10,Number(state.risk)||0));state.rep=Math.max(0,Number(state.rep)||0);state.regulars=Math.max(0,Number(state.regulars)||0);state.money=Math.max(0,Number(state.money)||0);state.debt=Math.max(0,Number(state.debt)||0);state.day=Math.max(1,Number(state.day)||1);state.phase=Math.max(0,Math.min(3,Number(state.phase)||0));if(!Array.isArray(state.log))state.log=[]}
+      let memoEditingIndex=-1;
+      function clamp(){state.energy=Math.max(0,Math.min(10,Number(state.energy)||0));state.risk=Math.max(0,Math.min(10,Number(state.risk)||0));state.rep=Math.max(0,Number(state.rep)||0);state.regulars=Math.max(0,Number(state.regulars)||0);state.money=Math.max(0,Number(state.money)||0);state.debt=Math.max(0,Number(state.debt)||0);state.day=Math.max(1,Number(state.day)||1);state.phase=Math.max(0,Math.min(3,Number(state.phase)||0));if(!Array.isArray(state.log))state.log=[];if(!Array.isArray(state.memos))state.memos=[]}
       function addLog(text,day=state.day,phase=phases[state.phase]){state.log.unshift({day,phase,text});if(state.log.length>60)state.log.length=60}
       function advance(text){addLog(text);state.message=text;state.phase++;if(state.phase>=phases.length){state.phase=0;state.day++;state.energy=Math.min(10,state.energy+3);state.view="room";state.outsidePlace=null;if(state.day%7===0){state.debt+=4;addLog("週の部屋代4が借金に加わった。",state.day,"朝")}}clamp();render()}
       function rumor(){const r=Math.random();if(r<.35){state.risk++;return"近くで役人が聞き込みをしている、という噂を聞いた。"}if(r<.7)return"隊商が到着したらしい。今夜は旅人が増えるかもしれない。";return"この辺りは今夜、比較的静かだという。"}
       function work(){if(state.phase<2){state.message="客を取る仕事は、主に夕方以降だ。";render();return}if(state.energy<=0){advance("今日はもう客を取れる状態ではなかった。");return}const chance=.45+state.rep*.03+state.regulars*.04-state.risk*.03;if(Math.random()>chance){state.energy--;advance("待ったが、今日は客がつかなかった。");return}const pay=3+Math.floor(Math.random()*5);state.money+=pay;state.energy-=2;state.rep++;let text=`客を一人取った。${pay}を得た。`;if(Math.random()<.18+state.rep*.01){state.regulars++;text+=" また来たいと言われた。常連になるかもしれない。"}advance(text)}
       function payDebt(){if(state.money<=0||state.debt<=0){state.message="今は返せる金がない。";render();return}const amount=Math.min(5,state.money,state.debt);state.money-=amount;state.debt-=amount;state.message=`${amount}を借金の返済に回した。`;addLog(state.message);render()}
       function button(label,fn,opt={}){const b=document.createElement("button");b.type="button";b.className="choice-btn";b.textContent=label;if(opt.primary)b.classList.add("primary");if(opt.back)b.classList.add("back");b.disabled=!!opt.disabled;b.addEventListener("click",fn);return b}
-      function setView(view){state.view=view;if(view!=="outsidePlace")state.outsidePlace=null;state.message="";render()}
+      function setView(view){state.view=view;if(view!=="outsidePlace")state.outsidePlace=null;state.message="";if(view!=="memo")memoEditingIndex=-1;render()}
       function selectPlace(key){state.view="outsidePlace";state.outsidePlace=key;state.message="";render()}
       function availablePlaces(){const list=[];if(state.phase!==3)list.push("well","market","edge");if(state.phase<=2)list.push("bath");if(state.phase>=2)list.push("pleasure");return list}
       function renderRoom(grid){$("screenTitle").textContent="部屋の中";$("sceneText").textContent=state.message||"古い貸家の二階。寝台と水差し、小さな箱だけがある。ここで暮らし、夜には客を迎えることもある。";$("notice").textContent=state.debt>0?`借金は残り${state.debt}。`:"借金は返し終えた。この部屋を出ることもできる。";grid.append(button("休む",()=>{state.energy+=2;advance("横になって休んだ。体力が少し戻った。")},{primary:true}));grid.append(button("借金を返す",payDebt,{disabled:state.money<=0||state.debt<=0}));grid.append(button("何もせず時間を進める",()=>advance("しばらく時間を過ごした。")))}
       function renderOutsideSelect(grid){$("screenTitle").textContent="部屋の外";$("sceneText").textContent="行く場所を選ぶ。";$("notice").textContent="";availablePlaces().forEach(key=>grid.append(button(places[key].name,()=>selectPlace(key))))}
       function renderOutsidePlace(grid){const key=state.outsidePlace;if(!key||!places[key]){state.view="outsideSelect";render();return}const p=places[key];$("screenTitle").textContent=p.name;$("sceneText").textContent=state.message||p.text;$("notice").textContent="";if(key==="well")grid.append(button("水を汲む・噂を聞く",()=>advance(rumor()),{primary:true}));if(key==="market"){grid.append(button("食事を買う（2）",()=>{if(state.money<2){state.message="金が足りない。";render();return}state.money-=2;state.energy+=2;advance("食事を買って食べた。")},{primary:true}));grid.append(button("香油を買う（3）",()=>{if(state.money<3){state.message="金が足りない。";render();return}state.money-=3;state.rep++;advance("安い香油を買った。身支度が少し整った。") }))}if(key==="bath")grid.append(button("浴場を使う（2）",()=>{if(state.money<2){state.message="金が足りない。";render();return}state.money-=2;state.energy+=3;advance("浴場を使った。身体が少し軽くなった。")},{primary:true,disabled:state.phase===3}));if(key==="edge")grid.append(button("花や香草を摘む",()=>{state.energy--;const gain=1+Math.floor(Math.random()*3);state.money+=gain;advance(`花や香草を集め、${gain}で売れる分を得た。`)},{primary:true,disabled:state.phase===3}));if(key==="pleasure"){grid.append(button("今夜、客を取る",work,{primary:true}));grid.append(button("今日は取らずに帰る",()=>{state.view="room";state.outsidePlace=null;advance("今日は客を取らず、部屋へ戻った。") }))}grid.append(button("場所選択へ戻る",()=>{state.view="outsideSelect";state.outsidePlace=null;state.message="";render()},{back:true}))}
       function renderJournal(){$("screenTitle").textContent="記録";$("sceneText").textContent="";$("notice").textContent="";const box=$("journalList");box.hidden=false;box.replaceChildren();state.log.forEach(entry=>{const row=document.createElement("div");row.className="journal-entry";const time=document.createElement("div");time.className="journal-time";time.textContent=`${entry.day}日目・${entry.phase}`;const text=document.createElement("div");text.textContent=entry.text;row.append(time,text);box.append(row)})}
-      function render(){clamp();$("dayText").textContent=`${state.day}日目`;$("phaseText").textContent=phases[state.phase];$("moneyText").textContent=state.money;$("debtText").textContent=state.debt;$("energyText").textContent=state.energy;$("menuMoney").textContent=state.money;$("menuDebt").textContent=state.debt;$("menuEnergy").textContent=state.energy;$("menuRep").textContent=state.rep;$("menuRegular").textContent=state.regulars;$("menuRisk").textContent=state.risk;const grid=$("choiceGrid");grid.replaceChildren();$("journalList").hidden=true;$("journalList").replaceChildren();$("sceneText").textContent="";$("notice").textContent="";$("roomTab").classList.toggle("active",state.view==="room");$("outsideTab").classList.toggle("active",state.view==="outsideSelect"||state.view==="outsidePlace");$("journalTab").classList.toggle("active",state.view==="journal");if(state.view==="room")renderRoom(grid);if(state.view==="outsideSelect")renderOutsideSelect(grid);if(state.view==="outsidePlace")renderOutsidePlace(grid);if(state.view==="journal")renderJournal();$("choiceWrap").style.visibility=state.view==="journal"?"hidden":"visible";$("choiceScroll").scrollTop=0;$("sceneBody").scrollTop=0}
+      function renderMemoList(){const list=$("memoList");list.replaceChildren();if(!state.memos.length){const empty=document.createElement("div");empty.className="memo-empty";empty.textContent="まだメモはありません。";list.append(empty);return}state.memos.forEach((memo,index)=>{const row=document.createElement("div");row.className="memo-row";const open=document.createElement("button");open.type="button";open.className="memo-open";const time=document.createElement("div");time.className="memo-time";time.textContent=memo.time||"メモ";const preview=document.createElement("div");preview.className="memo-preview";preview.textContent=memo.text||"";open.append(time,preview);open.addEventListener("click",()=>{memoEditingIndex=index;$("memoInput").value=memo.text||"";$("choiceGrid").replaceChildren(button("編集をやめる",clearMemo),button("上書き",saveMemo,{primary:true}));$("memoInput").focus()});const del=document.createElement("button");del.type="button";del.className="memo-delete";del.textContent="削除";del.addEventListener("click",()=>{state.memos.splice(index,1);if(memoEditingIndex===index)clearMemo();else{if(memoEditingIndex>index)memoEditingIndex--;renderMemoList()}});row.append(open,del);list.append(row)})}
+      function clearMemo(){memoEditingIndex=-1;$("memoInput").value="";localStorage.removeItem(MEMO_DRAFT_KEY);render()}
+      function saveMemo(){const text=$("memoInput").value.trim();if(!text)return;if(memoEditingIndex>=0&&state.memos[memoEditingIndex]){state.memos[memoEditingIndex].text=text;state.memos[memoEditingIndex].time=new Date().toLocaleString('ja-JP')}else{state.memos.unshift({time:new Date().toLocaleString('ja-JP'),text})}memoEditingIndex=-1;$("memoInput").value="";localStorage.removeItem(MEMO_DRAFT_KEY);render()}
+      function renderMemo(grid){$("screenTitle").textContent="メモ";$("sceneText").textContent="";$("notice").textContent="";$("memoView").hidden=false;if(memoEditingIndex>=0&&state.memos[memoEditingIndex])$("memoInput").value=state.memos[memoEditingIndex].text||"";else $("memoInput").value=localStorage.getItem(MEMO_DRAFT_KEY)||"";renderMemoList();grid.append(button(memoEditingIndex>=0?"編集をやめる":"入力を消す",clearMemo));grid.append(button(memoEditingIndex>=0?"上書き":"残す",saveMemo,{primary:true}))}
+      function render(){clamp();$("dayText").textContent=`${state.day}日目`;$("phaseText").textContent=phases[state.phase];$("moneyText").textContent=state.money;$("debtText").textContent=state.debt;$("energyText").textContent=state.energy;$("menuMoney").textContent=state.money;$("menuDebt").textContent=state.debt;$("menuEnergy").textContent=state.energy;$("menuRep").textContent=state.rep;$("menuRegular").textContent=state.regulars;$("menuRisk").textContent=state.risk;const grid=$("choiceGrid");grid.replaceChildren();$("journalList").hidden=true;$("journalList").replaceChildren();$("memoView").hidden=true;$("sceneText").textContent="";$("notice").textContent="";$("roomTab").classList.toggle("active",state.view==="room");$("outsideTab").classList.toggle("active",state.view==="outsideSelect"||state.view==="outsidePlace");$("journalTab").classList.toggle("active",state.view==="journal");$("memoTab").classList.toggle("active",state.view==="memo");if(state.view==="room")renderRoom(grid);if(state.view==="outsideSelect")renderOutsideSelect(grid);if(state.view==="outsidePlace")renderOutsidePlace(grid);if(state.view==="journal")renderJournal();if(state.view==="memo")renderMemo(grid);$("choiceWrap").style.visibility=state.view==="journal"?"hidden":"visible";$("choiceScroll").scrollTop=0;$("sceneBody").scrollTop=0}
       function cleanToken(t){return String(t||'').replace(/\s+/g,'')}
       function getToken(){for(const k of TOKEN_KEYS){const t=cleanToken(localStorage.getItem(k)||'');if(t)return t}return''}
       function rememberToken(t){t=cleanToken(t);if(t)localStorage.setItem(TOKEN_KEYS[0],t);return t}
@@ -128,15 +183,16 @@
       function cloudHeaders(t){return{'Accept':'application/vnd.github+json','Authorization':'Bearer '+t,'X-GitHub-Api-Version':'2022-11-28'}}
       function encode64(text){const bytes=new TextEncoder().encode(text);let b='';for(const x of bytes)b+=String.fromCharCode(x);return btoa(b)}
       function decode64(text){const raw=atob(String(text||'').replace(/\s/g,''));const bytes=Uint8Array.from(raw,c=>c.charCodeAt(0));return new TextDecoder().decode(bytes)}
-      function snapshot(){return{version:1,updatedAt:new Date().toISOString(),day:state.day,phase:state.phase,money:state.money,debt:state.debt,energy:state.energy,rep:state.rep,regulars:state.regulars,risk:state.risk,view:state.view,outsidePlace:state.outsidePlace,message:state.message,log:state.log}}
-      function applySave(data){if(!data||typeof data!=="object")throw new Error('セーブデータが不正です');for(const k of ['day','phase','money','debt','energy','rep','regulars','risk','view','outsidePlace','message','log']){if(Object.prototype.hasOwnProperty.call(data,k))state[k]=data[k]}clamp();if(!['room','outsideSelect','outsidePlace','journal'].includes(state.view))state.view='room';if(state.view==='outsidePlace'&&(!state.outsidePlace||!places[state.outsidePlace])){state.view='outsideSelect';state.outsidePlace=null}render()}
+      function snapshot(){return{version:2,updatedAt:new Date().toISOString(),day:state.day,phase:state.phase,money:state.money,debt:state.debt,energy:state.energy,rep:state.rep,regulars:state.regulars,risk:state.risk,view:state.view,outsidePlace:state.outsidePlace,message:state.message,log:state.log,memos:state.memos}}
+      function applySave(data){if(!data||typeof data!=="object")throw new Error('セーブデータが不正です');for(const k of ['day','phase','money','debt','energy','rep','regulars','risk','view','outsidePlace','message','log','memos']){if(Object.prototype.hasOwnProperty.call(data,k))state[k]=data[k]}clamp();if(!['room','outsideSelect','outsidePlace','journal','memo'].includes(state.view))state.view='room';if(state.view==='outsidePlace'&&(!state.outsidePlace||!places[state.outsidePlace])){state.view='outsideSelect';state.outsidePlace=null}render()}
       async function requireToken(){let token=getToken();if(token)return token;const x=prompt('private-game-data を使うGitHubトークンを入力してください');if(!x)throw new Error('中止しました');return rememberToken(x)}
       async function loadCloud(askToken=true){let token=getToken();if(!token){if(!askToken)return false;token=await requireToken()}const res=await fetch(cloudUrl(),{headers:cloudHeaders(token),cache:'no-store'});if(!res.ok)throw new Error('private-game-data を読み込めませんでした ('+res.status+')');const file=await res.json();const data=JSON.parse(decode64(file.content));applySave(data);$("cloudStatus").textContent='GitHubのセーブを読み込みました';return true}
       async function saveCloud(){const token=await requireToken();let sha='';const read=await fetch(cloudUrl(),{headers:cloudHeaders(token),cache:'no-store'});if(read.ok){const file=await read.json();sha=file.sha||''}else if(read.status!==404)throw new Error('private-game-data を読み込めませんでした ('+read.status+')');const body={message:'Update desert life save',content:encode64(JSON.stringify(snapshot(),null,2))};if(sha)body.sha=sha;const res=await fetch(cloudUrl(),{method:'PUT',headers:Object.assign({'Content-Type':'application/json'},cloudHeaders(token)),body:JSON.stringify(body)});if(!res.ok)throw new Error('private-game-data へ保存できませんでした ('+res.status+')');$("cloudStatus").textContent='GitHubへ保存しました'}
       async function cloudAction(button,fn,label){button.disabled=true;const old=button.textContent;button.textContent=label;$("cloudStatus").textContent='';try{await fn()}catch(e){$("cloudStatus").textContent=e.message||'失敗しました'}finally{button.disabled=false;button.textContent=old}}
       function openMenu(open){$("menuLayer").classList.toggle("open",open);$("menuLayer").setAttribute("aria-hidden",String(!open))}
-      document.addEventListener("touchmove",e=>{const scrollArea=e.target.closest&&e.target.closest(".scene-body,.choice-scroll");if(!scrollArea)e.preventDefault()},{passive:false});
-      $("roomTab").addEventListener("click",()=>setView("room"));$("outsideTab").addEventListener("click",()=>setView("outsideSelect"));$("journalTab").addEventListener("click",()=>setView("journal"));$("menuBtn").addEventListener("click",()=>openMenu(true));$("menuClose").addEventListener("click",()=>openMenu(false));$("menuLayer").addEventListener("click",e=>{if(e.target===$("menuLayer"))openMenu(false)});$("loadButton").addEventListener("click",()=>cloudAction($("loadButton"),()=>loadCloud(true),'読込中'));$("saveButton").addEventListener("click",()=>cloudAction($("saveButton"),saveCloud,'保存中'));
+      document.addEventListener("touchmove",e=>{const scrollArea=e.target.closest&&e.target.closest(".scene-body,.choice-scroll,.memo-list,.memo-input");if(!scrollArea)e.preventDefault()},{passive:false});
+      $("memoInput").addEventListener("input",()=>{if(memoEditingIndex<0)localStorage.setItem(MEMO_DRAFT_KEY,$("memoInput").value)});
+      $("roomTab").addEventListener("click",()=>setView("room"));$("outsideTab").addEventListener("click",()=>setView("outsideSelect"));$("journalTab").addEventListener("click",()=>setView("journal"));$("memoTab").addEventListener("click",()=>setView("memo"));$("menuBtn").addEventListener("click",()=>openMenu(true));$("menuClose").addEventListener("click",()=>openMenu(false));$("menuLayer").addEventListener("click",e=>{if(e.target===$("menuLayer"))openMenu(false)});$("loadButton").addEventListener("click",()=>cloudAction($("loadButton"),()=>loadCloud(true),'読込中'));$("saveButton").addEventListener("click",()=>cloudAction($("saveButton"),saveCloud,'保存中'));
       render();loadCloud(false).catch(e=>{$("cloudStatus").textContent=e.message||'自動読込に失敗しました'});
     })();
   </script>
