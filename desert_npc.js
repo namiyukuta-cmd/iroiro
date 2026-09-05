@@ -13,8 +13,8 @@ window.DESERT_NPC_DATA = {
     firstCustomer: {
       source: "貸主の紹介",
       referrerId: "npc_landlord_01",
-      customerId: null,
-      notes: "サフィラが最初に取る客は、貸主が紹介して連れてくる客。客本人の詳細は未設定。"
+      customerId: "customer_rashid_01",
+      notes: "サフィラが最初に取る客は、貸主の紹介で来るラシード。"
     }
   },
 
@@ -28,7 +28,23 @@ window.DESERT_NPC_DATA = {
       relation: "サフィラに狭い一部屋を貸している",
       status: "生存",
       tags: ["貸主", "住居", "慈悲", "最初の客の紹介者"],
-      notes: "サフィラに部屋を貸し、その代わり、宿を必要とする者をサフィラの部屋に泊め、もてなすよう求めた。サフィラが最初に取る客は、この貸主の紹介で来る。"
+      notes: "サフィラに部屋を貸し、その代わり、宿を必要とする者をサフィラの部屋に泊め、もてなすよう求めた。最初の客としてラシードを紹介する。"
+    },
+    {
+      id: "customer_rashid_01",
+      category: "客",
+      name: "ラシード",
+      age: 38,
+      role: "最初の客",
+      occupation: "隊商に雇われて荷の管理をする男",
+      location: "旅の途中で砂漠都市に滞在中",
+      relation: "貸主の紹介でサフィラの部屋を訪れる最初の客",
+      introducedBy: "npc_landlord_01",
+      firstCustomer: true,
+      regular: false,
+      status: "生存",
+      tags: ["客", "最初の客", "貸主の紹介", "旅人", "隊商"],
+      notes: "貸主の知人。旅の途中で宿を必要としており、貸主からサフィラの部屋を紹介される。サフィラが客を取ることになる最初の相手。"
     },
     {
       id: "family_sister_01",
