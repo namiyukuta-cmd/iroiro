@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+  <meta name="theme-color" content="#111713">
+  <title>3D</title>
+  <style>
+    *{box-sizing:border-box;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
+    html,body{width:100%;height:100%;margin:0}
+    body{overflow:hidden;background:#111713;font-family:-apple-system,BlinkMacSystemFont,"Hiragino Kaku Gothic ProN","Yu Gothic",sans-serif;-webkit-tap-highlight-color:transparent;touch-action:none}
+    button{font:inherit}
+    .screen{position:relative;width:100%;height:100dvh;max-width:520px;margin:0 auto;overflow:hidden;background:#78906f;touch-action:none}
+    #game{position:absolute;inset:0;z-index:1;touch-action:none}
+    #game canvas{display:block;width:100%;height:100%;touch-action:none;-webkit-user-drag:none}
+    .loading{position:absolute;inset:0;z-index:100;display:grid;place-items:center;padding:28px;background:#111713;color:#fff;font-size:14px;text-align:center;line-height:1.7}
+    .loading[hidden]{display:none}
+
+    .hud-left{position:absolute;z-index:20;top:calc(env(safe-area-inset-top) + 13px);left:13px;display:flex;align-items:flex-start;gap:7px;color:#fff;text-shadow:0 1px 3px rgba(0,0,0,.9);pointer-events:none}
+    .portrait{position:relative;width:48px;height:48px;flex:0 0 48px;border:2px solid rgba(255,255,255,.92);border-radius:50%;background:rgba(10,14,11,.56);box-shadow:0 2px 8px rgba(0,0,0,.28)}
+    .portrait::before{content:"";position:absolute;left:15px;top:8px;width:14px;height:14px;border-radius:50%;background:rgba(255,255,255,.93)}
+    .portrait::after{content:"";position:absolute;left:10px;bottom:7px;width:24px;height:15px;border-radius:14px 14px 8px 8px;background:rgba(255,255,255,.93)}
+    .stats{padding-top:2px;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:10px;line-height:1.35;font-weight:800;white-space:nowrap}
+    .hpbar{width:82px;height:5px;margin:2px 0 3px;overflow:hidden;border:1px solid rgba(255,255,255,.62);border-radius:999px;background:rgba(0,0,0,.45)}
+    .hpbar span{display:block;width:84%;height:100%;background:rgba(255,255,255,.92)}
+
+    .menu-button{position:absolute;z-index:30;top:calc(env(safe-area-inset-top) + 13px);right:13px;min-width:58px;height:38px;padding:0 11px;border:1.5px solid rgba(255,255,255,.82);border-radius:999px;background:rgba(9,12,10,.46);color:#fff;font-size:11px;font-weight:900;letter-spacing:.05em;text-shadow:0 1px 2px #000}
+    .menu-panel{position:absolute;z-index:40;top:calc(env(safe-area-inset-top) + 58px);right:13px;width:166px;padding:8px;border:1px solid rgba(255,255,255,.58);border-radius:12px;background:rgba(12,16,13,.88);color:#fff;box-shadow:0 8px 24px rgba(0,0,0,.3)}
+    .menu-panel[hidden]{display:none}
+    .menu-panel p{margin:5px 5px 9px;font-size:11px;line-height:1.45;opacity:.9}
+    .menu-panel a{display:flex;align-items:center;min-height:40px;padding:0 10px;border-radius:8px;color:#fff;text-decoration:none;font-size:12px;font-weight:750}
+
+    .joystick{position:absolute;z-index:25;right:max(18px,env(safe-area-inset-right));bottom:max(22px,calc(env(safe-area-inset-bottom) + 12px));width:82px;height:82px;border:1px solid rgba(255,255,255,.40);border-radius:50%;background:rgba(5,8,6,.22);box-shadow:inset 0 0 0 1px rgba(0,0,0,.12);touch-action:none}
+    .stick{position:absolute;left:50%;top:50%;width:30px;height:30px;margin:-15px 0 0 -15px;border:1px solid rgba(255,255,255,.56);border-radius:50%;background:rgba(255,255,255,.23);box-shadow:0 2px 8px rgba(0,0,0,.24);pointer-events:none}
+    .actions{position:absolute;z-index:25;left:max(18px,env(safe-area-inset-left));bottom:max(22px,calc(env(safe-area-inset-bottom) + 12px));display:flex;align-items:flex-end;gap:8px}
+    .action{border:1px solid rgba(255,255,255,.52);border-radius:50%;background:rgba(5,8,6,.30);color:#fff;font-weight:900;text-shadow:0 1px 2px #000;touch-action:none}
+    #checkButton{width:44px;height:44px;font-size:9px}
+    #runButton{width:56px;height:56px;font-size:10px}
+    .message{position:absolute;z-index:26;left:50%;bottom:max(116px,calc(env(safe-area-inset-bottom) + 104px));transform:translateX(-50%);max-width:78%;padding:7px 11px;border-radius:9px;background:rgba(5,8,6,.60);color:#fff;font-size:11px;font-weight:750;text-align:center;text-shadow:0 1px 2px #000;opacity:0;transition:opacity .18s ease;pointer-events:none}
+    .message.show{opacity:1}
+
+    @media (min-width:521px){body{display:flex;justify-content:center;padding:12px}.screen{height:calc(100dvh - 24px);border-radius:12px}}
+  </style>
+</head>
+<body>
+  <main class="screen" id="screen">
+    <div id="game" aria-label="3Dゲーム画面"></div>
+    <div id="loading" class="loading">3Dを読み込み中…</div>
+
+    <div class="hud-left" aria-hidden="true">
+      <div class="portrait"></div>
+      <div class="stats">
+        <div>HP 84 / 100</div>
+        <div class="hpbar"><span></span></div>
+        <div>MP 24 / 30</div>
+        <div>Gold 128</div>
+      </div>
+    </div>
+
+    <button id="menuButton" class="menu-button" type="button" aria-expanded="false">MENU</button>
+    <div id="menuPanel" class="menu-panel" hidden>
+      <p>右下で移動。左下が調べる/RUN。中央を2本指で拡大・縮小できます。</p>
+      <a href="index.html">ゲームを選ぶ</a>
+    </div>
+
+    <div id="joystick" class="joystick" aria-label="移動スティック"><div id="stick" class="stick"></div></div>
+    <div class="actions">
+      <button id="checkButton" class="action" type="button">調べる</button>
+      <button id="runButton" class="action" type="button">RUN</button>
+    </div>
+    <div id="message" class="message" role="status" aria-live="polite"></div>
+  </main>
+
+  <script type="module">
+    const screen=document.getElementById('screen');
+    const game=document.getElementById('game');
+    const loading=document.getElementById('loading');
+    const joystick=document.getElementById('joystick');
+    const stick=document.getElementById('stick');
+    const runButton=document.getElementById('runButton');
+    const checkButton=document.getElementById('checkButton');
+    const menuButton=document.getElementById('menuButton');
+    const menuPanel=document.getElementById('menuPanel');
+    const message=document.getElementById('message');
+
+    screen.addEventListener('selectstart',e=>e.preventDefault());
+    screen.addEventListener('contextmenu',e=>e.preventDefault());
+
+    menuButton.addEventListener('click',()=>{
+      const open=menuPanel.hidden;
+      menuPanel.hidden=!open;
+      menuButton.setAttribute('aria-expanded',String(open));
+    });
+    document.addEventListener('pointerdown',e=>{
+      if(menuPanel.hidden)return;
+      if(menuPanel.contains(e.target)||menuButton.contains(e.target))return;
+      menuPanel.hidden=true;
+      menuButton.setAttribute('aria-expanded','false');
+    });
+
+    try{
+      const THREE=await import('https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js');
+
+      const scene=new THREE.Scene();
+      scene.background=new THREE.Color(0xa9bfd0);
+      scene.fog=new THREE.Fog(0xa9bfd0,28,86);
+
+      const camera=new THREE.PerspectiveCamera(55,1,.1,160);
+      const renderer=new THREE.WebGLRenderer({antialias:true,powerPreference:'high-performance'});
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,1.7));
+      renderer.outputColorSpace=THREE.SRGBColorSpace;
+      game.appendChild(renderer.domElement);
+
+      scene.add(new THREE.HemisphereLight(0xf6fbff,0x41543f,2.1));
+      const sun=new THREE.DirectionalLight(0xfff0d2,2.2);
+      sun.position.set(-8,15,9);
+      scene.add(sun);
+
+      const ground=new THREE.Mesh(new THREE.PlaneGeometry(110,110),new THREE.MeshStandardMaterial({color:0x6e855e,roughness:1}));
+      ground.rotation.x=-Math.PI/2;
+      scene.add(ground);
+
+      const road=new THREE.Mesh(new THREE.PlaneGeometry(7.5,78),new THREE.MeshStandardMaterial({color:0x8b806d,roughness:1}));
+      road.rotation.x=-Math.PI/2;
+      road.position.set(0,.012,-6);
+      scene.add(road);
+
+      const obstacles=[];
+      const interactables=[];
+      function box(x,z,sx,sy,sz,color=0x756553,label=''){
+        const m=new THREE.Mesh(new THREE.BoxGeometry(sx,sy,sz),new THREE.MeshStandardMaterial({color,roughness:.92}));
+        m.position.set(x,sy/2,z);scene.add(m);
+        obstacles.push({x,z,r:Math.max(sx,sz)*.54});
+        if(label)interactables.push({x,z,label});
+      }
+      box(-7.2,-11,5.4,3.5,4.4,0x6a5b50,'古い家がある。');
+      box(7.4,-17,4.6,3.1,3.8,0x79634e,'小さな倉庫だ。');
+      box(-8,6,4,2.9,3.4,0x6b6258,'戸口は閉まっている。');
+
+      function tree(x,z,s=1){
+        const trunk=new THREE.Mesh(new THREE.CylinderGeometry(.15*s,.22*s,1.7*s,7),new THREE.MeshStandardMaterial({color:0x614934,roughness:1}));
+        trunk.position.set(x,.85*s,z);scene.add(trunk);
+        const crown=new THREE.Mesh(new THREE.ConeGeometry(.9*s,2.4*s,9),new THREE.MeshStandardMaterial({color:0x31583b,roughness:1}));
+        crown.position.set(x,2.45*s,z);scene.add(crown);
+        obstacles.push({x,z,r:.5*s});
+      }
+      [[-10,-4,1.2],[-10,-15,1.1],[-8,12,1.15],[9,-8,1.1],[11,-20,1.25],[9,8,1],[11,14,1.2],[-12,17,1.3],[6,17,1.1],[-4,-25,1.2],[13,-2,1.15],[-14,-8,1],[14,20,1.2],[-12,27,1.2]].forEach(v=>tree(...v));
+      for(let z=-32;z<=28;z+=5){tree(-17+(z%3),z,.9);tree(18-(z%4),z+2,1)}
+
+      const player=new THREE.Group();
+      const body=new THREE.Mesh(new THREE.CylinderGeometry(.34,.42,1.05,8),new THREE.MeshStandardMaterial({color:0x303a42,roughness:.82}));
+      body.position.y=.93;player.add(body);
+      const head=new THREE.Mesh(new THREE.SphereGeometry(.28,12,9),new THREE.MeshStandardMaterial({color:0xc79b78,roughness:.9}));
+      head.position.y=1.62;player.add(head);
+      const facing=new THREE.Mesh(new THREE.ConeGeometry(.10,.28,7),new THREE.MeshBasicMaterial({color:0xf3f3f3}));
+      facing.rotation.x=Math.PI/2;facing.position.set(0,1,-.47);player.add(facing);
+      player.position.set(0,0,10);scene.add(player);
+
+      const move=new THREE.Vector2();
+      const keyboard={left:false,right:false,up:false,down:false};
+      let joyPointer=null,running=false,messageTimer=0;
+      const clock=new THREE.Clock();
+
+      let zoomTarget=.38;
+      let zoomCurrent=zoomTarget;
+      const ZOOM_MIN=.06,ZOOM_MAX=1;
+      let pinchStartDistance=0,pinchStartZoom=zoomTarget;
+      const clamp=(v,min,max)=>Math.min(max,Math.max(min,v));
+      const touchDistance=(a,b)=>Math.hypot(a.clientX-b.clientX,a.clientY-b.clientY);
+
+      function resize(){
+        const r=screen.getBoundingClientRect();
+        renderer.setSize(r.width,r.height,false);
+        camera.aspect=r.width/r.height;
+        camera.updateProjectionMatrix();
+      }
+      resize();window.addEventListener('resize',resize);
+
+      function setJoystick(clientX,clientY){
+        const r=joystick.getBoundingClientRect(),cx=r.left+r.width/2,cy=r.top+r.height/2;
+        let dx=clientX-cx,dy=clientY-cy;
+        const max=r.width*.32,len=Math.hypot(dx,dy)||1;
+        if(len>max){dx=dx/len*max;dy=dy/len*max}
+        stick.style.transform=`translate(${dx}px, ${dy}px)`;
+        move.set(dx/max,-dy/max);
+      }
+      joystick.addEventListener('pointerdown',e=>{e.preventDefault();joyPointer=e.pointerId;joystick.setPointerCapture(e.pointerId);setJoystick(e.clientX,e.clientY)});
+      joystick.addEventListener('pointermove',e=>{if(e.pointerId===joyPointer){e.preventDefault();setJoystick(e.clientX,e.clientY)}});
+      function endJoy(e){if(e.pointerId!==joyPointer)return;joyPointer=null;move.set(0,0);stick.style.transform='translate(0px, 0px)'}
+      joystick.addEventListener('pointerup',endJoy);joystick.addEventListener('pointercancel',endJoy);
+
+      runButton.addEventListener('pointerdown',e=>{e.preventDefault();running=true;runButton.setPointerCapture(e.pointerId)});
+      runButton.addEventListener('pointerup',()=>running=false);runButton.addEventListener('pointercancel',()=>running=false);
+
+      game.addEventListener('touchstart',e=>{
+        if(e.touches.length===2){
+          e.preventDefault();
+          pinchStartDistance=touchDistance(e.touches[0],e.touches[1]);
+          pinchStartZoom=zoomTarget;
+        }
+      },{passive:false});
+      game.addEventListener('touchmove',e=>{
+        if(e.touches.length===2){
+          e.preventDefault();
+          const d=touchDistance(e.touches[0],e.touches[1]);
+          const ratio=d/Math.max(1,pinchStartDistance);
+          zoomTarget=clamp(pinchStartZoom-(ratio-1)*.72,ZOOM_MIN,ZOOM_MAX);
+        }
+      },{passive:false});
+      game.addEventListener('touchend',e=>{if(e.touches.length<2)pinchStartDistance=0},{passive:false});
+      game.addEventListener('touchcancel',()=>pinchStartDistance=0,{passive:false});
+
+      game.addEventListener('wheel',e=>{e.preventDefault();zoomTarget=clamp(zoomTarget+e.deltaY*.0014,ZOOM_MIN,ZOOM_MAX)},{passive:false});
+
+      window.addEventListener('keydown',e=>{
+        const k=e.key.toLowerCase();
+        if(e.key==='ArrowLeft'||k==='a')keyboard.left=true;
+        if(e.key==='ArrowRight'||k==='d')keyboard.right=true;
+        if(e.key==='ArrowUp'||k==='w')keyboard.up=true;
+        if(e.key==='ArrowDown'||k==='s')keyboard.down=true;
+        if(e.key==='Shift')running=true;
+      });
+      window.addEventListener('keyup',e=>{
+        const k=e.key.toLowerCase();
+        if(e.key==='ArrowLeft'||k==='a')keyboard.left=false;
+        if(e.key==='ArrowRight'||k==='d')keyboard.right=false;
+        if(e.key==='ArrowUp'||k==='w')keyboard.up=false;
+        if(e.key==='ArrowDown'||k==='s')keyboard.down=false;
+        if(e.key==='Shift')running=false;
+      });
+
+      function blocked(x,z){
+        if(Math.abs(x)>25||z<-40||z>35)return true;
+        for(const o of obstacles)if(Math.hypot(x-o.x,z-o.z)<o.r+.42)return true;
+        return false;
+      }
+      function showMessage(text){message.textContent=text;message.classList.add('show');clearTimeout(messageTimer);messageTimer=setTimeout(()=>message.classList.remove('show'),1700)}
+      checkButton.addEventListener('click',()=>{
+        let nearest=null,dist=Infinity;
+        for(const item of interactables){const d=Math.hypot(player.position.x-item.x,player.position.z-item.z);if(d<dist){dist=d;nearest=item}}
+        showMessage(nearest&&dist<5.4?nearest.label:'近くに調べられるものはない。');
+      });
+
+      loading.hidden=true;
+
+      function animate(){
+        requestAnimationFrame(animate);
+        const dt=Math.min(clock.getDelta(),.035);
+        let x=move.x+(keyboard.right?1:0)-(keyboard.left?1:0);
+        let y=move.y+(keyboard.up?1:0)-(keyboard.down?1:0);
+        const len=Math.hypot(x,y);if(len>1){x/=len;y/=len}
+        if(Math.hypot(x,y)>.05){
+          const speed=running?5.8:3.25;
+          const nx=player.position.x+x*speed*dt,nz=player.position.z-y*speed*dt;
+          if(!blocked(nx,player.position.z))player.position.x=nx;
+          if(!blocked(player.position.x,nz))player.position.z=nz;
+          player.rotation.y=Math.atan2(-x,y);
+          body.position.y=.93+Math.sin(performance.now()*(running?.018:.012))*.025;
+        }
+
+        zoomCurrent+=(zoomTarget-zoomCurrent)*Math.min(1,dt*8);
+        const smooth=zoomCurrent*zoomCurrent*(3-2*zoomCurrent);
+        const camDistance=THREE.MathUtils.lerp(7.6,30,smooth);
+        const camHeight=THREE.MathUtils.lerp(5.3,31,smooth);
+        const lookAhead=THREE.MathUtils.lerp(-1.5,0,smooth);
+        const desired=new THREE.Vector3(player.position.x,player.position.y+camHeight,player.position.z+camDistance);
+        camera.position.lerp(desired,1-Math.pow(.001,dt));
+        camera.lookAt(new THREE.Vector3(player.position.x,.65,player.position.z+lookAhead));
+        renderer.render(scene,camera);
+      }
+      animate();
+    }catch(error){
+      console.error(error);
+      loading.hidden=false;
+      loading.textContent='3Dの読み込みに失敗しました。ページを再読み込みしてください。';
+    }
+  </script>
+</body>
+</html>
