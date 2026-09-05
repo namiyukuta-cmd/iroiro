@@ -15,124 +15,261 @@
       --accent-soft: #ead8bd;
       --danger: #9a3f35;
     }
+
     * { box-sizing: border-box; }
-    body {
+
+    html, body {
+      width: 100%;
+      height: 100%;
       margin: 0;
+      overflow: hidden;
       background: var(--bg);
       color: var(--ink);
       font-family: -apple-system, BlinkMacSystemFont, "Hiragino Sans", "Yu Gothic", sans-serif;
       font-size: 18px;
-      line-height: 1.55;
+      line-height: 1.5;
     }
+
+    body {
+      height: 100vh;
+      height: 100dvh;
+    }
+
     button { font: inherit; }
-    .wrap {
+
+    .game {
       width: min(100%, 720px);
+      height: 100vh;
+      height: 100dvh;
       margin: 0 auto;
-      padding: 16px 14px 36px;
+      padding:
+        max(10px, env(safe-area-inset-top))
+        12px
+        max(10px, env(safe-area-inset-bottom));
+      display: grid;
+      grid-template-rows: auto minmax(0, 1fr) minmax(230px, 38dvh);
+      gap: 10px;
+      overflow: hidden;
     }
-    .status {
-      background: var(--panel);
+
+    .topbar {
+      min-width: 0;
+      background: rgba(255, 250, 240, .94);
       border: 1px solid var(--line);
-      border-radius: 14px;
-      padding: 14px;
-      margin-bottom: 14px;
+      border-radius: 16px;
+      padding: 10px 12px;
     }
-    .status-top {
+
+    .dayline {
       display: flex;
+      align-items: center;
       justify-content: space-between;
       gap: 10px;
-      align-items: baseline;
-      margin-bottom: 10px;
+      margin-bottom: 7px;
     }
-    .day { font-size: 22px; font-weight: 700; }
-    .phase { font-weight: 700; color: var(--accent); }
+
+    .day {
+      font-size: 22px;
+      font-weight: 800;
+      line-height: 1.1;
+    }
+
+    .phase {
+      font-size: 18px;
+      font-weight: 800;
+      color: var(--accent);
+    }
+
     .stats {
       display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 7px 12px;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 4px 10px;
       font-size: 17px;
     }
+
+    .stat {
+      min-width: 0;
+      white-space: nowrap;
+    }
+
     .scene {
+      min-height: 0;
+      overflow: hidden;
       background: var(--panel);
       border: 1px solid var(--line);
-      border-radius: 14px;
-      padding: 18px 16px;
-      min-height: 190px;
-      margin-bottom: 14px;
+      border-radius: 18px;
+      display: grid;
+      grid-template-rows: auto minmax(0, 1fr) auto;
     }
+
+    .scene-head {
+      padding: 15px 16px 8px;
+      border-bottom: 1px solid rgba(213, 195, 168, .55);
+    }
+
     .scene h1 {
-      font-size: 23px;
-      margin: 0 0 10px;
+      margin: 0;
+      font-size: 24px;
+      line-height: 1.25;
     }
-    .scene p { margin: 8px 0; }
+
+    .scene-body {
+      min-height: 0;
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+      padding: 14px 16px;
+      font-size: 18px;
+    }
+
+    .scene-body p {
+      margin: 0;
+    }
+
     .notice {
-      padding: 10px 12px;
+      margin: 0 14px 14px;
+      padding: 9px 11px;
       border-left: 4px solid var(--accent);
       background: #f7efdf;
-      margin-top: 12px;
+      font-size: 17px;
+      line-height: 1.4;
     }
+
+    .control-panel {
+      min-height: 0;
+      overflow: hidden;
+      background: rgba(255, 250, 240, .96);
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      display: grid;
+      grid-template-rows: auto minmax(0, 1fr);
+    }
+
+    .tabs {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .tab {
+      min-height: 46px;
+      border: 0;
+      background: transparent;
+      color: var(--muted);
+      font-weight: 800;
+      font-size: 18px;
+    }
+
+    .tab + .tab {
+      border-left: 1px solid var(--line);
+    }
+
+    .tab.active {
+      background: var(--accent-soft);
+      color: var(--ink);
+    }
+
+    .panel-scroll {
+      min-height: 0;
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+      padding: 10px;
+    }
+
     .actions {
       display: grid;
       grid-template-columns: 1fr;
-      gap: 10px;
+      gap: 8px;
     }
+
     .actions button {
       width: 100%;
-      min-height: 52px;
+      min-height: 50px;
       border: 1px solid var(--line);
-      border-radius: 12px;
+      border-radius: 13px;
       background: var(--panel);
       color: var(--ink);
-      padding: 12px 14px;
+      padding: 10px 13px;
       text-align: left;
+      font-size: 18px;
+      font-weight: 650;
       cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
     }
+
     .actions button.primary {
       background: var(--accent-soft);
       border-color: #bf9b6a;
-      font-weight: 700;
+      font-weight: 800;
     }
+
+    .actions button.current {
+      background: #eee3cf;
+      border-color: #bea27c;
+    }
+
     .actions button:disabled {
-      opacity: .45;
+      opacity: .42;
       cursor: default;
     }
-    .section-title {
-      font-size: 18px;
-      font-weight: 700;
-      margin: 18px 0 8px;
+
+    .actions button:active:not(:disabled) {
+      transform: scale(.99);
     }
-    .small { font-size: 17px; color: var(--muted); }
-    .danger { color: var(--danger); }
+
+    @media (max-height: 700px) {
+      .game {
+        grid-template-rows: auto minmax(0, 1fr) minmax(190px, 36dvh);
+        gap: 7px;
+      }
+      .topbar { padding: 8px 10px; }
+      .dayline { margin-bottom: 5px; }
+      .day { font-size: 20px; }
+      .stats { font-size: 17px; gap: 2px 8px; }
+      .scene-head { padding: 11px 14px 7px; }
+      .scene h1 { font-size: 21px; }
+      .scene-body { padding: 10px 14px; }
+      .notice { margin: 0 12px 10px; padding: 7px 9px; }
+      .actions button { min-height: 46px; }
+    }
   </style>
 </head>
 <body>
-  <main class="wrap">
-    <section class="status" aria-label="現在の状態">
-      <div class="status-top">
+  <main class="game">
+    <section class="topbar" aria-label="現在の状態">
+      <div class="dayline">
         <div class="day" id="dayText">1日目</div>
         <div class="phase" id="phaseText">朝</div>
       </div>
       <div class="stats">
-        <div>所持金：<strong id="moneyText">3</strong></div>
-        <div>借金：<strong id="debtText">30</strong></div>
-        <div>体力：<strong id="energyText">6</strong>/10</div>
-        <div>評判：<strong id="repText">0</strong></div>
-        <div>常連：<strong id="regularText">0</strong>人</div>
-        <div>警戒：<strong id="riskText">0</strong></div>
+        <div class="stat">所持金 <strong id="moneyText">3</strong></div>
+        <div class="stat">借金 <strong id="debtText">30</strong></div>
+        <div class="stat">体力 <strong id="energyText">6</strong>/10</div>
+        <div class="stat">評判 <strong id="repText">0</strong></div>
+        <div class="stat">常連 <strong id="regularText">0</strong>人</div>
+        <div class="stat">警戒 <strong id="riskText">0</strong></div>
       </div>
     </section>
 
     <section class="scene" aria-live="polite">
-      <h1 id="placeText">借り部屋</h1>
-      <p id="sceneText">薄い朝の光が、格子窓から差し込んでいる。今日をどう過ごすか決める。</p>
+      <div class="scene-head">
+        <h1 id="placeText">借り部屋</h1>
+      </div>
+      <div class="scene-body">
+        <p id="sceneText">薄い朝の光が、格子窓から差し込んでいる。今日をどう過ごすか決める。</p>
+      </div>
       <div id="notice" class="notice">部屋代と借金はまだ残っている。</div>
     </section>
 
-    <div class="section-title">行動</div>
-    <div class="actions" id="actions"></div>
-
-    <div class="section-title">行ける場所</div>
-    <div class="actions" id="places"></div>
+    <section class="control-panel" aria-label="操作">
+      <div class="tabs">
+        <button class="tab active" id="actionTab" type="button">行動</button>
+        <button class="tab" id="placeTab" type="button">移動</button>
+      </div>
+      <div class="panel-scroll">
+        <div class="actions" id="actions"></div>
+        <div class="actions" id="places" hidden></div>
+      </div>
+    </section>
   </main>
 
   <script>
@@ -147,16 +284,17 @@
         rep: 0,
         regulars: 0,
         risk: 0,
-        place: "room"
+        place: "room",
+        tab: "action"
       };
 
       const placeData = {
         room: { name: "借り部屋", text: "古い貸家の二階。寝台と水差し、小さな箱だけがある。ここで暮らし、夜には客を迎えることもある。" },
-        well: { name: "共同水場", text: "近所の女たちや水売りが出入りする。水を汲みながら、街の噂も耳に入る。" },
+        well: { name: "共同水場", text: "近所の人や水売りが出入りする。水を汲みながら、街の噂も耳に入る。" },
         market: { name: "小市場", text: "食べ物、布、香油、安い化粧品や日用品が並ぶ。大市場ほど品は多くない。" },
         bath: { name: "公衆浴場", text: "石造りの浴場。使える時間は限られている。入浴すれば疲れが少し取れる。" },
         edge: { name: "水路沿い", text: "街外れへ続く水路沿い。少し歩けば花や香草を摘める場所がある。人通りは少ない。" },
-        pleasure: { name: "歓楽街の入口", text: "日が落ちると灯りと音楽が増える。仕事の話も集まるが、夜は揉め事も起こりやすい。" }
+        pleasure: { name: "歓楽の通り", text: "日が落ちると灯りと音楽が増える。仕事の話も集まるが、夜は揉め事も起こりやすい。" }
       };
 
       const $ = id => document.getElementById(id);
@@ -165,6 +303,15 @@
         state.energy = Math.max(0, Math.min(10, state.energy));
         state.risk = Math.max(0, Math.min(10, state.risk));
         state.rep = Math.max(0, state.rep);
+      }
+
+      function showTab(tab) {
+        state.tab = tab;
+        const actionMode = tab === "action";
+        $("actions").hidden = !actionMode;
+        $("places").hidden = actionMode;
+        $("actionTab").classList.toggle("active", actionMode);
+        $("placeTab").classList.toggle("active", !actionMode);
       }
 
       function advance(message) {
@@ -184,6 +331,7 @@
 
       function go(place) {
         state.place = place;
+        state.tab = "action";
         render();
       }
 
@@ -226,7 +374,7 @@
 
       function payDebt() {
         if (state.money <= 0 || state.debt <= 0) {
-          render("今は返せる金がない。\n");
+          render("今は返せる金がない。");
           return;
         }
         const amount = Math.min(5, state.money, state.debt);
@@ -235,11 +383,12 @@
         render(`${amount}を借金の返済に回した。`);
       }
 
-      function actionButton(label, fn, primary = false, disabled = false) {
+      function actionButton(label, fn, primary = false, disabled = false, current = false) {
         const b = document.createElement("button");
         b.type = "button";
         b.textContent = label;
         if (primary) b.classList.add("primary");
+        if (current) b.classList.add("current");
         b.disabled = disabled;
         b.addEventListener("click", fn);
         return b;
@@ -270,55 +419,81 @@
           actions.append(actionButton("休む", () => { state.energy += 2; advance("横になって休んだ。体力が少し戻った。"); }, true));
           actions.append(actionButton("借金を返す（最大5）", payDebt, false, state.money <= 0 || state.debt <= 0));
         }
+
         if (state.place === "well") {
           actions.append(actionButton("水を汲む・噂を聞く", () => advance(rumor()), true));
         }
+
         if (state.place === "market") {
           actions.append(actionButton("食事を買う（2）", () => {
             if (state.money < 2) return render("金が足りない。");
-            state.money -= 2; state.energy += 2; advance("食事を買って食べた。");
+            state.money -= 2;
+            state.energy += 2;
+            advance("食事を買って食べた。");
           }, true));
+
           actions.append(actionButton("香油を買う（3）", () => {
             if (state.money < 3) return render("金が足りない。");
-            state.money -= 3; state.rep++; advance("安い香油を買った。身支度が少し整った。");
+            state.money -= 3;
+            state.rep++;
+            advance("安い香油を買った。身支度が少し整った。");
           }));
         }
+
         if (state.place === "bath") {
           actions.append(actionButton("浴場を使う（2）", () => {
             if (state.money < 2) return render("金が足りない。");
-            state.money -= 2; state.energy += 3; advance("浴場を使った。身体が少し軽くなった。");
+            state.money -= 2;
+            state.energy += 3;
+            advance("浴場を使った。身体が少し軽くなった。");
           }, true, state.phase === 3));
         }
+
         if (state.place === "edge") {
           actions.append(actionButton("花や香草を摘む", () => {
-            state.energy--; const gain = 1 + Math.floor(Math.random() * 3); state.money += gain;
+            state.energy--;
+            const gain = 1 + Math.floor(Math.random() * 3);
+            state.money += gain;
             advance(`花や香草を集め、${gain}で売れる分を得た。`);
           }, true, state.phase === 3));
         }
+
         if (state.place === "pleasure") {
           actions.append(actionButton("今夜、客を取る", work, true));
-          actions.append(actionButton("今日は取らずに帰る", () => { state.place = "room"; advance("今日は客を取らず、部屋へ戻った。"); }));
+          actions.append(actionButton("今日は取らずに帰る", () => {
+            state.place = "room";
+            advance("今日は客を取らず、部屋へ戻った。");
+          }));
         }
 
         actions.append(actionButton("何もせず時間を進める", () => advance("しばらく時間を過ごした。")));
 
         const places = $("places");
         places.replaceChildren();
-        places.append(actionButton("借り部屋", () => go("room"), state.place === "room"));
+        places.append(actionButton("借り部屋", () => go("room"), false, state.place === "room", state.place === "room"));
+
         if (state.phase !== 3) {
-          places.append(actionButton("共同水場", () => go("well"), state.place === "well"));
-          places.append(actionButton("小市場", () => go("market"), state.place === "market"));
+          places.append(actionButton("共同水場", () => go("well"), false, state.place === "well", state.place === "well"));
+          places.append(actionButton("小市場", () => go("market"), false, state.place === "market", state.place === "market"));
         }
+
         if (state.phase === 0 || state.phase === 1 || state.phase === 2) {
-          places.append(actionButton("公衆浴場", () => go("bath"), state.place === "bath"));
+          places.append(actionButton("公衆浴場", () => go("bath"), false, state.place === "bath", state.place === "bath"));
         }
+
         if (state.phase !== 3) {
-          places.append(actionButton("水路沿い", () => go("edge"), state.place === "edge"));
+          places.append(actionButton("水路沿い", () => go("edge"), false, state.place === "edge", state.place === "edge"));
         }
+
         if (state.phase >= 2) {
-          places.append(actionButton("歓楽街の入口", () => go("pleasure"), state.place === "pleasure"));
+          places.append(actionButton("歓楽の通り", () => go("pleasure"), false, state.place === "pleasure", state.place === "pleasure"));
         }
+
+        showTab(state.tab);
       }
+
+      $("actionTab").addEventListener("click", () => showTab("action"));
+      $("placeTab").addEventListener("click", () => showTab("place"));
 
       render();
     })();
