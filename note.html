@@ -22,23 +22,25 @@
     .menu-button{position:absolute;z-index:95;top:calc(env(safe-area-inset-top) + 15px);right:14px;min-width:62px;height:42px;padding:0 12px;border:1.5px solid #303030;border-radius:999px;background:rgba(255,255,255,.82);font-size:12px;font-weight:700;letter-spacing:.04em;box-shadow:0 1px 3px rgba(0,0,0,.08)}
     .menu-panel{position:absolute;z-index:100;top:calc(env(safe-area-inset-top) + 64px);right:14px;width:146px;padding:7px;border:1.5px solid #303030;border-radius:12px;background:rgba(250,249,245,.97);box-shadow:0 8px 24px rgba(0,0,0,.14)}
     .menu-panel[hidden]{display:none}
-    .menu-panel button{width:100%;min-height:42px;padding:7px 10px;border:0;border-radius:7px;background:transparent;text-align:left;font-size:14px}
+    .menu-panel button{width:100%;min-height:48px;padding:8px 10px;border:0;border-radius:8px;background:transparent;text-align:left;font-size:15px}
     .menu-panel button:active{background:rgba(0,0,0,.08)}
 
-    .note-mark-button{position:absolute;z-index:95;right:14px;bottom:calc(env(safe-area-inset-bottom) + 14px);width:46px;height:46px;padding:0;border:1.5px solid #303030;border-radius:12px;background:rgba(255,255,255,.9);box-shadow:0 2px 8px rgba(0,0,0,.08)}
-    .note-mark-button::before{content:"";position:absolute;left:12px;top:9px;width:19px;height:24px;border:1.5px solid #303030;border-radius:2px;background:linear-gradient(#303030,#303030) 4px 7px/11px 1px no-repeat,linear-gradient(#303030,#303030) 4px 12px/11px 1px no-repeat,linear-gradient(#303030,#303030) 4px 17px/8px 1px no-repeat}
+    .note-mark-button{position:absolute;z-index:95;right:14px;bottom:calc(env(safe-area-inset-bottom) + 14px);width:52px;height:52px;padding:0;border:1.5px solid #303030;border-radius:13px;background:rgba(255,255,255,.94);box-shadow:0 2px 8px rgba(0,0,0,.10);transition:bottom .15s ease}
+    .note-mark-button.workspace-open{bottom:calc(env(safe-area-inset-bottom) + 82px)}
+    .note-mark-button::before{content:"";position:absolute;left:14px;top:11px;width:20px;height:25px;border:1.5px solid #303030;border-radius:2px;background:linear-gradient(#303030,#303030) 4px 7px/11px 1px no-repeat,linear-gradient(#303030,#303030) 4px 12px/11px 1px no-repeat,linear-gradient(#303030,#303030) 4px 17px/8px 1px no-repeat}
 
     .saved-mark{position:absolute;z-index:120;top:calc(env(safe-area-inset-top) + 16px);left:50%;transform:translateX(-50%);padding:5px 9px;border-radius:999px;background:rgba(32,32,32,.84);color:#fff;opacity:0;font-size:11px;transition:opacity .2s ease;pointer-events:none}.saved-mark.show{opacity:1}
 
     .workspace{position:absolute;z-index:60;top:calc(env(safe-area-inset-top) + 86px);right:0;bottom:0;left:0;display:flex;flex-direction:column;background:#f5f3ed;border-top:1px solid rgba(0,0,0,.18)}
     .workspace[hidden]{display:none}
-    .tabs{order:2;display:grid;grid-template-columns:repeat(3,1fr);flex:0 0 calc(54px + env(safe-area-inset-bottom));padding-bottom:env(safe-area-inset-bottom);border-top:1px solid rgba(0,0,0,.16);background:#f5f3ed}
-    .tab{min-height:54px;border:0;border-top:2px solid transparent;background:transparent;font-size:13px;font-weight:700}
-    .tab.active{border-top-color:#202020}
+    .tabs{order:2;display:grid;grid-template-columns:repeat(3,1fr);flex:0 0 calc(68px + env(safe-area-inset-bottom));padding-bottom:env(safe-area-inset-bottom);border-top:1px solid rgba(0,0,0,.18);background:#f5f3ed}
+    .tab{min-height:68px;padding:0 8px;border:0;border-top:3px solid transparent;background:transparent;font-size:15px;font-weight:700;touch-action:manipulation}
+    .tab.active{border-top-color:#202020;background:rgba(0,0,0,.025)}
+    .tab:active{background:rgba(0,0,0,.08)}
     .panel{order:1;position:relative;flex:1;min-height:0;display:flex;flex-direction:column}
     .panel[hidden]{display:none}
 
-    .profile-body{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:20px 18px 20px}
+    .profile-body{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:20px 18px 24px}
     .profile-avatar{width:76px;height:76px;margin:2px auto 20px;border:2px solid #303030;border-radius:50%;position:relative;background:rgba(255,255,255,.72)}
     .profile-avatar::before{content:"";position:absolute;width:23px;height:23px;left:25px;top:13px;border-radius:50%;background:#4a4a4a}
     .profile-avatar::after{content:"";position:absolute;width:43px;height:25px;left:15px;bottom:10px;border-radius:23px 23px 11px 11px;background:#4a4a4a}
@@ -46,32 +48,33 @@
     .profile-name,.profile-text{width:100%;border:0;border-bottom:1px solid rgba(0,0,0,.24);background:transparent;outline:none}
     .profile-name{min-height:44px;padding:8px 2px;font-size:20px;font-weight:700;margin-bottom:20px}
     .profile-text{min-height:180px;padding:8px 2px;resize:none;font-size:16px;line-height:1.7}
-    .profile-save{width:100%;min-height:46px;margin-top:18px;border:1.5px solid #303030;border-radius:12px;background:#202020;color:#fff;font-size:14px;font-weight:700}
+    .profile-save{width:100%;min-height:52px;margin-top:18px;border:1.5px solid #303030;border-radius:12px;background:#202020;color:#fff;font-size:15px;font-weight:700}
 
-    .memo-body{position:relative;flex:1;min-height:0;padding:12px 14px 72px}
+    .memo-body{position:relative;flex:1;min-height:0;padding:12px 14px 84px}
     .memo-input{width:100%;height:100%;margin:0;padding:4px 2px;resize:none;outline:none;border:0;background:transparent;font-size:17px;line-height:1.7;caret-color:#202020}
-    .memo-actions{position:absolute;left:14px;right:14px;bottom:14px;display:flex;gap:8px}
-    .action{flex:1;min-height:46px;border:1.5px solid #303030;border-radius:12px;background:rgba(255,255,255,.86);font-size:13px;font-weight:700}
+    .memo-actions{position:absolute;left:14px;right:80px;bottom:14px;display:flex;gap:10px}
+    .action{flex:1;min-height:54px;border:1.5px solid #303030;border-radius:13px;background:rgba(255,255,255,.9);font-size:15px;font-weight:700;touch-action:manipulation}
     .action.primary{background:#202020;color:#fff}
     .action.danger{color:#8b2f2f}
+    .action:active{transform:scale(.985)}
 
-    .history-list{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:8px 14px 18px}
-    .log{display:block;width:100%;padding:13px 2px 14px;border:0;border-bottom:1px solid rgba(0,0,0,.17);background:transparent;text-align:left}
-    .log:active{background:rgba(0,0,0,.035)}
+    .history-list{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:8px 14px 20px}
+    .log{display:block;width:100%;min-height:64px;padding:13px 4px 14px;border:0;border-bottom:1px solid rgba(0,0,0,.17);background:transparent;text-align:left;touch-action:manipulation}
+    .log:active{background:rgba(0,0,0,.045)}
     .time{margin-bottom:5px;color:#777;font-size:11px}
     .preview{display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow:hidden;white-space:pre-wrap;overflow-wrap:anywhere;font-size:15px;line-height:1.55}
     .empty{margin:22px 4px;color:#888;font-size:14px}
 
     .detail{position:absolute;z-index:20;inset:0;display:flex;flex-direction:column;background:#f5f3ed}
     .detail[hidden]{display:none}
-    .detail-head{display:flex;align-items:center;justify-content:space-between;min-height:48px;padding:0 14px;border-bottom:1px solid rgba(0,0,0,.16)}
+    .detail-head{display:flex;align-items:center;justify-content:space-between;min-height:52px;padding:0 14px;border-bottom:1px solid rgba(0,0,0,.16)}
     .detail-title{font-size:14px;font-weight:700}
-    .back-button{min-width:58px;min-height:36px;border:1.5px solid #303030;border-radius:999px;background:transparent;font-size:12px;font-weight:700}
-    .detail-body{flex:1;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:16px 16px 72px}
+    .back-button{min-width:64px;min-height:42px;border:1.5px solid #303030;border-radius:999px;background:transparent;font-size:13px;font-weight:700}
+    .detail-body{flex:1;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:16px 16px 84px}
     .detail-time{margin-bottom:12px;color:#777;font-size:11px}
     .detail-text{white-space:pre-wrap;overflow-wrap:anywhere;font-size:17px;line-height:1.75}
     .detail-edit{width:100%;min-height:100%;padding:0;resize:none;border:0;outline:none;background:transparent;font-size:17px;line-height:1.75}
-    .detail-actions{position:absolute;left:14px;right:14px;bottom:14px;display:flex;gap:8px}
+    .detail-actions{position:absolute;left:14px;right:80px;bottom:14px;display:flex;gap:10px}
 
     @media (min-width:521px){body{padding:16px}.screen{height:calc(100dvh - 32px);border-radius:10px}}
   </style>
@@ -161,11 +164,7 @@
     const menuPanel=document.getElementById('menuPanel');
     const tabs=[...document.querySelectorAll('[data-tab]')];
     const openTabButtons=[...document.querySelectorAll('[data-open-tab]')];
-    const panels={
-      profile:document.getElementById('profilePanel'),
-      history:document.getElementById('historyPanel'),
-      memo:document.getElementById('memoPanel')
-    };
+    const panels={profile:document.getElementById('profilePanel'),history:document.getElementById('historyPanel'),memo:document.getElementById('memoPanel')};
 
     const input=document.getElementById('logInput');
     const saveButton=document.getElementById('saveButton');
@@ -192,34 +191,14 @@
     let currentTab='memo';
     let selectedIndex=-1;
 
-    function closeMenu(){
-      menuPanel.hidden=true;
-      menuButton.setAttribute('aria-expanded','false');
-    }
-
-    function showSaved(){
-      savedMark.classList.add('show');
-      window.setTimeout(()=>savedMark.classList.remove('show'),1200);
-    }
-
-    function loadLogs(){
-      try{return JSON.parse(localStorage.getItem(STORAGE_KEY))||[]}
-      catch{return[]}
-    }
-
-    function saveLogs(logs){
-      localStorage.setItem(STORAGE_KEY,JSON.stringify(logs));
-    }
+    function closeMenu(){menuPanel.hidden=true;menuButton.setAttribute('aria-expanded','false')}
+    function showSaved(){savedMark.classList.add('show');window.setTimeout(()=>savedMark.classList.remove('show'),1200)}
+    function loadLogs(){try{return JSON.parse(localStorage.getItem(STORAGE_KEY))||[]}catch{return[]}}
+    function saveLogs(logs){localStorage.setItem(STORAGE_KEY,JSON.stringify(logs))}
 
     function loadProfile(){
-      try{
-        const data=JSON.parse(localStorage.getItem(PROFILE_KEY))||{};
-        profileName.value=data.name||'';
-        profileText.value=data.text||'';
-      }catch{
-        profileName.value='';
-        profileText.value='';
-      }
+      try{const data=JSON.parse(localStorage.getItem(PROFILE_KEY))||{};profileName.value=data.name||'';profileText.value=data.text||''}
+      catch{profileName.value='';profileText.value=''}
     }
 
     function setTab(name){
@@ -234,19 +213,21 @@
       if(name==='memo')window.setTimeout(()=>input.focus(),0);
     }
 
+    function setWorkspaceOpen(open,name='memo'){
+      workspace.hidden=!open;
+      noteButton.classList.toggle('workspace-open',open);
+      if(open)setTab(name);
+      else detail.hidden=true;
+    }
+
     function openWorkspace(name='memo'){
       closeMenu();
-      workspace.hidden=false;
-      setTab(name);
+      setWorkspaceOpen(true,name);
     }
 
     noteButton.addEventListener('click',()=>{
-      if(workspace.hidden){
-        openWorkspace('memo');
-      }else{
-        workspace.hidden=true;
-        detail.hidden=true;
-      }
+      if(workspace.hidden)openWorkspace('memo');
+      else setWorkspaceOpen(false);
     });
 
     tabs.forEach(tab=>tab.addEventListener('click',()=>setTab(tab.dataset.tab)));
@@ -285,98 +266,49 @@
     });
 
     profileSave.addEventListener('click',()=>{
-      localStorage.setItem(PROFILE_KEY,JSON.stringify({
-        name:profileName.value.trim(),
-        text:profileText.value
-      }));
+      localStorage.setItem(PROFILE_KEY,JSON.stringify({name:profileName.value.trim(),text:profileText.value}));
       showSaved();
     });
 
     function renderLogs(){
       const logs=loadLogs();
       logsArea.innerHTML='';
-      if(!logs.length){
-        const empty=document.createElement('p');
-        empty.className='empty';
-        empty.textContent='まだ履歴はありません。';
-        logsArea.appendChild(empty);
-        return;
-      }
+      if(!logs.length){const empty=document.createElement('p');empty.className='empty';empty.textContent='まだ履歴はありません。';logsArea.appendChild(empty);return}
       logs.forEach((log,index)=>{
-        const item=document.createElement('button');
-        item.type='button';
-        item.className='log';
-        const time=document.createElement('div');
-        time.className='time';
-        time.textContent=log.time;
-        const preview=document.createElement('div');
-        preview.className='preview';
-        preview.textContent=log.text;
-        item.append(time,preview);
-        item.addEventListener('click',()=>openDetail(index));
-        logsArea.appendChild(item);
+        const item=document.createElement('button');item.type='button';item.className='log';
+        const time=document.createElement('div');time.className='time';time.textContent=log.time;
+        const preview=document.createElement('div');preview.className='preview';preview.textContent=log.text;
+        item.append(time,preview);item.addEventListener('click',()=>openDetail(index));logsArea.appendChild(item);
       });
     }
 
     function openDetail(index){
-      const logs=loadLogs();
-      if(!logs[index])return;
-      selectedIndex=index;
-      detailTime.textContent=logs[index].time;
-      detailText.textContent=logs[index].text;
-      detailEdit.value=logs[index].text;
-      detailText.hidden=false;
-      detailEdit.hidden=true;
-      detailNormalActions.hidden=false;
-      detailEditActions.hidden=true;
-      detail.hidden=false;
+      const logs=loadLogs();if(!logs[index])return;
+      selectedIndex=index;detailTime.textContent=logs[index].time;detailText.textContent=logs[index].text;detailEdit.value=logs[index].text;
+      detailText.hidden=false;detailEdit.hidden=true;detailNormalActions.hidden=false;detailEditActions.hidden=true;detail.hidden=false;
     }
 
-    backDetail.addEventListener('click',()=>{
-      detail.hidden=true;
-      renderLogs();
-    });
+    backDetail.addEventListener('click',()=>{detail.hidden=true;renderLogs()});
 
     editLogButton.addEventListener('click',()=>{
-      detailText.hidden=true;
-      detailEdit.hidden=false;
-      detailNormalActions.hidden=true;
-      detailEditActions.hidden=false;
-      window.setTimeout(()=>detailEdit.focus(),0);
+      detailText.hidden=true;detailEdit.hidden=false;detailNormalActions.hidden=true;detailEditActions.hidden=false;window.setTimeout(()=>detailEdit.focus(),0);
     });
 
     cancelEditButton.addEventListener('click',()=>{
-      const logs=loadLogs();
-      if(logs[selectedIndex])detailEdit.value=logs[selectedIndex].text;
-      detailText.hidden=false;
-      detailEdit.hidden=true;
-      detailNormalActions.hidden=false;
-      detailEditActions.hidden=true;
+      const logs=loadLogs();if(logs[selectedIndex])detailEdit.value=logs[selectedIndex].text;
+      detailText.hidden=false;detailEdit.hidden=true;detailNormalActions.hidden=false;detailEditActions.hidden=true;
     });
 
     saveEditButton.addEventListener('click',()=>{
-      const text=detailEdit.value.trim();
-      if(!text)return;
-      const logs=loadLogs();
-      if(!logs[selectedIndex])return;
-      logs[selectedIndex].text=text;
-      saveLogs(logs);
-      detailText.textContent=text;
-      detailText.hidden=false;
-      detailEdit.hidden=true;
-      detailNormalActions.hidden=false;
-      detailEditActions.hidden=true;
-      showSaved();
+      const text=detailEdit.value.trim();if(!text)return;
+      const logs=loadLogs();if(!logs[selectedIndex])return;
+      logs[selectedIndex].text=text;saveLogs(logs);detailText.textContent=text;
+      detailText.hidden=false;detailEdit.hidden=true;detailNormalActions.hidden=false;detailEditActions.hidden=true;showSaved();
     });
 
     deleteLogButton.addEventListener('click',()=>{
-      const logs=loadLogs();
-      if(selectedIndex<0||!logs[selectedIndex])return;
-      logs.splice(selectedIndex,1);
-      saveLogs(logs);
-      selectedIndex=-1;
-      detail.hidden=true;
-      renderLogs();
+      const logs=loadLogs();if(selectedIndex<0||!logs[selectedIndex])return;
+      logs.splice(selectedIndex,1);saveLogs(logs);selectedIndex=-1;detail.hidden=true;renderLogs();
     });
   </script>
 </body>
