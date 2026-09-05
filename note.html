@@ -9,61 +9,69 @@
     *{box-sizing:border-box}
     html,body{width:100%;height:100%;margin:0}
     body{overflow:hidden;background:#e9e7e0;color:#202020;font-family:-apple-system,BlinkMacSystemFont,"Hiragino Kaku Gothic ProN","Yu Gothic",sans-serif;-webkit-tap-highlight-color:transparent}
-    button,textarea,input{font:inherit}
-    button{color:inherit}
+    button,textarea,input{font:inherit;color:inherit}
     .screen{position:relative;width:100%;height:100dvh;max-width:520px;margin:0 auto;overflow:hidden;background:#f5f3ed;border:1.5px solid #2e2e2e}
 
-    .hud-left{position:absolute;z-index:20;top:calc(env(safe-area-inset-top) + 15px);left:15px;display:flex;align-items:flex-start;gap:8px}
-    .portrait{width:58px;height:58px;flex:0 0 58px;border:2px solid #303030;border-radius:50%;background:rgba(255,255,255,.72);box-shadow:0 1px 3px rgba(0,0,0,.10);position:relative;padding:0}
+    .hud-left{position:absolute;z-index:90;top:calc(env(safe-area-inset-top) + 15px);left:15px;display:flex;align-items:flex-start;gap:8px}
+    .portrait{width:58px;height:58px;flex:0 0 58px;border:2px solid #303030;border-radius:50%;background:rgba(255,255,255,.72);box-shadow:0 1px 3px rgba(0,0,0,.10);position:relative}
     .portrait::before{content:"";position:absolute;width:17px;height:17px;left:19px;top:10px;border-radius:50%;background:#4a4a4a}
     .portrait::after{content:"";position:absolute;width:31px;height:18px;left:12px;bottom:8px;border-radius:17px 17px 9px 9px;background:#4a4a4a}
     .stats{padding-top:3px;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:11px;line-height:1.42;letter-spacing:.02em;white-space:nowrap;pointer-events:none}
     .stat-row{display:grid;grid-template-columns:28px 1fr;gap:3px}.stat-value{opacity:.65}
 
-    .note-mark-button{position:absolute;z-index:25;right:14px;bottom:calc(env(safe-area-inset-bottom) + 14px);width:42px;height:42px;padding:0;border:1.5px solid #303030;border-radius:11px;background:rgba(255,255,255,.86)}
-    .note-mark-button::before{content:"";position:absolute;left:11px;top:8px;width:18px;height:23px;border:1.5px solid #303030;border-radius:2px;background:linear-gradient(#303030,#303030) 4px 7px/10px 1px no-repeat,linear-gradient(#303030,#303030) 4px 12px/10px 1px no-repeat,linear-gradient(#303030,#303030) 4px 17px/7px 1px no-repeat}
-
-    .menu-button{position:absolute;z-index:30;top:calc(env(safe-area-inset-top) + 15px);right:14px;min-width:62px;height:42px;padding:0 12px;border:1.5px solid #303030;border-radius:999px;background:rgba(255,255,255,.82);font-size:12px;font-weight:700;letter-spacing:.04em;box-shadow:0 1px 3px rgba(0,0,0,.08)}
-    .menu-panel{position:absolute;z-index:50;top:calc(env(safe-area-inset-top) + 64px);right:14px;width:146px;padding:7px;border:1.5px solid #303030;border-radius:12px;background:rgba(250,249,245,.97);box-shadow:0 8px 24px rgba(0,0,0,.14)}
+    .menu-button{position:absolute;z-index:95;top:calc(env(safe-area-inset-top) + 15px);right:14px;min-width:62px;height:42px;padding:0 12px;border:1.5px solid #303030;border-radius:999px;background:rgba(255,255,255,.82);font-size:12px;font-weight:700;letter-spacing:.04em;box-shadow:0 1px 3px rgba(0,0,0,.08)}
+    .menu-panel{position:absolute;z-index:100;top:calc(env(safe-area-inset-top) + 64px);right:14px;width:146px;padding:7px;border:1.5px solid #303030;border-radius:12px;background:rgba(250,249,245,.97);box-shadow:0 8px 24px rgba(0,0,0,.14)}
     .menu-panel[hidden]{display:none}
     .menu-panel button{width:100%;min-height:42px;padding:7px 10px;border:0;border-radius:7px;background:transparent;text-align:left;font-size:14px}
     .menu-panel button:active{background:rgba(0,0,0,.08)}
 
-    .saved-mark{position:absolute;z-index:110;top:calc(env(safe-area-inset-top) + 16px);left:50%;transform:translateX(-50%);padding:5px 9px;border-radius:999px;background:rgba(32,32,32,.84);color:#fff;opacity:0;font-size:11px;transition:opacity .2s ease;pointer-events:none}.saved-mark.show{opacity:1}
+    .note-mark-button{position:absolute;z-index:95;right:14px;bottom:calc(env(safe-area-inset-bottom) + 14px);width:46px;height:46px;padding:0;border:1.5px solid #303030;border-radius:12px;background:rgba(255,255,255,.9);box-shadow:0 2px 8px rgba(0,0,0,.08)}
+    .note-mark-button::before{content:"";position:absolute;left:12px;top:9px;width:19px;height:24px;border:1.5px solid #303030;border-radius:2px;background:linear-gradient(#303030,#303030) 4px 7px/11px 1px no-repeat,linear-gradient(#303030,#303030) 4px 12px/11px 1px no-repeat,linear-gradient(#303030,#303030) 4px 17px/8px 1px no-repeat}
 
-    .view{position:absolute;z-index:70;inset:0;display:flex;flex-direction:column;background:#f5f3ed}
-    .view[hidden]{display:none}
-    .overlay-head{display:flex;align-items:center;justify-content:space-between;min-height:calc(env(safe-area-inset-top) + 62px);padding:calc(env(safe-area-inset-top) + 10px) 14px 10px;border-bottom:1px solid rgba(0,0,0,.18)}
-    .overlay-title{margin:0;font-size:17px;font-weight:700}
-    .close-button{min-width:58px;min-height:42px;border:1.5px solid #303030;border-radius:999px;background:transparent;font-size:12px;font-weight:700}
+    .saved-mark{position:absolute;z-index:120;top:calc(env(safe-area-inset-top) + 16px);left:50%;transform:translateX(-50%);padding:5px 9px;border-radius:999px;background:rgba(32,32,32,.84);color:#fff;opacity:0;font-size:11px;transition:opacity .2s ease;pointer-events:none}.saved-mark.show{opacity:1}
 
-    .note-body{position:relative;flex:1;min-height:0;padding:12px 14px calc(env(safe-area-inset-bottom) + 76px)}
-    .note-input{width:100%;height:100%;margin:0;padding:4px 2px;resize:none;outline:none;border:0;background:transparent;color:#202020;font-size:17px;line-height:1.7;caret-color:#202020}
-    .note-actions{position:absolute;z-index:80;left:14px;right:14px;bottom:calc(env(safe-area-inset-bottom) + 14px);display:flex;gap:8px}
-    .note-action{flex:1;min-height:46px;border:1.5px solid #303030;border-radius:12px;background:rgba(255,255,255,.8);font-size:13px;font-weight:700}
-    .note-action.primary{background:#202020;color:#fff}
+    .workspace{position:absolute;z-index:60;top:calc(env(safe-area-inset-top) + 86px);right:0;bottom:0;left:0;display:flex;flex-direction:column;background:#f5f3ed;border-top:1px solid rgba(0,0,0,.18)}
+    .workspace[hidden]{display:none}
+    .tabs{display:grid;grid-template-columns:repeat(3,1fr);flex:0 0 auto;border-bottom:1px solid rgba(0,0,0,.16)}
+    .tab{min-height:46px;border:0;background:transparent;font-size:13px;font-weight:700}
+    .tab.active{border-bottom:2px solid #202020}
+    .panel{position:relative;flex:1;min-height:0;display:flex;flex-direction:column}
+    .panel[hidden]{display:none}
 
-    .history-list{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:8px 14px calc(env(safe-area-inset-bottom) + 18px)}
+    .profile-body{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:20px 18px calc(env(safe-area-inset-bottom) + 78px)}
+    .profile-avatar{width:76px;height:76px;margin:2px auto 20px;border:2px solid #303030;border-radius:50%;position:relative;background:rgba(255,255,255,.72)}
+    .profile-avatar::before{content:"";position:absolute;width:23px;height:23px;left:25px;top:13px;border-radius:50%;background:#4a4a4a}
+    .profile-avatar::after{content:"";position:absolute;width:43px;height:25px;left:15px;bottom:10px;border-radius:23px 23px 11px 11px;background:#4a4a4a}
+    .profile-label{display:block;margin:0 0 7px;font-size:12px;color:#666;font-weight:700}
+    .profile-name,.profile-text{width:100%;border:0;border-bottom:1px solid rgba(0,0,0,.24);background:transparent;outline:none}
+    .profile-name{min-height:44px;padding:8px 2px;font-size:20px;font-weight:700;margin-bottom:20px}
+    .profile-text{min-height:180px;padding:8px 2px;resize:none;font-size:16px;line-height:1.7}
+    .profile-save{width:100%;min-height:46px;margin-top:18px;border:1.5px solid #303030;border-radius:12px;background:#202020;color:#fff;font-size:14px;font-weight:700}
+
+    .memo-body{position:relative;flex:1;min-height:0;padding:12px 14px calc(env(safe-area-inset-bottom) + 76px)}
+    .memo-input{width:100%;height:100%;margin:0;padding:4px 2px;resize:none;outline:none;border:0;background:transparent;font-size:17px;line-height:1.7;caret-color:#202020}
+    .memo-actions{position:absolute;left:14px;right:74px;bottom:calc(env(safe-area-inset-bottom) + 14px);display:flex;gap:8px}
+    .action{flex:1;min-height:46px;border:1.5px solid #303030;border-radius:12px;background:rgba(255,255,255,.86);font-size:13px;font-weight:700}
+    .action.primary{background:#202020;color:#fff}
+    .action.danger{color:#8b2f2f}
+
+    .history-list{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:8px 14px calc(env(safe-area-inset-bottom) + 76px)}
     .log{display:block;width:100%;padding:13px 2px 14px;border:0;border-bottom:1px solid rgba(0,0,0,.17);background:transparent;text-align:left}
     .log:active{background:rgba(0,0,0,.035)}
     .time{margin-bottom:5px;color:#777;font-size:11px}
     .preview{display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow:hidden;white-space:pre-wrap;overflow-wrap:anywhere;font-size:15px;line-height:1.55}
     .empty{margin:22px 4px;color:#888;font-size:14px}
 
-    .detail-body{flex:1;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:18px 16px calc(env(safe-area-inset-bottom) + 86px)}
-    .detail-time{margin-bottom:14px;color:#777;font-size:11px}
+    .detail{position:absolute;z-index:20;inset:0;display:flex;flex-direction:column;background:#f5f3ed}
+    .detail[hidden]{display:none}
+    .detail-head{display:flex;align-items:center;justify-content:space-between;min-height:48px;padding:0 14px;border-bottom:1px solid rgba(0,0,0,.16)}
+    .detail-title{font-size:14px;font-weight:700}
+    .back-button{min-width:58px;min-height:36px;border:1.5px solid #303030;border-radius:999px;background:transparent;font-size:12px;font-weight:700}
+    .detail-body{flex:1;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:16px 16px calc(env(safe-area-inset-bottom) + 78px)}
+    .detail-time{margin-bottom:12px;color:#777;font-size:11px}
     .detail-text{white-space:pre-wrap;overflow-wrap:anywhere;font-size:17px;line-height:1.75}
-    .detail-edit{width:100%;min-height:calc(100dvh - 190px);padding:0;resize:none;border:0;outline:none;background:transparent;color:#202020;font-size:17px;line-height:1.75}
-    .detail-actions{position:absolute;z-index:80;left:14px;right:14px;bottom:calc(env(safe-area-inset-bottom) + 14px);display:flex;gap:8px}
-    .detail-action{flex:1;min-height:46px;border:1.5px solid #303030;border-radius:12px;background:rgba(255,255,255,.86);font-size:13px;font-weight:700}
-    .detail-action.primary{background:#202020;color:#fff}
-    .detail-action.danger{color:#8b2f2f}
-
-    .profile-body{flex:1;overflow-y:auto;padding:22px 18px calc(env(safe-area-inset-bottom) + 24px)}
-    .profile-avatar{width:88px;height:88px;margin:4px auto 24px;border:2px solid #303030;border-radius:50%;position:relative;background:rgba(255,255,255,.72)}
-    .profile-avatar::before{content:"";position:absolute;width:26px;height:26px;left:29px;top:16px;border-radius:50%;background:#4a4a4a}.profile-avatar::after{content:"";position:absolute;width:48px;height:28px;left:18px;bottom:12px;border-radius:25px 25px 12px 12px;background:#4a4a4a}
-    .profile-label{display:block;margin:0 0 8px;font-size:12px;color:#666;font-weight:700}.profile-name,.profile-text{width:100%;border:0;border-bottom:1px solid rgba(0,0,0,.24);background:transparent;color:#202020;outline:none}
-    .profile-name{min-height:46px;padding:8px 2px;font-size:20px;font-weight:700;margin-bottom:22px}.profile-text{min-height:220px;padding:8px 2px;resize:none;font-size:16px;line-height:1.7}.profile-save{width:100%;min-height:48px;margin-top:22px;border:1.5px solid #303030;border-radius:12px;background:#202020;color:#fff;font-size:14px;font-weight:700}
+    .detail-edit{width:100%;min-height:100%;padding:0;resize:none;border:0;outline:none;background:transparent;font-size:17px;line-height:1.75}
+    .detail-actions{position:absolute;left:14px;right:74px;bottom:calc(env(safe-area-inset-bottom) + 14px);display:flex;gap:8px}
 
     @media (min-width:521px){body{padding:16px}.screen{height:calc(100dvh - 32px);border-radius:10px}}
   </style>
@@ -71,7 +79,7 @@
 <body>
   <main class="screen">
     <div class="hud-left">
-      <button id="profileButton" class="portrait" type="button" aria-label="プロフィール"></button>
+      <div class="portrait" aria-hidden="true"></div>
       <div class="stats" aria-hidden="true">
         <div class="stat-row"><span>HP</span><span class="stat-value">—</span></div>
         <div class="stat-row"><span>MP</span><span class="stat-value">—</span></div>
@@ -79,72 +87,66 @@
       </div>
     </div>
 
-    <button id="noteButton" class="note-mark-button" type="button" aria-label="ノート"></button>
     <button id="menuButton" class="menu-button" type="button" aria-expanded="false">MENU</button>
+    <button id="noteButton" class="note-mark-button" type="button" aria-label="ノート"></button>
     <div id="savedMark" class="saved-mark">保存しました</div>
 
     <div id="menuPanel" class="menu-panel" hidden>
-      <button id="profileMenuButton" type="button">プロフィール</button>
-      <button id="noteMenuButton" type="button">ノート</button>
-      <button id="historyButton" type="button">履歴</button>
+      <button type="button" data-open-tab="profile">プロフィール</button>
+      <button type="button" data-open-tab="history">履歴</button>
+      <button type="button" data-open-tab="memo">メモ</button>
     </div>
 
-    <section id="noteView" class="view" hidden aria-label="ノートを書く">
-      <header class="overlay-head">
-        <h1 class="overlay-title">ノート</h1>
-        <button id="closeNote" class="close-button" type="button">閉じる</button>
-      </header>
-      <div class="note-body">
-        <textarea id="logInput" class="note-input" aria-label="ノート"></textarea>
-      </div>
-      <div class="note-actions">
-        <button id="clearButton" class="note-action" type="button">入力を消す</button>
-        <button id="noteHistoryButton" class="note-action" type="button">履歴</button>
-        <button id="saveButton" class="note-action primary" type="button">残す</button>
-      </div>
-    </section>
+    <section id="workspace" class="workspace" hidden aria-label="ノート">
+      <nav class="tabs" aria-label="ノート切り替え">
+        <button class="tab" type="button" data-tab="profile">プロフィール</button>
+        <button class="tab" type="button" data-tab="history">履歴</button>
+        <button class="tab active" type="button" data-tab="memo">メモ</button>
+      </nav>
 
-    <section id="history" class="view" hidden aria-label="履歴">
-      <header class="overlay-head">
-        <h1 class="overlay-title">履歴</h1>
-        <button id="closeHistory" class="close-button" type="button">閉じる</button>
-      </header>
-      <div id="logs" class="history-list"></div>
-    </section>
+      <section id="profilePanel" class="panel" hidden>
+        <div class="profile-body">
+          <div class="profile-avatar" aria-hidden="true"></div>
+          <label class="profile-label" for="profileName">名前</label>
+          <input id="profileName" class="profile-name" type="text" autocomplete="off">
+          <label class="profile-label" for="profileText">プロフィール</label>
+          <textarea id="profileText" class="profile-text"></textarea>
+          <button id="profileSave" class="profile-save" type="button">保存</button>
+        </div>
+      </section>
 
-    <section id="detailView" class="view" hidden aria-label="ノート全文">
-      <header class="overlay-head">
-        <h1 class="overlay-title">ノート</h1>
-        <button id="backDetail" class="close-button" type="button">戻る</button>
-      </header>
-      <div id="detailBody" class="detail-body">
-        <div id="detailTime" class="detail-time"></div>
-        <div id="detailText" class="detail-text"></div>
-        <textarea id="detailEdit" class="detail-edit" hidden aria-label="ノートを編集"></textarea>
-      </div>
-      <div id="detailNormalActions" class="detail-actions">
-        <button id="deleteLogButton" class="detail-action danger" type="button">削除</button>
-        <button id="editLogButton" class="detail-action primary" type="button">編集</button>
-      </div>
-      <div id="detailEditActions" class="detail-actions" hidden>
-        <button id="cancelEditButton" class="detail-action" type="button">キャンセル</button>
-        <button id="saveEditButton" class="detail-action primary" type="button">保存</button>
-      </div>
-    </section>
+      <section id="historyPanel" class="panel" hidden>
+        <div id="logs" class="history-list"></div>
+        <section id="detail" class="detail" hidden aria-label="メモ全文">
+          <header class="detail-head">
+            <span class="detail-title">メモ</span>
+            <button id="backDetail" class="back-button" type="button">戻る</button>
+          </header>
+          <div class="detail-body">
+            <div id="detailTime" class="detail-time"></div>
+            <div id="detailText" class="detail-text"></div>
+            <textarea id="detailEdit" class="detail-edit" hidden aria-label="メモを編集"></textarea>
+          </div>
+          <div id="detailNormalActions" class="detail-actions">
+            <button id="deleteLogButton" class="action danger" type="button">削除</button>
+            <button id="editLogButton" class="action primary" type="button">編集</button>
+          </div>
+          <div id="detailEditActions" class="detail-actions" hidden>
+            <button id="cancelEditButton" class="action" type="button">キャンセル</button>
+            <button id="saveEditButton" class="action primary" type="button">保存</button>
+          </div>
+        </section>
+      </section>
 
-    <section id="profile" class="view" hidden aria-label="プロフィール">
-      <header class="overlay-head">
-        <h1 class="overlay-title">プロフィール</h1>
-        <button id="closeProfile" class="close-button" type="button">閉じる</button>
-      </header>
-      <div class="profile-body">
-        <div class="profile-avatar" aria-hidden="true"></div>
-        <label class="profile-label" for="profileName">名前</label>
-        <input id="profileName" class="profile-name" type="text" autocomplete="off">
-        <label class="profile-label" for="profileText">プロフィール</label>
-        <textarea id="profileText" class="profile-text"></textarea>
-        <button id="profileSave" class="profile-save" type="button">保存</button>
-      </div>
+      <section id="memoPanel" class="panel">
+        <div class="memo-body">
+          <textarea id="logInput" class="memo-input" aria-label="メモ"></textarea>
+        </div>
+        <div class="memo-actions">
+          <button id="clearButton" class="action" type="button">入力を消す</button>
+          <button id="saveButton" class="action primary" type="button">残す</button>
+        </div>
+      </section>
     </section>
   </main>
 
@@ -153,21 +155,29 @@
     const DRAFT_KEY='iroiro-note-draft';
     const PROFILE_KEY='iroiro-note-profile';
 
-    const input=document.getElementById('logInput');
+    const workspace=document.getElementById('workspace');
     const noteButton=document.getElementById('noteButton');
-    const noteMenuButton=document.getElementById('noteMenuButton');
-    const noteView=document.getElementById('noteView');
-    const closeNote=document.getElementById('closeNote');
     const menuButton=document.getElementById('menuButton');
     const menuPanel=document.getElementById('menuPanel');
+    const tabs=[...document.querySelectorAll('[data-tab]')];
+    const openTabButtons=[...document.querySelectorAll('[data-open-tab]')];
+    const panels={
+      profile:document.getElementById('profilePanel'),
+      history:document.getElementById('historyPanel'),
+      memo:document.getElementById('memoPanel')
+    };
+
+    const input=document.getElementById('logInput');
     const saveButton=document.getElementById('saveButton');
-    const noteHistoryButton=document.getElementById('noteHistoryButton');
-    const historyButton=document.getElementById('historyButton');
     const clearButton=document.getElementById('clearButton');
-    const history=document.getElementById('history');
-    const closeHistory=document.getElementById('closeHistory');
     const logsArea=document.getElementById('logs');
-    const detailView=document.getElementById('detailView');
+    const savedMark=document.getElementById('savedMark');
+
+    const profileName=document.getElementById('profileName');
+    const profileText=document.getElementById('profileText');
+    const profileSave=document.getElementById('profileSave');
+
+    const detail=document.getElementById('detail');
     const backDetail=document.getElementById('backDetail');
     const detailTime=document.getElementById('detailTime');
     const detailText=document.getElementById('detailText');
@@ -178,50 +188,19 @@
     const deleteLogButton=document.getElementById('deleteLogButton');
     const cancelEditButton=document.getElementById('cancelEditButton');
     const saveEditButton=document.getElementById('saveEditButton');
-    const savedMark=document.getElementById('savedMark');
-    const profileButton=document.getElementById('profileButton');
-    const profileMenuButton=document.getElementById('profileMenuButton');
-    const profile=document.getElementById('profile');
-    const closeProfile=document.getElementById('closeProfile');
-    const profileName=document.getElementById('profileName');
-    const profileText=document.getElementById('profileText');
-    const profileSave=document.getElementById('profileSave');
 
-    const views=[noteView,history,detailView,profile];
-    let selectedLogIndex=-1;
-    let editingLog=false;
+    let currentTab='memo';
+    let selectedIndex=-1;
 
     function closeMenu(){
       menuPanel.hidden=true;
       menuButton.setAttribute('aria-expanded','false');
     }
 
-    function showHome(){
-      closeMenu();
-      views.forEach(view=>view.hidden=true);
-    }
-
-    function showView(view){
-      closeMenu();
-      views.forEach(item=>item.hidden=item!==view);
-    }
-
     function showSaved(){
       savedMark.classList.add('show');
       window.setTimeout(()=>savedMark.classList.remove('show'),1200);
     }
-
-    input.value=localStorage.getItem(DRAFT_KEY)||'';
-    input.addEventListener('input',()=>localStorage.setItem(DRAFT_KEY,input.value));
-
-    function openNote(){
-      showView(noteView);
-      window.setTimeout(()=>input.focus(),0);
-    }
-
-    noteButton.addEventListener('click',openNote);
-    noteMenuButton.addEventListener('click',openNote);
-    closeNote.addEventListener('click',showHome);
 
     function loadLogs(){
       try{return JSON.parse(localStorage.getItem(STORAGE_KEY))||[]}
@@ -232,94 +211,61 @@
       localStorage.setItem(STORAGE_KEY,JSON.stringify(logs));
     }
 
-    function renderLogs(){
-      const logs=loadLogs();
-      logsArea.innerHTML='';
-      if(!logs.length){
-        const empty=document.createElement('p');
-        empty.className='empty';
-        empty.textContent='まだ履歴はありません。';
-        logsArea.appendChild(empty);
-        return;
-      }
-      logs.forEach((log,index)=>{
-        const item=document.createElement('button');
-        item.type='button';
-        item.className='log';
-
-        const time=document.createElement('div');
-        time.className='time';
-        time.textContent=log.time;
-
-        const preview=document.createElement('div');
-        preview.className='preview';
-        preview.textContent=log.text;
-
-        item.append(time,preview);
-        item.addEventListener('click',()=>openLogDetail(index));
-        logsArea.appendChild(item);
-      });
-    }
-
-    function openHistory(){
-      renderLogs();
-      showView(history);
-    }
-
-    function setDetailMode(editing){
-      editingLog=editing;
-      detailText.hidden=editing;
-      detailEdit.hidden=!editing;
-      detailNormalActions.hidden=editing;
-      detailEditActions.hidden=!editing;
-      if(editing){
-        const logs=loadLogs();
-        const log=logs[selectedLogIndex];
-        detailEdit.value=log?log.text:'';
-        window.setTimeout(()=>detailEdit.focus(),0);
+    function loadProfile(){
+      try{
+        const data=JSON.parse(localStorage.getItem(PROFILE_KEY))||{};
+        profileName.value=data.name||'';
+        profileText.value=data.text||'';
+      }catch{
+        profileName.value='';
+        profileText.value='';
       }
     }
 
-    function openLogDetail(index){
-      const logs=loadLogs();
-      const log=logs[index];
-      if(!log)return;
-      selectedLogIndex=index;
-      detailTime.textContent=log.time;
-      detailText.textContent=log.text;
-      setDetailMode(false);
-      showView(detailView);
+    function setTab(name){
+      currentTab=name;
+      detail.hidden=true;
+      panels.profile.hidden=name!=='profile';
+      panels.history.hidden=name!=='history';
+      panels.memo.hidden=name!=='memo';
+      tabs.forEach(tab=>tab.classList.toggle('active',tab.dataset.tab===name));
+      if(name==='profile')loadProfile();
+      if(name==='history')renderLogs();
+      if(name==='memo')window.setTimeout(()=>input.focus(),0);
     }
 
-    historyButton.addEventListener('click',openHistory);
-    noteHistoryButton.addEventListener('click',openHistory);
-    closeHistory.addEventListener('click',showHome);
-    backDetail.addEventListener('click',openHistory);
+    function openWorkspace(name='memo'){
+      closeMenu();
+      workspace.hidden=false;
+      setTab(name);
+    }
 
-    editLogButton.addEventListener('click',()=>setDetailMode(true));
-    cancelEditButton.addEventListener('click',()=>setDetailMode(false));
-
-    saveEditButton.addEventListener('click',()=>{
-      const text=detailEdit.value.trim();
-      if(!text)return;
-      const logs=loadLogs();
-      if(!logs[selectedLogIndex])return;
-      logs[selectedLogIndex].text=text;
-      saveLogs(logs);
-      detailText.textContent=text;
-      setDetailMode(false);
-      showSaved();
+    noteButton.addEventListener('click',()=>{
+      if(workspace.hidden){
+        openWorkspace('memo');
+      }else{
+        workspace.hidden=true;
+        detail.hidden=true;
+      }
     });
 
-    deleteLogButton.addEventListener('click',()=>{
-      const logs=loadLogs();
-      if(!logs[selectedLogIndex])return;
-      if(!window.confirm('このノートを削除しますか？'))return;
-      logs.splice(selectedLogIndex,1);
-      saveLogs(logs);
-      selectedLogIndex=-1;
-      openHistory();
+    tabs.forEach(tab=>tab.addEventListener('click',()=>setTab(tab.dataset.tab)));
+    openTabButtons.forEach(button=>button.addEventListener('click',()=>openWorkspace(button.dataset.openTab)));
+
+    menuButton.addEventListener('click',()=>{
+      const open=menuPanel.hidden;
+      menuPanel.hidden=!open;
+      menuButton.setAttribute('aria-expanded',String(open));
     });
+
+    document.addEventListener('pointerdown',event=>{
+      if(menuPanel.hidden)return;
+      if(menuPanel.contains(event.target)||menuButton.contains(event.target))return;
+      closeMenu();
+    });
+
+    input.value=localStorage.getItem(DRAFT_KEY)||'';
+    input.addEventListener('input',()=>localStorage.setItem(DRAFT_KEY,input.value));
 
     saveButton.addEventListener('click',()=>{
       const text=input.value.trim();
@@ -338,26 +284,6 @@
       input.focus();
     });
 
-    function loadProfile(){
-      try{
-        const data=JSON.parse(localStorage.getItem(PROFILE_KEY))||{};
-        profileName.value=data.name||'';
-        profileText.value=data.text||'';
-      }catch{
-        profileName.value='';
-        profileText.value='';
-      }
-    }
-
-    function openProfile(){
-      loadProfile();
-      showView(profile);
-    }
-
-    profileButton.addEventListener('click',openProfile);
-    profileMenuButton.addEventListener('click',openProfile);
-    closeProfile.addEventListener('click',showHome);
-
     profileSave.addEventListener('click',()=>{
       localStorage.setItem(PROFILE_KEY,JSON.stringify({
         name:profileName.value.trim(),
@@ -366,16 +292,91 @@
       showSaved();
     });
 
-    menuButton.addEventListener('click',()=>{
-      const open=menuPanel.hidden;
-      menuPanel.hidden=!open;
-      menuButton.setAttribute('aria-expanded',String(open));
+    function renderLogs(){
+      const logs=loadLogs();
+      logsArea.innerHTML='';
+      if(!logs.length){
+        const empty=document.createElement('p');
+        empty.className='empty';
+        empty.textContent='まだ履歴はありません。';
+        logsArea.appendChild(empty);
+        return;
+      }
+      logs.forEach((log,index)=>{
+        const item=document.createElement('button');
+        item.type='button';
+        item.className='log';
+        const time=document.createElement('div');
+        time.className='time';
+        time.textContent=log.time;
+        const preview=document.createElement('div');
+        preview.className='preview';
+        preview.textContent=log.text;
+        item.append(time,preview);
+        item.addEventListener('click',()=>openDetail(index));
+        logsArea.appendChild(item);
+      });
+    }
+
+    function openDetail(index){
+      const logs=loadLogs();
+      if(!logs[index])return;
+      selectedIndex=index;
+      detailTime.textContent=logs[index].time;
+      detailText.textContent=logs[index].text;
+      detailEdit.value=logs[index].text;
+      detailText.hidden=false;
+      detailEdit.hidden=true;
+      detailNormalActions.hidden=false;
+      detailEditActions.hidden=true;
+      detail.hidden=false;
+    }
+
+    backDetail.addEventListener('click',()=>{
+      detail.hidden=true;
+      renderLogs();
     });
 
-    document.addEventListener('pointerdown',event=>{
-      if(menuPanel.hidden)return;
-      if(menuPanel.contains(event.target)||menuButton.contains(event.target))return;
-      closeMenu();
+    editLogButton.addEventListener('click',()=>{
+      detailText.hidden=true;
+      detailEdit.hidden=false;
+      detailNormalActions.hidden=true;
+      detailEditActions.hidden=false;
+      window.setTimeout(()=>detailEdit.focus(),0);
+    });
+
+    cancelEditButton.addEventListener('click',()=>{
+      const logs=loadLogs();
+      if(logs[selectedIndex])detailEdit.value=logs[selectedIndex].text;
+      detailText.hidden=false;
+      detailEdit.hidden=true;
+      detailNormalActions.hidden=false;
+      detailEditActions.hidden=true;
+    });
+
+    saveEditButton.addEventListener('click',()=>{
+      const text=detailEdit.value.trim();
+      if(!text)return;
+      const logs=loadLogs();
+      if(!logs[selectedIndex])return;
+      logs[selectedIndex].text=text;
+      saveLogs(logs);
+      detailText.textContent=text;
+      detailText.hidden=false;
+      detailEdit.hidden=true;
+      detailNormalActions.hidden=false;
+      detailEditActions.hidden=true;
+      showSaved();
+    });
+
+    deleteLogButton.addEventListener('click',()=>{
+      const logs=loadLogs();
+      if(selectedIndex<0||!logs[selectedIndex])return;
+      logs.splice(selectedIndex,1);
+      saveLogs(logs);
+      selectedIndex=-1;
+      detail.hidden=true;
+      renderLogs();
     });
   </script>
 </body>
