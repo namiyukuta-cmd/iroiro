@@ -7,13 +7,7 @@
   <title>ノート</title>
   <style>
     * { box-sizing: border-box; }
-
-    html, body {
-      width: 100%;
-      height: 100%;
-      margin: 0;
-    }
-
+    html, body { width: 100%; height: 100%; margin: 0; }
     body {
       overflow: hidden;
       background: #e9e7e0;
@@ -21,9 +15,7 @@
       font-family: -apple-system, BlinkMacSystemFont, "Hiragino Kaku Gothic ProN", "Yu Gothic", sans-serif;
       -webkit-tap-highlight-color: transparent;
     }
-
-    button, textarea { font: inherit; }
-
+    button, textarea, input { font: inherit; }
     .screen {
       position: relative;
       width: 100%;
@@ -34,7 +26,6 @@
       background: #f5f3ed;
       border: 1.5px solid #2e2e2e;
     }
-
     .hud-left {
       position: absolute;
       z-index: 20;
@@ -43,9 +34,7 @@
       display: flex;
       align-items: flex-start;
       gap: 8px;
-      pointer-events: none;
     }
-
     .portrait {
       width: 58px;
       height: 58px;
@@ -55,8 +44,9 @@
       background: rgba(255,255,255,.72);
       box-shadow: 0 1px 3px rgba(0,0,0,.10);
       position: relative;
+      padding: 0;
+      cursor: pointer;
     }
-
     .portrait::before {
       content: "";
       position: absolute;
@@ -67,7 +57,6 @@
       border-radius: 50%;
       background: #4a4a4a;
     }
-
     .portrait::after {
       content: "";
       position: absolute;
@@ -78,7 +67,6 @@
       border-radius: 17px 17px 9px 9px;
       background: #4a4a4a;
     }
-
     .stats {
       padding-top: 3px;
       font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
@@ -87,16 +75,10 @@
       letter-spacing: .02em;
       text-shadow: 0 1px 0 rgba(255,255,255,.8);
       white-space: nowrap;
+      pointer-events: none;
     }
-
-    .stat-row {
-      display: grid;
-      grid-template-columns: 28px 1fr;
-      gap: 3px;
-    }
-
+    .stat-row { display: grid; grid-template-columns: 28px 1fr; gap: 3px; }
     .stat-value { opacity: .65; }
-
     .menu-button {
       position: absolute;
       z-index: 30;
@@ -114,7 +96,6 @@
       letter-spacing: .04em;
       box-shadow: 0 1px 3px rgba(0,0,0,.08);
     }
-
     .note-input {
       position: absolute;
       z-index: 5;
@@ -136,11 +117,7 @@
       line-height: 1.7;
       caret-color: #202020;
     }
-
-    .note-input::placeholder {
-      color: rgba(32,32,32,.24);
-    }
-
+    .note-input::placeholder { color: rgba(32,32,32,.24); }
     .menu-panel {
       position: absolute;
       z-index: 50;
@@ -153,9 +130,7 @@
       background: rgba(250,249,245,.97);
       box-shadow: 0 8px 24px rgba(0,0,0,.14);
     }
-
     .menu-panel[hidden] { display: none; }
-
     .menu-panel button {
       width: 100%;
       min-height: 42px;
@@ -168,9 +143,7 @@
       text-align: left;
       font-size: 14px;
     }
-
     .menu-panel button:active { background: rgba(0,0,0,.08); }
-
     .saved-mark {
       position: absolute;
       z-index: 25;
@@ -181,10 +154,8 @@
       transition: opacity .2s ease;
       pointer-events: none;
     }
-
     .saved-mark.show { opacity: .55; }
-
-    .history {
+    .history, .profile {
       position: absolute;
       z-index: 70;
       inset: 0;
@@ -192,10 +163,8 @@
       flex-direction: column;
       background: #f5f3ed;
     }
-
-    .history[hidden] { display: none; }
-
-    .history-head {
+    .history[hidden], .profile[hidden] { display: none; }
+    .overlay-head {
       display: flex;
       align-items: center;
       justify-content: space-between;
@@ -203,14 +172,8 @@
       padding: calc(env(safe-area-inset-top) + 10px) 14px 10px;
       border-bottom: 1px solid rgba(0,0,0,.18);
     }
-
-    .history-title {
-      margin: 0;
-      font-size: 17px;
-      font-weight: 700;
-    }
-
-    .close-history {
+    .overlay-title { margin: 0; font-size: 17px; font-weight: 700; }
+    .close-button {
       min-width: 58px;
       min-height: 42px;
       border: 1.5px solid #303030;
@@ -219,61 +182,103 @@
       font-size: 12px;
       font-weight: 700;
     }
-
     .history-list {
       flex: 1;
       overflow-y: auto;
       -webkit-overflow-scrolling: touch;
       padding: 14px 14px calc(env(safe-area-inset-bottom) + 18px);
     }
-
-    .log {
-      padding: 12px 2px 15px;
-      border-bottom: 1px solid rgba(0,0,0,.17);
+    .log { padding: 12px 2px 15px; border-bottom: 1px solid rgba(0,0,0,.17); }
+    .time { margin-bottom: 5px; color: #777; font-size: 11px; }
+    .text { white-space: pre-wrap; overflow-wrap: anywhere; font-size: 15px; line-height: 1.6; }
+    .delete { margin-top: 7px; padding: 5px 8px; border: 0; background: transparent; color: #777; font-size: 12px; }
+    .empty { margin: 22px 4px; color: #888; font-size: 14px; }
+    .profile-body {
+      flex: 1;
+      overflow-y: auto;
+      padding: 22px 18px calc(env(safe-area-inset-bottom) + 24px);
     }
-
-    .time {
-      margin-bottom: 5px;
-      color: #777;
-      font-size: 11px;
+    .profile-avatar {
+      width: 88px;
+      height: 88px;
+      margin: 4px auto 24px;
+      border: 2px solid #303030;
+      border-radius: 50%;
+      position: relative;
+      background: rgba(255,255,255,.72);
     }
-
-    .text {
-      white-space: pre-wrap;
-      overflow-wrap: anywhere;
-      font-size: 15px;
-      line-height: 1.6;
+    .profile-avatar::before {
+      content: "";
+      position: absolute;
+      width: 26px;
+      height: 26px;
+      left: 29px;
+      top: 16px;
+      border-radius: 50%;
+      background: #4a4a4a;
     }
-
-    .delete {
-      margin-top: 7px;
-      padding: 5px 8px;
-      border: 0;
-      background: transparent;
-      color: #777;
+    .profile-avatar::after {
+      content: "";
+      position: absolute;
+      width: 48px;
+      height: 28px;
+      left: 18px;
+      bottom: 12px;
+      border-radius: 25px 25px 12px 12px;
+      background: #4a4a4a;
+    }
+    .profile-label {
+      display: block;
+      margin: 0 0 8px;
       font-size: 12px;
+      color: #666;
+      font-weight: 700;
     }
-
-    .empty {
-      margin: 22px 4px;
-      color: #888;
+    .profile-name, .profile-text {
+      width: 100%;
+      border: 0;
+      border-bottom: 1px solid rgba(0,0,0,.24);
+      border-radius: 0;
+      background: transparent;
+      color: #202020;
+      outline: none;
+    }
+    .profile-name {
+      min-height: 46px;
+      padding: 8px 2px;
+      font-size: 20px;
+      font-weight: 700;
+      margin-bottom: 22px;
+    }
+    .profile-text {
+      min-height: 220px;
+      padding: 8px 2px;
+      resize: none;
+      font-size: 16px;
+      line-height: 1.7;
+    }
+    .profile-save {
+      width: 100%;
+      min-height: 48px;
+      margin-top: 22px;
+      border: 1.5px solid #303030;
+      border-radius: 12px;
+      background: #202020;
+      color: #fff;
       font-size: 14px;
+      font-weight: 700;
     }
-
     @media (min-width: 521px) {
       body { padding: 16px; }
-      .screen {
-        height: calc(100dvh - 32px);
-        border-radius: 10px;
-      }
+      .screen { height: calc(100dvh - 32px); border-radius: 10px; }
     }
   </style>
 </head>
 <body>
   <main class="screen">
-    <div class="hud-left" aria-hidden="true">
-      <div class="portrait"></div>
-      <div class="stats">
+    <div class="hud-left">
+      <button id="profileButton" class="portrait" type="button" aria-label="プロフィール"></button>
+      <div class="stats" aria-hidden="true">
         <div class="stat-row"><span>HP</span><span class="stat-value">—</span></div>
         <div class="stat-row"><span>MP</span><span class="stat-value">—</span></div>
         <div class="stat-row"><span>Gold</span><span class="stat-value">—</span></div>
@@ -282,27 +287,43 @@
 
     <button id="menuButton" class="menu-button" type="button" aria-expanded="false">MENU</button>
     <div id="savedMark" class="saved-mark">保存しました</div>
-
     <textarea id="logInput" class="note-input" aria-label="ノート" placeholder=""></textarea>
 
     <div id="menuPanel" class="menu-panel" hidden>
+      <button id="profileMenuButton" type="button">プロフィール</button>
       <button id="saveButton" type="button">残す</button>
       <button id="historyButton" type="button">履歴</button>
       <button id="clearButton" type="button">入力を消す</button>
     </div>
 
     <section id="history" class="history" hidden aria-label="履歴">
-      <header class="history-head">
-        <h1 class="history-title">履歴</h1>
-        <button id="closeHistory" class="close-history" type="button">閉じる</button>
+      <header class="overlay-head">
+        <h1 class="overlay-title">履歴</h1>
+        <button id="closeHistory" class="close-button" type="button">閉じる</button>
       </header>
       <div id="logs" class="history-list"></div>
+    </section>
+
+    <section id="profile" class="profile" hidden aria-label="プロフィール">
+      <header class="overlay-head">
+        <h1 class="overlay-title">プロフィール</h1>
+        <button id="closeProfile" class="close-button" type="button">閉じる</button>
+      </header>
+      <div class="profile-body">
+        <div class="profile-avatar" aria-hidden="true"></div>
+        <label class="profile-label" for="profileName">名前</label>
+        <input id="profileName" class="profile-name" type="text" autocomplete="off">
+        <label class="profile-label" for="profileText">プロフィール</label>
+        <textarea id="profileText" class="profile-text"></textarea>
+        <button id="profileSave" class="profile-save" type="button">保存</button>
+      </div>
     </section>
   </main>
 
   <script>
     const STORAGE_KEY = 'iroiro-log-box';
     const DRAFT_KEY = 'iroiro-note-draft';
+    const PROFILE_KEY = 'iroiro-note-profile';
 
     const input = document.getElementById('logInput');
     const menuButton = document.getElementById('menuButton');
@@ -314,30 +335,26 @@
     const closeHistory = document.getElementById('closeHistory');
     const logsArea = document.getElementById('logs');
     const savedMark = document.getElementById('savedMark');
+    const profileButton = document.getElementById('profileButton');
+    const profileMenuButton = document.getElementById('profileMenuButton');
+    const profile = document.getElementById('profile');
+    const closeProfile = document.getElementById('closeProfile');
+    const profileName = document.getElementById('profileName');
+    const profileText = document.getElementById('profileText');
+    const profileSave = document.getElementById('profileSave');
 
     input.value = localStorage.getItem(DRAFT_KEY) || '';
-
-    input.addEventListener('input', () => {
-      localStorage.setItem(DRAFT_KEY, input.value);
-    });
+    input.addEventListener('input', () => localStorage.setItem(DRAFT_KEY, input.value));
 
     function loadLogs() {
-      try {
-        return JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
-      } catch {
-        return [];
-      }
+      try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || []; }
+      catch { return []; }
     }
-
-    function saveLogs(logs) {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(logs));
-    }
-
+    function saveLogs(logs) { localStorage.setItem(STORAGE_KEY, JSON.stringify(logs)); }
     function closeMenu() {
       menuPanel.hidden = true;
       menuButton.setAttribute('aria-expanded', 'false');
     }
-
     menuButton.addEventListener('click', () => {
       const willOpen = menuPanel.hidden;
       menuPanel.hidden = !willOpen;
@@ -346,21 +363,13 @@
 
     saveButton.addEventListener('click', () => {
       const text = input.value.trim();
-      if (!text) {
-        closeMenu();
-        return;
-      }
-
+      if (!text) { closeMenu(); return; }
       const logs = loadLogs();
-      logs.unshift({
-        time: new Date().toLocaleString('ja-JP'),
-        text
-      });
+      logs.unshift({ time: new Date().toLocaleString('ja-JP'), text });
       saveLogs(logs);
       input.value = '';
       localStorage.removeItem(DRAFT_KEY);
       closeMenu();
-
       savedMark.classList.add('show');
       window.setTimeout(() => savedMark.classList.remove('show'), 1200);
     });
@@ -375,7 +384,6 @@
     function renderLogs() {
       const logs = loadLogs();
       logsArea.innerHTML = '';
-
       if (logs.length === 0) {
         const empty = document.createElement('p');
         empty.className = 'empty';
@@ -383,19 +391,15 @@
         logsArea.appendChild(empty);
         return;
       }
-
       logs.forEach((log, index) => {
         const item = document.createElement('article');
         item.className = 'log';
-
         const time = document.createElement('div');
         time.className = 'time';
         time.textContent = log.time;
-
         const text = document.createElement('div');
         text.className = 'text';
         text.textContent = log.text;
-
         const deleteButton = document.createElement('button');
         deleteButton.type = 'button';
         deleteButton.className = 'delete';
@@ -406,7 +410,6 @@
           saveLogs(currentLogs);
           renderLogs();
         });
-
         item.append(time, text, deleteButton);
         logsArea.appendChild(item);
       });
@@ -417,9 +420,33 @@
       renderLogs();
       history.hidden = false;
     });
+    closeHistory.addEventListener('click', () => history.hidden = true);
 
-    closeHistory.addEventListener('click', () => {
-      history.hidden = true;
+    function loadProfile() {
+      try {
+        const data = JSON.parse(localStorage.getItem(PROFILE_KEY)) || {};
+        profileName.value = data.name || '';
+        profileText.value = data.text || '';
+      } catch {
+        profileName.value = '';
+        profileText.value = '';
+      }
+    }
+    function openProfile() {
+      closeMenu();
+      loadProfile();
+      profile.hidden = false;
+    }
+    profileButton.addEventListener('click', openProfile);
+    profileMenuButton.addEventListener('click', openProfile);
+    closeProfile.addEventListener('click', () => profile.hidden = true);
+    profileSave.addEventListener('click', () => {
+      localStorage.setItem(PROFILE_KEY, JSON.stringify({
+        name: profileName.value.trim(),
+        text: profileText.value
+      }));
+      savedMark.classList.add('show');
+      window.setTimeout(() => savedMark.classList.remove('show'), 1200);
     });
 
     document.addEventListener('pointerdown', (event) => {
