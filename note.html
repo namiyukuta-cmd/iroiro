@@ -2,28 +2,21 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <meta name="theme-color" content="#f5f3ed">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+  <meta name="theme-color" content="#111713">
   <title>ノート</title>
   <style>
     * { box-sizing: border-box; }
-
-    html, body {
-      width: 100%;
-      height: 100%;
-      margin: 0;
-    }
-
+    html, body { width: 100%; height: 100%; margin: 0; }
     body {
       overflow: hidden;
-      background: #e9e7e0;
-      color: #202020;
+      background: #111713;
       font-family: -apple-system, BlinkMacSystemFont, "Hiragino Kaku Gothic ProN", "Yu Gothic", sans-serif;
       -webkit-tap-highlight-color: transparent;
+      user-select: none;
+      touch-action: none;
     }
-
-    button, textarea { font: inherit; }
-
+    button { font: inherit; }
     .screen {
       position: relative;
       width: 100%;
@@ -31,407 +24,501 @@
       max-width: 520px;
       margin: 0 auto;
       overflow: hidden;
-      background: #f5f3ed;
-      border: 1.5px solid #2e2e2e;
+      background: #78906f;
     }
+    #game { position: absolute; inset: 0; z-index: 1; }
+    #game canvas { display: block; width: 100%; height: 100%; }
+    .loading {
+      position: absolute;
+      inset: 0;
+      z-index: 100;
+      display: grid;
+      place-items: center;
+      padding: 28px;
+      background: #111713;
+      color: #fff;
+      font-size: 14px;
+      text-align: center;
+      line-height: 1.7;
+    }
+    .loading[hidden] { display: none; }
 
-    /* 左上：丸い枠＋ステータス */
     .hud-left {
       position: absolute;
       z-index: 20;
-      top: calc(env(safe-area-inset-top) + 15px);
-      left: 15px;
+      top: calc(env(safe-area-inset-top) + 13px);
+      left: 13px;
       display: flex;
       align-items: flex-start;
-      gap: 8px;
+      gap: 7px;
+      color: #fff;
+      text-shadow: 0 1px 3px rgba(0,0,0,.9);
       pointer-events: none;
     }
-
     .portrait {
-      width: 58px;
-      height: 58px;
-      flex: 0 0 58px;
-      border: 2px solid #303030;
-      border-radius: 50%;
-      background: rgba(255,255,255,.72);
-      box-shadow: 0 1px 3px rgba(0,0,0,.10);
       position: relative;
+      width: 48px;
+      height: 48px;
+      flex: 0 0 48px;
+      border: 2px solid rgba(255,255,255,.92);
+      border-radius: 50%;
+      background: rgba(10,14,11,.56);
+      box-shadow: 0 2px 8px rgba(0,0,0,.28);
     }
-
     .portrait::before {
       content: "";
       position: absolute;
-      width: 17px;
-      height: 17px;
-      left: 19px;
-      top: 10px;
+      left: 15px;
+      top: 8px;
+      width: 14px;
+      height: 14px;
       border-radius: 50%;
-      background: #4a4a4a;
+      background: rgba(255,255,255,.93);
     }
-
     .portrait::after {
       content: "";
       position: absolute;
-      width: 31px;
-      height: 18px;
-      left: 12px;
-      bottom: 8px;
-      border-radius: 17px 17px 9px 9px;
-      background: #4a4a4a;
+      left: 10px;
+      bottom: 7px;
+      width: 24px;
+      height: 15px;
+      border-radius: 14px 14px 8px 8px;
+      background: rgba(255,255,255,.93);
     }
-
     .stats {
-      padding-top: 3px;
+      padding-top: 2px;
       font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-      font-size: 11px;
-      line-height: 1.42;
-      letter-spacing: .02em;
-      text-shadow: 0 1px 0 rgba(255,255,255,.8);
+      font-size: 10px;
+      line-height: 1.35;
+      font-weight: 800;
       white-space: nowrap;
     }
-
-    .stat-row {
-      display: grid;
-      grid-template-columns: 28px 1fr;
-      gap: 3px;
+    .hpbar {
+      width: 82px;
+      height: 5px;
+      margin: 2px 0 3px;
+      overflow: hidden;
+      border: 1px solid rgba(255,255,255,.62);
+      border-radius: 999px;
+      background: rgba(0,0,0,.45);
     }
+    .hpbar span { display: block; width: 84%; height: 100%; background: rgba(255,255,255,.92); }
 
-    .stat-value { opacity: .65; }
-
-    /* 右上：MENU */
     .menu-button {
       position: absolute;
       z-index: 30;
-      top: calc(env(safe-area-inset-top) + 15px);
-      right: 14px;
-      min-width: 62px;
-      height: 42px;
-      padding: 0 12px;
-      border: 1.5px solid #303030;
-      border-radius: 999px;
-      background: rgba(255,255,255,.82);
-      color: #202020;
-      font-size: 12px;
-      font-weight: 700;
-      letter-spacing: .04em;
-      box-shadow: 0 1px 3px rgba(0,0,0,.08);
-    }
-
-    /* 中央は最大限何も置かない。ここ自体がノート。 */
-    .note-input {
-      position: absolute;
-      z-index: 5;
-      top: calc(env(safe-area-inset-top) + 88px);
+      top: calc(env(safe-area-inset-top) + 13px);
       right: 13px;
-      bottom: calc(env(safe-area-inset-bottom) + 13px);
-      left: 13px;
-      width: auto;
-      height: auto;
-      margin: 0;
-      padding: 8px 6px;
-      resize: none;
-      outline: none;
-      border: 0;
-      border-radius: 0;
-      background: transparent;
-      color: #202020;
-      font-size: 17px;
-      line-height: 1.7;
-      caret-color: #202020;
+      min-width: 58px;
+      height: 38px;
+      padding: 0 11px;
+      border: 1.5px solid rgba(255,255,255,.82);
+      border-radius: 999px;
+      background: rgba(9,12,10,.46);
+      color: #fff;
+      font-size: 11px;
+      font-weight: 900;
+      letter-spacing: .05em;
+      text-shadow: 0 1px 2px #000;
     }
-
-    .note-input::placeholder {
-      color: rgba(32,32,32,.24);
-    }
-
-    /* メニュー */
     .menu-panel {
       position: absolute;
-      z-index: 50;
-      top: calc(env(safe-area-inset-top) + 64px);
-      right: 14px;
-      width: 146px;
-      padding: 7px;
-      border: 1.5px solid #303030;
+      z-index: 40;
+      top: calc(env(safe-area-inset-top) + 58px);
+      right: 13px;
+      width: 150px;
+      padding: 8px;
+      border: 1px solid rgba(255,255,255,.58);
       border-radius: 12px;
-      background: rgba(250,249,245,.97);
-      box-shadow: 0 8px 24px rgba(0,0,0,.14);
+      background: rgba(12,16,13,.86);
+      color: #fff;
+      box-shadow: 0 8px 24px rgba(0,0,0,.3);
     }
-
     .menu-panel[hidden] { display: none; }
-
-    .menu-panel button {
-      width: 100%;
-      min-height: 42px;
-      margin: 0;
-      padding: 7px 10px;
-      border: 0;
-      border-radius: 7px;
-      background: transparent;
-      color: #202020;
-      text-align: left;
-      font-size: 14px;
-    }
-
-    .menu-panel button:active { background: rgba(0,0,0,.08); }
-
-    .saved-mark {
-      position: absolute;
-      z-index: 25;
-      top: calc(env(safe-area-inset-top) + 61px);
-      right: 19px;
-      opacity: 0;
-      font-size: 11px;
-      transition: opacity .2s ease;
-      pointer-events: none;
-    }
-
-    .saved-mark.show { opacity: .55; }
-
-    /* 履歴は必要な時だけ全面表示 */
-    .history {
-      position: absolute;
-      z-index: 70;
-      inset: 0;
-      display: flex;
-      flex-direction: column;
-      background: #f5f3ed;
-    }
-
-    .history[hidden] { display: none; }
-
-    .history-head {
+    .menu-panel p { margin: 5px 5px 9px; font-size: 11px; line-height: 1.45; opacity: .9; }
+    .menu-panel a {
       display: flex;
       align-items: center;
-      justify-content: space-between;
-      min-height: calc(env(safe-area-inset-top) + 62px);
-      padding: calc(env(safe-area-inset-top) + 10px) 14px 10px;
-      border-bottom: 1px solid rgba(0,0,0,.18);
-    }
-
-    .history-title {
-      margin: 0;
-      font-size: 17px;
-      font-weight: 700;
-    }
-
-    .close-history {
-      min-width: 58px;
-      min-height: 42px;
-      border: 1.5px solid #303030;
-      border-radius: 999px;
-      background: transparent;
+      min-height: 40px;
+      padding: 0 10px;
+      border-radius: 8px;
+      color: #fff;
+      text-decoration: none;
       font-size: 12px;
-      font-weight: 700;
+      font-weight: 750;
     }
+    .menu-panel a:active { background: rgba(255,255,255,.12); }
 
-    .history-list {
-      flex: 1;
-      overflow-y: auto;
-      -webkit-overflow-scrolling: touch;
-      padding: 14px 14px calc(env(safe-area-inset-bottom) + 18px);
+    .joystick {
+      position: absolute;
+      z-index: 25;
+      left: max(18px, env(safe-area-inset-left));
+      bottom: max(22px, calc(env(safe-area-inset-bottom) + 12px));
+      width: 96px;
+      height: 96px;
+      border: 1px solid rgba(255,255,255,.40);
+      border-radius: 50%;
+      background: rgba(5,8,6,.22);
+      box-shadow: inset 0 0 0 1px rgba(0,0,0,.12);
+      touch-action: none;
     }
-
-    .log {
-      padding: 12px 2px 15px;
-      border-bottom: 1px solid rgba(0,0,0,.17);
+    .stick {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      width: 38px;
+      height: 38px;
+      margin: -19px 0 0 -19px;
+      border: 1px solid rgba(255,255,255,.56);
+      border-radius: 50%;
+      background: rgba(255,255,255,.23);
+      box-shadow: 0 2px 8px rgba(0,0,0,.24);
     }
-
-    .time {
-      margin-bottom: 5px;
-      color: #777;
+    .actions {
+      position: absolute;
+      z-index: 25;
+      right: max(18px, env(safe-area-inset-right));
+      bottom: max(22px, calc(env(safe-area-inset-bottom) + 12px));
+      display: flex;
+      align-items: flex-end;
+      gap: 10px;
+    }
+    .action {
+      border: 1px solid rgba(255,255,255,.52);
+      border-radius: 50%;
+      background: rgba(5,8,6,.30);
+      color: #fff;
+      font-weight: 900;
+      text-shadow: 0 1px 2px #000;
+      touch-action: none;
+    }
+    #checkButton { width: 52px; height: 52px; font-size: 10px; }
+    #runButton { width: 68px; height: 68px; font-size: 11px; }
+    .message {
+      position: absolute;
+      z-index: 26;
+      left: 50%;
+      bottom: max(128px, calc(env(safe-area-inset-bottom) + 116px));
+      transform: translateX(-50%);
+      max-width: 78%;
+      padding: 7px 11px;
+      border-radius: 9px;
+      background: rgba(5,8,6,.60);
+      color: #fff;
       font-size: 11px;
+      font-weight: 750;
+      text-align: center;
+      text-shadow: 0 1px 2px #000;
+      opacity: 0;
+      transition: opacity .18s ease;
+      pointer-events: none;
     }
-
-    .text {
-      white-space: pre-wrap;
-      overflow-wrap: anywhere;
-      font-size: 15px;
-      line-height: 1.6;
-    }
-
-    .delete {
-      margin-top: 7px;
-      padding: 5px 8px;
-      border: 0;
-      background: transparent;
-      color: #777;
-      font-size: 12px;
-    }
-
-    .empty {
-      margin: 22px 4px;
-      color: #888;
-      font-size: 14px;
-    }
+    .message.show { opacity: 1; }
 
     @media (min-width: 521px) {
-      body { padding: 16px; }
-      .screen {
-        height: calc(100dvh - 32px);
-        border-radius: 10px;
-      }
+      body { display: flex; justify-content: center; padding: 12px; }
+      .screen { height: calc(100dvh - 24px); border-radius: 12px; }
     }
   </style>
 </head>
 <body>
-  <main class="screen">
+  <main class="screen" id="screen">
+    <div id="game" aria-label="3Dゲーム画面"></div>
+    <div id="loading" class="loading">3Dを読み込み中…</div>
+
     <div class="hud-left" aria-hidden="true">
       <div class="portrait"></div>
       <div class="stats">
-        <div class="stat-row"><span>HP</span><span class="stat-value">—</span></div>
-        <div class="stat-row"><span>MP</span><span class="stat-value">—</span></div>
-        <div class="stat-row"><span>Gold</span><span class="stat-value">—</span></div>
+        <div>HP 84 / 100</div>
+        <div class="hpbar"><span></span></div>
+        <div>MP 24 / 30</div>
+        <div>Gold 128</div>
       </div>
     </div>
 
     <button id="menuButton" class="menu-button" type="button" aria-expanded="false">MENU</button>
-    <div id="savedMark" class="saved-mark">保存しました</div>
-
-    <textarea id="logInput" class="note-input" aria-label="ノート" placeholder=""></textarea>
-
     <div id="menuPanel" class="menu-panel" hidden>
-      <button id="saveButton" type="button">残す</button>
-      <button id="historyButton" type="button">履歴</button>
-      <button id="clearButton" type="button">入力を消す</button>
+      <p>左下で移動。RUNを押しながら移動すると速く歩きます。</p>
+      <a href="index.html">ゲームを選ぶ</a>
     </div>
 
-    <section id="history" class="history" hidden aria-label="履歴">
-      <header class="history-head">
-        <h1 class="history-title">履歴</h1>
-        <button id="closeHistory" class="close-history" type="button">閉じる</button>
-      </header>
-      <div id="logs" class="history-list"></div>
-    </section>
+    <div id="joystick" class="joystick" aria-label="移動スティック">
+      <div id="stick" class="stick"></div>
+    </div>
+
+    <div class="actions">
+      <button id="checkButton" class="action" type="button">調べる</button>
+      <button id="runButton" class="action" type="button">RUN</button>
+    </div>
+
+    <div id="message" class="message" role="status" aria-live="polite"></div>
   </main>
 
-  <script>
-    const STORAGE_KEY = 'iroiro-log-box';
-    const DRAFT_KEY = 'iroiro-note-draft';
-
-    const input = document.getElementById('logInput');
+  <script type="module">
+    const screen = document.getElementById('screen');
+    const game = document.getElementById('game');
+    const loading = document.getElementById('loading');
+    const joystick = document.getElementById('joystick');
+    const stick = document.getElementById('stick');
+    const runButton = document.getElementById('runButton');
+    const checkButton = document.getElementById('checkButton');
     const menuButton = document.getElementById('menuButton');
     const menuPanel = document.getElementById('menuPanel');
-    const saveButton = document.getElementById('saveButton');
-    const historyButton = document.getElementById('historyButton');
-    const clearButton = document.getElementById('clearButton');
-    const history = document.getElementById('history');
-    const closeHistory = document.getElementById('closeHistory');
-    const logsArea = document.getElementById('logs');
-    const savedMark = document.getElementById('savedMark');
-
-    input.value = localStorage.getItem(DRAFT_KEY) || '';
-
-    input.addEventListener('input', () => {
-      localStorage.setItem(DRAFT_KEY, input.value);
-    });
-
-    function loadLogs() {
-      try {
-        return JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
-      } catch {
-        return [];
-      }
-    }
-
-    function saveLogs(logs) {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(logs));
-    }
-
-    function closeMenu() {
-      menuPanel.hidden = true;
-      menuButton.setAttribute('aria-expanded', 'false');
-    }
+    const message = document.getElementById('message');
 
     menuButton.addEventListener('click', () => {
-      const willOpen = menuPanel.hidden;
-      menuPanel.hidden = !willOpen;
-      menuButton.setAttribute('aria-expanded', String(willOpen));
-    });
-
-    saveButton.addEventListener('click', () => {
-      const text = input.value.trim();
-      if (!text) {
-        closeMenu();
-        return;
-      }
-
-      const logs = loadLogs();
-      logs.unshift({
-        time: new Date().toLocaleString('ja-JP'),
-        text
-      });
-      saveLogs(logs);
-      input.value = '';
-      localStorage.removeItem(DRAFT_KEY);
-      closeMenu();
-
-      savedMark.classList.add('show');
-      window.setTimeout(() => savedMark.classList.remove('show'), 1200);
-    });
-
-    clearButton.addEventListener('click', () => {
-      input.value = '';
-      localStorage.removeItem(DRAFT_KEY);
-      closeMenu();
-      input.focus();
-    });
-
-    function renderLogs() {
-      const logs = loadLogs();
-      logsArea.innerHTML = '';
-
-      if (logs.length === 0) {
-        const empty = document.createElement('p');
-        empty.className = 'empty';
-        empty.textContent = 'まだ履歴はありません。';
-        logsArea.appendChild(empty);
-        return;
-      }
-
-      logs.forEach((log, index) => {
-        const item = document.createElement('article');
-        item.className = 'log';
-
-        const time = document.createElement('div');
-        time.className = 'time';
-        time.textContent = log.time;
-
-        const text = document.createElement('div');
-        text.className = 'text';
-        text.textContent = log.text;
-
-        const deleteButton = document.createElement('button');
-        deleteButton.type = 'button';
-        deleteButton.className = 'delete';
-        deleteButton.textContent = '削除';
-        deleteButton.addEventListener('click', () => {
-          const currentLogs = loadLogs();
-          currentLogs.splice(index, 1);
-          saveLogs(currentLogs);
-          renderLogs();
-        });
-
-        item.append(time, text, deleteButton);
-        logsArea.appendChild(item);
-      });
-    }
-
-    historyButton.addEventListener('click', () => {
-      closeMenu();
-      renderLogs();
-      history.hidden = false;
-    });
-
-    closeHistory.addEventListener('click', () => {
-      history.hidden = true;
+      const open = menuPanel.hidden;
+      menuPanel.hidden = !open;
+      menuButton.setAttribute('aria-expanded', String(open));
     });
 
     document.addEventListener('pointerdown', (event) => {
       if (menuPanel.hidden) return;
       if (menuPanel.contains(event.target) || menuButton.contains(event.target)) return;
-      closeMenu();
+      menuPanel.hidden = true;
+      menuButton.setAttribute('aria-expanded', 'false');
     });
+
+    try {
+      const THREE = await import('https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js');
+
+      const scene = new THREE.Scene();
+      scene.background = new THREE.Color(0xa9bfd0);
+      scene.fog = new THREE.Fog(0xa9bfd0, 22, 62);
+
+      const camera = new THREE.PerspectiveCamera(55, 1, 0.1, 120);
+      const renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: 'high-performance' });
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.7));
+      renderer.outputColorSpace = THREE.SRGBColorSpace;
+      game.appendChild(renderer.domElement);
+
+      scene.add(new THREE.HemisphereLight(0xf6fbff, 0x41543f, 2.1));
+      const sun = new THREE.DirectionalLight(0xfff0d2, 2.2);
+      sun.position.set(-8, 15, 9);
+      scene.add(sun);
+
+      const ground = new THREE.Mesh(
+        new THREE.PlaneGeometry(90, 90),
+        new THREE.MeshStandardMaterial({ color: 0x6e855e, roughness: 1 })
+      );
+      ground.rotation.x = -Math.PI / 2;
+      scene.add(ground);
+
+      const road = new THREE.Mesh(
+        new THREE.PlaneGeometry(7.5, 62),
+        new THREE.MeshStandardMaterial({ color: 0x8b806d, roughness: 1 })
+      );
+      road.rotation.x = -Math.PI / 2;
+      road.position.set(0, 0.012, -5);
+      scene.add(road);
+
+      const obstacles = [];
+      const interactables = [];
+
+      function box(x, z, sx, sy, sz, color = 0x756553, label = '') {
+        const mesh = new THREE.Mesh(
+          new THREE.BoxGeometry(sx, sy, sz),
+          new THREE.MeshStandardMaterial({ color, roughness: .92 })
+        );
+        mesh.position.set(x, sy / 2, z);
+        scene.add(mesh);
+        obstacles.push({ x, z, r: Math.max(sx, sz) * .54 });
+        if (label) interactables.push({ x, z, label });
+        return mesh;
+      }
+
+      box(-7.2, -11, 5.4, 3.5, 4.4, 0x6a5b50, '古い家がある。');
+      box(7.4, -17, 4.6, 3.1, 3.8, 0x79634e, '小さな倉庫だ。');
+      box(-8.0, 6, 4.0, 2.9, 3.4, 0x6b6258, '戸口は閉まっている。');
+
+      function tree(x, z, s = 1) {
+        const trunk = new THREE.Mesh(
+          new THREE.CylinderGeometry(.15 * s, .22 * s, 1.7 * s, 7),
+          new THREE.MeshStandardMaterial({ color: 0x614934, roughness: 1 })
+        );
+        trunk.position.set(x, .85 * s, z);
+        scene.add(trunk);
+        const crown = new THREE.Mesh(
+          new THREE.ConeGeometry(.9 * s, 2.4 * s, 9),
+          new THREE.MeshStandardMaterial({ color: 0x31583b, roughness: 1 })
+        );
+        crown.position.set(x, 2.45 * s, z);
+        scene.add(crown);
+        obstacles.push({ x, z, r: .5 * s });
+      }
+
+      [
+        [-10,-4,1.2],[-10,-15,1.1],[-8,12,1.15],[9,-8,1.1],[11,-20,1.25],
+        [9,8,1.0],[11,14,1.2],[-12,17,1.3],[6,17,1.1],[-4,-25,1.2],
+        [13,-2,1.15],[-14,-8,1.0],[14,20,1.2],[-12,27,1.2]
+      ].forEach(v => tree(...v));
+
+      for (let z = -28; z <= 22; z += 5) {
+        tree(-17 + (z % 3), z, .9);
+        tree(18 - (z % 4), z + 2, 1.0);
+      }
+
+      const player = new THREE.Group();
+      const body = new THREE.Mesh(
+        new THREE.CylinderGeometry(.34, .42, 1.05, 8),
+        new THREE.MeshStandardMaterial({ color: 0x303a42, roughness: .82 })
+      );
+      body.position.y = .93;
+      player.add(body);
+      const head = new THREE.Mesh(
+        new THREE.SphereGeometry(.28, 12, 9),
+        new THREE.MeshStandardMaterial({ color: 0xc79b78, roughness: .9 })
+      );
+      head.position.y = 1.62;
+      player.add(head);
+      const facing = new THREE.Mesh(
+        new THREE.ConeGeometry(.10, .28, 7),
+        new THREE.MeshBasicMaterial({ color: 0xf3f3f3 })
+      );
+      facing.rotation.x = Math.PI / 2;
+      facing.position.set(0, 1.0, -.47);
+      player.add(facing);
+      player.position.set(0, 0, 10);
+      scene.add(player);
+
+      const move = new THREE.Vector2();
+      const keyboard = { left: false, right: false, up: false, down: false };
+      let joyPointer = null;
+      let running = false;
+      let messageTimer = 0;
+      const clock = new THREE.Clock();
+
+      function resize() {
+        const rect = screen.getBoundingClientRect();
+        renderer.setSize(rect.width, rect.height, false);
+        camera.aspect = rect.width / rect.height;
+        camera.updateProjectionMatrix();
+      }
+      resize();
+      window.addEventListener('resize', resize);
+
+      function setJoystick(clientX, clientY) {
+        const rect = joystick.getBoundingClientRect();
+        const cx = rect.left + rect.width / 2;
+        const cy = rect.top + rect.height / 2;
+        let dx = clientX - cx;
+        let dy = clientY - cy;
+        const max = rect.width * .32;
+        const length = Math.hypot(dx, dy) || 1;
+        if (length > max) {
+          dx = dx / length * max;
+          dy = dy / length * max;
+        }
+        stick.style.transform = `translate(${dx}px, ${dy}px)`;
+        move.set(dx / max, -dy / max);
+      }
+
+      joystick.addEventListener('pointerdown', (event) => {
+        joyPointer = event.pointerId;
+        joystick.setPointerCapture(event.pointerId);
+        setJoystick(event.clientX, event.clientY);
+      });
+      joystick.addEventListener('pointermove', (event) => {
+        if (event.pointerId === joyPointer) setJoystick(event.clientX, event.clientY);
+      });
+      function endJoystick(event) {
+        if (event.pointerId !== joyPointer) return;
+        joyPointer = null;
+        move.set(0, 0);
+        stick.style.transform = 'translate(0px, 0px)';
+      }
+      joystick.addEventListener('pointerup', endJoystick);
+      joystick.addEventListener('pointercancel', endJoystick);
+
+      runButton.addEventListener('pointerdown', (event) => {
+        running = true;
+        runButton.setPointerCapture(event.pointerId);
+      });
+      runButton.addEventListener('pointerup', () => running = false);
+      runButton.addEventListener('pointercancel', () => running = false);
+
+      window.addEventListener('keydown', (event) => {
+        if (event.key === 'ArrowLeft' || event.key.toLowerCase() === 'a') keyboard.left = true;
+        if (event.key === 'ArrowRight' || event.key.toLowerCase() === 'd') keyboard.right = true;
+        if (event.key === 'ArrowUp' || event.key.toLowerCase() === 'w') keyboard.up = true;
+        if (event.key === 'ArrowDown' || event.key.toLowerCase() === 's') keyboard.down = true;
+        if (event.key === 'Shift') running = true;
+      });
+      window.addEventListener('keyup', (event) => {
+        if (event.key === 'ArrowLeft' || event.key.toLowerCase() === 'a') keyboard.left = false;
+        if (event.key === 'ArrowRight' || event.key.toLowerCase() === 'd') keyboard.right = false;
+        if (event.key === 'ArrowUp' || event.key.toLowerCase() === 'w') keyboard.up = false;
+        if (event.key === 'ArrowDown' || event.key.toLowerCase() === 's') keyboard.down = false;
+        if (event.key === 'Shift') running = false;
+      });
+
+      function blocked(x, z) {
+        if (Math.abs(x) > 21 || z < -34 || z > 29) return true;
+        for (const o of obstacles) {
+          if (Math.hypot(x - o.x, z - o.z) < o.r + .42) return true;
+        }
+        return false;
+      }
+
+      function showMessage(text) {
+        message.textContent = text;
+        message.classList.add('show');
+        clearTimeout(messageTimer);
+        messageTimer = setTimeout(() => message.classList.remove('show'), 1700);
+      }
+
+      checkButton.addEventListener('click', () => {
+        let nearest = null;
+        let nearestDistance = Infinity;
+        for (const item of interactables) {
+          const d = Math.hypot(player.position.x - item.x, player.position.z - item.z);
+          if (d < nearestDistance) {
+            nearestDistance = d;
+            nearest = item;
+          }
+        }
+        if (nearest && nearestDistance < 5.4) showMessage(nearest.label);
+        else showMessage('近くに調べられるものはない。');
+      });
+
+      loading.hidden = true;
+
+      function animate() {
+        requestAnimationFrame(animate);
+        const dt = Math.min(clock.getDelta(), .035);
+
+        let x = move.x + (keyboard.right ? 1 : 0) - (keyboard.left ? 1 : 0);
+        let y = move.y + (keyboard.up ? 1 : 0) - (keyboard.down ? 1 : 0);
+        const len = Math.hypot(x, y);
+        if (len > 1) { x /= len; y /= len; }
+
+        if (Math.hypot(x, y) > .05) {
+          const speed = running ? 5.8 : 3.25;
+          const nx = player.position.x + x * speed * dt;
+          const nz = player.position.z - y * speed * dt;
+          if (!blocked(nx, player.position.z)) player.position.x = nx;
+          if (!blocked(player.position.x, nz)) player.position.z = nz;
+          player.rotation.y = Math.atan2(-x, y);
+          body.position.y = .93 + Math.sin(performance.now() * (running ? .018 : .012)) * .025;
+        }
+
+        const desired = new THREE.Vector3(
+          player.position.x,
+          player.position.y + 4.3,
+          player.position.z + 7.2
+        );
+        camera.position.lerp(desired, 1 - Math.pow(.001, dt));
+        const look = new THREE.Vector3(player.position.x, 1.0, player.position.z - 1.2);
+        camera.lookAt(look);
+
+        renderer.render(scene, camera);
+      }
+      animate();
+    } catch (error) {
+      console.error(error);
+      loading.hidden = false;
+      loading.textContent = '3Dの読み込みに失敗しました。ページを再読み込みしてください。';
+    }
   </script>
 </body>
 </html>
