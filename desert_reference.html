@@ -68,18 +68,20 @@
       const g=data.gameEconomy;
       html+=section('ゲーム用の物価',`${badges(g.sourceType,g.status)}<h3>日用品</h3>${rows(g.prices)}<h3>労働賃金</h3>${rows(g.wages)}<h3>サフィラの客料金</h3>${rows(g.customerRates)}<p class="note">単位：${esc(g.unit)}</p>`);
 
-      html+=section('最初の客・ラシードの料金案',`${badges('ゲーム用設定',g.firstCustomer.status)}<div class="rows">
+      html+=section('最初の客・ラシード',`${badges('ゲーム用設定',g.firstCustomer.status,g.firstCustomer.pricingPosition)}<div class="rows">
         <div class="row"><div class="label">客が払う額</div><div class="value">${esc(g.firstCustomer.total)}ディルハム</div></div>
         <div class="row"><div class="label">貸主の取り分</div><div class="value">${esc(g.firstCustomer.landlordShare)}ディルハム</div></div>
         <div class="row"><div class="label">サフィラの手元</div><div class="value">${esc(g.firstCustomer.safiraShare)}ディルハム</div></div>
-      </div><p class="warning">${esc(g.firstCustomer.note)}</p>`);
+        <div class="row"><div class="label">滞在</div><div class="value">${esc(g.firstCustomer.stay)}</div></div>
+        <div class="row"><div class="label">料金に含むもの</div><div class="value">${esc(g.firstCustomer.included.join('・'))}</div></div>
+      </div><h3>${esc(g.firstCustomer.meal.name)}</h3><p>${esc(g.firstCustomer.meal.description)}</p><p class="note">${esc(g.firstCustomer.meal.note)}</p><h3>価格の位置づけ</h3><p>${esc(g.firstCustomer.pricingReason)}</p><h3>貸主の営業方針</h3><p>${esc(g.firstCustomer.landlordPolicy)}</p><p class="warning">${esc(g.firstCustomer.note)}</p>`);
 
       html+=section('開始時のお金',`<div class="rows"><div class="row"><div class="label">所持金</div><div class="value">${esc(g.startingBalanceInterpretation.money)}ディルハム</div></div><div class="row"><div class="label">借金</div><div class="value">${esc(g.startingBalanceInterpretation.debt)}ディルハム</div></div></div><p class="note">${esc(g.startingBalanceInterpretation.note)}</p>`);
 
       const c=data.customs.footCleaning;
       html+=section('風習',`${badges(data.customs.sourceType)}<h3>${esc(c.name)}</h3><p><strong>${esc(c.origin)}</strong></p><p>${esc(c.action)}</p><p class="warning">${esc(c.historicalNote)}</p>`);
 
-      html+=section('売春と貸主',`${badges(data.prostitutionSetting.sourceType)}<p>${esc(data.prostitutionSetting.note)}</p><p>${esc(data.prostitutionSetting.landlordRole)}</p>`);
+      html+=section('売春と貸主',`${badges(data.prostitutionSetting.sourceType,data.prostitutionSetting.scale)}<p>${esc(data.prostitutionSetting.note)}</p><p>${esc(data.prostitutionSetting.landlordRole)}</p><p>${esc(data.prostitutionSetting.operatingStyle)}</p>`);
 
       html+=section('管理メモ',`<ul>${data.referenceNotes.map(n=>`<li>${esc(n)}</li>`).join('')}</ul>`);
 
