@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>砂漠都市・資料</title>
+  <style>
+    :root{--bg:#efe9dc;--panel:#fbf7ee;--ink:#28231e;--muted:#776c5f;--line:#d6c8b3;--dark:#26211c;--accent:#8b5a2b;--soft:#eadfcf}
+    *{box-sizing:border-box}
+    html,body{width:100%;height:100%;margin:0;overflow:hidden;background:var(--bg);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Yu Gothic",sans-serif}
+    body{position:fixed;inset:0}
+    .app{height:100%;width:min(100%,760px);margin:0 auto;background:var(--panel);border-left:1px solid var(--dark);border-right:1px solid var(--dark);display:grid;grid-template-rows:auto minmax(0,1fr)}
+    header{padding:calc(env(safe-area-inset-top) + 14px) 18px 14px;border-bottom:2px solid var(--dark)}
+    h1{font-size:25px;margin:0 0 4px}
+    .sub{font-size:14px;color:var(--muted)}
+    .content{overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;padding:16px 16px calc(env(safe-area-inset-bottom) + 28px)}
+    section{margin:0 0 18px;padding:15px;border:1px solid var(--line);border-radius:14px;background:#fffdf8}
+    h2{font-size:20px;margin:0 0 10px}
+    h3{font-size:16px;margin:14px 0 7px;color:var(--accent)}
+    p{font-size:16px;line-height:1.7;margin:6px 0}
+    .badge{display:inline-block;padding:3px 8px;margin:0 6px 6px 0;border:1px solid var(--line);border-radius:999px;background:var(--soft);font-size:12px;font-weight:800}
+    .warning{background:#f5ead9;border-left:4px solid var(--accent);padding:10px 12px;border-radius:8px;font-size:14px;line-height:1.6}
+    .rows{border-top:1px solid var(--line)}
+    .row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:14px;padding:9px 0;border-bottom:1px solid var(--line);align-items:start}
+    .row .label{font-weight:800;font-size:15px}
+    .row .value{text-align:right;font-size:15px;white-space:nowrap}
+    .note{font-size:14px;color:var(--muted);line-height:1.65}
+    .split{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+    .money{padding:11px;border:1px solid var(--line);border-radius:10px;background:#faf5eb}
+    .money strong{display:block;margin-bottom:4px}
+    ul{margin:7px 0 0;padding-left:20px}
+    li{font-size:14px;line-height:1.65;margin:4px 0}
+    @media(max-width:480px){.split{grid-template-columns:1fr}.row{grid-template-columns:minmax(0,1fr) auto}.row .value{white-space:normal;max-width:145px}}
+  </style>
+</head>
+<body>
+  <main class="app">
+    <header>
+      <h1>砂漠都市・資料</h1>
+      <div class="sub">desert_world.js の内容をそのまま表示</div>
+    </header>
+    <div class="content" id="content"></div>
+  </main>
+
+  <script src="desert_world.js"></script>
+  <script>
+    (()=>{
+      const data=window.DESERT_WORLD_DATA;
+      const root=document.getElementById('content');
+      const esc=v=>String(v??'').replace(/[&<>"']/g,s=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[s]));
+      const badges=(...items)=>items.filter(Boolean).map(x=>`<span class="badge">${esc(x)}</span>`).join('');
+      const rows=items=>`<div class="rows">${items.map(x=>`<div class="row"><div class="label">${esc(x.label)}</div><div class="value">${esc(x.amount??x.display)}</div></div>`).join('')}</div>`;
+      const section=(title,body)=>`<section><h2>${esc(title)}</h2>${body}</section>`;
+
+      if(!data){root.innerHTML='<section><h2>読込エラー</h2><p>desert_world.js を読み込めませんでした。</p></section>';return}
+
+      let html='';
+      html+=section('歴史モデル',`${badges(data.model.sourceType)}<p><strong>${esc(data.model.period)}</strong>・${esc(data.model.region)}</p><p class="note">${esc(data.model.note)}</p>`);
+
+      html+=section('通貨',`${badges(data.currency.sourceType)}<div class="split">
+        <div class="money"><strong>${esc(data.currency.main.name)}</strong>${esc(data.currency.main.type)}<p class="note">${esc(data.currency.main.use)}</p></div>
+        <div class="money"><strong>${esc(data.currency.gold.name)}</strong>${esc(data.currency.gold.type)}<p class="note">${esc(data.currency.gold.use)}</p></div>
+        <div class="money"><strong>${esc(data.currency.copper.name)}（${esc(data.currency.copper.plural)}）</strong>${esc(data.currency.copper.type)}<p class="note">${esc(data.currency.copper.use)}</p></div>
+      </div><p class="warning">${esc(data.currency.exchangeNote)}</p>`);
+
+      html+=section('史実参考の生活費・賃金',`${badges(data.historicalEconomy.sourceType)}<h3>賃金</h3>${rows(data.historicalEconomy.wages)}<h3>生活費</h3>${rows(data.historicalEconomy.living)}<h3>売春料金の参考</h3>${rows(data.historicalEconomy.sexWorkReference)}<h3>仲介・場所提供の取り分</h3>${rows(data.historicalEconomy.intermediaryShare)}<p class="note">${esc(data.historicalEconomy.note)}</p>`);
+
+      const g=data.gameEconomy;
+      html+=section('ゲーム用の物価',`${badges(g.sourceType,g.status)}<h3>日用品</h3>${rows(g.prices)}<h3>労働賃金</h3>${rows(g.wages)}<h3>サフィラの客料金</h3>${rows(g.customerRates)}<p class="note">単位：${esc(g.unit)}</p>`);
+
+      html+=section('最初の客・ラシードの料金案',`${badges('ゲーム用設定',g.firstCustomer.status)}<div class="rows">
+        <div class="row"><div class="label">客が払う額</div><div class="value">${esc(g.firstCustomer.total)}ディルハム</div></div>
+        <div class="row"><div class="label">貸主の取り分</div><div class="value">${esc(g.firstCustomer.landlordShare)}ディルハム</div></div>
+        <div class="row"><div class="label">サフィラの手元</div><div class="value">${esc(g.firstCustomer.safiraShare)}ディルハム</div></div>
+      </div><p class="warning">${esc(g.firstCustomer.note)}</p>`);
+
+      html+=section('開始時のお金',`<div class="rows"><div class="row"><div class="label">所持金</div><div class="value">${esc(g.startingBalanceInterpretation.money)}ディルハム</div></div><div class="row"><div class="label">借金</div><div class="value">${esc(g.startingBalanceInterpretation.debt)}ディルハム</div></div></div><p class="note">${esc(g.startingBalanceInterpretation.note)}</p>`);
+
+      const c=data.customs.footCleaning;
+      html+=section('風習',`${badges(data.customs.sourceType)}<h3>${esc(c.name)}</h3><p><strong>${esc(c.origin)}</strong></p><p>${esc(c.action)}</p><p class="warning">${esc(c.historicalNote)}</p>`);
+
+      html+=section('売春と貸主',`${badges(data.prostitutionSetting.sourceType)}<p>${esc(data.prostitutionSetting.note)}</p><p>${esc(data.prostitutionSetting.landlordRole)}</p>`);
+
+      html+=section('管理メモ',`<ul>${data.referenceNotes.map(n=>`<li>${esc(n)}</li>`).join('')}</ul>`);
+
+      root.innerHTML=html;
+    })();
+  </script>
+</body>
+</html>
