@@ -3,112 +3,82 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <title>砂漠都市生活</title>
+  <title>砂漠都市の記録</title>
   <style>
     :root {
-      --bg: #f3ead8;
-      --panel: #fffaf0;
-      --ink: #33271f;
-      --muted: #75685d;
-      --line: #d5c3a8;
-      --accent: #8b5a2b;
-      --accent-soft: #ead8bd;
-      --danger: #9a3f35;
+      --bg:#f2eadb;
+      --paper:#fffaf0;
+      --ink:#33291f;
+      --muted:#766a5e;
+      --line:#d7c6ab;
+      --accent:#8c5d34;
+      --accentSoft:#eadbc4;
     }
-    * { box-sizing: border-box; }
-    body {
-      margin: 0;
-      background: var(--bg);
-      color: var(--ink);
-      font-family: -apple-system, BlinkMacSystemFont, "Hiragino Sans", "Yu Gothic", sans-serif;
-      font-size: 18px;
-      line-height: 1.55;
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      background:var(--bg);
+      color:var(--ink);
+      font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Yu Gothic",sans-serif;
+      font-size:18px;
+      line-height:1.65;
     }
-    button { font: inherit; }
-    .wrap {
-      width: min(100%, 720px);
-      margin: 0 auto;
-      padding: 16px 14px 36px;
+    button{font:inherit}
+    .wrap{width:min(100%,720px);margin:0 auto;padding:14px 14px 40px}
+    .top,.card{
+      background:var(--paper);
+      border:1px solid var(--line);
+      border-radius:14px;
     }
-    .status {
-      background: var(--panel);
-      border: 1px solid var(--line);
-      border-radius: 14px;
-      padding: 14px;
-      margin-bottom: 14px;
+    .top{padding:14px;margin-bottom:12px}
+    .topline{display:flex;justify-content:space-between;gap:12px;align-items:center;margin-bottom:10px}
+    .day{font-size:22px;font-weight:700}
+    .phase{font-weight:700;color:var(--accent)}
+    .stats{display:grid;grid-template-columns:1fr 1fr;gap:6px 12px;font-size:17px}
+    .card{padding:16px;margin-bottom:12px}
+    .card h1,.card h2{margin:0 0 10px}
+    .card h1{font-size:23px}.card h2{font-size:19px}
+    .entry{white-space:pre-wrap;min-height:120px}
+    .sub{color:var(--muted);font-size:17px}
+    .choices{display:grid;gap:10px}
+    .choices button{
+      min-height:52px;
+      width:100%;
+      text-align:left;
+      border:1px solid var(--line);
+      background:var(--paper);
+      color:var(--ink);
+      border-radius:12px;
+      padding:12px 14px;
+      cursor:pointer;
     }
-    .status-top {
-      display: flex;
-      justify-content: space-between;
-      gap: 10px;
-      align-items: baseline;
-      margin-bottom: 10px;
+    .choices button.primary{background:var(--accentSoft);font-weight:700;border-color:#bd9a70}
+    .choices button:disabled{opacity:.45;cursor:default}
+    .log{
+      display:grid;
+      gap:8px;
+      max-height:320px;
+      overflow:auto;
+      padding-right:2px;
     }
-    .day { font-size: 22px; font-weight: 700; }
-    .phase { font-weight: 700; color: var(--accent); }
-    .stats {
-      display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 7px 12px;
-      font-size: 17px;
+    .log-item{
+      padding:10px 12px;
+      border-left:3px solid var(--line);
+      background:#fbf4e7;
     }
-    .scene {
-      background: var(--panel);
-      border: 1px solid var(--line);
-      border-radius: 14px;
-      padding: 18px 16px;
-      min-height: 190px;
-      margin-bottom: 14px;
+    .log-item strong{display:block;margin-bottom:2px}
+    .hint{
+      margin-top:10px;
+      padding:10px 12px;
+      background:#f7efdf;
+      border-left:4px solid var(--accent);
     }
-    .scene h1 {
-      font-size: 23px;
-      margin: 0 0 10px;
-    }
-    .scene p { margin: 8px 0; }
-    .notice {
-      padding: 10px 12px;
-      border-left: 4px solid var(--accent);
-      background: #f7efdf;
-      margin-top: 12px;
-    }
-    .actions {
-      display: grid;
-      grid-template-columns: 1fr;
-      gap: 10px;
-    }
-    .actions button {
-      width: 100%;
-      min-height: 52px;
-      border: 1px solid var(--line);
-      border-radius: 12px;
-      background: var(--panel);
-      color: var(--ink);
-      padding: 12px 14px;
-      text-align: left;
-      cursor: pointer;
-    }
-    .actions button.primary {
-      background: var(--accent-soft);
-      border-color: #bf9b6a;
-      font-weight: 700;
-    }
-    .actions button:disabled {
-      opacity: .45;
-      cursor: default;
-    }
-    .section-title {
-      font-size: 18px;
-      font-weight: 700;
-      margin: 18px 0 8px;
-    }
-    .small { font-size: 17px; color: var(--muted); }
-    .danger { color: var(--danger); }
   </style>
 </head>
 <body>
   <main class="wrap">
-    <section class="status" aria-label="現在の状態">
-      <div class="status-top">
+    <section class="top" aria-label="現在の状態">
+      <div class="topline">
         <div class="day" id="dayText">1日目</div>
         <div class="phase" id="phaseText">朝</div>
       </div>
@@ -122,201 +92,177 @@
       </div>
     </section>
 
-    <section class="scene" aria-live="polite">
-      <h1 id="placeText">借り部屋</h1>
-      <p id="sceneText">薄い朝の光が、格子窓から差し込んでいる。今日をどう過ごすか決める。</p>
-      <div id="notice" class="notice">部屋代と借金はまだ残っている。</div>
+    <section class="card">
+      <h1 id="sceneTitle">借り部屋の朝</h1>
+      <div class="entry" id="sceneText">格子窓の向こうが白み始めた。\n狭い借り部屋には、寝台と水差し、小さな箱しかない。\n今日も一日が始まる。</div>
+      <div class="hint" id="hintText">借金を返し切れば、この部屋を出ることもできる。</div>
     </section>
 
-    <div class="section-title">行動</div>
-    <div class="actions" id="actions"></div>
+    <section class="card">
+      <h2>この時間にすること</h2>
+      <div class="choices" id="choices"></div>
+    </section>
 
-    <div class="section-title">行ける場所</div>
-    <div class="actions" id="places"></div>
+    <section class="card">
+      <h2>記録</h2>
+      <div class="sub">選んだことと、その日に起きたことがここに残ります。</div>
+      <div class="log" id="log"></div>
+    </section>
   </main>
 
   <script>
     (() => {
-      const phases = ["朝", "昼", "夕方", "深夜"];
-      const state = {
-        day: 1,
-        phase: 0,
-        money: 3,
-        debt: 30,
-        energy: 6,
-        rep: 0,
-        regulars: 0,
-        risk: 0,
-        place: "room"
-      };
+      const phases=["朝","昼","夕方","深夜"];
+      const state={day:1,phase:0,money:3,debt:30,energy:6,rep:0,regulars:0,risk:0,log:[]};
+      const $=id=>document.getElementById(id);
 
-      const placeData = {
-        room: { name: "借り部屋", text: "古い貸家の二階。寝台と水差し、小さな箱だけがある。ここで暮らし、夜には客を迎えることもある。" },
-        well: { name: "共同水場", text: "近所の女たちや水売りが出入りする。水を汲みながら、街の噂も耳に入る。" },
-        market: { name: "小市場", text: "食べ物、布、香油、安い化粧品や日用品が並ぶ。大市場ほど品は多くない。" },
-        bath: { name: "公衆浴場", text: "石造りの浴場。使える時間は限られている。入浴すれば疲れが少し取れる。" },
-        edge: { name: "水路沿い", text: "街外れへ続く水路沿い。少し歩けば花や香草を摘める場所がある。人通りは少ない。" },
-        pleasure: { name: "歓楽街の入口", text: "日が落ちると灯りと音楽が増える。仕事の話も集まるが、夜は揉め事も起こりやすい。" }
-      };
-
-      const $ = id => document.getElementById(id);
-
-      function clamp() {
-        state.energy = Math.max(0, Math.min(10, state.energy));
-        state.risk = Math.max(0, Math.min(10, state.risk));
-        state.rep = Math.max(0, state.rep);
+      function clamp(){
+        state.energy=Math.max(0,Math.min(10,state.energy));
+        state.risk=Math.max(0,Math.min(10,state.risk));
+        state.rep=Math.max(0,state.rep);
       }
 
-      function advance(message) {
+      function addLog(text){
+        state.log.unshift({day:state.day,phase:phases[state.phase],text});
+        if(state.log.length>40)state.log.length=40;
+      }
+
+      function advance(text){
+        addLog(text);
         state.phase++;
-        if (state.phase >= phases.length) {
-          state.phase = 0;
+        if(state.phase>=4){
+          state.phase=0;
           state.day++;
-          state.energy = Math.min(10, state.energy + 3);
-          if (state.day % 7 === 0) {
-            state.debt += 4;
-            message += " 週の部屋代4が借金に加わった。";
+          state.energy=Math.min(10,state.energy+3);
+          if(state.day%7===0){
+            state.debt+=4;
+            state.log.unshift({day:state.day,phase:"朝",text:"週の部屋代4が借金に加わった。"});
           }
         }
         clamp();
-        render(message);
+        render(text);
       }
 
-      function go(place) {
-        state.place = place;
-        render();
+      function rumor(){
+        const r=Math.random();
+        if(r<0.3){state.risk++;return "共同水場で、近くの通りを役人が見回っているという噂を聞いた。"}
+        if(r<0.65)return "水を汲んでいる間に、遠方から大きな隊商が着いたらしいと聞いた。";
+        return "朝の水場は静かだった。特に変わった噂はなかった。";
       }
 
-      function rumor() {
-        const roll = Math.random();
-        if (roll < 0.35) {
-          state.risk++;
-          return "近くで役人が聞き込みをしている、という噂を聞いた。";
-        }
-        if (roll < 0.7) return "隊商が到着したらしい。今夜は旅人が増えるかもしれない。";
-        return "この辺りは今夜、比較的静かだという。";
-      }
-
-      function work() {
-        if (state.phase < 2) {
-          render("客を取る仕事は、主に夕方以降だ。");
-          return;
-        }
-        if (state.energy <= 0) {
-          advance("今日はもう客を取れる状態ではなかった。");
-          return;
-        }
-        const chance = 0.45 + state.rep * 0.03 + state.regulars * 0.04 - state.risk * 0.03;
-        if (Math.random() > chance) {
-          state.energy--;
-          advance("待ったが、今日は客がつかなかった。");
-          return;
-        }
-        const pay = 3 + Math.floor(Math.random() * 5);
-        state.money += pay;
-        state.energy -= 2;
-        state.rep++;
-        let text = `客を一人取った。${pay}を得た。`;
-        if (Math.random() < 0.18 + state.rep * 0.01) {
+      function work(){
+        if(state.energy<=0){advance("客を取ろうとしたが、今日はもう動けなかった。");return}
+        const chance=.42+state.rep*.035+state.regulars*.05-state.risk*.025;
+        if(Math.random()>chance){state.energy--;advance("客を待ったが、今夜は誰も来なかった。");return}
+        const pay=3+Math.floor(Math.random()*5);
+        state.money+=pay;state.energy-=2;state.rep++;
+        let text=`今夜は客を一人取った。${pay}を得た。`;
+        if(Math.random()<.16+Math.min(.24,state.rep*.012)){
           state.regulars++;
-          text += " また来たいと言われた。常連になるかもしれない。";
+          text+=" 帰り際に、また来ると言われた。";
         }
         advance(text);
       }
 
-      function payDebt() {
-        if (state.money <= 0 || state.debt <= 0) {
-          render("今は返せる金がない。\n");
-          return;
-        }
-        const amount = Math.min(5, state.money, state.debt);
-        state.money -= amount;
-        state.debt -= amount;
-        render(`${amount}を借金の返済に回した。`);
+      function payDebt(){
+        if(state.money<=0||state.debt<=0)return;
+        const amount=Math.min(5,state.money,state.debt);
+        state.money-=amount;state.debt-=amount;
+        addLog(`${amount}を借金の返済に回した。`);
+        render(`${amount}を返した。`);
       }
 
-      function actionButton(label, fn, primary = false, disabled = false) {
-        const b = document.createElement("button");
-        b.type = "button";
-        b.textContent = label;
-        if (primary) b.classList.add("primary");
-        b.disabled = disabled;
-        b.addEventListener("click", fn);
-        return b;
+      function button(label,fn,primary=false,disabled=false){
+        const b=document.createElement("button");
+        b.type="button";b.textContent=label;b.disabled=disabled;
+        if(primary)b.classList.add("primary");
+        b.addEventListener("click",fn);return b;
       }
 
-      function render(message = "") {
+      function phaseScene(){
+        if(state.phase===0)return ["借り部屋の朝","格子窓の向こうが白み始めた。\n街が動き出す前に、今日のことを考える。"]; 
+        if(state.phase===1)return ["乾いた昼","日差しが強くなった。\n市場の通りには布、食べ物、香油、日用品が並び、人の声が重なる。"]; 
+        if(state.phase===2)return ["夕方","熱が少し引き、通りに長い影が落ちる。\n今夜、客を取るかどうかを決める時間が近い。"]; 
+        return ["深夜","街の表通りは静かになった。\n遠くではまだ灯りが残っている。今夜をどう終えるか決める。"]; 
+      }
+
+      function render(message=""){
         clamp();
-        $("dayText").textContent = `${state.day}日目`;
-        $("phaseText").textContent = phases[state.phase];
-        $("moneyText").textContent = state.money;
-        $("debtText").textContent = state.debt;
-        $("energyText").textContent = state.energy;
-        $("repText").textContent = state.rep;
-        $("regularText").textContent = state.regulars;
-        $("riskText").textContent = state.risk;
+        $("dayText").textContent=`${state.day}日目`;
+        $("phaseText").textContent=phases[state.phase];
+        $("moneyText").textContent=state.money;
+        $("debtText").textContent=state.debt;
+        $("energyText").textContent=state.energy;
+        $("repText").textContent=state.rep;
+        $("regularText").textContent=state.regulars;
+        $("riskText").textContent=state.risk;
 
-        const pd = placeData[state.place];
-        $("placeText").textContent = pd.name;
-        $("sceneText").textContent = message || pd.text;
-        $("notice").textContent = state.debt > 0
-          ? `借金は残り${state.debt}。返し切れば、この部屋を出る道も見えてくる。`
-          : "借金は返し終えた。ここを出るか、残るかを自分で選べる。";
+        const [title,text]=phaseScene();
+        $("sceneTitle").textContent=title;
+        $("sceneText").textContent=message?`${text}\n\n${message}`:text;
+        $("hintText").textContent=state.debt>0?`借金は残り${state.debt}。返し切れば、この部屋を出ることもできる。`:"借金は返し終えた。ここに残るか、出ていくかを選べる。";
 
-        const actions = $("actions");
-        actions.replaceChildren();
+        const choices=$("choices");choices.replaceChildren();
 
-        if (state.place === "room") {
-          actions.append(actionButton("休む", () => { state.energy += 2; advance("横になって休んだ。体力が少し戻った。"); }, true));
-          actions.append(actionButton("借金を返す（最大5）", payDebt, false, state.money <= 0 || state.debt <= 0));
+        if(state.phase===0){
+          choices.append(button("水を汲みに行く",()=>advance(rumor()),true));
+          choices.append(button("部屋で休む",()=>{state.energy+=2;advance("朝は外へ出ず、部屋で身体を休めた。")}));
+          choices.append(button("借金を返す（最大5）",payDebt,false,state.money<=0||state.debt<=0));
+          choices.append(button("何もせず昼まで過ごす",()=>advance("特に何もせず、昼まで部屋で過ごした。")));
         }
-        if (state.place === "well") {
-          actions.append(actionButton("水を汲む・噂を聞く", () => advance(rumor()), true));
+
+        if(state.phase===1){
+          choices.append(button("市場で食事を買う（2）",()=>{
+            if(state.money<2){render("食事を買うには金が足りない。");return}
+            state.money-=2;state.energy+=2;advance("市場で温かい食事を買って食べた。");
+          },true));
+          choices.append(button("香油や身支度の品を見る（3）",()=>{
+            if(state.money<3){render("買えるほどの金は持っていない。");return}
+            state.money-=3;state.rep++;advance("安い香油と身支度の品を買った。");
+          }));
+          choices.append(button("公衆浴場へ行く（2）",()=>{
+            if(state.money<2){render("浴場を使う金が足りない。");return}
+            state.money-=2;state.energy+=3;advance("空いている時間に公衆浴場を使った。身体が少し軽くなった。");
+          }));
+          choices.append(button("水路沿いで花や香草を摘む",()=>{
+            state.energy--;const gain=1+Math.floor(Math.random()*3);state.money+=gain;
+            advance(`水路沿いまで歩き、花や香草を集めた。売れる分が${gain}になった。`);
+          }));
+          choices.append(button("部屋へ戻って休む",()=>{state.energy+=2;advance("昼は部屋へ戻り、少し眠った。") }));
         }
-        if (state.place === "market") {
-          actions.append(actionButton("食事を買う（2）", () => {
-            if (state.money < 2) return render("金が足りない。");
-            state.money -= 2; state.energy += 2; advance("食事を買って食べた。");
-          }, true));
-          actions.append(actionButton("香油を買う（3）", () => {
-            if (state.money < 3) return render("金が足りない。");
-            state.money -= 3; state.rep++; advance("安い香油を買った。身支度が少し整った。");
+
+        if(state.phase===2){
+          choices.append(button("今夜は客を取る",()=>advance("今夜は客を取ることにした。深夜まで客を待つ。"),true));
+          choices.append(button("今日は客を取らない",()=>advance("今夜は客を取らないことにした。")));
+          choices.append(button("歓楽の通りへ様子を見に行く",()=>{
+            const r=Math.random();
+            if(r<.28){state.risk++;advance("歓楽の通りを見に行った。揉め事があり、少し危ない空気だった。")}
+            else if(r<.6){state.rep++;advance("歓楽の通りで顔見知りと少し話した。名前を覚えている者が増えた。")}
+            else advance("歓楽の通りを歩いたが、特に何も起こらなかった。屋台の灯りだけが残った。");
           }));
         }
-        if (state.place === "bath") {
-          actions.append(actionButton("浴場を使う（2）", () => {
-            if (state.money < 2) return render("金が足りない。");
-            state.money -= 2; state.energy += 3; advance("浴場を使った。身体が少し軽くなった。");
-          }, true, state.phase === 3));
-        }
-        if (state.place === "edge") {
-          actions.append(actionButton("花や香草を摘む", () => {
-            state.energy--; const gain = 1 + Math.floor(Math.random() * 3); state.money += gain;
-            advance(`花や香草を集め、${gain}で売れる分を得た。`);
-          }, true, state.phase === 3));
-        }
-        if (state.place === "pleasure") {
-          actions.append(actionButton("今夜、客を取る", work, true));
-          actions.append(actionButton("今日は取らずに帰る", () => { state.place = "room"; advance("今日は客を取らず、部屋へ戻った。"); }));
+
+        if(state.phase===3){
+          const last=state.log[0]?.text||"";
+          if(last.includes("客を取ることにした")){
+            choices.append(button("客を待つ",work,true));
+            choices.append(button("やはり今夜はやめる",()=>advance("客を待つのをやめ、そのまま眠ることにした。")));
+          }else{
+            choices.append(button("眠る",()=>advance("戸を閉め、眠った。"),true));
+            choices.append(button("遅い時間まで起きている",()=>{state.energy--;advance("深夜まで起きて、遠くの物音を聞いていた。") }));
+          }
         }
 
-        actions.append(actionButton("何もせず時間を進める", () => advance("しばらく時間を過ごした。")));
-
-        const places = $("places");
-        places.replaceChildren();
-        places.append(actionButton("借り部屋", () => go("room"), state.place === "room"));
-        if (state.phase !== 3) {
-          places.append(actionButton("共同水場", () => go("well"), state.place === "well"));
-          places.append(actionButton("小市場", () => go("market"), state.place === "market"));
-        }
-        if (state.phase === 0 || state.phase === 1 || state.phase === 2) {
-          places.append(actionButton("公衆浴場", () => go("bath"), state.place === "bath"));
-        }
-        if (state.phase !== 3) {
-          places.append(actionButton("水路沿い", () => go("edge"), state.place === "edge"));
-        }
-        if (state.phase >= 2) {
-          places.append(actionButton("歓楽街の入口", () => go("pleasure"), state.place === "pleasure"));
+        const log=$("log");log.replaceChildren();
+        if(!state.log.length){
+          const d=document.createElement("div");d.className="log-item";d.textContent="まだ記録はありません。";log.append(d);
+        }else{
+          state.log.forEach(item=>{
+            const d=document.createElement("div");d.className="log-item";
+            const s=document.createElement("strong");s.textContent=`${item.day}日目・${item.phase}`;
+            const t=document.createElement("div");t.textContent=item.text;
+            d.append(s,t);log.append(d);
+          });
         }
       }
 
