@@ -18,8 +18,8 @@ window.DESERT_NPC_DATA = {
       notes: "サフィラが最初に取る客は、貸主の紹介で来るラシード。ラシードは最初から売春の客として紹介されたことを理解している。"
     },
     dialogueGeneration: {
-      priority: ["departureDialogue", "sceneDialogue", "speech", "personality"],
-      notes: "客の場面を生成するときは性格タグだけで似た会話を作らず、NPC固有のセリフ候補と行動を最優先する。特に帰り際は『娼婦と一晩過ごした客』としての満足、不満、名残、金、再訪、秘密、身分差などが台詞に出るようにする。"
+      basis: ["personality", "speech", "customerBehavior", "attitudeToSafira", "sceneDialogue", "departureDialogue"],
+      notes: "場面生成では性格・立場・客としての行動傾向・サフィラへの態度・話し方・固有セリフを全部合わせて使う。固有セリフは性格設定を上書きするものではなく、その人物らしい会話を具体化するための材料。どれか一つだけを優先して人物像を崩さない。"
     }
   },
 
