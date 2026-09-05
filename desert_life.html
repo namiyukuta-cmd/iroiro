@@ -6,14 +6,15 @@
   <title>砂漠都市生活</title>
   <style>
     :root {
-      --bg: #f3ead8;
-      --panel: #fffaf0;
-      --ink: #33271f;
-      --muted: #75685d;
-      --line: #d5c3a8;
+      --bg: #f2eee5;
+      --panel: #fbf8f1;
+      --ink: #29241f;
+      --muted: #71695f;
+      --line: #9b8f7e;
+      --line-soft: #d7cdbd;
       --accent: #8b5a2b;
-      --accent-soft: #ead8bd;
-      --danger: #9a3f35;
+      --accent-soft: #e9dcc5;
+      --dark: #26231f;
     }
 
     * { box-sizing: border-box; }
@@ -27,7 +28,7 @@
       color: var(--ink);
       font-family: -apple-system, BlinkMacSystemFont, "Hiragino Sans", "Yu Gothic", sans-serif;
       font-size: 18px;
-      line-height: 1.5;
+      line-height: 1.45;
     }
 
     body {
@@ -38,238 +39,380 @@
     button { font: inherit; }
 
     .game {
+      position: relative;
       width: min(100%, 720px);
       height: 100vh;
       height: 100dvh;
       margin: 0 auto;
-      padding:
-        max(10px, env(safe-area-inset-top))
-        12px
-        max(10px, env(safe-area-inset-bottom));
-      display: grid;
-      grid-template-rows: auto minmax(0, 1fr) minmax(230px, 38dvh);
-      gap: 10px;
-      overflow: hidden;
-    }
-
-    .topbar {
-      min-width: 0;
-      background: rgba(255, 250, 240, .94);
-      border: 1px solid var(--line);
-      border-radius: 16px;
-      padding: 10px 12px;
-    }
-
-    .dayline {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 10px;
-      margin-bottom: 7px;
-    }
-
-    .day {
-      font-size: 22px;
-      font-weight: 800;
-      line-height: 1.1;
-    }
-
-    .phase {
-      font-size: 18px;
-      font-weight: 800;
-      color: var(--accent);
-    }
-
-    .stats {
-      display: grid;
-      grid-template-columns: repeat(3, minmax(0, 1fr));
-      gap: 4px 10px;
-      font-size: 17px;
-    }
-
-    .stat {
-      min-width: 0;
-      white-space: nowrap;
-    }
-
-    .scene {
-      min-height: 0;
       overflow: hidden;
       background: var(--panel);
-      border: 1px solid var(--line);
-      border-radius: 18px;
+      border-left: 2px solid var(--dark);
+      border-right: 2px solid var(--dark);
       display: grid;
-      grid-template-rows: auto minmax(0, 1fr) auto;
+      grid-template-rows: auto minmax(0, 1fr) auto auto;
+      padding-top: env(safe-area-inset-top);
+      padding-bottom: env(safe-area-inset-bottom);
     }
 
-    .scene-head {
-      padding: 15px 16px 8px;
-      border-bottom: 1px solid rgba(213, 195, 168, .55);
+    .hud {
+      min-height: 118px;
+      padding: 14px 16px 12px;
+      border-top: 2px solid var(--dark);
+      border-bottom: 1px solid var(--line-soft);
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 12px;
+      align-items: center;
     }
 
-    .scene h1 {
-      margin: 0;
-      font-size: 24px;
-      line-height: 1.25;
+    .hud-left {
+      min-width: 0;
+      display: flex;
+      align-items: center;
+      gap: 13px;
     }
 
-    .scene-body {
-      min-height: 0;
-      overflow-y: auto;
-      -webkit-overflow-scrolling: touch;
-      padding: 14px 16px;
-      font-size: 18px;
+    .avatar {
+      width: 72px;
+      height: 72px;
+      flex: 0 0 72px;
+      border: 2px solid var(--dark);
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      background: #fff;
     }
 
-    .scene-body p {
-      margin: 0;
+    .avatar svg {
+      width: 48px;
+      height: 48px;
+      fill: #5d5954;
     }
 
-    .notice {
-      margin: 0 14px 14px;
-      padding: 9px 11px;
-      border-left: 4px solid var(--accent);
-      background: #f7efdf;
+    .quick-stats {
+      min-width: 0;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
       font-size: 17px;
-      line-height: 1.4;
+      line-height: 1.45;
+      letter-spacing: .02em;
     }
 
-    .control-panel {
-      min-height: 0;
-      overflow: hidden;
-      background: rgba(255, 250, 240, .96);
-      border: 1px solid var(--line);
-      border-radius: 18px;
+    .quick-stats div { white-space: nowrap; }
+
+    .hud-right {
       display: grid;
-      grid-template-rows: auto minmax(0, 1fr);
-    }
-
-    .tabs {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      border-bottom: 1px solid var(--line);
-    }
-
-    .tab {
-      min-height: 46px;
-      border: 0;
-      background: transparent;
-      color: var(--muted);
-      font-weight: 800;
-      font-size: 18px;
-    }
-
-    .tab + .tab {
-      border-left: 1px solid var(--line);
-    }
-
-    .tab.active {
-      background: var(--accent-soft);
-      color: var(--ink);
-    }
-
-    .panel-scroll {
-      min-height: 0;
-      overflow-y: auto;
-      -webkit-overflow-scrolling: touch;
-      padding: 10px;
-    }
-
-    .actions {
-      display: grid;
-      grid-template-columns: 1fr;
+      justify-items: end;
       gap: 8px;
     }
 
-    .actions button {
-      width: 100%;
-      min-height: 50px;
-      border: 1px solid var(--line);
-      border-radius: 13px;
-      background: var(--panel);
+    .daytime {
+      font-weight: 800;
+      text-align: right;
+      line-height: 1.2;
+    }
+
+    .daytime .day { font-size: 18px; }
+    .daytime .phase { color: var(--accent); font-size: 18px; }
+
+    .menu-btn {
+      min-width: 96px;
+      min-height: 48px;
+      padding: 8px 15px;
+      border: 2px solid var(--dark);
+      border-radius: 26px;
+      background: #fff;
       color: var(--ink);
-      padding: 10px 13px;
-      text-align: left;
       font-size: 18px;
-      font-weight: 650;
-      cursor: pointer;
+      font-weight: 850;
+      letter-spacing: .07em;
+      box-shadow: 0 2px 5px rgba(0,0,0,.08);
       -webkit-tap-highlight-color: transparent;
     }
 
-    .actions button.primary {
+    .scene {
+      position: relative;
+      min-height: 0;
+      overflow: hidden;
+      background:
+        linear-gradient(to bottom, rgba(139,90,43,.03), transparent 32%),
+        var(--panel);
+    }
+
+    .scene::before,
+    .scene::after {
+      content: "";
+      position: absolute;
+      pointer-events: none;
+      opacity: .12;
+    }
+
+    .scene::before {
+      width: 220px;
+      height: 220px;
+      right: -75px;
+      top: 20%;
+      border: 2px solid var(--accent);
+      border-radius: 50% 50% 0 0;
+    }
+
+    .scene::after {
+      width: 150px;
+      height: 150px;
+      left: -55px;
+      bottom: 12%;
+      border: 2px solid var(--accent);
+      transform: rotate(45deg);
+    }
+
+    .location {
+      position: absolute;
+      top: 16px;
+      left: 18px;
+      z-index: 1;
+      font-size: 25px;
+      font-weight: 850;
+    }
+
+    .scene-copy {
+      position: absolute;
+      z-index: 1;
+      left: 18px;
+      right: 18px;
+      bottom: 18px;
+      max-height: 42%;
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+      padding: 14px 15px;
+      border: 1px solid var(--line-soft);
+      background: rgba(251,248,241,.93);
+      font-size: 18px;
+    }
+
+    .scene-copy p { margin: 0; }
+
+    .scene-note {
+      margin-top: 9px;
+      color: var(--muted);
+      font-size: 17px;
+    }
+
+    .choice-wrap {
+      height: 154px;
+      min-height: 0;
+      border-top: 1px solid var(--line-soft);
+      overflow: hidden;
+      background: var(--panel);
+    }
+
+    .choice-scroll {
+      height: 100%;
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+      padding: 12px 14px;
+    }
+
+    .choice-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .choice-btn {
+      min-width: 0;
+      min-height: 58px;
+      padding: 10px 12px;
+      border: 2px solid var(--dark);
+      border-radius: 16px;
+      background: #fff;
+      color: var(--ink);
+      font-size: 18px;
+      font-weight: 800;
+      line-height: 1.25;
+      text-align: center;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .choice-btn.primary {
+      background: var(--dark);
+      color: #fff;
+    }
+
+    .choice-btn.current {
       background: var(--accent-soft);
-      border-color: #bf9b6a;
+      border-color: var(--accent);
+    }
+
+    .choice-btn:disabled {
+      opacity: .36;
+    }
+
+    .choice-grid .choice-btn:last-child:nth-child(odd) {
+      grid-column: 1 / -1;
+    }
+
+    .journal {
+      font-size: 17px;
+      line-height: 1.5;
+    }
+
+    .journal-entry {
+      padding: 7px 2px 9px;
+      border-bottom: 1px solid var(--line-soft);
+    }
+
+    .journal-entry:last-child { border-bottom: 0; }
+    .journal-time { color: var(--muted); font-size: 16px; margin-bottom: 2px; }
+
+    .nav {
+      height: 70px;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      border-top: 1px solid var(--line-soft);
+      border-bottom: 2px solid var(--dark);
+      background: var(--panel);
+    }
+
+    .nav-btn {
+      position: relative;
+      border: 0;
+      background: transparent;
+      color: var(--ink);
+      font-size: 18px;
+      font-weight: 850;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .nav-btn + .nav-btn { border-left: 1px solid rgba(215,205,189,.55); }
+
+    .nav-btn.active::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 18%;
+      right: 18%;
+      height: 4px;
+      background: var(--dark);
+    }
+
+    .menu-layer {
+      position: absolute;
+      inset: 0;
+      z-index: 20;
+      display: none;
+      background: rgba(34,31,27,.30);
+    }
+
+    .menu-layer.open { display: block; }
+
+    .menu-card {
+      position: absolute;
+      top: calc(env(safe-area-inset-top) + 72px);
+      right: 14px;
+      width: min(310px, calc(100% - 28px));
+      padding: 18px;
+      border: 2px solid var(--dark);
+      border-radius: 18px;
+      background: var(--panel);
+      box-shadow: 0 8px 28px rgba(0,0,0,.16);
+    }
+
+    .menu-card h2 {
+      margin: 0 0 12px;
+      font-size: 22px;
+    }
+
+    .menu-stats {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px 12px;
+      margin-bottom: 14px;
+      font-size: 17px;
+    }
+
+    .menu-close {
+      width: 100%;
+      min-height: 48px;
+      border: 2px solid var(--dark);
+      border-radius: 13px;
+      background: var(--dark);
+      color: #fff;
       font-weight: 800;
     }
 
-    .actions button.current {
-      background: #eee3cf;
-      border-color: #bea27c;
-    }
-
-    .actions button:disabled {
-      opacity: .42;
-      cursor: default;
-    }
-
-    .actions button:active:not(:disabled) {
-      transform: scale(.99);
-    }
-
-    @media (max-height: 700px) {
-      .game {
-        grid-template-rows: auto minmax(0, 1fr) minmax(190px, 36dvh);
-        gap: 7px;
-      }
-      .topbar { padding: 8px 10px; }
-      .dayline { margin-bottom: 5px; }
-      .day { font-size: 20px; }
-      .stats { font-size: 17px; gap: 2px 8px; }
-      .scene-head { padding: 11px 14px 7px; }
-      .scene h1 { font-size: 21px; }
-      .scene-body { padding: 10px 14px; }
-      .notice { margin: 0 12px 10px; padding: 7px 9px; }
-      .actions button { min-height: 46px; }
+    @media (max-height: 720px) {
+      .hud { min-height: 100px; padding: 9px 13px; }
+      .avatar { width: 62px; height: 62px; flex-basis: 62px; }
+      .avatar svg { width: 42px; height: 42px; }
+      .quick-stats { font-size: 17px; }
+      .menu-btn { min-width: 88px; min-height: 44px; }
+      .choice-wrap { height: 136px; }
+      .nav { height: 62px; }
+      .scene-copy { max-height: 48%; padding: 10px 12px; }
+      .location { top: 12px; left: 14px; font-size: 22px; }
+      .choice-btn { min-height: 52px; }
     }
   </style>
 </head>
 <body>
   <main class="game">
-    <section class="topbar" aria-label="現在の状態">
-      <div class="dayline">
-        <div class="day" id="dayText">1日目</div>
-        <div class="phase" id="phaseText">朝</div>
+    <header class="hud" aria-label="現在の状態">
+      <div class="hud-left">
+        <div class="avatar" aria-hidden="true">
+          <svg viewBox="0 0 64 64">
+            <circle cx="32" cy="20" r="13"></circle>
+            <path d="M12 55c0-13 8-22 20-22s20 9 20 22v3H12z"></path>
+          </svg>
+        </div>
+        <div class="quick-stats">
+          <div>体力　<span id="energyText">6</span>/10</div>
+          <div>所持金 <span id="moneyText">3</span></div>
+          <div>借金　<span id="debtText">30</span></div>
+        </div>
       </div>
-      <div class="stats">
-        <div class="stat">所持金 <strong id="moneyText">3</strong></div>
-        <div class="stat">借金 <strong id="debtText">30</strong></div>
-        <div class="stat">体力 <strong id="energyText">6</strong>/10</div>
-        <div class="stat">評判 <strong id="repText">0</strong></div>
-        <div class="stat">常連 <strong id="regularText">0</strong>人</div>
-        <div class="stat">警戒 <strong id="riskText">0</strong></div>
+      <div class="hud-right">
+        <div class="daytime">
+          <div class="day" id="dayText">1日目</div>
+          <div class="phase" id="phaseText">朝</div>
+        </div>
+        <button class="menu-btn" id="menuBtn" type="button">MENU</button>
       </div>
-    </section>
+    </header>
 
     <section class="scene" aria-live="polite">
-      <div class="scene-head">
-        <h1 id="placeText">借り部屋</h1>
-      </div>
-      <div class="scene-body">
+      <div class="location" id="placeText">借り部屋</div>
+      <div class="scene-copy">
         <p id="sceneText">薄い朝の光が、格子窓から差し込んでいる。今日をどう過ごすか決める。</p>
+        <div class="scene-note" id="notice">借金は残り30。</div>
       </div>
-      <div id="notice" class="notice">部屋代と借金はまだ残っている。</div>
     </section>
 
-    <section class="control-panel" aria-label="操作">
-      <div class="tabs">
-        <button class="tab active" id="actionTab" type="button">行動</button>
-        <button class="tab" id="placeTab" type="button">移動</button>
-      </div>
-      <div class="panel-scroll">
-        <div class="actions" id="actions"></div>
-        <div class="actions" id="places" hidden></div>
+    <section class="choice-wrap" aria-label="選択肢">
+      <div class="choice-scroll" id="choiceScroll">
+        <div class="choice-grid" id="choiceGrid"></div>
+        <div class="journal" id="journal" hidden></div>
       </div>
     </section>
+
+    <nav class="nav" aria-label="画面切り替え">
+      <button class="nav-btn active" id="actionTab" type="button">行動</button>
+      <button class="nav-btn" id="placeTab" type="button">移動</button>
+      <button class="nav-btn" id="journalTab" type="button">記録</button>
+    </nav>
+
+    <div class="menu-layer" id="menuLayer" aria-hidden="true">
+      <section class="menu-card" aria-label="メニュー">
+        <h2>状態</h2>
+        <div class="menu-stats">
+          <div>所持金：<strong id="menuMoney">3</strong></div>
+          <div>借金：<strong id="menuDebt">30</strong></div>
+          <div>体力：<strong id="menuEnergy">6</strong>/10</div>
+          <div>評判：<strong id="menuRep">0</strong></div>
+          <div>常連：<strong id="menuRegular">0</strong>人</div>
+          <div>警戒：<strong id="menuRisk">0</strong></div>
+        </div>
+        <button class="menu-close" id="menuClose" type="button">閉じる</button>
+      </section>
+    </div>
   </main>
 
   <script>
@@ -285,7 +428,8 @@
         regulars: 0,
         risk: 0,
         place: "room",
-        tab: "action"
+        tab: "action",
+        log: [{ day: 1, phase: "朝", text: "借り部屋で目を覚ました。" }]
       };
 
       const placeData = {
@@ -305,16 +449,20 @@
         state.rep = Math.max(0, state.rep);
       }
 
-      function showTab(tab) {
+      function addLog(text, day = state.day, phase = phases[state.phase]) {
+        state.log.unshift({ day, phase, text });
+        if (state.log.length > 60) state.log.length = 60;
+      }
+
+      function setTab(tab) {
         state.tab = tab;
-        const actionMode = tab === "action";
-        $("actions").hidden = !actionMode;
-        $("places").hidden = actionMode;
-        $("actionTab").classList.toggle("active", actionMode);
-        $("placeTab").classList.toggle("active", !actionMode);
+        renderChoices();
       }
 
       function advance(message) {
+        const logDay = state.day;
+        const logPhase = phases[state.phase];
+        addLog(message, logDay, logPhase);
         state.phase++;
         if (state.phase >= phases.length) {
           state.phase = 0;
@@ -322,7 +470,7 @@
           state.energy = Math.min(10, state.energy + 3);
           if (state.day % 7 === 0) {
             state.debt += 4;
-            message += " 週の部屋代4が借金に加わった。";
+            addLog("週の部屋代4が借金に加わった。", state.day, "朝");
           }
         }
         clamp();
@@ -380,18 +528,117 @@
         const amount = Math.min(5, state.money, state.debt);
         state.money -= amount;
         state.debt -= amount;
-        render(`${amount}を借金の返済に回した。`);
+        const text = `${amount}を借金の返済に回した。`;
+        addLog(text);
+        render(text);
       }
 
-      function actionButton(label, fn, primary = false, disabled = false, current = false) {
+      function makeButton(label, fn, options = {}) {
         const b = document.createElement("button");
         b.type = "button";
+        b.className = "choice-btn";
         b.textContent = label;
-        if (primary) b.classList.add("primary");
-        if (current) b.classList.add("current");
-        b.disabled = disabled;
+        if (options.primary) b.classList.add("primary");
+        if (options.current) b.classList.add("current");
+        b.disabled = !!options.disabled;
         b.addEventListener("click", fn);
         return b;
+      }
+
+      function renderChoices() {
+        const grid = $("choiceGrid");
+        const journal = $("journal");
+        grid.replaceChildren();
+        journal.replaceChildren();
+
+        const isAction = state.tab === "action";
+        const isPlace = state.tab === "place";
+        const isJournal = state.tab === "journal";
+
+        grid.hidden = isJournal;
+        journal.hidden = !isJournal;
+        $("actionTab").classList.toggle("active", isAction);
+        $("placeTab").classList.toggle("active", isPlace);
+        $("journalTab").classList.toggle("active", isJournal);
+
+        if (isAction) {
+          if (state.place === "room") {
+            grid.append(makeButton("休む", () => { state.energy += 2; advance("横になって休んだ。体力が少し戻った。"); }, { primary: true }));
+            grid.append(makeButton("借金を返す", payDebt, { disabled: state.money <= 0 || state.debt <= 0 }));
+          }
+          if (state.place === "well") {
+            grid.append(makeButton("水を汲む・噂を聞く", () => advance(rumor()), { primary: true }));
+          }
+          if (state.place === "market") {
+            grid.append(makeButton("食事を買う（2）", () => {
+              if (state.money < 2) return render("金が足りない。");
+              state.money -= 2;
+              state.energy += 2;
+              advance("食事を買って食べた。");
+            }, { primary: true }));
+            grid.append(makeButton("香油を買う（3）", () => {
+              if (state.money < 3) return render("金が足りない。");
+              state.money -= 3;
+              state.rep++;
+              advance("安い香油を買った。身支度が少し整った。");
+            }));
+          }
+          if (state.place === "bath") {
+            grid.append(makeButton("浴場を使う（2）", () => {
+              if (state.money < 2) return render("金が足りない。");
+              state.money -= 2;
+              state.energy += 3;
+              advance("浴場を使った。身体が少し軽くなった。");
+            }, { primary: true, disabled: state.phase === 3 }));
+          }
+          if (state.place === "edge") {
+            grid.append(makeButton("花や香草を摘む", () => {
+              state.energy--;
+              const gain = 1 + Math.floor(Math.random() * 3);
+              state.money += gain;
+              advance(`花や香草を集め、${gain}で売れる分を得た。`);
+            }, { primary: true, disabled: state.phase === 3 }));
+          }
+          if (state.place === "pleasure") {
+            grid.append(makeButton("今夜、客を取る", work, { primary: true }));
+            grid.append(makeButton("今日は取らずに帰る", () => {
+              state.place = "room";
+              advance("今日は客を取らず、部屋へ戻った。");
+            }));
+          }
+          grid.append(makeButton("何もせず時間を進める", () => advance("しばらく時間を過ごした。")));
+        }
+
+        if (isPlace) {
+          grid.append(makeButton("借り部屋", () => go("room"), { current: state.place === "room" }));
+          if (state.phase !== 3) {
+            grid.append(makeButton("共同水場", () => go("well"), { current: state.place === "well" }));
+            grid.append(makeButton("小市場", () => go("market"), { current: state.place === "market" }));
+            grid.append(makeButton("水路沿い", () => go("edge"), { current: state.place === "edge" }));
+          }
+          if (state.phase <= 2) {
+            grid.append(makeButton("公衆浴場", () => go("bath"), { current: state.place === "bath" }));
+          }
+          if (state.phase >= 2) {
+            grid.append(makeButton("歓楽の通り", () => go("pleasure"), { current: state.place === "pleasure" }));
+          }
+        }
+
+        if (isJournal) {
+          state.log.forEach(entry => {
+            const row = document.createElement("div");
+            row.className = "journal-entry";
+            const time = document.createElement("div");
+            time.className = "journal-time";
+            time.textContent = `${entry.day}日目・${entry.phase}`;
+            const text = document.createElement("div");
+            text.textContent = entry.text;
+            row.append(time, text);
+            journal.append(row);
+          });
+        }
+
+        $("choiceScroll").scrollTop = 0;
       }
 
       function render(message = "") {
@@ -401,99 +648,37 @@
         $("moneyText").textContent = state.money;
         $("debtText").textContent = state.debt;
         $("energyText").textContent = state.energy;
-        $("repText").textContent = state.rep;
-        $("regularText").textContent = state.regulars;
-        $("riskText").textContent = state.risk;
+
+        $("menuMoney").textContent = state.money;
+        $("menuDebt").textContent = state.debt;
+        $("menuEnergy").textContent = state.energy;
+        $("menuRep").textContent = state.rep;
+        $("menuRegular").textContent = state.regulars;
+        $("menuRisk").textContent = state.risk;
 
         const pd = placeData[state.place];
         $("placeText").textContent = pd.name;
         $("sceneText").textContent = message || pd.text;
         $("notice").textContent = state.debt > 0
-          ? `借金は残り${state.debt}。返し切れば、この部屋を出る道も見えてくる。`
-          : "借金は返し終えた。ここを出るか、残るかを自分で選べる。";
+          ? `借金は残り${state.debt}。`
+          : "借金は返し終えた。この部屋を出ることもできる。";
 
-        const actions = $("actions");
-        actions.replaceChildren();
-
-        if (state.place === "room") {
-          actions.append(actionButton("休む", () => { state.energy += 2; advance("横になって休んだ。体力が少し戻った。"); }, true));
-          actions.append(actionButton("借金を返す（最大5）", payDebt, false, state.money <= 0 || state.debt <= 0));
-        }
-
-        if (state.place === "well") {
-          actions.append(actionButton("水を汲む・噂を聞く", () => advance(rumor()), true));
-        }
-
-        if (state.place === "market") {
-          actions.append(actionButton("食事を買う（2）", () => {
-            if (state.money < 2) return render("金が足りない。");
-            state.money -= 2;
-            state.energy += 2;
-            advance("食事を買って食べた。");
-          }, true));
-
-          actions.append(actionButton("香油を買う（3）", () => {
-            if (state.money < 3) return render("金が足りない。");
-            state.money -= 3;
-            state.rep++;
-            advance("安い香油を買った。身支度が少し整った。");
-          }));
-        }
-
-        if (state.place === "bath") {
-          actions.append(actionButton("浴場を使う（2）", () => {
-            if (state.money < 2) return render("金が足りない。");
-            state.money -= 2;
-            state.energy += 3;
-            advance("浴場を使った。身体が少し軽くなった。");
-          }, true, state.phase === 3));
-        }
-
-        if (state.place === "edge") {
-          actions.append(actionButton("花や香草を摘む", () => {
-            state.energy--;
-            const gain = 1 + Math.floor(Math.random() * 3);
-            state.money += gain;
-            advance(`花や香草を集め、${gain}で売れる分を得た。`);
-          }, true, state.phase === 3));
-        }
-
-        if (state.place === "pleasure") {
-          actions.append(actionButton("今夜、客を取る", work, true));
-          actions.append(actionButton("今日は取らずに帰る", () => {
-            state.place = "room";
-            advance("今日は客を取らず、部屋へ戻った。");
-          }));
-        }
-
-        actions.append(actionButton("何もせず時間を進める", () => advance("しばらく時間を過ごした。")));
-
-        const places = $("places");
-        places.replaceChildren();
-        places.append(actionButton("借り部屋", () => go("room"), false, state.place === "room", state.place === "room"));
-
-        if (state.phase !== 3) {
-          places.append(actionButton("共同水場", () => go("well"), false, state.place === "well", state.place === "well"));
-          places.append(actionButton("小市場", () => go("market"), false, state.place === "market", state.place === "market"));
-        }
-
-        if (state.phase === 0 || state.phase === 1 || state.phase === 2) {
-          places.append(actionButton("公衆浴場", () => go("bath"), false, state.place === "bath", state.place === "bath"));
-        }
-
-        if (state.phase !== 3) {
-          places.append(actionButton("水路沿い", () => go("edge"), false, state.place === "edge", state.place === "edge"));
-        }
-
-        if (state.phase >= 2) {
-          places.append(actionButton("歓楽の通り", () => go("pleasure"), false, state.place === "pleasure", state.place === "pleasure"));
-        }
-
-        showTab(state.tab);
+        renderChoices();
       }
 
-      $("actionTab").addEventListener("click", () => showTab("action"));
-      $("placeTab").addEventListener("click", () => showTab("place"));
+      function openMenu(open) {
+        $("menuLayer").classList.toggle("open", open);
+        $("menuLayer").setAttribute("aria-hidden", String(!open));
+      }
+
+      $("actionTab").addEventListener("click", () => setTab("action"));
+      $("placeTab").addEventListener("click", () => setTab("place"));
+      $("journalTab").addEventListener("click", () => setTab("journal"));
+      $("menuBtn").addEventListener("click", () => openMenu(true));
+      $("menuClose").addEventListener("click", () => openMenu(false));
+      $("menuLayer").addEventListener("click", e => {
+        if (e.target === $("menuLayer")) openMenu(false);
+      });
 
       render();
     })();
