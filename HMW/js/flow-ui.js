@@ -20,6 +20,8 @@
   const getCount = (itemId) => HMW.getItemCount?.(itemId) || 0;
   const hasFood = () => getCount("food_pack") + getCount("bread") + getCount("leftover_food") > 0;
   const getFlowButtons = () => [...document.querySelectorAll("[data-flow-slot]")];
+  const contextActions = () => HMW.lifeLoop?.getContextActions?.() || [];
+  const actionById = (id) => contextActions().find((action) => action.id === id) || null;
 
   const replaceActionButtons = () => {
     const originals = [...document.querySelectorAll("[data-action-slot]")];
@@ -61,10 +63,26 @@
     return p;
   };
 
-  const contextActions = () => HMW.lifeLoop?.getContextActions?.() || [];
-  const actionById = (id) => contextActions().find((action) => action.id === id) || null;
+  const getGateState = () => {
+    const gateApi = HMW.eventGate;
+    let blocking = null;
+    if (gateApi?.ensureBlockingEvent) blocking = gateApi.ensureBlockingEvent();
+    if (!blocking && gateApi?.getActiveBlocking) blocking = gateApi.getActiveBlocking();
+
+    const gate = HMW.state?.player?.progression?.eventGate || null;
+    const forced = Boolean(
+      gate?.forcedMoveFrom &&
+      gate.forcedMoveFrom === HMW.state?.world?.locationId
+    );
+
+    return { blocking, forced, gate };
+  };
 
   const movementBlock = () => {
+    const gateState = getGateState();
+    if (gateState.blocking) return gateState.blocking.policy?.blockedText || "先に目の前の出来事へ対応する必要がある。";
+    if (gateState.forced) return gateState.gate?.forcedReason || "先にこの場所を離れる必要がある。";
+
     const player = HMW.state?.player;
     const c = player?.condition || {};
     if (!player) return "状態を読み込めない。";
@@ -103,6 +121,16 @@
   };
 
   const requestEmergencyHelp = () => {
+    const gateState = getGateState();
+    if (gateState.blocking) {
+      HMW.eventGate?.openBlockingEvent?.();
+      return;
+    }
+    if (gateState.forced) {
+      HMW.eventGate?.openForcedMove?.();
+      return;
+    }
+
     const player = HMW.state.player;
     const c = player.condition;
     const emergency = getEmergencyState();
@@ -153,28 +181,41 @@
     if (emergency === "hunger") {
       HMW.addItem?.("bread", 1);
       c.health = Math.max(6, c.health);
-      content.append(makeParagraph("声をかけた相手が、食べられる物を一つ渡した。これで生活が解決するわけではないが、今すぐ食べることはできる。"));
+      content.append(makeParagraph("声をかけた相手が、食べられる物を一つ渡した。今すぐ食べることはできる。"));
     } else if (emergency === "fatigue") {
       c.fatigue = Math.min(c.fatigue, 90);
       c.health = Math.max(6, c.health);
-      content.append(makeParagraph("その場で座って休めるようにされ、しばらく動かずに済んだ。疲労が少し下がった。"));
+      content.append(makeParagraph("その場で座って休めるようにされ、疲労が少し下がった。"));
     } else if (emergency === "cold") {
       c.warmth = Math.max(c.warmth, 12);
       c.health = Math.max(6, c.health);
-      content.append(makeParagraph("短時間だけ寒さを避けられる場所につながった。身体の冷えが少しましになった。"));
+      content.append(makeParagraph("短時間だけ寒さを避けられる場所につながり、身体の冷えが少しましになった。"));
     } else {
       c.health = Math.max(c.health, 12);
-      content.append(makeParagraph("周囲の人が異変に気づき、最低限の救急対応につながった。動ける程度まで持ち直したが、生活上の問題は残っている。"));
+      content.append(makeParagraph("周囲の人が異変に気づき、最低限の救急対応につながった。"));
     }
 
     HMW.app?.appendHistory?.("emergency_help", "助けを求め、最低限の援助につながった。", { success: true, emergency });
-    content.append(makeButton("持ち物・状態を確認する", () => {
-      document.getElementById("inventoryButton")?.click();
-    }));
     renderMain();
   };
 
   const choosePrimaryAction = () => {
+    const gateState = getGateState();
+    if (gateState.blocking) {
+      return {
+        kind: "blocking_event",
+        label: "対応する",
+        run: () => HMW.eventGate?.openBlockingEvent?.()
+      };
+    }
+    if (gateState.forced) {
+      return {
+        kind: "forced_move",
+        label: "この場所を離れる",
+        run: () => HMW.eventGate?.openForcedMove?.()
+      };
+    }
+
     const state = HMW.state?.player;
     const world = HMW.state?.world;
     const condition = state?.condition || {};
@@ -243,6 +284,14 @@
   };
 
   const contextSummary = () => {
+    const gateState = getGateState();
+    if (gateState.blocking) {
+      return gateState.blocking.policy?.blockedText || "目の前の出来事に対応する必要がある。";
+    }
+    if (gateState.forced) {
+      return `${gateState.gate?.forcedReason || "この場所には留まれない。"} 先にこの場所を離れる必要がある。`;
+    }
+
     const context = HMW.getTurnContext?.();
     if (!context) return "現在の状況を読み込めない。";
     if (context.lifeStatus === "dead") return "この主人公は死亡している。このセーブでは行動を続けられない。";
@@ -272,58 +321,98 @@
     const primary = choosePrimaryAction();
     if (primary?.label && primary.kind !== "dead") parts.push(`今ここでまず出来ることは「${primary.label}」。`);
 
-    const otherActions = contextActions().filter((action) => action.id !== primary?.id).slice(0, 3).map((action) => action.label);
+    const otherActions = contextActions()
+      .filter((action) => action.id !== primary?.id)
+      .slice(0, 3)
+      .map((action) => action.label);
     if (otherActions.length) parts.push(`ほかに「${otherActions.join("」「")}」もできる。`);
     return parts.join(" ");
+  };
+
+  const setButton = (button, label, onClick, disabled = false) => {
+    if (!button) return;
+    button.textContent = label;
+    button.disabled = disabled;
+    button.onclick = disabled ? null : onClick;
   };
 
   const renderMain = () => {
     const state = HMW.state?.player;
     if (!state) return;
 
+    const gateState = getGateState();
     const text = document.getElementById("sceneText");
+    const buttons = getFlowButtons();
+    if (buttons.length < 3) return;
+
+    if (gateState.blocking) {
+      const blockedText = gateState.blocking.policy?.blockedText || "目の前の出来事に対応する必要がある。";
+      if (text && text.textContent !== blockedText) text.textContent = blockedText;
+      setButton(buttons[0], "対応する", () => HMW.eventGate?.openBlockingEvent?.(), false);
+      setButton(buttons[1], "対応が必要", null, true);
+      setButton(buttons[2], "移動できない", null, true);
+      const map = document.getElementById("mapButton");
+      if (map) map.disabled = true;
+      return;
+    }
+
+    if (gateState.forced) {
+      const forcedText = `${gateState.gate?.forcedReason || "この場所には留まれない。"} 先にこの場所を離れる必要がある。`;
+      if (text && text.textContent !== forcedText) text.textContent = forcedText;
+      setButton(buttons[0], "この場所を離れる", () => HMW.eventGate?.openForcedMove?.(), false);
+      setButton(buttons[1], "先に移動が必要", null, true);
+      setButton(buttons[2], "先に移動が必要", null, true);
+      const map = document.getElementById("mapButton");
+      if (map) map.disabled = true;
+      return;
+    }
+
+    const map = document.getElementById("mapButton");
+    if (map && map.dataset.eventGateDisabled !== "true") map.disabled = false;
+
     if (text) {
       const summary = contextSummary();
       if (text.textContent !== summary) text.textContent = summary;
     }
 
-    const buttons = getFlowButtons();
-    if (buttons.length < 3) return;
+    if (state.lifeStatus === "dead") {
+      setButton(buttons[0], "死亡", null, true);
+      setButton(buttons[1], "行動できない", null, true);
+      setButton(buttons[2], "移動できない", null, true);
+      return;
+    }
+
     const primary = choosePrimaryAction();
     const context = HMW.getTurnContext?.() || {};
     const peopleCount = (context.people || []).length;
     const ambientCount = (context.ambientPeople || []).length;
 
-    if (state.lifeStatus === "dead") {
-      buttons.forEach((button) => { button.disabled = true; button.onclick = null; });
-      buttons[0].textContent = "死亡";
-      buttons[1].textContent = "行動できない";
-      buttons[2].textContent = "移動できない";
-      return;
-    }
+    setButton(buttons[0], primary?.label || "ここで行動する", () => primary?.run?.(), !primary?.run);
 
-    buttons[0].disabled = !primary?.run;
-    buttons[0].textContent = primary?.label || "ここで行動する";
-    buttons[0].onclick = () => primary?.run?.();
-
-    buttons[1].disabled = false;
-    if (context.event) buttons[1].textContent = "人・出来事を見る";
-    else if (peopleCount || ambientCount) buttons[1].textContent = "人と関わる";
-    else buttons[1].textContent = "周囲を見る";
-    buttons[1].onclick = () => HMW.lifeLoop?.openCurrentScene?.();
+    const peopleLabel = context.event
+      ? "人・出来事を見る"
+      : (peopleCount || ambientCount ? "人と関わる" : "周囲を見る");
+    setButton(buttons[1], peopleLabel, () => HMW.lifeLoop?.openCurrentScene?.(), false);
 
     const blocked = movementBlock();
-    buttons[2].disabled = Boolean(blocked);
-    buttons[2].textContent = blocked ? "移動できない" : "移動する";
-    buttons[2].onclick = blocked ? null : openMove;
+    setButton(buttons[2], blocked ? "移動できない" : "移動する", blocked ? null : openMove, Boolean(blocked));
   };
 
   const afterMove = (locationId) => {
+    const gateState = getGateState();
+    if (gateState.blocking) {
+      HMW.eventGate?.openBlockingEvent?.();
+      return;
+    }
+    if (gateState.forced) {
+      HMW.eventGate?.openForcedMove?.();
+      return;
+    }
+
     const blocked = movementBlock();
     if (blocked) {
       const content = openModal("移動できない");
       content?.append(makeParagraph(blocked));
-      content?.append(makeButton("今できることを見る", requestEmergencyHelp));
       renderMain();
       return;
     }
@@ -333,12 +422,21 @@
   };
 
   function openMove() {
+    const gateState = getGateState();
+    if (gateState.blocking) {
+      HMW.eventGate?.openBlockingEvent?.();
+      return;
+    }
+    if (gateState.forced) {
+      HMW.eventGate?.openForcedMove?.();
+      return;
+    }
+
     const blocked = movementBlock();
     if (blocked) {
       const content = openModal("移動できない");
       if (!content) return;
       content.append(makeParagraph(blocked));
-      content.append(makeButton("助けを求める", requestEmergencyHelp));
       return;
     }
 
@@ -356,11 +454,31 @@
 
     const sceneText = document.getElementById("sceneText");
     if (sceneText) {
-      const observer = new MutationObserver(() => queueMicrotask(renderMain));
+      let scheduled = false;
+      const observer = new MutationObserver(() => {
+        if (scheduled) return;
+        scheduled = true;
+        setTimeout(() => {
+          scheduled = false;
+          renderMain();
+        }, 0);
+      });
       observer.observe(sceneText, { childList: true, characterData: true, subtree: true });
     }
 
     document.addEventListener("click", (event) => {
+      const gateState = getGateState();
+      if (gateState.blocking || gateState.forced) {
+        const target = event.target.closest?.("[data-flow-slot]");
+        if (target && target.getAttribute("data-flow-slot") !== "1") {
+          event.preventDefault();
+          event.stopImmediatePropagation();
+          if (gateState.blocking) HMW.eventGate?.openBlockingEvent?.();
+          else HMW.eventGate?.openForcedMove?.();
+          return;
+        }
+      }
+
       const sleepButton = event.target.closest?.("button");
       if (sleepButton?.textContent?.trim() === "ここで寝る") {
         const c = HMW.state?.player?.condition || {};
@@ -380,5 +498,11 @@
   };
 
   document.addEventListener("DOMContentLoaded", install);
-  HMW.flowUI = { render: renderMain, openMove, moveTo: afterMove, requestEmergencyHelp, movementBlock };
+  HMW.flowUI = {
+    render: renderMain,
+    openMove,
+    moveTo: afterMove,
+    requestEmergencyHelp,
+    movementBlock
+  };
 })();
