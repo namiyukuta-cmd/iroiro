@@ -23,7 +23,8 @@ body {
   overflow: hidden;
 }
 
-button {
+button,
+a {
   font: inherit;
   color: inherit;
 }
@@ -66,9 +67,12 @@ button {
   border: 1px solid #b9b1a5;
   border-radius: 12px;
   background: #faf8f3;
+  font-weight: 800;
 }
 
-.status-strip {
+.status-strip,
+.quick-menu {
+  min-width: 0;
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 5px;
@@ -113,6 +117,34 @@ button {
   font-size: 28px;
   line-height: 1;
   overflow: visible;
+}
+
+.quick-menu {
+  border: 1px solid #b9b1a5;
+  border-radius: 12px;
+  overflow: hidden;
+  background: #faf8f3;
+  gap: 0;
+}
+
+.quick-menu-item {
+  min-width: 0;
+  min-height: 48px;
+  padding: 6px 2px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 0;
+  border-right: 1px solid #d5d0c7;
+  background: transparent;
+  text-decoration: none;
+  font-size: 17px;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.quick-menu-item:last-child {
+  border-right: 0;
 }
 
 .condition-panel {
@@ -339,8 +371,18 @@ button {
     gap: 3px;
   }
 
+  .quick-menu {
+    gap: 0;
+  }
+
   .status-cell,
   .condition-cell {
+    padding-left: 1px;
+    padding-right: 1px;
+  }
+
+  .quick-menu-item {
+    font-size: 17px;
     padding-left: 1px;
     padding-right: 1px;
   }
@@ -348,7 +390,8 @@ button {
 
 @media (max-height: 760px) {
   .status-cell,
-  .condition-cell {
+  .condition-cell,
+  .quick-menu-item {
     min-height: 44px;
   }
 
