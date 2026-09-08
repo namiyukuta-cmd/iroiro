@@ -22,14 +22,8 @@
         aiTags: ["police", "questioning", "street_life", "caution"],
         summary: "巡回中の警官が主人公を気に留め、声をかける。",
         outcomes: {
-          answer_calmly: {
-            label: "落ち着いて応じる",
-            effects: {}
-          },
-          leave_area: {
-            label: "その場を離れる",
-            effects: {}
-          }
+          answer_calmly: { label: "落ち着いて応じる", effects: {} },
+          leave_area: { label: "その場を離れる", effects: {} }
         }
       },
 
@@ -45,14 +39,8 @@
         aiTags: ["danger", "thug", "avoidance", "street_life"],
         summary: "この辺りに不良が集まっている。通るか避けるか判断が必要になる。",
         outcomes: {
-          avoid: {
-            label: "近づかない",
-            effects: {}
-          },
-          pass_through: {
-            label: "そのまま通る",
-            effects: {}
-          }
+          avoid: { label: "近づかない", effects: {} },
+          pass_through: { label: "そのまま通る", effects: {} }
         }
       },
 
@@ -60,28 +48,23 @@
         name: "食料支援",
         category: "support",
         repeatable: true,
+        oncePerDay: true,
+        dailyChance: 0.65,
         weight: 5,
         locations: ["charity_center"],
-        timeSlots: ["morning", "daytime", "evening"],
+        timeSlots: ["daytime"],
         conditions: {},
         participants: ["charity_staff"],
-        aiTags: ["support", "food", "volunteer"],
-        summary: "支援施設で食料を受け取れる時間になっている。",
+        aiTags: ["support", "food", "volunteer", "limited_supply"],
+        summary: "配布時間に間に合い、食料が残っていれば一人分を受け取れる。毎日必ず配布されるわけではない。",
         outcomes: {
           receive: {
             label: "受け取る",
             effects: {
-              condition: { hunger: -12 },
-              relationship: {
-                npcId: "charity_staff",
-                familiarity: 1
-              }
+              condition: { hunger: -12 }
             }
           },
-          decline: {
-            label: "今回は受け取らない",
-            effects: {}
-          }
+          decline: { label: "今回は受け取らない", effects: {} }
         }
       },
 
@@ -89,6 +72,7 @@
         name: "危険な場所の噂",
         category: "information",
         repeatable: true,
+        oncePerDay: true,
         weight: 3,
         locations: ["park", "underpass", "riverside"],
         timeSlots: ["morning", "evening", "night", "lateNight"],
@@ -107,10 +91,7 @@
               }
             }
           },
-          ignore: {
-            label: "聞き流す",
-            effects: {}
-          }
+          ignore: { label: "聞き流す", effects: {} }
         }
       },
 
@@ -118,6 +99,8 @@
         name: "店員が廃棄予定の食べ物を気にする",
         category: "shop",
         repeatable: true,
+        oncePerDay: true,
+        dailyChance: 0.35,
         weight: 2,
         locations: ["convenience_store"],
         timeSlots: ["evening", "night"],
@@ -130,7 +113,7 @@
         },
         participants: ["convenience_clerk"],
         aiTags: ["shop", "leftovers", "familiarity", "small_kindness"],
-        summary: "何度か顔を合わせた店員が、廃棄予定の食べ物を気にしている。",
+        summary: "何度も顔を合わせている店員が、たまたま廃棄予定の食べ物を渡せそうな日がある。",
         outcomes: {
           accept: {
             label: "受け取る",
@@ -169,16 +152,8 @@
         aiTags: ["rain", "shelter", "weather", "street_life"],
         summary: "雨を避けられる場所がある。ここで少しやり過ごすことができる。",
         outcomes: {
-          shelter: {
-            label: "雨宿りする",
-            effects: {
-              condition: { wetness: -8 }
-            }
-          },
-          continue: {
-            label: "移動を続ける",
-            effects: {}
-          }
+          shelter: { label: "雨宿りする", effects: { condition: { wetness: -8 } } },
+          continue: { label: "移動を続ける", effects: {} }
         }
       },
 
@@ -194,14 +169,8 @@
         aiTags: ["resident", "complaint", "police_risk", "street_life"],
         summary: "住宅街で長く留まっていることを住民に警戒される。",
         outcomes: {
-          leave: {
-            label: "場所を離れる",
-            effects: {}
-          },
-          explain: {
-            label: "事情を説明する",
-            effects: {}
-          }
+          leave: { label: "場所を離れる", effects: {} },
+          explain: { label: "事情を説明する", effects: {} }
         }
       },
 
@@ -209,13 +178,15 @@
         name: "売れそうな廃品を見つける",
         category: "resource",
         repeatable: true,
+        oncePerDay: true,
+        dailyChance: 0.45,
         weight: 3,
         locations: ["riverside", "industrial_street"],
         timeSlots: ["morning", "daytime", "evening"],
         conditions: {},
         participants: [],
         aiTags: ["scrap", "resource", "street_life"],
-        summary: "道端に、廃品回収所へ持ち込めそうな物が落ちている。",
+        summary: "探せば必ず見つかるわけではないが、道端に換金できそうな廃品が残っていることがある。",
         outcomes: {
           take: {
             label: "拾う",
@@ -223,13 +194,19 @@
               inventoryAdd: [{ id: "scrap_piece", name: "売れそうな廃品", quantity: 1 }]
             }
           },
-          leave: {
-            label: "そのままにする",
-            effects: {}
-          }
+          leave: { label: "そのままにする", effects: {} }
         }
       }
     }
+  };
+
+  const stableRoll = (key) => {
+    let hash = 2166136261;
+    for (let i = 0; i < key.length; i += 1) {
+      hash ^= key.charCodeAt(i);
+      hash = Math.imul(hash, 16777619);
+    }
+    return (hash >>> 0) / 4294967296;
   };
 
   const getRelationship = (npcId) => {
@@ -237,9 +214,7 @@
 
     if (!HMW.state.relationships[npcId] && typeof HMW.getNpc === "function") {
       const npc = HMW.getNpc(npcId);
-      if (npc?.relationship) {
-        HMW.state.relationships[npcId] = clone(npc.relationship);
-      }
+      if (npc?.relationship) HMW.state.relationships[npcId] = clone(npc.relationship);
     }
 
     return HMW.state.relationships[npcId] || null;
@@ -279,13 +254,14 @@
     if (event.conditions?.weather?.length && !event.conditions.weather.includes(weather)) return false;
     if (!relationshipMeets(event.conditions?.relationship)) return false;
 
+    if (isNumber(event.dailyChance) && stableRoll(`event:${eventId}:${day}`) >= event.dailyChance) return false;
+
     const active = HMW.state.events.active || [];
     if (active.some((entry) => entry.eventId === eventId)) return false;
 
-    if (!event.repeatable) {
-      const completed = HMW.state.events.completed || [];
-      if (completed.some((entry) => entry.eventId === eventId)) return false;
-    }
+    const completed = HMW.state.events.completed || [];
+    if (event.oncePerDay && completed.some((entry) => entry.eventId === eventId && entry.completedDay === day)) return false;
+    if (!event.repeatable && completed.some((entry) => entry.eventId === eventId)) return false;
 
     return true;
   };
@@ -315,16 +291,12 @@
   };
 
   const applyEffects = (effects = {}) => {
-    if (isNumber(effects.money)) {
-      HMW.state.player.money += effects.money;
-    }
+    if (isNumber(effects.money)) HMW.state.player.money += effects.money;
 
     if (effects.condition) {
       Object.entries(effects.condition).forEach(([key, amount]) => {
         const current = HMW.state.player.condition[key];
-        if (isNumber(current) && isNumber(amount)) {
-          HMW.state.player.condition[key] = clamp(current + amount);
-        }
+        if (isNumber(current) && isNumber(amount)) HMW.state.player.condition[key] = clamp(current + amount);
       });
     }
 
@@ -339,9 +311,7 @@
     }
 
     if (Array.isArray(effects.inventoryAdd)) {
-      effects.inventoryAdd.forEach((item) => {
-        HMW.state.player.inventory.push(clone(item));
-      });
+      effects.inventoryAdd.forEach((item) => HMW.state.player.inventory.push(clone(item)));
     }
   };
 
@@ -350,11 +320,9 @@
     return event ? { id: eventId, ...clone(event) } : null;
   };
 
-  const getEligibleEvents = (context = {}) => {
-    return Object.entries(eventData.definitions)
-      .filter(([eventId, event]) => eventMatches(eventId, event, context))
-      .map(([eventId, event]) => ({ id: eventId, ...clone(event) }));
-  };
+  const getEligibleEvents = (context = {}) => Object.entries(eventData.definitions)
+    .filter(([eventId, event]) => eventMatches(eventId, event, context))
+    .map(([eventId, event]) => ({ id: eventId, ...clone(event) }));
 
   const startEvent = (eventId, context = {}) => {
     const event = eventData.definitions[eventId];
@@ -372,11 +340,7 @@
     };
 
     HMW.state.events.active.push(instance);
-    addHistory("event_start", `${event.name}が発生した。`, {
-      eventId,
-      instanceId: instance.instanceId
-    });
-
+    addHistory("event_start", `${event.name}が発生した。`, { eventId, instanceId: instance.instanceId });
     return clone(instance);
   };
 
@@ -389,7 +353,6 @@
 
     const picked = weightedPick(eligible);
     if (!picked) return null;
-
     return startEvent(picked[0], options);
   };
 
