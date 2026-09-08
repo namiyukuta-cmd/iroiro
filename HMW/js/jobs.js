@@ -377,10 +377,16 @@
   window.HMW.isJobAvailableToday = isAvailableToday;
   window.HMW.isJobAccepted = isAccepted;
 
-  // 旧UI向け。条件を満たした仕事だけを返すが、検索・応募・採用を飛ばして就労させる用途には使わない。
+  // 旧UIから検索・応募・採用を飛ばして仕事を直接出さない。
   window.HMW.getJobsAtLocation = (locationId, timeSlot = null) => {
-    return getJobSearchCandidates(locationId, timeSlot)
-      .filter((job) => getApplicationStatus(job.id).ok)
-      .map((job) => clone(job));
+    const day = HMW.state?.world?.day;
+    const accepted = HMW.state?.player?.employment?.search?.accepted || [];
+
+    return accepted
+      .filter((entry) => entry.day === day && entry.status === "accepted")
+      .map((entry) => window.HMW.getJob(entry.jobId))
+      .filter(Boolean)
+      .filter((job) => job.locationId === locationId)
+      .filter((job) => !timeSlot || job.timeSlots.includes(timeSlot));
   };
 })();
