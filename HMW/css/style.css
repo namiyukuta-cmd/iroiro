@@ -108,6 +108,13 @@ button {
   white-space: nowrap;
 }
 
+.weather-cell strong {
+  margin-top: 0;
+  font-size: 28px;
+  line-height: 1;
+  overflow: visible;
+}
+
 .condition-panel {
   margin-top: 7px;
 }
