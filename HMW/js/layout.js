@@ -13,6 +13,14 @@
     fatigue: 25
   };
 
+  const WEATHER_ICONS = {
+    clear: "☀️",
+    cloudy: "☁️",
+    rain: "🌧️",
+    heavyRain: "🌧️",
+    cold: "❄️"
+  };
+
   const isNumber = (value) => typeof value === "number" && Number.isFinite(value);
 
   const ensureCondition = () => {
@@ -31,6 +39,11 @@
     if (element) element.textContent = String(value);
   };
 
+  const renderWeatherIcon = () => {
+    const weatherId = HMW.state?.world?.weather;
+    setText("weatherValue", WEATHER_ICONS[weatherId] || "―");
+  };
+
   const renderConditionPanel = () => {
     if (!HMW.state?.player) return;
 
@@ -43,6 +56,7 @@
     setText("warmthValue", condition.warmth);
     setText("wetnessValue", condition.wetness);
     setText("fatigueValue", condition.fatigue);
+    renderWeatherIcon();
 
     const sleepingPlaceId = HMW.state.player.sleepingPlaceId;
     const sleepingPlace = sleepingPlaceId
@@ -68,7 +82,6 @@
       "dayValue",
       "timeValue",
       "moneyValue",
-      "weatherValue",
       "locationName"
     ];
 
@@ -94,6 +107,7 @@
   };
 
   HMW.renderConditionPanel = renderConditionPanel;
+  HMW.renderWeatherIcon = renderWeatherIcon;
 
   document.addEventListener("DOMContentLoaded", () => {
     renderConditionPanel();
