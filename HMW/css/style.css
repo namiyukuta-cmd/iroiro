@@ -33,14 +33,14 @@ button {
   height: 100svh;
   margin: 0 auto;
   display: grid;
-  grid-template-rows: auto 1fr auto;
+  grid-template-rows: auto minmax(0, 1fr) auto;
   background: #f7f5ef;
   border-left: 1px solid #d5d0c7;
   border-right: 1px solid #d5d0c7;
 }
 
 .topbar {
-  padding: max(12px, env(safe-area-inset-top)) 14px 10px;
+  padding: max(10px, env(safe-area-inset-top)) 12px 10px;
   background: #e8e3d9;
   border-bottom: 1px solid #c9c2b7;
 }
@@ -75,24 +75,24 @@ button {
 }
 
 .status-strip {
-  margin-top: 10px;
+  margin-top: 9px;
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 6px;
+  gap: 5px;
 }
 
 .status-cell {
   min-width: 0;
-  padding: 7px 5px;
+  padding: 6px 4px;
   text-align: center;
   border: 1px solid #c9c2b7;
   border-radius: 10px;
-  background: rgba(255, 255, 255, 0.48);
+  background: rgba(255, 255, 255, 0.5);
 }
 
 .status-label {
   display: block;
-  margin-bottom: 2px;
+  margin-bottom: 1px;
   font-size: 0.68rem;
   letter-spacing: 0.04em;
   color: #6a706f;
@@ -106,12 +106,74 @@ button {
   font-size: 0.92rem;
 }
 
+.condition-panel {
+  margin-top: 8px;
+  padding: 8px;
+  border: 1px solid #c9c2b7;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.36);
+}
+
+.condition-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 5px;
+}
+
+.condition-cell {
+  min-width: 0;
+  min-height: 38px;
+  padding: 5px 7px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+  border-radius: 8px;
+  background: #f7f4ed;
+}
+
+.condition-cell span {
+  white-space: nowrap;
+  color: #5d6263;
+  font-size: 0.88rem;
+  font-weight: 700;
+}
+
+.condition-cell strong {
+  min-width: 2ch;
+  text-align: right;
+  font-size: 0.95rem;
+}
+
+.sleeping-place-row {
+  margin-top: 6px;
+  min-height: 34px;
+  padding: 5px 7px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  border-top: 1px solid #d6d0c6;
+  font-size: 0.88rem;
+}
+
+.sleeping-place-row span {
+  color: #5d6263;
+  font-weight: 700;
+}
+
+.sleeping-place-row strong {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 .main-view {
   min-height: 0;
-  padding: 10px 12px;
+  padding: 9px 12px;
   display: grid;
   grid-template-rows: minmax(0, 1fr) auto auto;
-  gap: 10px;
+  gap: 9px;
   overflow: hidden;
 }
 
@@ -136,9 +198,9 @@ button {
   left: 10px;
   right: 10px;
   bottom: 10px;
-  max-height: 48%;
+  max-height: 52%;
   overflow-y: auto;
-  padding: 13px 14px;
+  padding: 12px 13px;
   border: 1px solid rgba(90, 86, 79, 0.22);
   border-radius: 14px;
   background: rgba(250, 248, 243, 0.93);
@@ -158,8 +220,8 @@ button {
 }
 
 .scene-text {
-  margin-top: 9px;
-  line-height: 1.7;
+  margin-top: 8px;
+  line-height: 1.65;
 }
 
 .scene-text p {
@@ -167,7 +229,7 @@ button {
 }
 
 .notice-area {
-  padding: 10px 12px;
+  padding: 9px 11px;
   border-radius: 12px;
   background: #ebe6dc;
   border: 1px solid #cfc7bb;
@@ -175,7 +237,7 @@ button {
 
 .action-area {
   display: grid;
-  gap: 8px;
+  gap: 7px;
 }
 
 .action-button,
@@ -188,15 +250,15 @@ button {
 
 .action-button {
   width: 100%;
-  padding: 10px 14px;
+  padding: 9px 13px;
   text-align: left;
 }
 
 .bottom-nav {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 7px;
-  padding: 9px 10px max(9px, env(safe-area-inset-bottom));
+  gap: 6px;
+  padding: 8px 10px max(8px, env(safe-area-inset-bottom));
   border-top: 1px solid #c9c2b7;
   background: #e8e3d9;
 }
@@ -252,12 +314,47 @@ button {
     font-size: 17px;
   }
 
-  .status-strip {
+  .topbar {
+    padding-left: 10px;
+    padding-right: 10px;
+  }
+
+  .status-strip,
+  .condition-grid {
     gap: 4px;
   }
 
   .status-cell {
     padding-left: 3px;
     padding-right: 3px;
+  }
+
+  .condition-cell {
+    padding-left: 6px;
+    padding-right: 6px;
+  }
+}
+
+@media (max-height: 760px) {
+  .condition-panel {
+    padding: 6px;
+  }
+
+  .condition-cell {
+    min-height: 34px;
+    padding-top: 3px;
+    padding-bottom: 3px;
+  }
+
+  .sleeping-place-row {
+    min-height: 30px;
+    margin-top: 4px;
+    padding-top: 3px;
+    padding-bottom: 3px;
+  }
+
+  .main-view {
+    padding-top: 7px;
+    padding-bottom: 7px;
   }
 }
