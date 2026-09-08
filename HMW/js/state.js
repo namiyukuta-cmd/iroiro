@@ -6,7 +6,7 @@
   const createInitialState = () => ({
     meta: {
       gameId: "HMW",
-      stateVersion: 4,
+      stateVersion: 5,
       saveId: null,
       createdAt: null,
       updatedAt: null
@@ -38,6 +38,12 @@
         phone: false,
         bankAccount: false,
         contactAddress: false
+      },
+
+      survival: {
+        movementCount: 0,
+        movesThisSlot: 0,
+        lastProcessedDay: 1
       },
 
       employment: {
