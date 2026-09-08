@@ -145,13 +145,16 @@
     }
   };
 
-  const buildLoveInterest = (id, data) => ({
-    id,
-    named: true,
-    romanceCandidate: true,
-    displayName: data.displayName || data.temporaryLabel,
-    ...clone(data)
-  });
+  const buildLoveInterest = (id, data) => {
+    const copy = clone(data);
+    return {
+      id,
+      named: true,
+      romanceCandidate: true,
+      ...copy,
+      displayName: copy.displayName || copy.temporaryLabel || copy.role || "人物"
+    };
+  };
 
   const ensureRelationship = (id) => {
     const data = loveInterestData.definitions[id];
