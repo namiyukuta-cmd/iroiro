@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#f4f1ea">
+  <title>HMW</title>
+  <link rel="stylesheet" href="./css/style.css">
+</head>
+<body>
+  <div class="game-shell">
+    <header class="topbar" aria-label="ゲーム情報">
+      <div class="topbar-main">
+        <div>
+          <div class="game-title">HMW</div>
+          <div id="locationName" class="location-name">現在地</div>
+        </div>
+        <button id="menuButton" class="icon-button" type="button" aria-label="メニュー">☰</button>
+      </div>
+
+      <div class="status-strip" aria-label="現在の状態">
+        <div class="status-cell">
+          <span class="status-label">DAY</span>
+          <strong id="dayValue">1</strong>
+        </div>
+        <div class="status-cell">
+          <span class="status-label">TIME</span>
+          <strong id="timeValue">朝</strong>
+        </div>
+        <div class="status-cell">
+          <span class="status-label">MONEY</span>
+          <strong id="moneyValue">0</strong>
+        </div>
+        <div class="status-cell">
+          <span class="status-label">WEATHER</span>
+          <strong id="weatherValue">―</strong>
+        </div>
+      </div>
+    </header>
+
+    <main class="main-view">
+      <section id="sceneArea" class="scene-area" aria-label="現在地の画面">
+        <div id="sceneBackground" class="scene-background"></div>
+
+        <div id="sceneOverlay" class="scene-overlay">
+          <div class="scene-heading-row">
+            <h1 id="sceneTitle" class="scene-title">現在地</h1>
+            <span id="sceneTime" class="scene-time"></span>
+          </div>
+
+          <div id="sceneText" class="scene-text" aria-live="polite">
+            <p>ここに現在の状況が表示されます。</p>
+          </div>
+        </div>
+      </section>
+
+      <section id="noticeArea" class="notice-area" aria-live="polite" hidden></section>
+
+      <section id="actionArea" class="action-area" aria-label="行動">
+        <button class="action-button" type="button" data-action-slot="1">行動</button>
+        <button class="action-button" type="button" data-action-slot="2">行動</button>
+        <button class="action-button" type="button" data-action-slot="3">行動</button>
+      </section>
+    </main>
+
+    <nav class="bottom-nav" aria-label="ゲームメニュー">
+      <button id="statusButton" class="nav-button" type="button">状態</button>
+      <button id="inventoryButton" class="nav-button" type="button">持ち物</button>
+      <button id="logButton" class="nav-button" type="button">記録</button>
+      <button id="saveButton" class="nav-button" type="button">セーブ</button>
+    </nav>
+  </div>
+
+  <div id="modalLayer" class="modal-layer" hidden>
+    <div class="modal-backdrop" data-close-modal></div>
+    <section id="modalPanel" class="modal-panel" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+      <header class="modal-header">
+        <h2 id="modalTitle">メニュー</h2>
+        <button id="modalCloseButton" class="icon-button" type="button" aria-label="閉じる">×</button>
+      </header>
+      <div id="modalContent" class="modal-content"></div>
+    </section>
+  </div>
+
+  <!-- ゲーム内容・状態・イベント・NPC・セーブ処理は後からJSで接続する -->
+</body>
+</html>
