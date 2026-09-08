@@ -6,7 +6,7 @@
   const createInitialState = () => ({
     meta: {
       gameId: "HMW",
-      stateVersion: 6,
+      stateVersion: 7,
       saveId: null,
       createdAt: null,
       updatedAt: null
@@ -23,6 +23,8 @@
       name: "",
       age: null,
       money: 0,
+      lifeStatus: "active",
+      causeOfDeath: null,
 
       condition: {
         health: 80,
@@ -43,7 +45,8 @@
       survival: {
         movementCount: 0,
         movesThisSlot: 0,
-        lastProcessedDay: 1
+        lastProcessedDay: 1,
+        lastCriticalKey: null
       },
 
       employment: {
@@ -75,7 +78,10 @@
           scavengingAttempts: 0,
           restCount: 0,
           washed: false,
-          sleepSpotAttempts: {}
+          foodSupportReceived: false,
+          supportConsulted: false,
+          sleepSpotAttempts: {},
+          npcContacts: {}
         },
         social: {
           lastMeaningfulContact: {}
