@@ -45,6 +45,8 @@
       survival: {
         movementCount: 0,
         movesThisSlot: 0,
+        arrivalCount: 0,
+        collapseCount: 0,
         lastProcessedDay: 1,
         lastCriticalKey: null
       },
@@ -81,10 +83,12 @@
           foodSupportReceived: false,
           supportConsulted: false,
           sleepSpotAttempts: {},
-          npcContacts: {}
+          npcContacts: {},
+          ambientContacts: {}
         },
         social: {
-          lastMeaningfulContact: {}
+          lastMeaningfulContact: {},
+          knownTips: []
         }
       },
 
