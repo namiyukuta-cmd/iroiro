@@ -12,19 +12,26 @@
         locationId: "charity_center",
         providerNpcId: "charity_staff",
         repeatable: true,
-        timeSlots: ["morning", "daytime", "evening"],
-        availabilityChance: 0.30,
+        discoveryMode: "relationship",
+        timeSlots: ["daytime", "evening"],
+        leadChance: 0.22,
+        availabilityChance: 0.35,
+        acceptanceChance: 0.90,
         requirements: {
           relationship: {
             npcId: "charity_staff",
-            minFamiliarity: 3,
-            minGoodwill: 1
+            minFamiliarity: 4,
+            minGoodwill: 2,
+            minTrust: 1
+          },
+          condition: {
+            minHealth: 35,
+            maxFatigue: 75
           }
         },
         reward: {
           moneyMin: 50,
           moneyMax: 80,
-          items: [],
           relationship: {
             npcId: "charity_staff",
             trust: 1,
@@ -36,7 +43,7 @@
           hunger: 2,
           timeSteps: 1
         },
-        notes: "支援施設で何度か顔を合わせ、信頼されてから頼まれることがある小仕事。"
+        notes: "支援施設で何度か顔を合わせ、相手から頼まれた時だけ発生する小仕事。"
       },
 
       street_cleaning: {
@@ -45,8 +52,11 @@
         locationId: "labor_office",
         providerNpcId: "labor_staff",
         repeatable: true,
+        discoveryMode: "listing",
         timeSlots: ["morning", "daytime"],
+        leadChance: 0.38,
         availabilityChance: 0.30,
+        acceptanceChance: 0.62,
         requirements: {
           workAccess: {
             identityDocument: true,
@@ -54,20 +64,20 @@
           },
           condition: {
             minHealth: 40,
-            maxFatigue: 75
+            minHygiene: 25,
+            maxFatigue: 70
           }
         },
         reward: {
           moneyMin: 120,
-          moneyMax: 180,
-          items: []
+          moneyMax: 180
         },
         cost: {
           fatigue: 15,
           hunger: 5,
           timeSteps: 2
         },
-        notes: "求人がある日に、本人確認と連絡先情報を確認されたうえで紹介される短時間仕事。"
+        notes: "求人がある日に本人確認と連絡先を確認され、その上で選考される短時間仕事。"
       },
 
       delivery: {
@@ -76,8 +86,11 @@
         locationId: "labor_office",
         providerNpcId: "labor_staff",
         repeatable: true,
+        discoveryMode: "listing",
         timeSlots: ["morning", "daytime"],
+        leadChance: 0.28,
         availabilityChance: 0.22,
+        acceptanceChance: 0.50,
         requirements: {
           workAccess: {
             identityDocument: true,
@@ -87,20 +100,20 @@
           },
           condition: {
             minHealth: 45,
-            maxFatigue: 70
+            minHygiene: 35,
+            maxFatigue: 65
           }
         },
         reward: {
           moneyMin: 150,
-          moneyMax: 220,
-          items: []
+          moneyMax: 220
         },
         cost: {
           fatigue: 18,
           hunger: 6,
           timeSteps: 2
         },
-        notes: "登録と連絡手段が必要な臨時仕事。募集が毎日あるわけではない。"
+        notes: "登録・本人確認・電話・給与受取口座などが必要。募集があっても採用されるとは限らない。"
       },
 
       warehouse_day_labor: {
@@ -109,8 +122,11 @@
         locationId: "industrial_street",
         providerNpcId: null,
         repeatable: true,
-        timeSlots: ["morning", "daytime"],
-        availabilityChance: 0.20,
+        discoveryMode: "listing",
+        timeSlots: ["morning"],
+        leadChance: 0.22,
+        availabilityChance: 0.18,
+        acceptanceChance: 0.55,
         requirements: {
           workAccess: {
             identityDocument: true,
@@ -120,20 +136,20 @@
           },
           condition: {
             minHealth: 55,
+            minHygiene: 30,
             maxFatigue: 55
           }
         },
         reward: {
           moneyMin: 250,
-          moneyMax: 350,
-          items: []
+          moneyMax: 350
         },
         cost: {
           fatigue: 30,
           hunger: 10,
           timeSteps: 3
         },
-        notes: "未経験可でも、その場で飛び込み就労はできない。登録・本人確認・連絡手段などが必要。"
+        notes: "未経験可でも飛び込み就労はできない。早い時間の募集で、登録条件を満たしていても枠に入れないことがある。"
       },
 
       recycling_sorting: {
@@ -142,22 +158,25 @@
         locationId: "recycling_yard",
         providerNpcId: "recycler_staff",
         repeatable: true,
+        discoveryMode: "relationship",
         timeSlots: ["morning", "daytime", "evening"],
-        availabilityChance: 0.45,
+        leadChance: 0.30,
+        availabilityChance: 0.40,
+        acceptanceChance: 0.85,
         requirements: {
           relationship: {
             npcId: "recycler_staff",
-            minFamiliarity: 5
+            minFamiliarity: 6,
+            minTrust: 2
           },
           condition: {
             minHealth: 35,
-            maxFatigue: 80
+            maxFatigue: 75
           }
         },
         reward: {
           moneyMin: 100,
           moneyMax: 160,
-          items: [],
           relationship: {
             npcId: "recycler_staff",
             trust: 1,
@@ -169,7 +188,7 @@
           hunger: 4,
           timeSteps: 1
         },
-        notes: "少し顔馴染みになったあと、手が足りない日にだけ頼まれることがある。"
+        notes: "顔馴染みになったあと、手が足りない日に声をかけられて初めて発生する。"
       },
 
       convenience_cleanup: {
@@ -178,19 +197,26 @@
         locationId: "convenience_store",
         providerNpcId: "convenience_clerk",
         repeatable: true,
+        discoveryMode: "relationship",
         timeSlots: ["daytime", "evening"],
-        availabilityChance: 0.35,
+        leadChance: 0.20,
+        availabilityChance: 0.30,
+        acceptanceChance: 0.85,
         requirements: {
           relationship: {
             npcId: "convenience_clerk",
             minFamiliarity: 10,
-            minGoodwill: 5
+            minGoodwill: 5,
+            minTrust: 2
+          },
+          condition: {
+            minHygiene: 35,
+            maxFatigue: 75
           }
         },
         reward: {
           moneyMin: 80,
           moneyMax: 120,
-          items: ["leftover_food_chance"],
           relationship: {
             npcId: "convenience_clerk",
             trust: 1,
@@ -202,7 +228,7 @@
           hunger: 3,
           timeSteps: 1
         },
-        notes: "店員との関係ができたあと、たまたま人手が必要な日に発生する小仕事。"
+        notes: "店員との関係ができ、かつ人手が足りない時だけ頼まれる。"
       }
     }
   };
@@ -210,26 +236,20 @@
   const clone = (value) => JSON.parse(JSON.stringify(value));
   const isNumber = (value) => typeof value === "number" && Number.isFinite(value);
 
-  const getRelationship = (npcId) => {
-    if (!npcId) return {};
-    if (HMW.state?.relationships?.[npcId]) return HMW.state.relationships[npcId];
-    const npc = typeof HMW.getNpc === "function" ? HMW.getNpc(npcId) : null;
-    return npc?.relationship || {};
-  };
-
-  const availabilityRoll = (jobId, day) => {
-    const text = `${jobId}:${day}`;
+  const stableRoll = (key) => {
     let hash = 2166136261;
-    for (let i = 0; i < text.length; i += 1) {
-      hash ^= text.charCodeAt(i);
+    for (let i = 0; i < key.length; i += 1) {
+      hash ^= key.charCodeAt(i);
       hash = Math.imul(hash, 16777619);
     }
     return (hash >>> 0) / 4294967296;
   };
 
-  const isAvailableToday = (jobId, job, day = HMW.state?.world?.day || 1) => {
-    if (!isNumber(job.availabilityChance)) return true;
-    return availabilityRoll(jobId, day) < job.availabilityChance;
+  const getRelationship = (npcId) => {
+    if (!npcId) return {};
+    if (HMW.state?.relationships?.[npcId]) return HMW.state.relationships[npcId];
+    const npc = typeof HMW.getNpc === "function" ? HMW.getNpc(npcId) : null;
+    return npc?.relationship || {};
   };
 
   const checkRelationship = (requirement) => {
@@ -271,7 +291,10 @@
     const condition = HMW.state?.player?.condition || {};
 
     if (isNumber(requirement.minHealth) && (condition.health || 0) < requirement.minHealth) {
-      return "今の体調ではこの仕事を受けにくい。";
+      return "今の体調では、この仕事を任せてもらえる状態ではない。";
+    }
+    if (isNumber(requirement.minHygiene) && (condition.hygiene || 0) < requirement.minHygiene) {
+      return "身なりを整えられておらず、この仕事では不利になる。";
     }
     if (isNumber(requirement.maxFatigue) && (condition.fatigue || 0) > requirement.maxFatigue) {
       return "疲労が強く、この仕事をこなせる状態ではない。";
@@ -279,51 +302,85 @@
     return null;
   };
 
-  const getJobAccessStatus = (jobId, options = {}) => {
+  const getRequirementStatus = (jobId) => {
     const job = jobData.definitions[jobId];
     if (!job) return { ok: false, reason: "仕事情報がない。" };
 
     const relationshipReason = checkRelationship(job.requirements?.relationship);
-    if (relationshipReason) return { ok: false, reason: relationshipReason };
+    if (relationshipReason) return { ok: false, reason: relationshipReason, barrier: "relationship" };
 
     const accessReason = checkWorkAccess(job.requirements?.workAccess);
-    if (accessReason) return { ok: false, reason: accessReason };
+    if (accessReason) return { ok: false, reason: accessReason, barrier: "workAccess" };
 
     const conditionReason = checkCondition(job.requirements?.condition);
-    if (conditionReason) return { ok: false, reason: conditionReason };
+    if (conditionReason) return { ok: false, reason: conditionReason, barrier: "condition" };
 
-    if (!options.ignoreAvailability && !isAvailableToday(jobId, job, options.day)) {
-      return { ok: false, reason: "今日は募集がない、またはすでに枠が埋まっている。" };
+    return { ok: true, reason: "", barrier: null };
+  };
+
+  const isLeadFound = (jobId, day, searchAttempt) => {
+    const job = jobData.definitions[jobId];
+    if (!job) return false;
+    const chance = isNumber(job.leadChance) ? job.leadChance : 1;
+    return stableRoll(`lead:${jobId}:${day}:${searchAttempt}`) < chance;
+  };
+
+  const isAvailableToday = (jobId, day = HMW.state?.world?.day || 1) => {
+    const job = jobData.definitions[jobId];
+    if (!job) return false;
+    const chance = isNumber(job.availabilityChance) ? job.availabilityChance : 1;
+    return stableRoll(`availability:${jobId}:${day}`) < chance;
+  };
+
+  const isAccepted = (jobId, day, applicationAttempt) => {
+    const job = jobData.definitions[jobId];
+    if (!job) return false;
+    const chance = isNumber(job.acceptanceChance) ? job.acceptanceChance : 1;
+    return stableRoll(`acceptance:${jobId}:${day}:${applicationAttempt}`) < chance;
+  };
+
+  const getJobSearchCandidates = (locationId, timeSlot = null) => {
+    return Object.entries(jobData.definitions)
+      .filter(([, job]) => job.locationId === locationId)
+      .filter(([, job]) => !timeSlot || job.timeSlots.includes(timeSlot))
+      .filter(([jobId, job]) => {
+        if (job.discoveryMode !== "relationship") return true;
+        return getRequirementStatus(jobId).barrier !== "relationship";
+      })
+      .map(([jobId, job]) => ({ id: jobId, ...clone(job) }));
+  };
+
+  const getApplicationStatus = (jobId, options = {}) => {
+    const job = jobData.definitions[jobId];
+    if (!job) return { ok: false, reason: "仕事情報がない。" };
+
+    const requirementStatus = getRequirementStatus(jobId);
+    if (!requirementStatus.ok) return requirementStatus;
+
+    const day = options.day ?? HMW.state?.world?.day ?? 1;
+    if (!isAvailableToday(jobId, day)) {
+      return { ok: false, reason: "募集は見つかったが、今日はもう枠がない。", barrier: "availability" };
     }
 
-    return { ok: true, reason: "" };
+    return { ok: true, reason: "", barrier: null };
   };
 
   window.HMW.jobData = jobData;
-
   window.HMW.getJob = (jobId) => {
     const job = jobData.definitions[jobId];
     return job ? { id: jobId, ...clone(job) } : null;
   };
+  window.HMW.getJobRequirementStatus = getRequirementStatus;
+  window.HMW.getJobApplicationStatus = getApplicationStatus;
+  window.HMW.getJobSearchCandidates = getJobSearchCandidates;
+  window.HMW.isJobLeadFound = isLeadFound;
+  window.HMW.isJobAvailableToday = isAvailableToday;
+  window.HMW.isJobAccepted = isAccepted;
 
-  window.HMW.getJobAccessStatus = getJobAccessStatus;
-
-  window.HMW.getJobLeadsAtLocation = (locationId, timeSlot = null) => {
-    return Object.entries(jobData.definitions)
-      .filter(([, job]) => job.locationId === locationId)
-      .filter(([, job]) => !timeSlot || job.timeSlots.includes(timeSlot))
-      .map(([jobId, job]) => ({
-        id: jobId,
-        ...clone(job),
-        access: getJobAccessStatus(jobId)
-      }));
-  };
-
+  // 旧UI向け。条件を満たした仕事だけを返すが、検索・応募・採用を飛ばして就労させる用途には使わない。
   window.HMW.getJobsAtLocation = (locationId, timeSlot = null) => {
-    return Object.entries(jobData.definitions)
-      .filter(([, job]) => job.locationId === locationId)
-      .filter(([, job]) => !timeSlot || job.timeSlots.includes(timeSlot))
-      .filter(([jobId]) => getJobAccessStatus(jobId).ok)
-      .map(([jobId, job]) => ({ id: jobId, ...clone(job) }));
+    return getJobSearchCandidates(locationId, timeSlot)
+      .filter((job) => getApplicationStatus(job.id).ok)
+      .map((job) => clone(job));
   };
 })();
