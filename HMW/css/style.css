@@ -1,0 +1,263 @@
+:root {
+  color-scheme: light;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Hiragino Sans", "Yu Gothic", sans-serif;
+  font-size: 18px;
+  background: #f4f1ea;
+  color: #1f2529;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  width: 100%;
+  min-height: 100%;
+  background: #f4f1ea;
+}
+
+body {
+  min-height: 100svh;
+  overflow: hidden;
+}
+
+button {
+  font: inherit;
+  color: inherit;
+}
+
+.game-shell {
+  width: min(100%, 720px);
+  height: 100svh;
+  margin: 0 auto;
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  background: #f7f5ef;
+  border-left: 1px solid #d5d0c7;
+  border-right: 1px solid #d5d0c7;
+}
+
+.topbar {
+  padding: max(12px, env(safe-area-inset-top)) 14px 10px;
+  background: #e8e3d9;
+  border-bottom: 1px solid #c9c2b7;
+}
+
+.topbar-main,
+.scene-heading-row,
+.modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.game-title {
+  font-size: 1.15rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+}
+
+.location-name {
+  margin-top: 2px;
+  font-size: 0.95rem;
+  color: #555d61;
+}
+
+.icon-button {
+  width: 46px;
+  height: 46px;
+  border: 1px solid #b9b1a5;
+  border-radius: 12px;
+  background: #faf8f3;
+}
+
+.status-strip {
+  margin-top: 10px;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 6px;
+}
+
+.status-cell {
+  min-width: 0;
+  padding: 7px 5px;
+  text-align: center;
+  border: 1px solid #c9c2b7;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.48);
+}
+
+.status-label {
+  display: block;
+  margin-bottom: 2px;
+  font-size: 0.68rem;
+  letter-spacing: 0.04em;
+  color: #6a706f;
+}
+
+.status-cell strong {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 0.92rem;
+}
+
+.main-view {
+  min-height: 0;
+  padding: 10px 12px;
+  display: grid;
+  grid-template-rows: minmax(0, 1fr) auto auto;
+  gap: 10px;
+  overflow: hidden;
+}
+
+.scene-area {
+  position: relative;
+  min-height: 0;
+  overflow: hidden;
+  border: 1px solid #c5beb3;
+  border-radius: 16px;
+  background: #ddd8cf;
+}
+
+.scene-background {
+  position: absolute;
+  inset: 0;
+  background-position: center;
+  background-size: cover;
+}
+
+.scene-overlay {
+  position: absolute;
+  left: 10px;
+  right: 10px;
+  bottom: 10px;
+  max-height: 48%;
+  overflow-y: auto;
+  padding: 13px 14px;
+  border: 1px solid rgba(90, 86, 79, 0.22);
+  border-radius: 14px;
+  background: rgba(250, 248, 243, 0.93);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+}
+
+.scene-title,
+.modal-header h2 {
+  margin: 0;
+  font-size: 1.05rem;
+}
+
+.scene-time {
+  color: #666d6e;
+  font-size: 0.9rem;
+}
+
+.scene-text {
+  margin-top: 9px;
+  line-height: 1.7;
+}
+
+.scene-text p {
+  margin: 0;
+}
+
+.notice-area {
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: #ebe6dc;
+  border: 1px solid #cfc7bb;
+}
+
+.action-area {
+  display: grid;
+  gap: 8px;
+}
+
+.action-button,
+.nav-button {
+  min-height: 48px;
+  border: 1px solid #bcb4a8;
+  border-radius: 12px;
+  background: #fffdf8;
+}
+
+.action-button {
+  width: 100%;
+  padding: 10px 14px;
+  text-align: left;
+}
+
+.bottom-nav {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 7px;
+  padding: 9px 10px max(9px, env(safe-area-inset-bottom));
+  border-top: 1px solid #c9c2b7;
+  background: #e8e3d9;
+}
+
+.nav-button {
+  padding: 8px 4px;
+  font-size: 0.92rem;
+}
+
+.modal-layer {
+  position: fixed;
+  inset: 0;
+  z-index: 20;
+}
+
+.modal-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(29, 31, 31, 0.42);
+}
+
+.modal-panel {
+  position: absolute;
+  left: 50%;
+  bottom: 0;
+  transform: translateX(-50%);
+  width: min(100%, 720px);
+  max-height: 80svh;
+  overflow: hidden;
+  border-radius: 18px 18px 0 0;
+  background: #f8f6f0;
+  box-shadow: 0 -10px 30px rgba(0, 0, 0, 0.15);
+}
+
+.modal-header {
+  padding: 12px 14px;
+  border-bottom: 1px solid #d0c9bd;
+}
+
+.modal-content {
+  max-height: calc(80svh - 72px);
+  overflow-y: auto;
+  padding: 14px;
+  line-height: 1.7;
+}
+
+[hidden] {
+  display: none !important;
+}
+
+@media (max-width: 420px) {
+  :root {
+    font-size: 17px;
+  }
+
+  .status-strip {
+    gap: 4px;
+  }
+
+  .status-cell {
+    padding-left: 3px;
+    padding-right: 3px;
+  }
+}
