@@ -6,7 +6,7 @@
   const createInitialState = () => ({
     meta: {
       gameId: "HMW",
-      stateVersion: 2,
+      stateVersion: 3,
       saveId: null,
       createdAt: null,
       updatedAt: null
@@ -31,6 +31,13 @@
         warmth: 50,
         wetness: 0,
         fatigue: 25
+      },
+
+      workAccess: {
+        identityDocument: false,
+        phone: false,
+        bankAccount: false,
+        contactAddress: false
       },
 
       sleepingPlaceId: null,
