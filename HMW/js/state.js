@@ -15,7 +15,7 @@
     world: {
       day: 1,
       time: "morning",
-      weather: null,
+      weather: "clear",
       locationId: null
     },
 
