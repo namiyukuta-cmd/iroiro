@@ -43,15 +43,6 @@
     const style = document.createElement("style");
     style.id = "hmwMapStyles";
     style.textContent = `
-      .hmw-map-button {
-        min-height: 48px;
-        border: 1px solid #bcb4a8;
-        border-radius: 12px;
-        background: #fffdf8;
-        padding: 8px 4px;
-        font-size: 0.92rem;
-      }
-
       .hmw-map-wrap {
         position: relative;
         width: 100%;
@@ -212,19 +203,11 @@
   const installMapButton = () => {
     addStyles();
 
-    const bottomNav = document.querySelector(".bottom-nav");
-    if (!bottomNav || document.getElementById("mapButton")) return;
+    const button = document.getElementById("mapButton");
+    if (!button || button.dataset.mapBound === "true") return;
 
-    bottomNav.style.gridTemplateColumns = "repeat(5, minmax(0, 1fr))";
-
-    const button = document.createElement("button");
-    button.id = "mapButton";
-    button.type = "button";
-    button.className = "hmw-map-button";
-    button.textContent = "マップ";
+    button.dataset.mapBound = "true";
     button.addEventListener("click", openMap);
-
-    bottomNav.insertBefore(button, bottomNav.firstChild);
   };
 
   HMW.openMap = openMap;
