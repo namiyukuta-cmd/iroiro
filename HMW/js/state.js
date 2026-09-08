@@ -6,7 +6,7 @@
   const createInitialState = () => ({
     meta: {
       gameId: "HMW",
-      stateVersion: 1,
+      stateVersion: 2,
       saveId: null,
       createdAt: null,
       updatedAt: null
@@ -25,12 +25,12 @@
       money: 0,
 
       condition: {
-        health: null,
-        hunger: null,
-        hygiene: null,
-        warmth: null,
-        wetness: null,
-        fatigue: null
+        health: 80,
+        hunger: 35,
+        hygiene: 40,
+        warmth: 50,
+        wetness: 0,
+        fatigue: 25
       },
 
       sleepingPlaceId: null,
