@@ -4,14 +4,14 @@
   window.HMW = window.HMW || {};
 
   const ruleData = {
-    version: 2,
+    version: 3,
 
     turnResolution: [
-      "AIがHMWの1ターンを生成する前に、必ず HMW.getTurnContext() の返り値をそのターンの事実として使う。",
-      "AIはJSにある確率判定・条件判定・所持品・関係値・仕事・支援・遭遇結果を上書きしない。AIの役割は確定済み結果の描写であり、結果そのものを都合よく決めない。",
-      "HMW.getTurnContext() を取得できない状態では、仕事が見つかった、食料を得た、NPCに会った、金を得た、支援が進んだ等のゲーム結果を新規確定しない。",
-      "ユーザーの行動入力を受けたら、現在地・時間・体調・持ち物・その場所で可能な行動・人物・イベント条件を確認してから結果を出す。",
-      "難易度を下げるための救済も、難易度を上げるための不幸もAIが勝手に足さない。JSで成立した出来事だけを物語として膨らませる。"
+      "AIがHMWの1ターンを生成する前に、必ず HMW.getAIPacket() を取得し、その context をそのターンの唯一のゲーム事実として使う。",
+      "HMW.getAIPacket() を取得できない場合、AIはゲーム結果を生成しない。人物、仕事、食料、金、支援、移動結果、体調変化を推測で補わない。",
+      "AIは allowedActions・allowedMoves・people・ambientPeople・event に存在しない行動結果や遭遇を勝手に確定しない。",
+      "AIはJSにある確率判定・条件判定・所持品・関係値・仕事・支援・遭遇結果を上書きしない。AIの役割はJSで確定した結果の文章化に限定する。",
+      "難易度を下げるための救済も、難易度を上げるための不幸もAIが勝手に足さない。"
     ],
 
     protagonist: [
@@ -24,13 +24,13 @@
 
     stateIntegrity: [
       "state.js に存在しない所持金、持ち物、寝床、関係値、既知情報を勝手に追加しない。",
-      "items.js に存在しないアイテムを入手済みとして扱わない。必要なら新規アイテム候補として提案するだけにする。",
+      "items.js に存在しないアイテムを入手済みとして扱わない。",
       "world.js に存在しない場所へ、説明なく移動したことにしない。",
       "jobs.js に存在しない仕事を完了済み・受注済みとして扱わない。",
       "events.js の結果が確定していない出来事を、勝手に完了扱いにしない。",
       "時間、日付、天気、現在地、所持金などは現在のゲーム状態を優先する。",
       "過去の記録と矛盾する出来事を新しく作らない。",
-      "空腹・疲労・体力・衛生・濡れ・体温は単なる飾りの数字にしない。行動可否や健康悪化などJS側の結果を必ず反映する。"
+      "空腹・疲労・体力・衛生・濡れ・体温は飾りの数字にしない。JS側の行動制限、衰弱、倒れる処理をそのまま反映する。"
     ],
 
     npc: [
@@ -66,7 +66,7 @@
       "支援員、店員、他のホームレス、住民、不良、警官はそれぞれ異なる反応をする。",
       "小さな親切や顔馴染み化は、一度の劇的な出来事より日々の積み重ねを優先する。",
       "危険な場所や悪天候など、events.js と world.js の条件を物語上でも尊重する。",
-      "『何も起きない日』は存在してよいが、ゲーム全体を移動と数値減少だけにしない。支援、人間関係、情報、資源、仕事への準備など複数の進行経路を残す。"
+      "ゲーム全体を移動と数値減少だけにしない。支援、人間関係、情報、資源、買い物、寝床、仕事への準備など複数の進行経路を残す。"
     ],
 
     narration: [
@@ -113,10 +113,13 @@
     }).join("\n\n");
   };
 
-  const getAITurnPacket = () => ({
-    rules: getAIRulesText(),
-    context: typeof window.HMW.getTurnContext === "function" ? window.HMW.getTurnContext() : null
-  });
+  const getAITurnPacket = () => {
+    if (typeof window.HMW.getAIPacket === "function") return window.HMW.getAIPacket();
+    return {
+      rules: getAIRulesText(),
+      context: typeof window.HMW.getTurnContext === "function" ? window.HMW.getTurnContext() : null
+    };
+  };
 
   window.HMW.ruleData = ruleData;
   window.HMW.getRuleList = getRuleList;
