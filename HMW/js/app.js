@@ -5,20 +5,23 @@
 
   const HMW = window.HMW;
   const $ = (id) => document.getElementById(id);
-
   const elements = {};
 
   const clamp = (value, min = 0, max = 100) => Math.max(min, Math.min(max, value));
   const isNumber = (value) => typeof value === "number" && Number.isFinite(value);
   const clone = (value) => JSON.parse(JSON.stringify(value));
 
-  const getTimeLabel = (timeId) => {
-    return HMW.worldData?.timeSlots?.[timeId]?.label || timeId || "―";
-  };
+  const getTimeLabel = (timeId) => HMW.worldData?.timeSlots?.[timeId]?.label || timeId || "―";
 
-  const getWeatherLabel = (weatherId) => {
-    if (!weatherId) return "―";
-    return HMW.worldData?.weather?.[weatherId]?.label || weatherId;
+  const getWeatherDisplay = (weatherId) => {
+    const icons = {
+      clear: "☀️",
+      cloudy: "☁️",
+      rain: "🌧️",
+      heavyRain: "🌧️",
+      cold: "❄️"
+    };
+    return icons[weatherId] || "―";
   };
 
   const getCurrentLocation = () => {
@@ -30,6 +33,15 @@
     if (!HMW.state.world.locationId) {
       HMW.state.world.locationId = HMW.worldData.defaultStartLocationId;
     }
+  };
+
+  const ensureSurvivalState = () => {
+    HMW.state.player.survival = HMW.state.player.survival || {};
+    const survival = HMW.state.player.survival;
+    survival.movementCount = isNumber(survival.movementCount) ? survival.movementCount : 0;
+    survival.movesThisSlot = isNumber(survival.movesThisSlot) ? survival.movesThisSlot : 0;
+    survival.lastProcessedDay = isNumber(survival.lastProcessedDay) ? survival.lastProcessedDay : HMW.state.world.day;
+    return survival;
   };
 
   const appendHistory = (type, text, extra = {}) => {
@@ -90,6 +102,47 @@
     return heading;
   };
 
+  const applyHealthPressure = () => {
+    const condition = HMW.state.player.condition;
+    let damage = 0;
+
+    if (condition.hunger >= 90) damage += 3;
+    if (condition.fatigue >= 90) damage += 2;
+    if (condition.warmth <= 20) damage += 3;
+    if (condition.wetness >= 80) damage += 2;
+
+    if (damage > 0) condition.health = clamp(condition.health - damage);
+  };
+
+  const applyTimePassingCost = () => {
+    const condition = HMW.state.player.condition;
+    condition.hunger = clamp(condition.hunger + 3);
+    condition.fatigue = clamp(condition.fatigue + 2);
+    condition.hygiene = clamp(condition.hygiene - 1);
+    applyHealthPressure();
+  };
+
+  const applyOvernightConsequences = () => {
+    const condition = HMW.state.player.condition;
+    const hasSleepingPlace = Boolean(HMW.state.player.sleepingPlaceId);
+
+    if (hasSleepingPlace) {
+      condition.fatigue = clamp(condition.fatigue - 20);
+      condition.hygiene = clamp(condition.hygiene - 2);
+    } else {
+      condition.fatigue = clamp(condition.fatigue + 20);
+      condition.health = clamp(condition.health - 5);
+      condition.hygiene = clamp(condition.hygiene - 5);
+      condition.warmth = clamp(condition.warmth - 5);
+      appendHistory("overnight", "寝床を確保できないまま朝を迎えた。");
+    }
+
+    const survival = ensureSurvivalState();
+    survival.movesThisSlot = 0;
+    survival.lastProcessedDay = HMW.state.world.day;
+    applyHealthPressure();
+  };
+
   const advanceTime = (steps = 1) => {
     const slots = Object.entries(HMW.worldData.timeSlots)
       .sort(([, a], [, b]) => a.order - b.order)
@@ -100,109 +153,62 @@
     let index = Math.max(0, slots.indexOf(HMW.state.world.time));
 
     for (let i = 0; i < steps; i += 1) {
+      applyTimePassingCost();
       index += 1;
+
       if (index >= slots.length) {
         index = 0;
         HMW.state.world.day += 1;
+        HMW.state.world.time = slots[index];
+        applyOvernightConsequences();
+      } else {
+        HMW.state.world.time = slots[index];
       }
     }
+  };
 
-    HMW.state.world.time = slots[index];
+  const applyMovementCost = () => {
+    const condition = HMW.state.player.condition;
+    const survival = ensureSurvivalState();
+
+    condition.fatigue = clamp(condition.fatigue + 2);
+    condition.hunger = clamp(condition.hunger + 1);
+    condition.hygiene = clamp(condition.hygiene - 1);
+
+    if (HMW.state.world.weather === "rain") {
+      condition.wetness = clamp(condition.wetness + 5);
+      condition.warmth = clamp(condition.warmth - 2);
+    } else if (HMW.state.world.weather === "heavyRain") {
+      condition.wetness = clamp(condition.wetness + 10);
+      condition.warmth = clamp(condition.warmth - 4);
+    } else if (HMW.state.world.weather === "cold") {
+      condition.warmth = clamp(condition.warmth - 4);
+    }
+
+    survival.movementCount += 1;
+    survival.movesThisSlot += 1;
+    applyHealthPressure();
+
+    if (survival.movesThisSlot >= 2) {
+      survival.movesThisSlot = 0;
+      advanceTime(1);
+    }
   };
 
   const getRelationship = (npcId) => {
     if (!HMW.state.relationships[npcId]) {
       const npc = HMW.getNpc(npcId);
-      if (npc?.relationship) {
-        HMW.state.relationships[npcId] = clone(npc.relationship);
-      }
+      if (npc?.relationship) HMW.state.relationships[npcId] = clone(npc.relationship);
     }
     return HMW.state.relationships[npcId] || null;
   };
 
-  const checkJobRequirements = (job) => {
-    const requirement = job.requirements?.relationship;
-    if (!requirement) return { ok: true, reason: "" };
-
-    const relationship = getRelationship(requirement.npcId) || {};
-
-    if (isNumber(requirement.minFamiliarity) && (relationship.familiarity || 0) < requirement.minFamiliarity) {
-      return { ok: false, reason: "まだ十分な顔馴染みではありません。" };
-    }
-
-    if (isNumber(requirement.minGoodwill) && (relationship.goodwill || 0) < requirement.minGoodwill) {
-      return { ok: false, reason: "まだ相手から十分な好意を得ていません。" };
-    }
-
-    if (isNumber(requirement.minTrust) && (relationship.trust || 0) < requirement.minTrust) {
-      return { ok: false, reason: "まだ十分な信頼を得ていません。" };
-    }
-
-    return { ok: true, reason: "" };
-  };
-
-  const applyConditionCost = (cost = {}) => {
-    const condition = HMW.state.player.condition;
-
-    if (isNumber(condition.fatigue) && isNumber(cost.fatigue)) {
-      condition.fatigue = clamp(condition.fatigue + cost.fatigue);
-    }
-
-    if (isNumber(condition.hunger) && isNumber(cost.hunger)) {
-      condition.hunger = clamp(condition.hunger + cost.hunger);
-    }
-  };
-
-  const applyRelationshipReward = (reward) => {
-    if (!reward?.npcId) return;
-
-    const relationship = getRelationship(reward.npcId);
-    if (!relationship) return;
-
-    ["familiarity", "trust", "goodwill", "caution", "irritation", "annoyance"].forEach((key) => {
-      if (isNumber(reward[key])) {
-        relationship[key] = (relationship[key] || 0) + reward[key];
-      }
-    });
-  };
-
   const executeJob = (jobId) => {
-    const job = HMW.getJob(jobId);
-    if (!job) return;
-
-    if (job.locationId !== HMW.state.world.locationId) {
-      showNotice("この場所ではその仕事を受けられません。");
+    if (HMW.jobSearch?.perform) {
+      HMW.jobSearch.perform(jobId);
       return;
     }
-
-    if (!job.timeSlots.includes(HMW.state.world.time)) {
-      showNotice("今の時間帯はその仕事を受けられません。");
-      return;
-    }
-
-    const requirement = checkJobRequirements(job);
-    if (!requirement.ok) {
-      showNotice(requirement.reason);
-      return;
-    }
-
-    const min = job.reward?.moneyMin || 0;
-    const max = job.reward?.moneyMax ?? min;
-    const money = Math.floor(Math.random() * (max - min + 1)) + min;
-
-    HMW.state.player.money += money;
-    applyConditionCost(job.cost);
-    applyRelationshipReward(job.reward?.relationship);
-    advanceTime(job.cost?.timeSteps || 0);
-
-    appendHistory("job", `${job.name}をして${money}獲得した。`, {
-      jobId,
-      money
-    });
-
-    closeModal();
-    showNotice(`${job.name}を終えました。${money}獲得。`);
-    render();
+    showNotice("この仕事は、検索・応募・採用の手順を経てからでないと始められません。");
   };
 
   const moveTo = (locationId) => {
@@ -217,6 +223,7 @@
     const destination = HMW.getLocation(locationId);
     if (!destination) return;
 
+    applyMovementCost();
     HMW.state.world.locationId = locationId;
     appendHistory("move", `${destination.name}へ移動した。`);
 
@@ -254,17 +261,12 @@
       }
 
       if (npcs.length) {
-        container.append(makeSectionTitle("顔を覚えられる人"));
+        container.append(makeSectionTitle("人"));
         npcs.forEach((npc) => {
-          const relationship = getRelationship(npc.id);
           const p = document.createElement("p");
           p.style.margin = "0 0 12px";
           p.textContent = npc.role ? `${npc.displayName} — ${npc.role}` : npc.displayName;
           container.append(p);
-
-          if (relationship) {
-            relationship.familiarity = (relationship.familiarity || 0) + 1;
-          }
         });
       }
 
@@ -287,44 +289,13 @@
   };
 
   const openJobsMenu = () => {
-    const locationId = HMW.state.world.locationId;
-    const time = HMW.state.world.time;
-    const jobs = HMW.getJobsAtLocation(locationId, time);
+    if (HMW.jobSearch?.open) {
+      HMW.jobSearch.open();
+      return;
+    }
 
-    openModal("仕事", (container) => {
-      if (!jobs.length) {
-        container.append(makeParagraph("今この場所で受けられる仕事はありません。"));
-        return;
-      }
-
-      jobs.forEach((job) => {
-        const requirement = checkJobRequirements(job);
-        const min = job.reward?.moneyMin || 0;
-        const max = job.reward?.moneyMax ?? min;
-        const rewardText = min === max ? `${min}` : `${min}〜${max}`;
-
-        const block = document.createElement("div");
-        block.style.marginBottom = "14px";
-
-        const title = document.createElement("strong");
-        title.textContent = job.name;
-        block.append(title);
-
-        const detail = document.createElement("p");
-        detail.style.margin = "5px 0 8px";
-        detail.textContent = `報酬 ${rewardText} / 所要 ${job.cost?.timeSteps || 0}区分`;
-        block.append(detail);
-
-        if (!requirement.ok) {
-          const reason = document.createElement("p");
-          reason.style.margin = "0 0 8px";
-          reason.textContent = requirement.reason;
-          block.append(reason);
-        }
-
-        block.append(makeButton("この仕事をする", () => executeJob(job.id), !requirement.ok));
-        container.append(block);
-      });
+    openModal("仕事を探す", (container) => {
+      container.append(makeParagraph("仕事探しの処理を読み込んでいます。"));
     });
   };
 
@@ -387,26 +358,15 @@
 
   const openSavePlaceholder = () => {
     openModal("セーブ", (container) => {
-      container.append(makeParagraph("HMWの複数セーブ機能は save.js で接続します。"));
-      container.append(makeParagraph("現在のゲーム状態はすでに state.js にまとまっているため、この状態をそのままセーブデータにできます。"));
+      container.append(makeParagraph("セーブ機能を読み込んでいます。"));
     });
   };
 
   const openMainMenu = () => {
     openModal("メニュー", (container) => {
-      container.append(makeButton("状態", openStatus));
       container.append(makeButton("持ち物", openInventory));
       container.append(makeButton("記録", openLog));
       container.append(makeButton("セーブ", openSavePlaceholder));
-
-      const back = document.createElement("a");
-      back.href = "../index.html";
-      back.className = "action-button";
-      back.textContent = "ゲーム選択へ戻る";
-      back.style.display = "block";
-      back.style.marginTop = "8px";
-      back.style.textDecoration = "none";
-      container.append(back);
     });
   };
 
@@ -415,19 +375,18 @@
 
     const district = HMW.worldData.districts?.[location.districtId]?.name;
     const people = HMW.getNpcsAtLocation(HMW.state.world.locationId, HMW.state.world.time);
-    const jobs = HMW.getJobsAtLocation(HMW.state.world.locationId, HMW.state.world.time);
-
     const parts = [];
+
     if (district) parts.push(`${district}にいます。`);
-    if (people.length) parts.push(`顔を覚えられる人が${people.length}人います。`);
-    if (jobs.length) parts.push(`今受けられる仕事が${jobs.length}件あります。`);
-    if (!people.length && !jobs.length) parts.push("今は特に目立った用事はありません。");
+    if (people.length) parts.push(`目につく人が${people.length}人います。`);
+    if (!people.length) parts.push("今は特に目立った人はいません。");
 
     return parts.join(" ");
   };
 
   const render = () => {
     ensureInitialLocation();
+    ensureSurvivalState();
 
     const state = HMW.state;
     const location = getCurrentLocation();
@@ -435,7 +394,7 @@
     elements.dayValue.textContent = state.world.day;
     elements.timeValue.textContent = getTimeLabel(state.world.time);
     elements.moneyValue.textContent = state.player.money;
-    elements.weatherValue.textContent = getWeatherLabel(state.world.weather);
+    elements.weatherValue.textContent = getWeatherDisplay(state.world.weather);
 
     const locationName = location?.name || "現在地不明";
     elements.locationName.textContent = locationName;
@@ -445,7 +404,7 @@
 
     elements.actionButtons[0].textContent = "移動する";
     elements.actionButtons[1].textContent = "人を見る";
-    elements.actionButtons[2].textContent = "仕事を見る";
+    elements.actionButtons[2].textContent = "仕事を探す";
   };
 
   const bindEvents = () => {
@@ -487,6 +446,7 @@
     elements.actionButtons = [...document.querySelectorAll("[data-action-slot]")];
 
     ensureInitialLocation();
+    ensureSurvivalState();
     bindEvents();
     render();
   };
@@ -499,7 +459,9 @@
     executeJob,
     moveTo,
     appendHistory,
-    advanceTime
+    advanceTime,
+    showNotice,
+    closeModal
   };
 
   document.addEventListener("DOMContentLoaded", init);
