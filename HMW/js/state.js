@@ -6,7 +6,7 @@
   const createInitialState = () => ({
     meta: {
       gameId: "HMW",
-      stateVersion: 3,
+      stateVersion: 4,
       saveId: null,
       createdAt: null,
       updatedAt: null
@@ -38,6 +38,20 @@
         phone: false,
         bankAccount: false,
         contactAddress: false
+      },
+
+      employment: {
+        currentJobId: null,
+        workHistory: [],
+        search: {
+          day: 1,
+          slotKey: "1:morning",
+          attemptsToday: 0,
+          attemptsThisSlot: 0,
+          discoveredJobIds: [],
+          applications: [],
+          accepted: []
+        }
       },
 
       sleepingPlaceId: null,
