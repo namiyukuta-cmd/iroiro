@@ -52,6 +52,17 @@
     setText("sleepingPlaceValue", sleepingPlace);
   };
 
+  const hideDuplicateStatusEntry = () => {
+    const content = document.getElementById("modalContent");
+    if (!content) return;
+
+    [...content.querySelectorAll("button")].forEach((button) => {
+      if (button.textContent.trim() === "状態") {
+        button.hidden = true;
+      }
+    });
+  };
+
   const installRefreshHooks = () => {
     const watchedIds = [
       "dayValue",
@@ -75,7 +86,10 @@
     }
 
     document.addEventListener("click", () => {
-      setTimeout(renderConditionPanel, 0);
+      setTimeout(() => {
+        renderConditionPanel();
+        hideDuplicateStatusEntry();
+      }, 0);
     });
   };
 
