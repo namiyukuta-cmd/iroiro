@@ -18,7 +18,7 @@
         <button id="menuButton" class="icon-button" type="button" aria-label="メニュー">☰</button>
       </div>
 
-      <div class="status-strip" aria-label="現在の状態">
+      <div class="status-strip" aria-label="日時と所持金">
         <div class="status-cell">
           <span class="status-label">DAY</span>
           <strong id="dayValue">1</strong>
@@ -36,6 +36,21 @@
           <strong id="weatherValue">―</strong>
         </div>
       </div>
+
+      <section class="condition-panel" aria-label="主人公の状態">
+        <div class="condition-grid">
+          <div class="condition-cell"><span>体力</span><strong id="healthValue">―</strong></div>
+          <div class="condition-cell"><span>空腹</span><strong id="hungerValue">―</strong></div>
+          <div class="condition-cell"><span>清潔</span><strong id="hygieneValue">―</strong></div>
+          <div class="condition-cell"><span>体温</span><strong id="warmthValue">―</strong></div>
+          <div class="condition-cell"><span>濡れ</span><strong id="wetnessValue">―</strong></div>
+          <div class="condition-cell"><span>疲労</span><strong id="fatigueValue">―</strong></div>
+        </div>
+        <div class="sleeping-place-row">
+          <span>今夜の寝床</span>
+          <strong id="sleepingPlaceValue">未定</strong>
+        </div>
+      </section>
     </header>
 
     <main class="main-view">
@@ -64,7 +79,8 @@
     </main>
 
     <nav class="bottom-nav" aria-label="ゲームメニュー">
-      <button id="statusButton" class="nav-button" type="button">状態</button>
+      <button id="mapButton" class="nav-button" type="button">マップ</button>
+      <button id="statusButton" class="nav-button" type="button" hidden aria-hidden="true">状態</button>
       <button id="inventoryButton" class="nav-button" type="button">持ち物</button>
       <button id="logButton" class="nav-button" type="button">記録</button>
       <button id="saveButton" class="nav-button" type="button">セーブ</button>
@@ -92,6 +108,7 @@
   <script src="./js/love-interests.js"></script>
   <script src="./js/map.js"></script>
   <script src="./js/app.js"></script>
+  <script src="./js/layout.js"></script>
   <script src="./js/save.js"></script>
 </body>
 </html>
