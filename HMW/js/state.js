@@ -5,6 +5,24 @@
 
   const clamp100 = (value) => Math.max(0, Math.min(100, Number(value) || 0));
 
+  HMW.RELATIONSHIP_LABELS = Object.freeze({
+    familiarity: "親密度",
+    trust: "信頼",
+    goodwill: "好意",
+    desire: "欲求",
+    conscience: "良心",
+    malice: "悪心"
+  });
+
+  HMW.RELATIONSHIP_DISPLAY_KEYS = Object.freeze([
+    "familiarity",
+    "trust",
+    "goodwill",
+    "desire",
+    "conscience",
+    "malice"
+  ]);
+
   const relationship = (id) => {
     const mind = HMW.DATA?.people?.[id]?.mind || {};
     return {
@@ -180,6 +198,31 @@
       if (typeof changes[key] === "number") rel[key] = clamp100((Number(rel[key]) || 0) + changes[key]);
     });
     return HMW.getNpcMind(id);
+  };
+
+  HMW.getNpcStatus = (id) => {
+    const rel = HMW.state.relationships?.[id];
+    const person = HMW.DATA?.people?.[id];
+    if (!rel || !person) return null;
+    const values = {};
+    HMW.RELATIONSHIP_DISPLAY_KEYS.forEach((key) => {
+      values[key] = Number(rel[key]) || 0;
+    });
+    return {
+      id,
+      name: person.name,
+      labels: HMW.RELATIONSHIP_LABELS,
+      values
+    };
+  };
+
+  HMW.formatNpcStatus = (id) => {
+    const status = HMW.getNpcStatus(id);
+    if (!status) return "";
+    const body = HMW.RELATIONSHIP_DISPLAY_KEYS
+      .map((key) => `${HMW.RELATIONSHIP_LABELS[key]} ${status.values[key]}`)
+      .join("／");
+    return `${status.name}：${body}`;
   };
 
   HMW.addHistory = (text) => {
