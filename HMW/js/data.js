@@ -130,10 +130,10 @@
     },
 
     npcMindRule: {
-      formula: "desire + malice - conscience",
+      formula: "desire * (1 + malice / 100) - conscience",
       restrainedMax: 20,
       conflictedMax: 50,
-      description: "良心は欲求を抑える方向、悪心は欲求に流される方向へ働く。"
+      description: "良心は欲求を抑える方向、悪心は欲求が生じた時にそれへ流されやすくする方向へ働く。"
     }
   };
 })();
