@@ -106,8 +106,6 @@
     const cooldown = POLICIES[eventId]?.cooldownDays || 2;
     if (lastSame && day - lastSame < cooldown) return false;
 
-    // 同じ到着地点で再描画されても再抽選しない。
-    if (gate.checked[currentKey()]) return false;
     return true;
   };
 
