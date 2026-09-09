@@ -25,11 +25,12 @@
     casualChecked: false,
     casualOffer: false,
     casualDone: false,
-    recyclerTalk: false
+    recyclerTalk: false,
+    sceneKeys: {}
   });
 
   HMW.createInitialState = () => ({
-    version: 2,
+    version: 3,
     day: 1,
     slot: 0,
     money: 0,
@@ -103,7 +104,18 @@
       informal: {
         recyclingNoticeKnown: false,
         casualWorkKnown: false
+      },
+      stability: {
+        paidWorkDays: 0,
+        safeNights: 0,
+        regularIncome: false,
+        supportBase: false,
+        streetNetwork: false
       }
+    },
+    story: {
+      seen: {},
+      counters: {}
     },
     sleep: {
       known: { park: true },
@@ -113,18 +125,17 @@
     daily: createDaily(),
     activeEvent: null,
     leads: [
-      { id: "first_board", text: "駅前の掲示板を確認する", done: false },
+      { id: "first_board", text: "駅前で今日使える情報を探す", done: false },
       { id: "food_today", text: "今日の食料を確保する", done: false },
       { id: "sleep_tonight", text: "今夜眠れる場所を確保する", done: false }
     ],
     history: [
-      "DAY1 朝　駅前。所持金はない。移動で消耗するのではなく、今日の時間を何に使うかを決める。"
+      "DAY1 朝　駅前。所持金はない。街の中で、食事・仕事・人とのつながりを一つずつ作っていく。"
     ],
-    lastMessage: "駅前にいる。移動そのものでは時間も体力も減らない。ここから今日の生活を組み立てる。"
+    lastMessage: "駅前にいる。ここには掲示板だけでなく、仕事を探す人、通勤客、店の搬入口、休める場所がある。"
   });
 
   HMW.state = HMW.createInitialState();
-
   HMW.createDailyState = createDaily;
 
   HMW.resetDaily = () => {
@@ -142,7 +153,7 @@
     if (!text) return;
     const slotName = HMW.DATA?.slots?.[HMW.state.slot] || "";
     HMW.state.history.unshift(`DAY${HMW.state.day} ${slotName}　${text}`);
-    HMW.state.history = HMW.state.history.slice(0, 160);
+    HMW.state.history = HMW.state.history.slice(0, 180);
     HMW.state.lastMessage = text;
   };
 
