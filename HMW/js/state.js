@@ -3,14 +3,22 @@
   window.HMW = window.HMW || {};
   const HMW = window.HMW;
 
-  const relationship = () => ({
-    familiarity: 0,
-    trust: 0,
-    goodwill: 0,
-    irritation: 0,
-    lastContactDay: 0,
-    flags: {}
-  });
+  const clamp100 = (value) => Math.max(0, Math.min(100, Number(value) || 0));
+
+  const relationship = (id) => {
+    const mind = HMW.DATA?.people?.[id]?.mind || {};
+    return {
+      familiarity: 0,
+      trust: 0,
+      goodwill: 0,
+      irritation: 0,
+      desire: clamp100(mind.desire),
+      conscience: clamp100(mind.conscience),
+      malice: clamp100(mind.malice),
+      lastContactDay: 0,
+      flags: {}
+    };
+  };
 
   const createDaily = () => ({
     beg: {},
@@ -57,12 +65,12 @@
       weather: "clear"
     },
     relationships: {
-      support_named: relationship(),
-      police_named: relationship(),
-      homeless_named: relationship(),
-      thug_named: relationship(),
-      clerk: relationship(),
-      recycler: relationship()
+      support_named: relationship("support_named"),
+      police_named: relationship("police_named"),
+      homeless_named: relationship("homeless_named"),
+      thug_named: relationship("thug_named"),
+      clerk: relationship("clerk"),
+      recycler: relationship("recycler")
     },
     progression: {
       support: {
@@ -147,6 +155,31 @@
       HMW.state.stats[key] = Math.max(0, Math.min(100, Number(HMW.state.stats[key]) || 0));
     });
     HMW.state.money = Math.max(0, Math.floor(Number(HMW.state.money) || 0));
+  };
+
+  HMW.getNpcMind = (id) => {
+    const rel = HMW.state.relationships?.[id];
+    if (!rel || !HMW.DATA?.people?.[id]?.romance) return null;
+    const desire = clamp100(rel.desire);
+    const conscience = clamp100(rel.conscience);
+    const malice = clamp100(rel.malice);
+    const pressure = desire * (1 + malice / 100) - conscience;
+    const rule = HMW.DATA?.npcMindRule || {};
+    const restrainedMax = Number(rule.restrainedMax ?? 20);
+    const conflictedMax = Number(rule.conflictedMax ?? 50);
+    const mode = pressure <= restrainedMax
+      ? "restrained"
+      : (pressure <= conflictedMax ? "conflicted" : "desire_led");
+    return { desire, conscience, malice, pressure, mode };
+  };
+
+  HMW.adjustNpcMind = (id, changes = {}) => {
+    const rel = HMW.state.relationships?.[id];
+    if (!rel || !HMW.DATA?.people?.[id]?.romance) return null;
+    ["desire", "conscience", "malice"].forEach((key) => {
+      if (typeof changes[key] === "number") rel[key] = clamp100((Number(rel[key]) || 0) + changes[key]);
+    });
+    return HMW.getNpcMind(id);
   };
 
   HMW.addHistory = (text) => {
