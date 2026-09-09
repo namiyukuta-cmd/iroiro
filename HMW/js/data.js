@@ -101,12 +101,39 @@
     },
 
     people: {
-      support_named: { name: "アーロン", role: "支援センター職員", romance: true },
-      police_named: { name: "マーク", role: "警察官", romance: true },
-      homeless_named: { name: "サム", role: "高架下で暮らす男", romance: true },
-      thug_named: { name: "レオン", role: "工業通りの男", romance: true },
+      support_named: {
+        name: "アーロン",
+        role: "支援センター職員",
+        romance: true,
+        mind: { desire: 0, conscience: 90, malice: 10 }
+      },
+      police_named: {
+        name: "マーク",
+        role: "警察官",
+        romance: true,
+        mind: { desire: 0, conscience: 80, malice: 15 }
+      },
+      homeless_named: {
+        name: "サム",
+        role: "高架下で暮らす男",
+        romance: true,
+        mind: { desire: 0, conscience: 55, malice: 30 }
+      },
+      thug_named: {
+        name: "レオン",
+        role: "工業通りの男",
+        romance: true,
+        mind: { desire: 0, conscience: 20, malice: 80 }
+      },
       clerk: { name: "コンビニ店員", role: "店員", romance: false },
       recycler: { name: "回収所の作業員", role: "回収所", romance: false }
+    },
+
+    npcMindRule: {
+      formula: "desire + malice - conscience",
+      restrainedMax: 20,
+      conflictedMax: 50,
+      description: "良心は欲求を抑える方向、悪心は欲求に流される方向へ働く。"
     }
   };
 })();
