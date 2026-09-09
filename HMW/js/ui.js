@@ -10,18 +10,18 @@
     const slot = H.state.slot;
     const a = [];
     if (id === "charity_center" && slot !== 3) {
-      a.push({ label: "名前付き支援員と話す", desc: "話す内容を選ぶ。", run: G.supportPersonTalk, disabled: !!H.state.daily.talk.support_named });
+      a.push({ label: "名前付き支援員と話す", desc: "これまでの相談内容を踏まえて話す。", run: G.supportPersonTalk, disabled: !!H.state.daily.talk.support_named });
     }
     if ((id === "park" && slot >= 2) || id === "underpass") {
-      a.push({ label: "名前付きホームレスと話す", desc: "情報・食料・寝場所の選択がある。", run: G.homelessTalk });
+      a.push({ label: "名前付きホームレスと話す", desc: "顔見知りになるほど、寝場所や回収所の情報が具体的になる。", run: G.homelessTalk });
     }
     if ((id === "station_front" && slot >= 1) || id === "police_station") {
-      a.push({ label: "名前付き警官と話す", desc: "支援・巡回・距離の選択がある。", run: G.policeTalk, disabled: !!H.state.daily.talk.police_named });
+      a.push({ label: "名前付き警官と話す", desc: "支援先・巡回・距離の取り方が、前の接触から続く。", run: G.policeTalk, disabled: !!H.state.daily.talk.police_named });
     }
     if ((id === "underpass" && slot >= 2) || (id === "industrial_street" && slot >= 2)) {
-      a.push({ label: "名前付き不良と話す", desc: "寝場所・危ない仕事・距離の選択。", run: G.thugTalk, disabled: !!H.state.daily.talk.thug_named });
+      a.push({ label: "名前付き不良と話す", desc: "寝場所・危ない仕事・借りが後に残る。", run: G.thugTalk, disabled: !!H.state.daily.talk.thug_named });
       if (H.state.progression.thug.carryKnown) {
-        a.push({ label: "中身不明の荷運びを受ける", desc: "900円。警察注意と借りが増える。", run: G.thugJob });
+        a.push({ label: "中身不明の荷運びを受ける", desc: "900円。警察注意と相手への借りが残る。", run: G.thugJob });
       }
     }
     return a;
@@ -34,69 +34,72 @@
 
     if (id === "station_front") {
       if (!H.state.knownLocations.charity_center) {
-        a.push({ label: "掲示板を見る", desc: "DAY1から複数の生活手段を知る。時間消費なし。", run: G.board });
+        a.push({ label: "掲示板を見る", desc: "支援・廃品回収・小仕事という別々の生活手段を知る。", run: G.board });
       }
       if (H.state.progression.informal.casualWorkKnown) {
         a.push({
           label: "今日の小仕事を確認する",
           desc: H.state.daily.casualChecked
-            ? (H.state.daily.casualOffer ? "今日は募集あり。" : "今日は募集なし。")
-            : "書類不要の仕事を確認。時間消費なし。",
+            ? (H.state.daily.casualOffer ? "今日は搬入口の募集あり。" : "今日は募集なし。")
+            : "書類不要の当日仕事が出ているか確認する。",
           run: G.checkCasualWork,
           disabled: H.state.daily.casualChecked
         });
         if (H.state.daily.casualOffer && !H.state.daily.casualDone) {
-          a.push({ label: "荷下ろしの小仕事をする", desc: "550円。", run: G.casualWork });
+          a.push({ label: "荷下ろしを手伝う", desc: "荷札を見て実際に仕分ける小仕事。", run: G.casualWork });
         }
       }
-      a.push({ label: "人に小銭を頼む", desc: "収入になるが警察の注意が増える。", run: G.beg, disabled: (H.state.daily.beg[id] || 0) >= 2 });
-      a.push({ label: "廃品を探す", desc: "一日1回。", run: G.scavenge, disabled: !!H.state.daily.scavenge[id] });
+      a.push({ label: "人に小銭を頼む", desc: "収入になるが、この場所で続ければ警察の注意が増える。", run: G.beg, disabled: (H.state.daily.beg[id] || 0) >= 2 });
+      a.push({ label: "使える物を探す", desc: "三か所を自分で調べる。見つけた物は持ち帰れる。", run: G.scavenge, disabled: !!H.state.daily.scavenge[id] });
     }
 
     if (id === "shopping_street") {
       if (!H.state.knownLocations.convenience_store) {
-        a.push({ label: "店と裏道を確認する", desc: "時間消費なし。", run: G.shoppingLook });
+        a.push({ label: "店と裏道を確認する", desc: "店・住宅裏・仕事につながる場所を把握する。", run: G.shoppingLook });
       }
-      a.push({ label: "人に小銭を頼む", desc: "警察の注意が増える。", run: G.beg, disabled: (H.state.daily.beg[id] || 0) >= 2 });
-      a.push({ label: "廃品を探す", desc: "一日1回。", run: G.scavenge, disabled: !!H.state.daily.scavenge[id] });
+      a.push({ label: "人に小銭を頼む", desc: "収入になるが、この場所での視線が増える。", run: G.beg, disabled: (H.state.daily.beg[id] || 0) >= 2 });
+      a.push({ label: "使える物を探す", desc: "三か所を選んで調べる。", run: G.scavenge, disabled: !!H.state.daily.scavenge[id] });
     }
 
     if (["park", "riverside", "residential_alley", "industrial_street"].includes(id)) {
-      a.push({ label: "使える物を探す", desc: id === "industrial_street" ? "金属片が見つかりやすい。" : "一日1回。", run: G.scavenge, disabled: !!H.state.daily.scavenge[id] });
-      a.push({ label: "休む", desc: "時間を使い疲労を戻す。", run: G.rest, disabled: !!H.state.daily.rest[id] });
+      a.push({ label: "使える物を探す", desc: id === "industrial_street" ? "金属片が見つかりやすい。三か所を選んで調べる。" : "三か所を選んで調べる。", run: G.scavenge, disabled: !!H.state.daily.scavenge[id] });
+      a.push({ label: "休む", desc: "その場で時間を使い、疲労を戻す。", run: G.rest, disabled: !!H.state.daily.rest[id] });
     }
 
-    if (id === "park" && slot === 3) a.push({ label: "公園で眠る", desc: "助言や巡回情報でリスクが変わる。", run: () => G.sleepAt("park") });
-    if (id === "underpass" && slot === 3) a.push({ label: "高架下で眠る", desc: "寝ようとした時だけ縄張り問題が起こり得る。", run: () => G.sleepAt("underpass") });
-    if (id === "riverside" && slot === 3) a.push({ label: "河川敷で眠る", desc: "天候の影響が強い。", run: () => G.sleepAt("riverside") });
+    if (id === "park" && slot === 3) a.push({ label: "公園で眠る", desc: "巡回情報や人との関係で、夜の結果が変わる。", run: () => G.sleepAt("park") });
+    if (id === "underpass" && slot === 3) a.push({ label: "高架下で眠る", desc: "縄張りの話を通しているかで結果が変わる。", run: () => G.sleepAt("underpass") });
+    if (id === "riverside" && slot === 3) a.push({ label: "河川敷で眠る", desc: "人目は少ないが天候の影響が強い。", run: () => G.sleepAt("riverside") });
 
     if (id === "charity_center") {
-      a.push({ label: "食料支援を受ける", desc: "時間消費なし。", run: G.foodSupport, disabled: H.state.daily.foodSupport || slot === 3 });
-      a.push({ label: "支援相談をする", desc: H.state.progression.support.stage ? `次回 DAY${H.state.progression.support.nextDay} 以降` : "継続相談を始める。", run: G.supportConsult, disabled: slot === 3 });
-      a.push({ label: "洗面を使う", desc: "時間消費なし。", run: G.wash, disabled: !!H.state.daily.wash[id] || slot === 3 });
+      a.push({ label: "食料支援を受ける", desc: "今日の食料を確保し、残りを持ち物に入れる。", run: G.foodSupport, disabled: H.state.daily.foodSupport || slot === 3 });
+      a.push({ label: "支援相談をする", desc: H.state.progression.support.stage ? `前回の続き。次回 DAY${H.state.progression.support.nextDay} 以降` : "何を優先するか決め、継続相談を始める。", run: G.supportConsult, disabled: slot === 3 });
+      a.push({ label: "洗面を使う", desc: "身支度を整える。", run: G.wash, disabled: !!H.state.daily.wash[id] || slot === 3 });
       if (slot === 3 && H.state.progression.support.shelterReferral) {
-        a.push({ label: "一時宿泊の紹介を使う", desc: "今回の紹介を使う。", run: () => G.sleepAt("charity_referral") });
+        a.push({ label: "一時宿泊の紹介を使う", desc: "今回の紹介を使って一晩休む。", run: () => G.sleepAt("charity_referral") });
       }
     }
 
     if (id === "public_toilet") {
-      a.push({ label: "身支度する", desc: "時間消費なし。", run: G.wash, disabled: !!H.state.daily.wash[id] });
-      a.push({ label: "少し休む", desc: "疲労を戻す。", run: G.rest, disabled: !!H.state.daily.rest[id] });
+      a.push({ label: "身支度する", desc: "衛生を戻す。", run: G.wash, disabled: !!H.state.daily.wash[id] });
+      a.push({ label: "少し休む", desc: "長居はできないが疲労を戻せる。", run: G.rest, disabled: !!H.state.daily.rest[id] });
     }
 
     if (id === "convenience_store") {
-      a.push({ label: "買い物をする", desc: "時間消費なし。", run: G.openShop });
-      a.push({ label: "店員と話す", desc: "関係や小仕事につながる。", run: G.clerkTalk, disabled: !!H.state.daily.talk.clerk });
+      a.push({ label: "買い物をする", desc: "食料・水・衛生用品を買う。", run: G.openShop });
+      a.push({ label: "店員と話す", desc: "同じ店を使った履歴が、小仕事や対応の変化につながる。", run: G.clerkTalk, disabled: !!H.state.daily.talk.clerk });
+      if (H.state.progression.clerk.cleanupUnlocked && slot >= 2 && !H.state.daily.clerkWork) {
+        a.push({ label: "店の裏を清掃する", desc: "汚れた場所を実際に片付ける小仕事。", run: G.clerkWork });
+      }
     }
 
     if (id === "recycling_yard") {
       const count = (H.state.inventory.aluminum_can || 0) + (H.state.inventory.scrap_piece || 0);
-      a.push({ label: "廃品を売る", desc: `${count}点。時間消費なし。`, run: G.sellScrap, disabled: !count });
+      a.push({ label: "廃品を売る", desc: `${count}点。持ち込み回数が信用として残る。`, run: G.sellScrap, disabled: !count });
       if (H.state.progression.recycler.sales >= 2 && !H.state.progression.recycler.trialDone) {
-        a.push({ label: "仕分けの試し仕事を聞く", desc: "持ち込み実績から仕事へ。", run: G.recyclerTrial });
+        a.push({ label: "仕分けの試し仕事をする", desc: "回収物を実際に仕分ける。結果が継続仕事につながる。", run: G.recyclerTrial });
       }
       if (H.state.progression.recycler.recurringWork) {
-        a.push({ label: "仕分け仕事をする", desc: "650円。", run: G.recyclerWork, disabled: H.state.daily.recyclerWork });
+        a.push({ label: "仕分け仕事をする", desc: "回収物を仕分けて報酬を得る。", run: G.recyclerWork, disabled: H.state.daily.recyclerWork });
       }
     }
 
@@ -109,12 +112,12 @@
           : "正式紹介はまだ不可。駅前の小仕事、回収所、店の清掃は別に利用できる。")
       });
       if (H.state.progression.support.workAccess) {
-        a.push({ label: "日雇い仕事を受ける", desc: "1200円。半日。", run: G.formalWork, disabled: H.state.daily.formalWork });
+        a.push({ label: "倉庫の日雇いをする", desc: "伝票を見て箱を揃える作業。報酬は作業結果で変わる。", run: G.formalWork, disabled: H.state.daily.formalWork });
       }
     }
 
     if (id === "police_station") {
-      a.push({ label: "名前付き警官に用件を伝える", desc: "支援先や巡回を聞ける。", run: G.policeTalk, disabled: !!H.state.daily.talk.police_named });
+      a.push({ label: "名前付き警官に用件を伝える", desc: "前の接触を踏まえて、支援先や巡回を聞ける。", run: G.policeTalk, disabled: !!H.state.daily.talk.police_named });
     }
 
     return a.concat(peopleActions());
@@ -125,7 +128,7 @@
     const list = s.leads.filter((x) => !x.done).map((x) => x.text);
     if (s.stats.hunger >= 72) list.unshift("空腹が強い。食料支援・購入・持ち物で戻せる");
     if (s.stats.fatigue >= 78) list.unshift("疲労が高い。休むか今夜の寝場所を優先");
-    if (s.slot === 3) list.unshift("深夜。今夜どこで眠るか決める");
+    if (s.slot === 3) list.unshift("深夜。眠る場所を選ぶまで翌朝には進まない");
     if (s.world.policeAttention >= 3) list.push(`警察の注意度 ${s.world.policeAttention}`);
     return [...new Set(list)].slice(0, 5);
   }
@@ -140,15 +143,39 @@
     Object.entries(fields).forEach(([id, value]) => { $(id).innerHTML = `${value[0]}<b>${value[1]}</b>`; });
   }
 
+  function renderCityScene() {
+    const box = $("city-scene");
+    if (!box) return;
+    const scene = G.getCityScene?.();
+    if (!scene) {
+      box.classList.add("hidden");
+      box.innerHTML = "";
+      return;
+    }
+    box.classList.remove("hidden");
+    box.innerHTML = `<strong>${esc(scene.title)}</strong><p>${esc(scene.text)}</p><div class="scene-choice-row"></div>`;
+    const row = box.querySelector(".scene-choice-row");
+    scene.actions.forEach((action) => {
+      const b = document.createElement("button");
+      b.className = "scene-choice";
+      b.textContent = action.label;
+      b.disabled = !!action.disabled;
+      b.addEventListener("click", action.run);
+      row.appendChild(b);
+    });
+  }
+
   function renderScene() {
     const loc = D.locations[H.state.location];
     $("location-name").textContent = loc.name;
     $("location-desc").textContent = loc.description;
     $("last-message").textContent = H.state.lastMessage;
+    renderCityScene();
     const list = dynamicLeads();
-    $("lead-list").innerHTML = list.length
+    const stability = G.stabilityScore();
+    $("lead-list").innerHTML = `<div class="stability-line"><strong>生活基盤 ${stability}/5</strong><span>${"●".repeat(stability)}${"○".repeat(5 - stability)}</span></div>` + (list.length
       ? `<strong>今ある用事</strong><br>${list.map((x) => `・${esc(x)}`).join("<br>")}`
-      : "<strong>今ある用事</strong><br>・特になし";
+      : "<strong>今ある用事</strong><br>・特になし");
   }
 
   function button(label, desc, run, disabled = false) {
@@ -170,7 +197,7 @@
       panel.innerHTML = `<h2>${esc(e.title)}</h2><p>${esc(e.text)}</p>`;
       const choices = document.createElement("div");
       choices.className = "action-grid";
-      e.choices.forEach((x) => choices.appendChild(button(x.label, "対応する。", () => G.resolveEvent(x.id), x.disabled)));
+      e.choices.forEach((x) => choices.appendChild(button(x.label, "この出来事への対応。", () => G.resolveEvent(x.id), x.disabled)));
       panel.appendChild(choices);
       box.appendChild(panel);
       return;
@@ -180,7 +207,7 @@
     if (!list.length) {
       const p = document.createElement("div");
       p.className = "message";
-      p.textContent = "ここで今使う生活行動はない。地図は場所切替で、移動だけでは消耗しない。";
+      p.textContent = "ここで今使う生活行動はない。地図から別の場所の仕事・人・資源を見に行ける。";
       box.appendChild(p);
     }
   }
@@ -191,7 +218,7 @@
     const list = Object.keys(D.locations)
       .filter((id) => H.state.knownLocations[id] && id !== current)
       .map((id) => ({ label: D.locations[id].name, onClick: () => travel(id) }));
-    openModal("地図", `現在地：${D.locations[current].name}。知っている場所へ直接切り替えられる。移動では何も消耗しない。`, list.length ? list : [{ label: "まだ他の場所を知らない", disabled: true }]);
+    openModal("地図", `現在地：${D.locations[current].name}。場所を変えるだけでは時間も状態も減らない。`, list.length ? list : [{ label: "まだ他の場所を知らない", disabled: true }]);
   }
 
   function openInventory() {
