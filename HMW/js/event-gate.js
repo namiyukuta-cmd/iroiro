@@ -6,15 +6,18 @@
 
   const POLICIES = {
     police_check: {
-      chance: 0.42,
+      chance: 0.18,
+      cooldownDays: 3,
       blockedText: "巡回中の警官に呼び止められている。応じるまで、移動や別の行動には移れない。"
     },
     thug_presence: {
-      chance: 0.38,
+      chance: 0.16,
+      cooldownDays: 2,
       blockedText: "不良に進路を塞がれている。避けるか、そのまま通るかを決める必要がある。"
     },
     resident_complaint: {
-      chance: 0.34,
+      chance: 0.12,
+      cooldownDays: 2,
       blockedText: "住民から直接声をかけられている。このまま無視して居続けることはできない。"
     }
   };
@@ -22,103 +25,124 @@
   const clone = (value) => JSON.parse(JSON.stringify(value));
   const clamp = (value, min = 0, max = 100) => Math.max(min, Math.min(max, value));
 
-  const stableRoll = (key) => {
-    let hash = 2166136261;
-    for (let i = 0; i < key.length; i += 1) {
-      hash ^= key.charCodeAt(i);
-      hash = Math.imul(hash, 16777619);
-    }
-    return (hash >>> 0) / 4294967296;
-  };
+  const rawGetEligibleEvents = typeof HMW.getEligibleEvents === "function"
+    ? HMW.getEligibleEvents.bind(HMW)
+    : null;
+  const rawGetTurnContext = typeof HMW.getTurnContext === "function"
+    ? HMW.getTurnContext.bind(HMW)
+    : null;
 
-  // love-interests.js の displayName:null が temporaryLabel を上書きする問題をここで吸収する。
-  if (typeof HMW.getLoveInterestsAtLocation === "function") {
-    const original = HMW.getLoveInterestsAtLocation;
-    HMW.getLoveInterestsAtLocation = (...args) => original(...args).map((person) => ({
-      ...person,
-      displayName: person.displayName || person.temporaryLabel || person.role || "人物"
-    }));
-  }
-  if (typeof HMW.getLoveInterest === "function") {
-    const original = HMW.getLoveInterest;
-    HMW.getLoveInterest = (...args) => {
-      const person = original(...args);
-      return person ? {
-        ...person,
-        displayName: person.displayName || person.temporaryLabel || person.role || "人物"
-      } : null;
-    };
+  // 通常の「周囲を見る」では、強制イベント候補を説明文として出さない。
+  // 強制イベントはこのファイルだけが発生・解決を管理する。
+  if (rawGetEligibleEvents) {
+    HMW.getEligibleEvents = (context = {}) => rawGetEligibleEvents(context)
+      .filter((event) => !POLICIES[event.id]);
   }
 
   const ensureGateState = () => {
     const player = HMW.state?.player;
     if (!player) return null;
+
     player.progression = player.progression || {};
-    player.progression.eventGate = player.progression.eventGate || {
-      checked: {},
-      forcedMoveFrom: null,
-      forcedReason: null
-    };
+    player.progression.eventGate = player.progression.eventGate || {};
     const gate = player.progression.eventGate;
+
     gate.checked = gate.checked && typeof gate.checked === "object" ? gate.checked : {};
     gate.forcedMoveFrom = gate.forcedMoveFrom || null;
     gate.forcedReason = gate.forcedReason || null;
+    gate.lastBlockingDay = Number(gate.lastBlockingDay) || 0;
+    gate.lastBlockingArrival = Number(gate.lastBlockingArrival) || 0;
+    gate.lastEventDay = gate.lastEventDay && typeof gate.lastEventDay === "object" ? gate.lastEventDay : {};
+
+    // 既存セーブの完了履歴からクールダウンを復元する。
+    const completed = HMW.state?.events?.completed || [];
+    completed.forEach((entry) => {
+      if (!POLICIES[entry.eventId]) return;
+      const day = Number(entry.completedDay || entry.day) || 0;
+      gate.lastBlockingDay = Math.max(gate.lastBlockingDay, day);
+      gate.lastEventDay[entry.eventId] = Math.max(Number(gate.lastEventDay[entry.eventId]) || 0, day);
+    });
+
     return gate;
   };
 
-  const currentKey = () => {
-    const state = HMW.state;
-    const arrival = state?.player?.survival?.arrivalCount || 0;
-    return `${state?.world?.day || 1}:${state?.world?.time || "morning"}:${state?.world?.locationId || "none"}:${arrival}`;
-  };
+  const currentArrival = () => Number(HMW.state?.player?.survival?.arrivalCount) || 0;
+  const currentKey = () => `${HMW.state?.world?.day || 1}:${HMW.state?.world?.locationId || "none"}:${currentArrival()}`;
 
   const getActiveBlocking = () => {
     const active = HMW.state?.events?.active || [];
     const locationId = HMW.state?.world?.locationId;
     const instance = active.find((entry) => entry.locationId === locationId && POLICIES[entry.eventId]);
     if (!instance) return null;
+
     const definition = HMW.getEvent?.(instance.eventId);
-    return definition ? { instance, definition, policy: POLICIES[instance.eventId] } : null;
+    if (!definition) return null;
+    return { instance, definition, policy: POLICIES[instance.eventId] };
   };
 
-  const rawGetTurnContext = typeof HMW.getTurnContext === "function"
-    ? HMW.getTurnContext.bind(HMW)
-    : null;
+  const isCritical = () => {
+    const player = HMW.state?.player;
+    const c = player?.condition || {};
+    if (!player || player.lifeStatus !== "active") return true;
+    return (c.health ?? 100) <= 20 ||
+      (c.hunger ?? 0) >= 90 ||
+      (c.fatigue ?? 0) >= 95 ||
+      (c.warmth ?? 100) <= 10;
+  };
+
+  const canStartBlockingEvent = (eventId) => {
+    const gate = ensureGateState();
+    if (!gate || gate.forcedMoveFrom || isCritical()) return false;
+
+    const day = Number(HMW.state?.world?.day) || 1;
+    const arrival = currentArrival();
+    if (arrival <= 0) return false;
+
+    // 強制イベント全体で最低2日空ける。
+    if (gate.lastBlockingDay && day - gate.lastBlockingDay < 2) return false;
+
+    // 同種イベントはさらに個別クールダウンを持つ。
+    const lastSame = Number(gate.lastEventDay[eventId]) || 0;
+    const cooldown = POLICIES[eventId]?.cooldownDays || 2;
+    if (lastSame && day - lastSame < cooldown) return false;
+
+    // 同じ到着地点で再描画されても再抽選しない。
+    if (gate.checked[currentKey()]) return false;
+    return true;
+  };
 
   const chooseBlockingCandidate = () => {
-    if (!rawGetTurnContext) return null;
-    const raw = rawGetTurnContext();
-    if (raw?.event?.id && POLICIES[raw.event.id]) {
-      return HMW.getEvent?.(raw.event.id) || null;
-    }
+    if (!rawGetEligibleEvents || isCritical()) return null;
 
-    const candidates = (HMW.getEligibleEvents?.() || []).filter((event) => POLICIES[event.id]);
+    const candidates = rawGetEligibleEvents().filter((event) => POLICIES[event.id]);
     if (!candidates.length) return null;
 
-    const key = currentKey();
-    return candidates.find((event) => stableRoll(`blocking:${key}:${event.id}`) < (POLICIES[event.id].chance || 0)) || null;
+    for (const event of candidates) {
+      if (!canStartBlockingEvent(event.id)) continue;
+      if (Math.random() < POLICIES[event.id].chance) return event;
+    }
+    return null;
   };
 
   const ensureBlockingEvent = () => {
-    const player = HMW.state?.player;
-    if (!player || player.lifeStatus !== "active") return getActiveBlocking();
-
     const existing = getActiveBlocking();
     if (existing) return existing;
 
+    const player = HMW.state?.player;
     const gate = ensureGateState();
-    if (!gate || gate.forcedMoveFrom) return null;
+    if (!player || player.lifeStatus !== "active" || !gate || gate.forcedMoveFrom) return null;
 
     const key = currentKey();
     if (gate.checked[key]) return null;
     gate.checked[key] = true;
 
+    if (isCritical()) return null;
+
     const candidate = chooseBlockingCandidate();
     if (!candidate) return null;
 
     const instance = HMW.startEvent?.(candidate.id);
-    if (!instance) return null;
-    return getActiveBlocking();
+    return instance ? getActiveBlocking() : null;
   };
 
   const wrappedTurnContext = () => {
@@ -145,21 +169,20 @@
     if (gate?.forcedMoveFrom === HMW.state?.world?.locationId) {
       context.event = null;
       context.allowedActions = [{ id: "forced_move", label: "この場所を離れる" }];
+      context.allowedMoves = (HMW.getConnectedLocations?.(HMW.state.world.locationId) || [])
+        .map((location) => ({ id: location.id, label: location.name }));
       context.mustLeaveLocation = true;
       return context;
     }
 
-    if (context.event?.id && POLICIES[context.event.id] && gate?.checked?.[currentKey()]) {
-      context.event = null;
-    }
-
+    if (context.event?.id && POLICIES[context.event.id]) context.event = null;
     return context;
   };
 
   if (rawGetTurnContext) {
     HMW.getTurnContext = wrappedTurnContext;
     HMW.getAIPacket = () => ({
-      instruction: "blockingEvent または mustLeaveLocation がある間は、それを解決する行動以外を成立させない。イベントを無視して移動・仕事・休息などを進めない。",
+      instruction: "blockingEvent または mustLeaveLocation がある間だけ、その解決を優先する。解決後は通常の生活行動へ戻す。同種の強制イベントを連続発生させない。",
       rules: typeof HMW.getAIRulesText === "function" ? HMW.getAIRulesText() : null,
       context: wrappedTurnContext()
     });
@@ -197,7 +220,7 @@
     return content;
   };
 
-  const refreshBase = () => {
+  const refresh = () => {
     HMW.app?.render?.();
     HMW.renderConditionPanel?.();
     HMW.flowUI?.render?.();
@@ -217,61 +240,68 @@
     gate.forcedReason = null;
   };
 
+  const rememberResolvedEvent = (eventId) => {
+    const gate = ensureGateState();
+    if (!gate) return;
+    const day = Number(HMW.state.world.day) || 1;
+    gate.lastBlockingDay = day;
+    gate.lastBlockingArrival = currentArrival();
+    gate.lastEventDay[eventId] = day;
+  };
+
   const applyOutcomeConsequence = (eventId, outcomeId) => {
-    const condition = HMW.state.player.condition;
-    let text = "対応した。";
+    const c = HMW.state.player.condition;
 
     if (eventId === "police_check") {
       if (outcomeId === "answer_calmly") {
-        condition.fatigue = clamp(condition.fatigue + 1);
-        text = "警官の確認に応じた。少し時間と気力を使ったが、その場での確認は終わった。";
-      } else if (outcomeId === "leave_area") {
-        condition.fatigue = clamp(condition.fatigue + 2);
+        c.fatigue = clamp(c.fatigue + 1);
+        return "警官の確認に応じた。確認はここで終わった。";
+      }
+      if (outcomeId === "leave_area") {
+        c.fatigue = clamp(c.fatigue + 2);
         setForcedMove("警官から、この場所を離れるよう求められている。");
-        text = "警官からここを離れるよう求められた。別の場所へ移動するまで、ほかの行動には移れない。";
+        return "警官からここを離れるよう求められた。別の場所へ移れば、この件は終わる。";
       }
     }
 
     if (eventId === "thug_presence") {
       if (outcomeId === "avoid") {
-        condition.fatigue = clamp(condition.fatigue + 3);
+        c.fatigue = clamp(c.fatigue + 3);
         setForcedMove("不良を避けるため、この場所から離れる必要がある。");
-        text = "近づかないことにした。遠回りになるため疲労が増え、この場所から離れる必要がある。";
-      } else if (outcomeId === "pass_through") {
-        const roll = stableRoll(`thug-result:${HMW.state.world.day}:${HMW.state.world.time}:${HMW.state.world.locationId}:${HMW.state.player.survival?.arrivalCount || 0}`);
-        if (roll < 0.34 && HMW.state.player.money > 0) {
+        return "不良を避けることにした。この場所から離れれば、この件は終わる。";
+      }
+      if (outcomeId === "pass_through") {
+        const roll = Math.random();
+        if (roll < 0.30 && HMW.state.player.money > 0) {
           const loss = Math.min(HMW.state.player.money, 20);
           HMW.state.player.money -= loss;
-          text = `そのまま通ろうとして絡まれ、${loss}を失った。`;
-        } else if (roll < 0.64) {
-          condition.health = clamp(condition.health - 6);
-          condition.fatigue = clamp(condition.fatigue + 4);
-          text = "そのまま通ろうとして揉め、体力を失った。";
-        } else {
-          condition.fatigue = clamp(condition.fatigue + 2);
-          text = "緊張したまま通り抜けた。何も取られなかったが疲労が増えた。";
+          return `絡まれ、${loss}を失った。`;
         }
+        if (roll < 0.58) {
+          c.health = clamp(c.health - 6);
+          c.fatigue = clamp(c.fatigue + 4);
+          return "揉めて体力を失った。";
+        }
+        c.fatigue = clamp(c.fatigue + 2);
+        return "緊張したが、そのまま通り抜けた。";
       }
     }
 
     if (eventId === "resident_complaint") {
       if (outcomeId === "leave") {
-        condition.fatigue = clamp(condition.fatigue + 1);
+        c.fatigue = clamp(c.fatigue + 1);
         setForcedMove("住民から、この場所に留まらないよう求められている。");
-        text = "住民に退去を求められた。この場所から離れるまで、ほかの行動はできない。";
-      } else if (outcomeId === "explain") {
-        const roll = stableRoll(`resident-result:${HMW.state.world.day}:${HMW.state.world.time}:${HMW.state.world.locationId}:${HMW.state.player.survival?.arrivalCount || 0}`);
-        condition.fatigue = clamp(condition.fatigue + 1);
-        if (roll < 0.45) {
-          text = "事情を説明し、今すぐ追い立てられることは避けられた。";
-        } else {
-          setForcedMove("説明しても住民の警戒は解けず、この場所を離れるよう求められている。");
-          text = "事情を説明したが受け入れられず、ここを離れるよう求められた。";
-        }
+        return "住民から退去を求められた。別の場所へ移れば、この件は終わる。";
+      }
+      if (outcomeId === "explain") {
+        c.fatigue = clamp(c.fatigue + 1);
+        if (Math.random() < 0.45) return "事情を説明し、今すぐ追い立てられることは避けられた。";
+        setForcedMove("説明しても住民の警戒は解けず、この場所を離れるよう求められている。");
+        return "事情を説明したが受け入れられず、ここを離れるよう求められた。";
       }
     }
 
-    return text;
+    return "対応した。";
   };
 
   const resolveBlockingEvent = (outcomeId) => {
@@ -282,65 +312,72 @@
     const completed = HMW.resolveEvent?.(blocking.instance.instanceId, outcomeId);
     if (!completed) return;
 
+    rememberResolvedEvent(eventId);
     const resultText = applyOutcomeConsequence(eventId, outcomeId);
-    refreshBase();
+    refresh();
 
     const gate = ensureGateState();
     if (gate?.forcedMoveFrom === HMW.state.world.locationId) {
       const content = openPanel("この場所を離れる");
-      if (content) {
-        content.append(paragraph(resultText));
-        const destinations = HMW.getConnectedLocations?.(HMW.state.world.locationId) || [];
-        destinations.forEach((location) => {
-          content.append(button(location.name, () => forceMoveTo(location.id)));
-        });
-      }
-    } else {
-      HMW.app?.closeModal?.();
-      const notice = document.getElementById("noticeArea");
-      if (notice) {
-        notice.textContent = resultText;
-        notice.hidden = false;
-      }
+      if (!content) return;
+      content.append(paragraph(resultText));
+      (HMW.getConnectedLocations?.(HMW.state.world.locationId) || [])
+        .forEach((location) => content.append(button(location.name, () => forceMoveTo(location.id))));
+      return;
     }
-    setTimeout(renderGate, 0);
+
+    HMW.app?.closeModal?.();
+    const notice = document.getElementById("noticeArea");
+    if (notice) {
+      notice.textContent = resultText;
+      notice.hidden = false;
+    }
+    setTimeout(refresh, 0);
   };
 
   const openBlockingEvent = () => {
-    const blocking = ensureBlockingEvent();
+    const blocking = getActiveBlocking() || ensureBlockingEvent();
     if (!blocking) return;
 
     const content = openPanel(blocking.definition.name || "対応が必要");
     if (!content) return;
     content.append(paragraph(blocking.policy.blockedText));
-
     Object.entries(blocking.definition.outcomes || {}).forEach(([outcomeId, outcome]) => {
       content.append(button(outcome.label, () => resolveBlockingEvent(outcomeId)));
     });
   };
 
+  // 強制退去は通常移動とは別処理。
+  // 疲労100などで「退去しろと言われたのに移動不能」の詰みを起こさない。
   function forceMoveTo(locationId) {
-    const gate = ensureGateState();
-    const from = HMW.state.world.locationId;
-    const previousReason = gate?.forcedReason || null;
+    const from = HMW.state?.world?.locationId;
+    const connected = HMW.getConnectedLocations?.(from) || [];
+    if (!connected.some((location) => location.id === locationId)) return;
+
+    const player = HMW.state?.player;
+    if (!player || player.lifeStatus === "dead") return;
+
     clearForcedMove();
+    HMW.state.world.locationId = locationId;
+    HMW.state.player.sleepingPlaceId = null;
+    HMW.state.player.survival = HMW.state.player.survival || {};
+    HMW.state.player.survival.movementCount = (HMW.state.player.survival.movementCount || 0) + 1;
+    HMW.state.player.survival.arrivalCount = (HMW.state.player.survival.arrivalCount || 0) + 1;
 
-    HMW.lifeLoop?.moveTo?.(locationId);
-    const moved = HMW.state.world.locationId !== from;
+    const c = HMW.state.player.condition;
+    c.hunger = clamp(c.hunger + 1);
+    c.hygiene = clamp(c.hygiene - 1);
+    if (c.fatigue < 100) c.fatigue = clamp(c.fatigue + 1);
 
-    if (!moved) {
-      const restored = ensureGateState();
-      if (restored) {
-        restored.forcedMoveFrom = from;
-        restored.forcedReason = previousReason;
-      }
-      setTimeout(renderGate, 0);
-      return;
-    }
-
+    HMW.app?.appendHistory?.("forced_move", `${HMW.getLocation?.(locationId)?.name || locationId}へ退去した。`, { from, to: locationId });
     HMW.app?.closeModal?.();
-    ensureBlockingEvent();
-    setTimeout(renderGate, 0);
+
+    // 強制退去の直後に別の強制イベントを連鎖させない。
+    const gate = ensureGateState();
+    if (gate) gate.checked[currentKey()] = true;
+
+    HMW.lifeLoop?.resolveCriticalState?.("forced-move-end");
+    refresh();
   }
 
   const openForcedMove = () => {
@@ -350,8 +387,8 @@
     const content = openPanel("この場所を離れる");
     if (!content) return;
     content.append(paragraph(gate.forcedReason || "この場所には留まれない。"));
-    const destinations = HMW.getConnectedLocations?.(HMW.state.world.locationId) || [];
-    destinations.forEach((location) => content.append(button(location.name, () => forceMoveTo(location.id))));
+    (HMW.getConnectedLocations?.(HMW.state.world.locationId) || [])
+      .forEach((location) => content.append(button(location.name, () => forceMoveTo(location.id))));
   };
 
   const setMapGate = (blocked) => {
@@ -366,67 +403,27 @@
     }
   };
 
-  const renderGate = () => {
+  const render = () => {
     const player = HMW.state?.player;
     if (!player) return;
 
-    refreshBase();
-
-    const gateState = ensureGateState();
+    const gate = ensureGateState();
     const blocking = ensureBlockingEvent();
-    const forced = gateState?.forcedMoveFrom === HMW.state.world.locationId;
-    const buttons = [...document.querySelectorAll("[data-flow-slot]")];
-    const text = document.getElementById("sceneText");
+    const forced = Boolean(gate?.forcedMoveFrom && gate.forcedMoveFrom === HMW.state.world.locationId);
 
-    if (blocking) {
-      if (text) text.textContent = blocking.policy.blockedText;
-      if (buttons[0]) {
-        buttons[0].textContent = "対応する";
-        buttons[0].disabled = false;
-      }
-      if (buttons[1]) {
-        buttons[1].textContent = "対応が必要";
-        buttons[1].disabled = true;
-      }
-      if (buttons[2]) {
-        buttons[2].textContent = "移動できない";
-        buttons[2].disabled = true;
-      }
-      setMapGate(true);
-      return;
-    }
-
-    if (forced) {
-      if (text) text.textContent = `${gateState.forcedReason || "この場所には留まれない。"} 先に場所を移る必要がある。`;
-      if (buttons[0]) {
-        buttons[0].textContent = "この場所を離れる";
-        buttons[0].disabled = false;
-      }
-      if (buttons[1]) {
-        buttons[1].textContent = "先に移動が必要";
-        buttons[1].disabled = true;
-      }
-      if (buttons[2]) {
-        buttons[2].textContent = "先に移動が必要";
-        buttons[2].disabled = true;
-      }
-      setMapGate(true);
-      return;
-    }
-
-    setMapGate(false);
+    HMW.flowUI?.render?.();
+    setMapGate(Boolean(blocking || forced));
   };
 
   document.addEventListener("click", (event) => {
     const blocking = getActiveBlocking();
-    const gateState = ensureGateState();
-    const forced = gateState?.forcedMoveFrom === HMW.state?.world?.locationId;
+    const gate = ensureGateState();
+    const forced = Boolean(gate?.forcedMoveFrom && gate.forcedMoveFrom === HMW.state?.world?.locationId);
     if (!blocking && !forced) return;
 
     const flowButton = event.target.closest?.("[data-flow-slot]");
     const mapTarget = event.target.closest?.("#mapButton, .hmw-map-node");
     const inventory = event.target.closest?.("#inventoryButton");
-
     if (!flowButton && !mapTarget && !inventory) return;
 
     event.preventDefault();
@@ -434,22 +431,18 @@
 
     if (flowButton?.getAttribute("data-flow-slot") === "1") {
       if (blocking) openBlockingEvent();
-      else if (forced) openForcedMove();
+      else openForcedMove();
     }
   }, true);
 
-  document.addEventListener("click", () => {
-    setTimeout(renderGate, 1);
-  });
-
+  document.addEventListener("click", () => setTimeout(render, 0));
   document.addEventListener("DOMContentLoaded", () => {
     ensureGateState();
-    ensureBlockingEvent();
-    setTimeout(renderGate, 0);
+    setTimeout(render, 0);
   });
 
   HMW.eventGate = {
-    render: renderGate,
+    render,
     ensureBlockingEvent,
     openBlockingEvent,
     openForcedMove,
