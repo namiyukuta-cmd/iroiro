@@ -27,7 +27,7 @@
     return a;
   }
 
-  function actions() {
+  function locationActions() {
     const id = H.state.location;
     const slot = H.state.slot;
     const a = [];
@@ -120,7 +120,7 @@
       a.push({ label: "名前付き警官に用件を伝える", desc: "前の接触を踏まえて、支援先や巡回を聞ける。", run: G.policeTalk, disabled: !!H.state.daily.talk.police_named });
     }
 
-    return a.concat(peopleActions());
+    return a;
   }
 
   function dynamicLeads() {
@@ -134,13 +134,21 @@
   }
 
   function renderStatus() {
-    $("day").textContent = `DAY ${H.state.day}`;
-    $("time").textContent = `TIME ${D.slots[H.state.slot]}`;
-    $("money").textContent = `MONEY ${H.state.money}円`;
-    $("weather").textContent = H.state.world.weather === "rain" ? "☂ 雨" : H.state.world.weather === "cold" ? "❄ 寒い" : "☀ 晴れ";
+    $("day").innerHTML = `DAY<b>${H.state.day}</b>`;
+    $("time").innerHTML = `TIME<b>${esc(D.slots[H.state.slot])}</b>`;
+    $("money").innerHTML = `MONEY<b>${H.state.money}</b>`;
+    $("weather").textContent = H.state.world.weather === "rain" ? "☂️" : H.state.world.weather === "cold" ? "❄️" : "☀️";
     const s = H.state.stats;
-    const fields = { health: ["体力", s.health], hunger: ["空腹", s.hunger], fatigue: ["疲労", s.fatigue], hygiene: ["衛生", s.hygiene], warmth: ["体温", s.warmth], wetness: ["濡れ", s.wetness] };
+    const fields = {
+      health: ["体力", s.health],
+      hunger: ["空腹", s.hunger],
+      hygiene: ["衛生", s.hygiene],
+      warmth: ["体温", s.warmth],
+      wetness: ["濡れ", s.wetness],
+      fatigue: ["疲労", s.fatigue]
+    };
     Object.entries(fields).forEach(([id, value]) => { $(id).innerHTML = `${value[0]}<b>${value[1]}</b>`; });
+    $("night-bed").textContent = "未定";
   }
 
   function renderCityScene() {
@@ -171,18 +179,46 @@
     $("location-desc").textContent = loc.description;
     $("last-message").textContent = H.state.lastMessage;
     renderCityScene();
-    const list = dynamicLeads();
-    const stability = G.stabilityScore();
-    $("lead-list").innerHTML = `<div class="stability-line"><strong>生活基盤 ${stability}/5</strong><span>${"●".repeat(stability)}${"○".repeat(5 - stability)}</span></div>` + (list.length
-      ? `<strong>今ある用事</strong><br>${list.map((x) => `・${esc(x)}`).join("<br>")}`
-      : "<strong>今ある用事</strong><br>・特になし");
   }
 
-  function button(label, desc, run, disabled = false) {
+  function modalAction(a) {
+    return {
+      label: a.label,
+      disabled: !!a.disabled,
+      onClick: () => {
+        closeModal();
+        a.run();
+      }
+    };
+  }
+
+  function openLocationActions() {
+    if (H.state.activeEvent) return info("行動", "現在の出来事への対応が先になる。");
+    const list = locationActions();
+    if (!list.length) return info(D.locations[H.state.location].name, "今ここでできる特別な行動はない。");
+    openModal(D.locations[H.state.location].name, "ここで何をするか選ぶ。", list.map(modalAction));
+  }
+
+  function openPeopleHere() {
+    if (H.state.activeEvent) return info("人と関わる", "現在の出来事への対応が先になる。");
+    const list = peopleActions();
+    if (!list.length) return info("人と関わる", "今ここで話しかけられる相手はいない。");
+    openModal("人と関わる", "今ここにいる相手。", list.map(modalAction));
+  }
+
+  function mainButton(label, run) {
+    const b = document.createElement("button");
+    b.className = "primary-action";
+    b.textContent = label;
+    b.addEventListener("click", run);
+    return b;
+  }
+
+  function eventButton(label, run, disabled = false) {
     const b = document.createElement("button");
     b.className = "action-btn";
+    b.textContent = label;
     b.disabled = !!disabled;
-    b.innerHTML = `${esc(label)}${desc ? `<small>${esc(desc)}</small>` : ""}`;
     b.addEventListener("click", run);
     return b;
   }
@@ -197,28 +233,23 @@
       panel.innerHTML = `<h2>${esc(e.title)}</h2><p>${esc(e.text)}</p>`;
       const choices = document.createElement("div");
       choices.className = "action-grid";
-      e.choices.forEach((x) => choices.appendChild(button(x.label, "この出来事への対応。", () => G.resolveEvent(x.id), x.disabled)));
+      e.choices.forEach((x) => choices.appendChild(eventButton(x.label, () => G.resolveEvent(x.id), x.disabled)));
       panel.appendChild(choices);
       box.appendChild(panel);
       return;
     }
-    const list = actions();
-    list.forEach((x) => box.appendChild(button(x.label, x.desc, x.run, x.disabled)));
-    if (!list.length) {
-      const p = document.createElement("div");
-      p.className = "message";
-      p.textContent = "ここで今使う生活行動はない。地図から別の場所の仕事・人・資源を見に行ける。";
-      box.appendChild(p);
-    }
+    box.appendChild(mainButton("行動する", openLocationActions));
+    box.appendChild(mainButton("人と関わる", openPeopleHere));
+    box.appendChild(mainButton("移動する", openMap));
   }
 
   function openMap() {
-    if (H.state.activeEvent) return info("地図", "現在の出来事への対応が先になる。");
+    if (H.state.activeEvent) return info("マップ", "現在の出来事への対応が先になる。");
     const current = H.state.location;
     const list = Object.keys(D.locations)
       .filter((id) => H.state.knownLocations[id] && id !== current)
       .map((id) => ({ label: D.locations[id].name, onClick: () => travel(id) }));
-    openModal("地図", `現在地：${D.locations[current].name}。場所を変えるだけでは時間も状態も減らない。`, list.length ? list : [{ label: "まだ他の場所を知らない", disabled: true }]);
+    openModal("マップ", `現在地：${D.locations[current].name}`, list.length ? list : [{ label: "まだ他の場所を知らない", disabled: true }]);
   }
 
   function openInventory() {
@@ -244,6 +275,14 @@
     openModal("人物", html, [], true);
   }
 
+  function openTasks() {
+    const stability = typeof G.stabilityScore === "function" ? G.stabilityScore() : 0;
+    const leads = dynamicLeads();
+    const html = `<div class="menu-summary"><b>生活基盤 ${stability}/5</b><br><span class="stability-dots">${"●".repeat(stability)}${"○".repeat(5 - stability)}</span></div>` +
+      `<div class="menu-summary"><b>今ある用事</b>${leads.length ? leads.map((x) => `<div class="task-row">${esc(x)}</div>`).join("") : "<p>特になし</p>"}</div>`;
+    openModal("状況", html, [], true);
+  }
+
   function openLog() {
     openModal("記録", H.state.history.map((x) => `<div class="log-row">${esc(x)}</div>`).join(""), [], true);
   }
@@ -259,6 +298,13 @@
     ]);
   }
 
+  function openMenu() {
+    openModal("メニュー", "", [
+      { label: "状況・今ある用事", onClick: () => { closeModal(); openTasks(); } },
+      { label: "人物一覧", onClick: () => { closeModal(); openPeople(); } }
+    ]);
+  }
+
   function refresh() {
     renderStatus();
     renderScene();
@@ -269,10 +315,10 @@
   G.refresh = refresh;
 
   document.addEventListener("DOMContentLoaded", () => {
+    $("nav-menu").addEventListener("click", openMenu);
     $("nav-map").addEventListener("click", openMap);
     $("nav-inventory").addEventListener("click", openInventory);
     $("nav-log").addEventListener("click", openLog);
-    $("nav-people").addEventListener("click", openPeople);
     $("nav-save").addEventListener("click", openSave);
     $("modal-close").addEventListener("click", closeModal);
     $("modal-backdrop").addEventListener("click", (e) => { if (e.target === $("modal-backdrop")) closeModal(); });
