@@ -7,30 +7,29 @@
   <meta http-equiv="Pragma" content="no-cache" />
   <meta http-equiv="Expires" content="0" />
   <title>HMW</title>
-  <link rel="stylesheet" href="css/style.css?v=20260909-1835" />
+  <link rel="stylesheet" href="css/style.css?v=20260909-1745" />
 </head>
 <body>
   <div class="app">
     <div class="topbar">
-      <div class="status-box" id="day">DAY<b>1</b></div>
-      <div class="status-box" id="time">TIME<b>朝</b></div>
-      <div class="status-box" id="money">MONEY<b>0</b></div>
-      <div class="weather-box" id="weather">☀️</div>
-      <button class="menu-top-btn" id="nav-menu" aria-label="メニュー">…</button>
+      <div class="status-box" id="day">DAY 1</div>
+      <div class="status-box" id="time">TIME 朝</div>
+      <div class="status-box" id="money">MONEY 0円</div>
     </div>
 
-    <div class="stats">
-      <div class="stat" id="health">体力<b>80</b></div>
-      <div class="stat" id="hunger">空腹<b>35</b></div>
-      <div class="stat" id="hygiene">清潔<b>45</b></div>
-      <div class="stat" id="warmth">体温<b>55</b></div>
-      <div class="stat" id="wetness">濡れ<b>0</b></div>
-      <div class="stat" id="fatigue">疲労<b>25</b></div>
-    </div>
-
-    <div class="sleep-row">
-      <span>今夜の寝床</span>
-      <b id="night-bed">未定</b>
+    <div>
+      <div class="weather-row">
+        <strong>HMW</strong>
+        <span id="weather">☀ 晴れ</span>
+      </div>
+      <div class="stats">
+        <div class="stat" id="health">体力<b>80</b></div>
+        <div class="stat" id="hunger">空腹<b>35</b></div>
+        <div class="stat" id="fatigue">疲労<b>25</b></div>
+        <div class="stat" id="hygiene">衛生<b>45</b></div>
+        <div class="stat" id="warmth">体温<b>55</b></div>
+        <div class="stat" id="wetness">濡れ<b>0</b></div>
+      </div>
     </div>
 
     <main class="main">
@@ -38,16 +37,21 @@
         <h1 id="location-name">駅前</h1>
         <p id="location-desc"></p>
         <div class="message" id="last-message"></div>
-        <section class="city-scene hidden" id="city-scene"></section>
+      </section>
+
+      <section class="city-scene hidden" id="city-scene"></section>
+      <section class="leads" id="lead-list"></section>
+
+      <section class="action-panel">
+        <div class="action-grid" id="action-list"></div>
       </section>
     </main>
 
-    <section class="main-actions" id="action-list"></section>
-
     <nav class="bottom-nav" aria-label="ゲームメニュー">
-      <button class="nav-btn" id="nav-map">マップ</button>
+      <button class="nav-btn" id="nav-map">地図</button>
       <button class="nav-btn" id="nav-inventory">持ち物</button>
       <button class="nav-btn" id="nav-log">記録</button>
+      <button class="nav-btn" id="nav-people">人物</button>
       <button class="nav-btn" id="nav-save">セーブ</button>
     </nav>
   </div>
@@ -63,14 +67,14 @@
     </section>
   </div>
 
-  <script src="js/data.js?v=20260909-1835"></script>
-  <script src="js/state.js?v=20260909-1835"></script>
-  <script src="js/save.js?v=20260909-1835"></script>
-  <script src="js/core.js?v=20260909-1835"></script>
-  <script src="js/activities.js?v=20260909-1835"></script>
-  <script src="js/actions-life.js?v=20260909-1835"></script>
-  <script src="js/actions-people.js?v=20260909-1835"></script>
-  <script src="js/scenes.js?v=20260909-1835"></script>
-  <script src="js/ui.js?v=20260909-1835"></script>
+  <script src="js/data.js?v=20260909-1745"></script>
+  <script src="js/state.js?v=20260909-1745"></script>
+  <script src="js/save.js?v=20260909-1745"></script>
+  <script src="js/core.js?v=20260909-1745"></script>
+  <script src="js/activities.js?v=20260909-1745"></script>
+  <script src="js/actions-life.js?v=20260909-1745"></script>
+  <script src="js/actions-people.js?v=20260909-1745"></script>
+  <script src="js/scenes.js?v=20260909-1745"></script>
+  <script src="js/ui.js?v=20260909-1745"></script>
 </body>
 </html>
