@@ -10,7 +10,7 @@
     const fresh = H.createInitialState();
     const s = H.state || fresh;
     const oldVersion = Number(s.version) || 1;
-    s.version = 2;
+    s.version = 3;
     s.world = { ...fresh.world, ...(s.world || {}) };
     s.world.locations = s.world.locations || {};
     s.inventory = s.inventory || {};
@@ -24,10 +24,14 @@
     Object.keys(fresh.progression).forEach((key) => {
       s.progression[key] = { ...fresh.progression[key], ...(s.progression[key] || {}) };
     });
+    s.progression.stability = { ...fresh.progression.stability, ...(s.progression.stability || {}) };
+    s.story = { ...fresh.story, ...(s.story || {}) };
+    s.story.seen = { ...fresh.story.seen, ...((s.story && s.story.seen) || {}) };
+    s.story.counters = { ...fresh.story.counters, ...((s.story && s.story.counters) || {}) };
     s.sleep = { ...fresh.sleep, ...(s.sleep || {}) };
     s.sleep.known = { ...fresh.sleep.known, ...((s.sleep && s.sleep.known) || {}) };
     s.daily = { ...H.createDailyState(), ...(s.daily || {}) };
-    ["beg", "scavenge", "talk", "wash", "rest"].forEach((k) => { s.daily[k] = s.daily[k] || {}; });
+    ["beg", "scavenge", "talk", "wash", "rest", "sceneKeys"].forEach((k) => { s.daily[k] = s.daily[k] || {}; });
     s.leads = Array.isArray(s.leads) ? s.leads : fresh.leads;
     s.history = Array.isArray(s.history) ? s.history : fresh.history;
     s.stats = { ...fresh.stats, ...(s.stats || {}) };
@@ -40,7 +44,10 @@
       s.stats.warmth = Math.max(45, s.stats.warmth);
       s.stats.wetness = Math.min(20, s.stats.wetness);
       s.activeEvent = null;
-      s.lastMessage = "旧版セーブを新方式へ移行した。移動だけでは何も消耗しない。";
+    }
+    if (oldVersion < 3) {
+      s.activeEvent = null;
+      s.lastMessage = "セーブを新しい生活シミュレーション方式へ移行した。深夜を越えるのは睡眠を選んだ時だけ。";
     }
     if (!D.locations[s.location]) s.location = "station_front";
     H.state = s;
@@ -95,17 +102,10 @@
   }
 
   function advanceTime(steps = 1, message = "") {
-    for (let i = 0; i < steps; i += 1) {
+    const count = Math.max(0, Number(steps) || 0);
+    for (let i = 0; i < count; i += 1) {
       actionTick();
-      H.state.slot += 1;
-      if (H.state.slot > 3) {
-        H.state.day += 1;
-        H.state.slot = 0;
-        H.resetDaily();
-        changeStats({ fatigue: 18, hunger: 5 });
-        rollWeather();
-        H.addHistory("眠らず朝になり疲労が残った。体力は自動では減らない。");
-      }
+      if (H.state.slot < 3) H.state.slot += 1;
     }
     if (message) H.addHistory(message);
     G.refresh?.();
@@ -186,9 +186,20 @@
     if (H.state.activeEvent || !H.state.knownLocations[id] || !D.locations[id]) return;
     H.state.location = id;
     locState(id).visits += 1;
-    H.state.lastMessage = `${D.locations[id].name}へ移った。移動だけでは時間・空腹・疲労・体力は変わらない。`;
+    H.state.lastMessage = `${D.locations[id].name}へ移った。街の様子と、そこで今起きていることが変わる。`;
     closeModal();
     G.refresh?.();
+  }
+
+  function stabilityScore() {
+    const p = H.state.progression;
+    let score = 0;
+    if (p.stability.paidWorkDays >= 1) score += 1;
+    if (p.stability.safeNights >= 1) score += 1;
+    if (p.support.caseOpened || p.stability.supportBase) score += 1;
+    if (p.recycler.recurringWork || p.clerk.cleanupUnlocked || p.support.workAccess || p.stability.regularIncome) score += 1;
+    if (p.homelessNetwork.safeSleepAdvice || rel("clerk").trust >= 1 || rel("support_named").trust >= 2 || p.stability.streetNetwork) score += 1;
+    return Math.min(5, score);
   }
 
   function escapeHtml(value) {
@@ -218,7 +229,7 @@
 
   Object.assign(G, {
     $, clamp, ensureState, locState, rel, random, changeStats, unlock, rollWeather,
-    advanceTime, policeCheck, underpassCheck, resolveEvent, travel,
+    advanceTime, policeCheck, underpassCheck, resolveEvent, travel, stabilityScore,
     escapeHtml, openModal, closeModal, info
   });
 })();
