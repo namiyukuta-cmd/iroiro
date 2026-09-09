@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no" />
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+  <meta http-equiv="Pragma" content="no-cache" />
+  <meta http-equiv="Expires" content="0" />
+  <title>HMW</title>
+  <link rel="stylesheet" href="css/style.css?v=20260909-1900" />
+</head>
+<body>
+  <div class="app">
+    <div class="topbar">
+      <div class="status-box" id="day">DAY 1</div>
+      <div class="status-box" id="time">TIME 朝</div>
+      <div class="status-box" id="money">MONEY 0円</div>
+    </div>
+
+    <div>
+      <div class="weather-row">
+        <strong>HMW</strong>
+        <span id="weather">☀ 晴れ</span>
+      </div>
+      <div class="stats">
+        <div class="stat" id="health">体力<b>80</b></div>
+        <div class="stat" id="hunger">空腹<b>35</b></div>
+        <div class="stat" id="fatigue">疲労<b>25</b></div>
+        <div class="stat" id="hygiene">衛生<b>45</b></div>
+        <div class="stat" id="warmth">体温<b>55</b></div>
+        <div class="stat" id="wetness">濡れ<b>0</b></div>
+      </div>
+    </div>
+
+    <main class="main">
+      <section class="scene">
+        <h1 id="location-name">駅前</h1>
+        <p id="location-desc"></p>
+        <div class="message" id="last-message"></div>
+      </section>
+
+      <section class="leads" id="lead-list"></section>
+
+      <section class="action-panel">
+        <div class="action-grid" id="action-list"></div>
+      </section>
+    </main>
+
+    <nav class="bottom-nav" aria-label="ゲームメニュー">
+      <button class="nav-btn" id="nav-map">地図</button>
+      <button class="nav-btn" id="nav-inventory">持ち物</button>
+      <button class="nav-btn" id="nav-log">記録</button>
+      <button class="nav-btn" id="nav-people">人物</button>
+      <button class="nav-btn" id="nav-save">セーブ</button>
+    </nav>
+  </div>
+
+  <div class="modal-backdrop" id="modal-backdrop">
+    <section class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+      <h2 id="modal-title"></h2>
+      <div id="modal-body"></div>
+      <div class="modal-actions" id="modal-actions"></div>
+      <div class="close-row">
+        <button class="modal-btn" id="modal-close">閉じる</button>
+      </div>
+    </section>
+  </div>
+
+  <script src="js/data.js?v=20260909-1900"></script>
+  <script src="js/state.js?v=20260909-1900"></script>
+  <script src="js/save.js?v=20260909-1900"></script>
+  <script src="js/game.js?v=20260909-1900"></script>
+</body>
+</html>
