@@ -80,7 +80,7 @@
     }
 
     if (id === "public_toilet") {
-      a.push({ label: "身支度する", desc: "衛生を戻す。", run: G.wash, disabled: !!H.state.daily.wash[id] });
+      a.push({ label: "身支度する", desc: "清潔を戻す。", run: G.wash, disabled: !!H.state.daily.wash[id] });
       a.push({ label: "少し休む", desc: "長居はできないが疲労を戻せる。", run: G.rest, disabled: !!H.state.daily.rest[id] });
     }
 
@@ -108,7 +108,7 @@
         label: "仕事の条件を確認する",
         desc: H.state.progression.support.workAccess ? "正式紹介を使える。" : "正式紹介には手続きが必要。別の仕事は使える。",
         run: () => info("仕事の条件", H.state.progression.support.workAccess
-          ? "紹介可能。体力40以上・疲労75以下・衛生25以上・空腹82以下。"
+          ? "紹介可能。体力40以上・疲労75以下・清潔25以上・空腹82以下。"
           : "正式紹介はまだ不可。駅前の小仕事、回収所、店の清掃は別に利用できる。")
       });
       if (H.state.progression.support.workAccess) {
@@ -142,7 +142,7 @@
     const fields = {
       health: ["体力", s.health],
       hunger: ["空腹", s.hunger],
-      hygiene: ["衛生", s.hygiene],
+      hygiene: ["清潔", s.hygiene],
       warmth: ["体温", s.warmth],
       wetness: ["濡れ", s.wetness],
       fatigue: ["疲労", s.fatigue]
@@ -199,6 +199,13 @@
     openModal(D.locations[H.state.location].name, "ここで何をするか選ぶ。", list.map(modalAction));
   }
 
+  function searchUsefulThings() {
+    if (H.state.activeEvent) return info("使えるものを探す", "現在の出来事への対応が先になる。");
+    const search = locationActions().find((a) => a.label === "使える物を探す" && !a.disabled);
+    if (search) return search.run();
+    openLocationActions();
+  }
+
   function openPeopleHere() {
     if (H.state.activeEvent) return info("人と関わる", "現在の出来事への対応が先になる。");
     const list = peopleActions();
@@ -238,7 +245,7 @@
       box.appendChild(panel);
       return;
     }
-    box.appendChild(mainButton("行動する", openLocationActions));
+    box.appendChild(mainButton("使えるものを探す", searchUsefulThings));
     box.appendChild(mainButton("人と関わる", openPeopleHere));
     box.appendChild(mainButton("移動する", openMap));
   }
@@ -300,6 +307,7 @@
 
   function openMenu() {
     openModal("メニュー", "", [
+      { label: "そのほかの行動", onClick: () => { closeModal(); openLocationActions(); } },
       { label: "状況・今ある用事", onClick: () => { closeModal(); openTasks(); } },
       { label: "人物一覧", onClick: () => { closeModal(); openPeople(); } }
     ]);
