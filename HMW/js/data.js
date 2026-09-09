@@ -101,10 +101,10 @@
     },
 
     people: {
-      support_named: { name: "名前付き支援員", role: "支援員", romance: true },
-      police_named: { name: "名前付き警官", role: "警官", romance: true },
-      homeless_named: { name: "名前付きホームレス", role: "ホームレス", romance: true },
-      thug_named: { name: "名前付き不良", role: "不良", romance: true },
+      support_named: { name: "アーロン", role: "支援センター職員", romance: true },
+      police_named: { name: "マーク", role: "警察官", romance: true },
+      homeless_named: { name: "サム", role: "高架下で暮らす男", romance: true },
+      thug_named: { name: "レオン", role: "工業通りの男", romance: true },
       clerk: { name: "コンビニ店員", role: "店員", romance: false },
       recycler: { name: "回収所の作業員", role: "回収所", romance: false }
     }
