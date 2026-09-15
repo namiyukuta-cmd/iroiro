@@ -39,13 +39,14 @@
     }
     .scene {
       width: 100%;
-      aspect-ratio: 4 / 3;
       border: 2px solid #202020;
       background: #fff;
-      display: grid;
-      place-items: center;
-      font-size: 28px;
-      font-weight: 700;
+      overflow: hidden;
+    }
+    .scene img {
+      display: block;
+      width: 100%;
+      height: auto;
     }
     .choices {
       display: grid;
@@ -71,7 +72,9 @@
     </header>
 
     <main id="game-screen">
-      <section class="scene">絵</section>
+      <section class="scene">
+        <img src="IMG_2788.jpeg" alt="DDの絵" />
+      </section>
       <div class="choices" aria-label="選択肢">
         <button class="choice" type="button"></button>
         <button class="choice" type="button"></button>
