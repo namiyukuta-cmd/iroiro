@@ -1,5 +1,6 @@
 (() => {
-  const STORAGE_KEY = 'dd_time_v1';
+  const SESSION_KEY = 'dd_session_time_v1';
+  const LEGACY_LOCAL_KEYS = ['dd_time_v1', 'dd_map_position_v1'];
   const START_MINUTES = 7 * 60;
 
   const actionCosts = Object.freeze({
@@ -10,9 +11,35 @@
     returnHome: 30
   });
 
+  function clearLegacyPersistence() {
+    try {
+      LEGACY_LOCAL_KEYS.forEach(key => localStorage.removeItem(key));
+    } catch (_) {}
+  }
+
+  function installNoCacheGuards() {
+    const directives = [
+      ['Cache-Control', 'no-cache, no-store, must-revalidate'],
+      ['Pragma', 'no-cache'],
+      ['Expires', '0']
+    ];
+
+    directives.forEach(([name, content]) => {
+      if (document.head.querySelector(`meta[http-equiv="${name}"]`)) return;
+      const meta = document.createElement('meta');
+      meta.httpEquiv = name;
+      meta.content = content;
+      document.head.appendChild(meta);
+    });
+
+    window.addEventListener('pageshow', event => {
+      if (event.persisted) location.reload();
+    });
+  }
+
   function load() {
     try {
-      const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || 'null');
+      const saved = JSON.parse(sessionStorage.getItem(SESSION_KEY) || 'null');
       if (saved && Number.isFinite(saved.totalMinutes) && saved.totalMinutes >= 0) {
         return { totalMinutes: Math.floor(saved.totalMinutes) };
       }
@@ -22,8 +49,10 @@
 
   let state = load();
 
-  function save() {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  function syncSession() {
+    try {
+      sessionStorage.setItem(SESSION_KEY, JSON.stringify(state));
+    } catch (_) {}
   }
 
   function parts() {
@@ -70,7 +99,7 @@
     const value = Math.max(0, Math.floor(Number(minutes) || 0));
     if (!value) return parts();
     state.totalMinutes += value;
-    save();
+    syncSession();
     refresh();
     emit(reason, value);
     return parts();
@@ -84,15 +113,27 @@
 
   function reset() {
     state = { totalMinutes: START_MINUTES };
-    save();
+    syncSession();
     refresh();
     emit('reset', 0);
     return parts();
   }
 
+  function resetAllSessionState() {
+    try {
+      sessionStorage.removeItem('dd_session_map_position_v1');
+      sessionStorage.removeItem(SESSION_KEY);
+    } catch (_) {}
+    clearLegacyPersistence();
+    return reset();
+  }
+
   function getState() {
     return { ...parts(), phase: phase(), label: label() };
   }
+
+  clearLegacyPersistence();
+  installNoCacheGuards();
 
   window.DDTime = {
     actionCosts,
@@ -103,7 +144,8 @@
     refresh,
     advance,
     advanceAction,
-    reset
+    reset,
+    resetAllSessionState
   };
 
   if (document.readyState === 'loading') {
