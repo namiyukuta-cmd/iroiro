@@ -81,12 +81,26 @@
     setTimeout(() => inventoryButton.classList.remove('receive'), 260);
   }
 
+  function removeDrawnCard() {
+    drawn.style.display = 'none';
+    drawn.classList.remove('tapFeedback', 'acquired');
+    setDrawnInteractivity(null);
+    currentCard = null;
+    refreshDeck();
+  }
+
   function animateToInventory(card) {
-    if (!inventoryButton || !drawn || drawn.style.display === 'none') return;
+    if (!inventoryButton || !drawn || drawn.style.display === 'none') {
+      removeDrawnCard();
+      pulseInventory();
+      return;
+    }
 
     const source = drawn.getBoundingClientRect();
     const target = inventoryButton.getBoundingClientRect();
+
     if (!source.width || !source.height || !target.width || !target.height) {
+      removeDrawnCard();
       pulseInventory();
       return;
     }
@@ -116,34 +130,30 @@
     const dx = targetCenterX - sourceCenterX;
     const dy = targetCenterY - sourceCenterY;
 
+    removeDrawnCard();
+
     if (typeof fly.animate === 'function') {
       const animation = fly.animate([
         { transform: 'translate(0,0) scale(1) rotate(0deg)', opacity: 1, offset: 0 },
-        { transform: `translate(${dx * .35}px,${dy * .28}px) scale(.9) rotate(-4deg)`, opacity: 1, offset: .32 },
-        { transform: `translate(${dx}px,${dy}px) scale(.16) rotate(8deg)`, opacity: .15, offset: 1 }
+        { transform: `translate(${dx * .4}px,${dy * .34}px) scale(.86) rotate(-4deg)`, opacity: 1, offset: .38 },
+        { transform: `translate(${dx}px,${dy}px) scale(.12) rotate(9deg)`, opacity: .05, offset: 1 }
       ], {
-        duration: 720,
-        easing: 'cubic-bezier(.22,.72,.22,1)',
+        duration: 700,
+        easing: 'cubic-bezier(.2,.72,.2,1)',
         fill: 'forwards'
       });
       animation.onfinish = () => fly.remove();
       animation.oncancel = () => fly.remove();
     } else {
-      fly.style.transition = 'transform .72s cubic-bezier(.22,.72,.22,1),opacity .72s ease';
+      fly.style.transition = 'transform .7s cubic-bezier(.2,.72,.2,1),opacity .7s ease';
       requestAnimationFrame(() => {
-        fly.style.transform = `translate(${dx}px,${dy}px) scale(.16) rotate(8deg)`;
-        fly.style.opacity = '.15';
+        fly.style.transform = `translate(${dx}px,${dy}px) scale(.12) rotate(9deg)`;
+        fly.style.opacity = '.05';
       });
-      setTimeout(() => fly.remove(), 760);
+      setTimeout(() => fly.remove(), 740);
     }
 
-    setTimeout(pulseInventory, 520);
-  }
-
-  function markCardAcquired() {
-    drawn.classList.add('acquired');
-    cardSub.textContent = '取得済み';
-    setDrawnInteractivity(currentCard);
+    setTimeout(pulseInventory, 500);
   }
 
   function clearCardView() {
@@ -181,9 +191,8 @@
     const name = item?.name || card.title || 'アイテム';
     DDItems?.add?.(card.itemId, 1);
     animateToInventory(card);
-    markCardAcquired();
     result.textContent = `${name}を1個、手に入れた。`;
-    eventDetail.textContent = 'アイテムに入れた。山札をタップすると次のカード。';
+    eventDetail.textContent = 'アイテムに入った。';
   }
 
   function doHunt(card) {
@@ -206,9 +215,8 @@
     if (hp - attack <= 0) {
       DDItems?.add?.('river_fish', 1);
       animateToInventory({ ...card, title: '川魚', icon: card.icon || '🐟' });
-      markCardAcquired();
       result.textContent = '川魚を1匹、手に入れた。';
-      eventDetail.textContent = 'アイテムに入れた。山札をタップすると次のカード。';
+      eventDetail.textContent = 'アイテムに入った。';
     } else {
       result.textContent = '素手で追ったが魚は逃げた。';
       eventDetail.textContent = '山札をタップすると次のカード。';
