@@ -52,6 +52,11 @@
     return pool;
   }
 
+  function drawMinutes() {
+    const value = Number(window.DDTime?.actionCosts?.exploreDraw ?? 6);
+    return Number.isFinite(value) && value > 0 ? Math.floor(value) : 6;
+  }
+
   function setDrawnInteractivity(card) {
     const actionable = Boolean(card && card.type !== 'none');
     drawn.style.pointerEvents = actionable ? 'auto' : 'none';
@@ -80,9 +85,10 @@
 
   function refreshDeck() {
     deckButton.disabled = false;
+    const minutes = drawMinutes();
     deckHint.textContent = currentCard
-      ? '山札をタップして次のカードをめくる'
-      : '山札をタップして1枚めくる';
+      ? `山札をタップして次のカードをめくる　${minutes}分`
+      : `山札をタップして1枚めくる　${minutes}分`;
   }
 
   function doGather(card) {
@@ -163,6 +169,8 @@
       refreshDeck();
       return;
     }
+
+    DDTime?.advanceAction?.('exploreDraw');
 
     currentCard = clone(card);
     acted = false;
