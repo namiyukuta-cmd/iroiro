@@ -97,12 +97,12 @@
     return Number(travelMinutes[currentLocation]?.[placeId] ?? 0);
   }
 
-  function moveTo(placeId) {
-    if (!places[placeId] || placeId === currentLocation) return;
+  function completeMove(placeId) {
+    const from = currentLocation;
+    const minutes = Number(travelMinutes[from]?.[placeId] ?? 0);
 
-    const minutes = costFromHere(placeId);
     if (minutes > 0 && window.DDTime) {
-      DDTime.advance(minutes, `move:${currentLocation}->${placeId}`);
+      DDTime.advance(minutes, `move:${from}->${placeId}`);
     }
 
     currentLocation = placeId;
@@ -111,6 +111,26 @@
     const phaseText = window.DDTime ? phaseMessage(DDTime.phase()) : '';
     message.textContent = phaseText || `${places[placeId].name}へ移動した。${minutes}分経過。`;
     render();
+  }
+
+  function moveTo(placeId) {
+    if (!places[placeId] || placeId === currentLocation) return;
+
+    const from = currentLocation;
+    const event = window.DDEvents?.find?.({
+      type: 'beforeTravel',
+      from,
+      to: placeId
+    });
+
+    if (event) {
+      DDEvents.run(event, {
+        onComplete: () => completeMove(placeId)
+      });
+      return;
+    }
+
+    completeMove(placeId);
   }
 
   function makeAction(text, onClick, className = '') {
