@@ -44,6 +44,19 @@
     ]
   };
 
+  const encounterCards = {
+    forest: [
+      { type: 'enemy', icon: '⚔', title: '狼', text: '狼がこちらに気づいた。', enemyId: 'wolf' },
+      { type: 'enemy', icon: '⚔', title: '野犬', text: '野犬が唸りながら近づいてくる。', enemyId: 'wild_dog' }
+    ],
+    plain: [
+      { type: 'enemy', icon: '⚔', title: '野犬', text: '野犬がこちらを狙っている。', enemyId: 'wild_dog' }
+    ],
+    river: [
+      { type: 'enemy', icon: '⚔', title: '野犬', text: '水辺にいた野犬がこちらへ向かってくる。', enemyId: 'wild_dog' }
+    ]
+  };
+
   const timeText = document.getElementById('timeText');
   const dayText = document.getElementById('dayText');
   const hourHand = document.getElementById('hourHand');
@@ -75,8 +88,17 @@
     return out;
   }
 
+  function buildDeck() {
+    const list = decks[zone].map(card => ({ ...card }));
+    (encounterCards[zone] || []).forEach(card => {
+      const weight = Math.max(1, Math.floor(Number(window.DDWolf?.getEncounterRisk?.(card.enemyId, 1) || 1)));
+      for (let i = 0; i < weight; i++) list.push({ ...card });
+    });
+    return list;
+  }
+
   function resetDeck() {
-    deck = shuffle(decks[zone]);
+    deck = shuffle(buildDeck());
     currentCard = null;
     resolved = true;
     drawn.style.display = 'none';
@@ -166,6 +188,11 @@
     }
   }
 
+  function doBattle(card) {
+    const back = `DD_point.html?zone=${encodeURIComponent(zone)}&place=${encodeURIComponent(place)}`;
+    location.href = `DD_battle.html?enemy=${encodeURIComponent(card.enemyId)}&return=${encodeURIComponent(back)}`;
+  }
+
   function showActions(card) {
     actions.innerHTML = '';
     eventDetail.textContent = '';
@@ -191,6 +218,13 @@
       return;
     }
 
+    if (card.type === 'enemy') {
+      const increased = window.DDWolf?.hasCompanion?.() ? ' 狼の気配のせいか、犬科の敵に見つかりやすくなっている。' : '';
+      eventDetail.textContent = `戦闘になる。${increased}`;
+      makeButton('戦う', () => doBattle(card), true);
+      return;
+    }
+
     eventDetail.textContent = '行動はない。';
     makeButton('次へ', () => resolveCard(), true);
   }
@@ -207,7 +241,7 @@
     drawn.style.display = 'flex';
     cardIcon.textContent = currentCard.icon || '';
     cardTitle.textContent = currentCard.title || '何もない';
-    cardSub.textContent = currentCard.type === 'none' ? '空白札' : '';
+    cardSub.textContent = currentCard.type === 'none' ? '空白札' : currentCard.type === 'enemy' ? '遭遇' : '';
     eventText.textContent = currentCard.text || '何も起こらなかった。';
     result.textContent = '';
     showActions(currentCard);
