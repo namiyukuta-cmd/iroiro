@@ -9,12 +9,12 @@
     html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#1b2119;color:#f1efe7;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
     body{height:100dvh}
     #game{position:relative;width:min(100%,520px);height:100dvh;margin:0 auto;padding:max(8px,env(safe-area-inset-top)) 8px max(8px,env(safe-area-inset-bottom));display:flex;flex-direction:column;gap:7px;background:#263024;overflow:hidden}
-    header{flex:0 0 42px;display:flex;align-items:center;justify-content:space-between;gap:8px;border-bottom:1px solid rgba(255,255,255,.28);padding:0 3px 5px}
-    h1{margin:0;font-size:18px}
-    .headerRight{text-align:right;display:grid;gap:1px}
-    #clock{font-size:12px;font-weight:800}
-    header a{color:#fff;text-decoration:none;font-size:11px;font-weight:700}
-    #message{flex:0 0 32px;border:1px solid rgba(255,255,255,.24);border-radius:7px;background:rgba(0,0,0,.2);display:flex;align-items:center;justify-content:center;padding:4px 8px;text-align:center;font-size:11px;font-weight:700}
+    header{flex:0 0 50px;display:flex;align-items:center;justify-content:space-between;gap:8px;border-bottom:1px solid rgba(255,255,255,.28);padding:0 3px 5px}
+    h1{margin:0;font-size:22px}
+    .headerRight{text-align:right;display:grid;gap:2px}
+    #clock{font-size:16px;font-weight:800}
+    header a{color:#fff;text-decoration:none;font-size:14px;font-weight:700}
+    #message{flex:0 0 40px;border:1px solid rgba(255,255,255,.24);border-radius:7px;background:rgba(0,0,0,.2);display:flex;align-items:center;justify-content:center;padding:5px 8px;text-align:center;font-size:14px;font-weight:700}
     #boardWrap{position:relative;flex:1 1 auto;min-height:0;border:2px solid #161a15;border-radius:8px;overflow:hidden;background:#354333}
     #board{position:absolute;inset:0;display:grid;grid-template-columns:repeat(7,1fr);grid-template-rows:repeat(7,1fr);gap:1px;background:#151b14}
     .cell{position:relative;min-width:0;min-height:0;border:0;padding:0;font:inherit;color:#fff;overflow:hidden;cursor:pointer;isolation:isolate}
@@ -30,9 +30,9 @@
     .cell.selected:not(.current){box-shadow:inset 0 0 0 3px #fff}
     .cell.current{box-shadow:inset 0 0 0 4px #fff,inset 0 0 0 7px #1a1a1a}
 
-    .terrainLabel{position:absolute;left:3px;bottom:2px;font-size:8px;line-height:1;text-shadow:0 1px 2px #000;opacity:.82;z-index:3}
-    .poi{position:absolute;left:50%;top:48%;transform:translate(-50%,-50%);font-size:18px;line-height:1;filter:drop-shadow(0 1px 1px rgba(0,0,0,.65));pointer-events:none;z-index:4}
-    .animal{font-size:22px}
+    .terrainLabel{position:absolute;left:4px;bottom:3px;font-size:11px;font-weight:700;line-height:1;text-shadow:0 1px 2px #000;opacity:.9;z-index:3}
+    .poi{position:absolute;left:50%;top:48%;transform:translate(-50%,-50%);font-size:20px;line-height:1;filter:drop-shadow(0 1px 1px rgba(0,0,0,.65));pointer-events:none;z-index:4}
+    .animal{font-size:24px}
 
     .pawn{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:28px;height:28px;border-radius:50%;background:#fff;border:4px solid #171717;box-shadow:0 0 0 3px #f4d35e,0 3px 7px rgba(0,0,0,.8);z-index:7;pointer-events:none}
     .pawn::after{content:"";position:absolute;left:50%;top:50%;width:8px;height:8px;border-radius:50%;background:#171717;transform:translate(-50%,-50%)}
@@ -43,14 +43,14 @@
     html[data-dd-phase="夕方"] #shade{background:rgba(111,54,20,.17)}
     html[data-dd-phase="夜"] #shade{background:rgba(11,19,48,.43)}
     html[data-dd-phase="深夜"] #shade{background:rgba(4,8,22,.58)}
-    #actionBox{flex:0 0 86px;border:1px solid rgba(255,255,255,.25);border-radius:8px;background:rgba(0,0,0,.22);padding:6px;display:grid;grid-template-columns:1fr auto;grid-template-rows:auto 1fr;gap:4px 7px}
-    #locationName{font-size:12px;font-weight:800}
-    #moveCost{font-size:10px;text-align:right;opacity:.85}
-    #locationText{font-size:10px;line-height:1.35;align-self:center}
-    #actions{display:flex;align-items:center;gap:5px;justify-content:flex-end}
-    .action{min-width:64px;min-height:32px;border:1px solid #f0eee5;border-radius:7px;background:#f0eee5;color:#1c1c1c;font:inherit;font-size:11px;font-weight:800}
+    #actionBox{flex:0 0 108px;border:1px solid rgba(255,255,255,.25);border-radius:8px;background:rgba(0,0,0,.22);padding:8px;display:grid;grid-template-columns:1fr auto;grid-template-rows:auto 1fr;gap:6px 8px}
+    #locationName{font-size:16px;font-weight:800}
+    #moveCost{font-size:14px;text-align:right;opacity:.9;font-weight:700}
+    #locationText{font-size:14px;line-height:1.4;align-self:center}
+    #actions{display:flex;align-items:center;gap:6px;justify-content:flex-end}
+    .action{min-width:82px;min-height:38px;border:1px solid #f0eee5;border-radius:7px;background:#f0eee5;color:#1c1c1c;font:inherit;font-size:14px;font-weight:800;padding:4px 9px}
     .action:disabled{opacity:.38}
-    #legend{flex:0 0 22px;display:flex;align-items:center;justify-content:center;gap:10px;font-size:9px;opacity:.95}
+    #legend{flex:0 0 28px;display:flex;align-items:center;justify-content:center;gap:8px;font-size:11px;font-weight:700;opacity:.96;white-space:nowrap}
   </style>
 </head>
 <body>
