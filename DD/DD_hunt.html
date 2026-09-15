@@ -19,9 +19,23 @@
     #scene:before{left:13%}#scene:after{right:12%}
     .bush{position:absolute;bottom:0;width:74px;height:52px;border-radius:50% 50% 0 0;background:#364230}.bush.a{left:31%}.bush.b{right:23%;height:63px}
 
-    #animal{display:none;position:absolute;left:63%;top:57%;transform:translate(-50%,-50%);transition:transform .18s ease,opacity .18s ease;opacity:1;text-align:center}
+    #animal{display:none;position:absolute;left:63%;top:52%;transform:translate(-50%,-50%);transition:transform .22s ease,opacity .22s ease;opacity:1;text-align:center;transform-origin:50% 85%}
     #animalGlyph{display:block;font-size:48px;line-height:1}
     #animalName{display:block;margin-top:7px;font-size:13px;font-weight:800;text-shadow:0 1px 3px #000}
+    #animal.hit{animation:animalHit .26s ease}
+    #animal.dead{transform:translate(-50%,-43%) rotate(72deg);opacity:.88}
+    #animal.dead #animalName{font-size:14px}
+    @keyframes animalHit{
+      0%{transform:translate(-50%,-50%)}
+      25%{transform:translate(-58%,-50%) rotate(-5deg)}
+      55%{transform:translate(-43%,-50%) rotate(5deg)}
+      100%{transform:translate(-50%,-50%)}
+    }
+
+    #timingWrap{display:none;position:absolute;z-index:15;left:22px;right:22px;bottom:22px;height:20px;border:2px solid rgba(255,255,255,.95);border-radius:10px;background:rgba(20,20,20,.78);overflow:hidden;box-shadow:0 1px 5px rgba(0,0,0,.5)}
+    #hitZone{position:absolute;top:0;bottom:0;background:rgba(210,210,210,.58)}
+    #timingMarker{position:absolute;top:-2px;bottom:-2px;width:5px;background:#fff;left:0;box-shadow:0 0 4px #000}
+
     #searchText{position:absolute;left:4%;right:4%;top:49%;text-align:center;font-weight:800;font-size:15px;line-height:1.35}
 
     #shootArea{position:absolute;left:0;right:0;bottom:0;height:44%;display:none}
@@ -29,9 +43,6 @@
     #string{position:absolute;left:111px;top:37%;width:3px;height:166px;background:#ddd;transform:translateY(-50%)}
     #arrow{position:absolute;left:111px;top:37%;width:110px;height:4px;background:#ddd;transform:translateY(-50%)}
     #arrow:after{content:"";position:absolute;right:-10px;top:-5px;border-left:12px solid #ddd;border-top:7px solid transparent;border-bottom:7px solid transparent}
-    #timingWrap{position:absolute;left:8%;right:8%;bottom:88px;height:30px;border:2px solid #eee;background:#292929;overflow:hidden}
-    #hitZone{position:absolute;top:0;bottom:0;background:#8d8d8d}
-    #timingMarker{position:absolute;top:-3px;bottom:-3px;width:5px;background:#fff;left:0}
     #guide{position:absolute;left:0;right:0;bottom:35px;text-align:center;font-weight:800;text-shadow:0 1px 3px #000}
     #result{position:absolute;z-index:40;left:50%;top:57%;transform:translate(-50%,-50%);padding:12px 18px;background:rgba(0,0,0,.82);border:1px solid #aaa;display:none;font-size:18px;white-space:nowrap}
   </style>
@@ -43,12 +54,12 @@
   <div id="searchWindow">
     <div id="scene"><i class="bush a"></i><i class="bush b"></i></div>
     <div id="animal"><span id="animalGlyph"></span><span id="animalName"></span></div>
+    <div id="timingWrap"><div id="hitZone"></div><div id="timingMarker"></div></div>
   </div>
   <div id="searchText">獲物を探している…</div>
 
   <div id="shootArea">
     <div id="bow"></div><div id="string"></div><div id="arrow"></div>
-    <div id="timingWrap"><div id="hitZone"></div><div id="timingMarker"></div></div>
     <div id="guide">長押しで弓を引く　狙った位置で離す</div>
   </div>
   <div id="result"></div>
@@ -81,6 +92,7 @@
   const arrow=document.getElementById('arrow');
   const marker=document.getElementById('timingMarker');
   const hitZone=document.getElementById('hitZone');
+  const timingWrap=document.getElementById('timingWrap');
   const result=document.getElementById('result');
   const guide=document.getElementById('guide');
 
@@ -113,9 +125,17 @@
   function updateAnimalDisplay(resetHp=true){
     const data=currentAnimal();
     if(resetHp) currentHp=Number(data.hp||1);
+    animal.className='';
     animalGlyph.textContent=glyphFor(data.id);
     animalName.textContent=data.name||'獲物';
     searchText.textContent=`${data.name||'獲物'}　HP ${currentHp}/${data.hp||1}${engaged?'':'　←→ スワイプで変更'}`;
+  }
+
+  function flashHit(){
+    animal.classList.remove('hit');
+    void animal.offsetWidth;
+    animal.classList.add('hit');
+    setTimeout(()=>animal.classList.remove('hit'),280);
   }
 
   function show(text){
@@ -151,7 +171,9 @@
     pulling=false;
     engaged=false;
     shootArea.style.display='none';
+    timingWrap.style.display='none';
     animal.style.display='none';
+    animal.className='';
     searchText.textContent='獲物を探している…';
     moveSearchWindow();
   }
@@ -163,6 +185,7 @@
     animal.style.display='block';
     animal.style.opacity='1';
     animal.style.transform='translate(-50%,-50%)';
+    timingWrap.style.display='block';
     shootArea.style.display='block';
     guide.textContent='長押しで弓を引く　狙った位置で離す';
     ready=true;
@@ -180,10 +203,10 @@
       animal.style.transition='none';
       animal.style.transform=`translate(${direction>0?-180:80}%,-50%)`;
       animal.offsetHeight;
-      animal.style.transition='transform .18s ease,opacity .18s ease';
+      animal.style.transition='transform .22s ease,opacity .22s ease';
       animal.style.opacity='1';
       animal.style.transform='translate(-50%,-50%)';
-      setTimeout(()=>{ready=true},190);
+      setTimeout(()=>{ready=true},220);
     },180);
   }
 
@@ -229,7 +252,9 @@
   function endHuntAndReturn(message){
     ready=false;
     show(message);
+    timingWrap.style.display='none';
     animal.style.opacity='0';
+    animal.style.transform='translate(120%,-50%)';
     shootArea.style.display='none';
     searchText.textContent='獲物を取れなかった。小屋へ帰る。';
     setTimeout(()=>{ location.href='DD_top.html'; },1200);
@@ -256,23 +281,31 @@
     }
 
     currentHp=Math.max(0,currentHp-arrowDamage);
+    flashHit();
+
     if(currentHp<=0){
-      show(`${data.name}を仕留めた`);
-      searchText.textContent=`${data.name}　HP 0/${data.hp||1}`;
       ready=false;
+      timingWrap.style.display='none';
       shootArea.style.display='none';
+      setTimeout(()=>{
+        animal.classList.remove('hit');
+        animal.classList.add('dead');
+        animalName.textContent=`${data.name}　仕留めた`;
+        searchText.textContent=`${data.name}を仕留めた`;
+        show(`${data.name}を仕留めた`);
+      },220);
       return;
     }
 
     const canRetry=currentHp<=Number(data.hp||1)*retryHpRatio && arrowsLeft>0;
     if(canRetry){
       show(`命中 -${arrowDamage}　もう1射できる`);
-      updateAnimalDisplay(false);
+      setTimeout(()=>updateAnimalDisplay(false),280);
       ready=true;
       return;
     }
 
-    endHuntAndReturn(`命中 -${arrowDamage}　逃げた`);
+    setTimeout(()=>endHuntAndReturn(`命中 -${arrowDamage}　逃げた`),260);
   }
 
   searchWindow.addEventListener('pointerdown',e=>{
