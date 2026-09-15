@@ -17,6 +17,20 @@
   const behaviorButton = document.getElementById('behaviorButton');
   const message = document.getElementById('message');
 
+  const CARE_TIME = Object.freeze({
+    feed: 30,
+    behavior: 5,
+    pet: 10,
+    hug: 10,
+    lullaby: 10
+  });
+
+  function advanceCareTime(action) {
+    const minutes = CARE_TIME[action];
+    if (!Number.isFinite(minutes) || !window.DDTime) return;
+    DDTime.advance(minutes, `wolf-care:${action}`);
+  }
+
   function formatRemaining(minutes) {
     const value = Math.max(0, Math.floor(Number(minutes) || 0));
     const days = Math.floor(value / 1440);
@@ -93,8 +107,11 @@
         if (result.ok) {
           if (stageBeforeFeeding === 'pup') needs?.feedWolf?.(100);
           else needs?.feedWolf?.(25);
+          message.textContent = result.message || '';
+          advanceCareTime('feed');
+        } else {
+          message.textContent = result.message || '';
         }
-        message.textContent = result.message || '';
         renderStatus();
       });
 
@@ -135,6 +152,7 @@
     };
     careText.textContent = texts[action] || '';
     message.textContent = '';
+    advanceCareTime(action);
   }
 
   petButton?.addEventListener('click', () => care('pet'));
@@ -152,6 +170,7 @@
     message.textContent = behavior.combatEffect === 'enemy_flee'
       ? 'この遠吠えは戦闘中なら敵をひるませ、逃走に使える。'
       : '';
+    advanceCareTime('behavior');
   });
 
   window.addEventListener('ddinventorychange', renderStatus);
