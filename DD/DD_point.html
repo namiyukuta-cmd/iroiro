@@ -6,7 +6,7 @@
   <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0" />
   <meta http-equiv="Pragma" content="no-cache" />
   <meta http-equiv="Expires" content="0" />
-  <meta name="dd-build" content="202609160830" />
+  <meta name="dd-build" content="202609160900" />
   <title>DD - 地点探索</title>
   <style>
     *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
@@ -18,6 +18,8 @@
     #clockDial{position:relative;width:86px;height:86px;border:5px solid #20201d;border-radius:50%;background:#faf8f2;box-shadow:0 3px 0 rgba(0,0,0,.12)}
     #clockDial::before{content:"12";position:absolute;left:50%;top:4px;transform:translateX(-50%);font-size:11px;font-weight:900}
     #clockDial::after{content:"6";position:absolute;left:50%;bottom:4px;transform:translateX(-50%);font-size:11px;font-weight:900}
+    #clockDial.timeReceive{animation:clockReceive .34s ease}
+    @keyframes clockReceive{0%{transform:scale(1)}45%{transform:scale(1.12)}100%{transform:scale(1)}}
     #hourHand,#minuteHand{position:absolute;left:50%;bottom:50%;transform-origin:50% 100%;border-radius:999px;background:#20201d}
     #hourHand{width:5px;height:24px;margin-left:-2.5px}
     #minuteHand{width:3px;height:31px;margin-left:-1.5px}
@@ -28,8 +30,13 @@
     #placeName{font-size:23px;font-weight:1000}
     #placeType{margin-top:4px;font-size:13px;font-weight:800;opacity:.65}
     .headLink{display:inline-block;margin-top:8px;margin-left:8px;color:#1d1d1b;text-decoration:none;font-size:14px;font-weight:900}
-    #table{position:relative;min-height:322px;border-top:2px solid #aaa397;border-bottom:2px solid #aaa397;padding:24px 8px 20px;overflow:hidden}
-    #cards{height:250px;position:relative}
+
+    #table{position:relative;min-height:332px;border-top:2px solid #aaa397;border-bottom:2px solid #aaa397;padding:22px 8px 20px;overflow:hidden}
+    #cards{height:266px;position:relative}
+    #cardSlot{position:absolute;left:50%;top:0;transform:translateX(-50%);width:178px;height:232px;border:3px dashed #8b867c;border-radius:18px;background:rgba(255,255,255,.28);display:grid;place-items:center;touch-action:manipulation;cursor:pointer;transition:background .15s ease,border-color .15s ease,transform .12s ease}
+    #cardSlot.empty:active{transform:translateX(-50%) scale(.97);background:rgba(255,255,255,.48)}
+    #cardSlot.busy{cursor:default;border-style:solid;border-color:#b2ada3;background:rgba(255,255,255,.18)}
+    #slotPrompt{padding:18px;text-align:center;font-size:16px;font-weight:1000;line-height:1.5;color:#625f58}
     .card{position:absolute;width:148px;height:204px;border:3px solid #24231f;border-radius:13px;background:#fff;box-shadow:0 7px 0 rgba(0,0,0,.16);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:12px;text-align:center}
     #drawn{left:50%;top:12px;margin-left:-74px;z-index:2;display:none;touch-action:none;cursor:pointer;will-change:transform,opacity;transform-origin:center}
     #drawn.tapFeedback{transform:translateY(5px) scale(.93);box-shadow:0 2px 0 rgba(0,0,0,.15)}
@@ -40,17 +47,24 @@
     #cardTitle{font-size:20px;font-weight:1000;line-height:1.25}
     #cardSub{margin-top:8px;font-size:13px;font-weight:800;color:#666}
     #cardHint{position:absolute;left:8px;right:8px;bottom:0;text-align:center;font-size:14px;font-weight:900;color:#555;line-height:1.45}
+
     #eventBox{min-height:118px;border:2px solid #2c2b27;border-radius:12px;background:#faf8f2;padding:14px}
     #eventText{min-height:38px;font-size:18px;font-weight:900;line-height:1.45}
     #eventDetail{min-height:24px;margin-top:5px;font-size:14px;font-weight:700;color:#5d5a53}
     #result{min-height:28px;font-size:14px;font-weight:900;color:#514e47}
+
     #bottomBar{position:fixed;z-index:90;left:50%;bottom:max(10px,env(safe-area-inset-bottom));transform:translateX(-50%);width:min(calc(100% - 28px),492px);display:flex;justify-content:center;pointer-events:none}
     #inventoryButton{pointer-events:auto;width:100%;min-height:58px;border:3px solid #24231f;border-radius:15px;background:#faf8f2;color:#1d1d1b;text-decoration:none;display:flex;align-items:center;justify-content:center;gap:9px;font-size:18px;font-weight:1000;box-shadow:0 6px 0 rgba(0,0,0,.18);transition:transform .14s ease,box-shadow .14s ease,background .14s ease}
     #inventoryButton:active{transform:translateY(3px);box-shadow:0 2px 0 rgba(0,0,0,.14)}
     #inventoryButton.receive{transform:scale(1.07);background:#fff;box-shadow:0 2px 0 rgba(0,0,0,.14),0 0 0 7px rgba(35,35,31,.18)}
+
     .inventoryFly{position:fixed;z-index:9999;border:3px solid #24231f;border-radius:13px;background:#fff;box-shadow:0 9px 24px rgba(0,0,0,.34);display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:10px;pointer-events:none;will-change:transform,opacity}
     .inventoryFly .flyIcon{font-size:46px;line-height:1;margin-bottom:10px}
     .inventoryFly .flyTitle{font-size:17px;font-weight:1000;line-height:1.2}
+    .timeSparkle{position:fixed;z-index:10000;pointer-events:none;font-size:20px;font-weight:1000;line-height:1;color:#f4cf46;text-shadow:0 0 6px rgba(255,255,255,.95),0 0 11px rgba(244,207,70,.75);will-change:transform,opacity}
+    .timeGain{position:fixed;z-index:10001;transform:translateX(-50%);pointer-events:none;padding:3px 7px;border-radius:999px;background:#20201d;color:#fff;font-size:12px;font-weight:1000;white-space:nowrap;animation:timeGain .65s ease forwards}
+    @keyframes timeGain{0%{opacity:0;transform:translate(-50%,5px) scale(.85)}25%{opacity:1;transform:translate(-50%,0) scale(1.06)}100%{opacity:0;transform:translate(-50%,-12px) scale(1)}}
+
     html[data-dd-phase="夕方"] body{background:#e7d9c9}
     html[data-dd-phase="夜"] body,html[data-dd-phase="深夜"] body{background:#c8ccd2}
   </style>
@@ -66,18 +80,21 @@
       <div id="placeName">森</div>
       <div id="placeType">探索地点</div>
       <a class="headLink" href="DD_inventory.html">アイテム</a>
-      <a class="headLink" href="DD_map.html?v=202609160830">← マップ</a>
+      <a class="headLink" href="DD_map.html?v=202609160900">← マップ</a>
     </div>
   </header>
 
   <section id="table">
     <div id="cards">
-      <div id="drawn" class="card" role="button" tabindex="0" aria-live="polite"><div id="cardIcon"></div><div id="cardTitle"></div><div id="cardSub"></div></div>
-      <div id="cardHint">タップ：使う／入手　　左右スワイプ：捨てる</div>
+      <div id="cardSlot" class="empty" role="button" tabindex="0" aria-label="札を出す">
+        <div id="slotPrompt">ここをタップして札を出す</div>
+        <div id="drawn" class="card" role="button" tabindex="-1" aria-live="polite"><div id="cardIcon"></div><div id="cardTitle"></div><div id="cardSub"></div></div>
+      </div>
+      <div id="cardHint">空白をタップして次の札へ　6分</div>
     </div>
   </section>
 
-  <section id="eventBox"><div id="eventText">探索中…</div><div id="eventDetail"></div></section>
+  <section id="eventBox"><div id="eventText">空白をタップして札を出す。</div><div id="eventDetail">札を出すと6分進む。</div></section>
   <div id="result"></div>
 
   <nav id="bottomBar" aria-label="下部メニュー">
@@ -85,11 +102,11 @@
   </nav>
 </div>
 
-<script src="DD_time.js?v=202609160830"></script>
-<script src="DD_items.js?v=202609160830"></script>
-<script src="DD_wolf.js?v=202609160830"></script>
-<script src="DD_event.js?v=202609160830"></script>
-<script src="DD_point_config.js?v=202609160830"></script>
-<script src="DD_point.js?v=202609160830"></script>
+<script src="DD_time.js?v=202609160900"></script>
+<script src="DD_items.js?v=202609160900"></script>
+<script src="DD_wolf.js?v=202609160900"></script>
+<script src="DD_event.js?v=202609160900"></script>
+<script src="DD_point_config.js?v=202609160900"></script>
+<script src="DD_point.js?v=202609160900"></script>
 </body>
 </html>
