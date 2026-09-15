@@ -3,6 +3,9 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate" />
+  <meta http-equiv="Pragma" content="no-cache" />
+  <meta http-equiv="Expires" content="0" />
   <title>DD - Game</title>
   <style>
     * { box-sizing: border-box; }
@@ -54,16 +57,18 @@
     }
     .choices {
       display: grid;
-      grid-template-columns: repeat(4, 1fr);
+      grid-template-columns: 1fr;
       gap: 8px;
     }
     .choice {
-      min-width: 0;
-      min-height: 54px;
+      width: 100%;
+      min-height: 60px;
       border: 2px solid #202020;
       background: #fff;
       border-radius: 10px;
       font: inherit;
+      font-size: 18px;
+      font-weight: 700;
       cursor: pointer;
     }
   </style>
@@ -84,9 +89,6 @@
       </section>
       <div class="choices" aria-label="選択肢">
         <button class="choice" type="button" onclick="location.href='DD_map.html'">マップ</button>
-        <button class="choice" type="button" onclick="DDTime.advanceAction('travel'); location.href='DD_hunt.html'">狩り</button>
-        <button class="choice" type="button" onclick="DDTime.advanceAction('travel'); location.href='DD_forest.html'">森</button>
-        <button class="choice" type="button"></button>
       </div>
     </main>
   </div>
