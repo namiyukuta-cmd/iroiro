@@ -77,6 +77,7 @@
       font-weight: 700;
       cursor: pointer;
     }
+    .choice:disabled{opacity:.48;cursor:default}
     #wolfCare{display:none;grid-column:1/-1;background:#eee8dc}
   </style>
 </head>
@@ -110,6 +111,7 @@
         <button class="choice" type="button" onclick="location.href='DD_map.html'">マップ</button>
         <button class="choice" type="button" onclick="location.href='DD_inventory.html'">アイテム</button>
         <button class="choice" type="button" onclick="location.href='DD_sleep.html'">寝る</button>
+        <button class="choice" type="button" onclick="location.href='DD_craft.html'">制作</button>
         <button id="wolfCare" class="choice" type="button" onclick="location.href='DD_wolf.html'">狼の子の世話</button>
       </div>
     </main>
@@ -129,12 +131,22 @@
   const wolfText = document.getElementById('wolfHungerText');
   const wolfFill = document.getElementById('wolfHungerFill');
 
+  function pupIsSleeping(state) {
+    if (state?.stage !== 'pup') return false;
+    const hour = Number(window.DDTime?.getState?.().hour ?? 12);
+    return hour >= 20 || hour < 7;
+  }
+
   function refreshWolfCare() {
     if (!wolfButton || !window.DDWolf) return;
     DDWolf.updateAge();
     const state = DDWolf.getState();
+    const sleeping = pupIsSleeping(state);
     wolfButton.style.display = state.hasCompanion ? 'block' : 'none';
-    wolfButton.textContent = state.stage === 'adult' ? '狼（？）の世話' : '狼の子の世話';
+    wolfButton.disabled = sleeping;
+    wolfButton.textContent = sleeping
+      ? '狼の子は眠っている'
+      : state.stage === 'adult' ? '狼（？）の世話' : '狼の子の世話';
     wolfNeed.style.display = state.hasCompanion ? 'block' : 'none';
     wolfLabel.textContent = state.stage === 'adult' ? '狼（？）の空腹' : '狼の子の空腹';
   }
@@ -149,7 +161,7 @@
 
   window.addEventListener('ddwolfchange', () => { refreshWolfCare(); refreshNeeds(); });
   window.addEventListener('ddinventorychange', () => { refreshWolfCare(); refreshNeeds(); });
-  window.addEventListener('ddtimechange', refreshNeeds);
+  window.addEventListener('ddtimechange', () => { refreshWolfCare(); refreshNeeds(); });
   window.addEventListener('ddneedschange', refreshNeeds);
   refreshWolfCare();
   refreshNeeds();
