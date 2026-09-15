@@ -8,45 +8,186 @@
     *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
     html,body{margin:0;width:100%;height:100%;overflow:hidden}
     body{background:#111;color:#eee;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;touch-action:none}
-    #game{position:relative;width:min(100%,520px);height:100dvh;margin:0 auto;overflow:hidden;background:linear-gradient(#68755e 0 45%,#263120 45% 100%)}
-    #top{position:absolute;z-index:20;top:0;left:0;right:0;display:flex;justify-content:space-between;align-items:center;padding:max(10px,env(safe-area-inset-top)) 12px 10px;background:rgba(0,0,0,.55)}
+    #game{position:relative;width:min(100%,520px);height:100dvh;margin:0 auto;overflow:hidden;background:#171b16}
+    #top{position:absolute;z-index:30;top:0;left:0;right:0;display:flex;justify-content:space-between;align-items:flex-start;padding:max(10px,env(safe-area-inset-top)) 12px 10px;background:rgba(0,0,0,.62)}
     #top a{color:#fff;text-decoration:none;font-weight:700}
-    #stats{font-size:12px;text-align:right;line-height:1.35}
-    #animal{position:absolute;left:72%;top:46%;width:82px;height:48px;border-radius:48% 48% 42% 42%;background:#6f5942;transform:translate(-50%,-50%)}
-    #animal:before{content:"";position:absolute;right:-20px;top:4px;width:29px;height:29px;border-radius:50%;background:#6f5942}
-    #animal:after{content:"";position:absolute;right:-22px;top:12px;width:6px;height:6px;border-radius:50%;background:#111}
-    .leg{position:absolute;bottom:-26px;width:7px;height:29px;background:#6f5942}.leg.a{left:18px}.leg.b{right:16px}
-    #bow{position:absolute;left:38px;top:53%;width:84px;height:190px;transform:translateY(-50%);border:6px solid #8b6842;border-right:none;border-radius:100% 0 0 100%}
-    #string{position:absolute;left:118px;top:53%;width:3px;height:180px;background:#eee;transform:translateY(-50%)}
-    #arrow{position:absolute;left:118px;top:53%;width:115px;height:4px;background:#eee;transform:translateY(-50%);transform-origin:left center}
-    #arrow:after{content:"";position:absolute;right:-10px;top:-5px;border-left:12px solid #eee;border-top:7px solid transparent;border-bottom:7px solid transparent}
-    #powerWrap{position:absolute;left:10%;right:10%;bottom:92px;height:18px;border:2px solid #eee;background:rgba(0,0,0,.4)}
-    #power{height:100%;width:0;background:#eee}
-    #guide{position:absolute;left:0;right:0;bottom:38px;text-align:center;font-weight:800;text-shadow:0 1px 3px #000}
-    #result{position:absolute;z-index:30;left:50%;top:28%;transform:translate(-50%,-50%);padding:12px 18px;background:rgba(0,0,0,.75);border:1px solid #aaa;display:none;font-size:20px}
+    #stats{font-size:12px;text-align:right;line-height:1.45;max-width:70%}
+
+    #searchWindow{position:absolute;left:7%;right:7%;top:18%;height:31%;overflow:hidden;border:3px solid #d8d2c6;background:#44503f;box-shadow:0 0 0 5px #27231e,0 10px 25px rgba(0,0,0,.45)}
+    #forestTrack{position:absolute;inset:0;width:400%;display:flex;will-change:transform}
+    .forestScene{position:relative;width:25%;height:100%;flex:0 0 25%;overflow:hidden;background:linear-gradient(#778174 0 42%,#404c3b 42% 100%)}
+    .forestScene:before,.forestScene:after{content:"";position:absolute;bottom:0;width:38px;height:90%;background:#2d382b;border-radius:50% 50% 0 0}
+    .forestScene:before{left:15%}.forestScene:after{right:12%}
+    .bush{position:absolute;bottom:0;width:85px;height:55px;border-radius:50% 50% 0 0;background:#34402f}
+    .bush.a{left:35%}.bush.b{right:25%;height:70px}
+    #animal{display:none;position:absolute;left:68%;top:58%;width:78px;height:45px;border-radius:48% 48% 42% 42%;background:#745d43;transform:translate(-50%,-50%)}
+    #animal:before{content:"";position:absolute;right:-19px;top:3px;width:27px;height:27px;border-radius:50%;background:#745d43}
+    #animal:after{content:"";position:absolute;right:-21px;top:11px;width:6px;height:6px;border-radius:50%;background:#111}
+    .leg{position:absolute;bottom:-23px;width:6px;height:26px;background:#745d43}.leg.a{left:17px}.leg.b{right:14px}
+    #searchText{position:absolute;left:0;right:0;top:51%;text-align:center;font-weight:800;font-size:16px}
+
+    #shootArea{position:absolute;left:0;right:0;bottom:0;height:48%;display:none}
+    #bow{position:absolute;left:32px;top:40%;width:82px;height:175px;transform:translateY(-50%);border:6px solid #8b6842;border-right:none;border-radius:100% 0 0 100%}
+    #string{position:absolute;left:111px;top:40%;width:3px;height:166px;background:#ddd;transform:translateY(-50%)}
+    #arrow{position:absolute;left:111px;top:40%;width:110px;height:4px;background:#ddd;transform:translateY(-50%)}
+    #arrow:after{content:"";position:absolute;right:-10px;top:-5px;border-left:12px solid #ddd;border-top:7px solid transparent;border-bottom:7px solid transparent}
+
+    #timingWrap{position:absolute;left:8%;right:8%;bottom:88px;height:30px;border:2px solid #eee;background:#292929;overflow:hidden}
+    #hitZone{position:absolute;left:42%;width:16%;top:0;bottom:0;background:#8d8d8d}
+    #timingMarker{position:absolute;top:-3px;bottom:-3px;width:5px;background:#fff;left:0}
+    #guide{position:absolute;left:0;right:0;bottom:35px;text-align:center;font-weight:800;text-shadow:0 1px 3px #000}
+    #result{position:absolute;z-index:40;left:50%;top:55%;transform:translate(-50%,-50%);padding:12px 18px;background:rgba(0,0,0,.82);border:1px solid #aaa;display:none;font-size:20px;white-space:nowrap}
   </style>
 </head>
 <body>
 <div id="game">
-  <div id="top"><a href="DD_top.html">← 戻る</a><div id="stats">弓 品質3<br>弓弦 強度3 / 矢 強度3</div></div>
-  <div id="animal"><i class="leg a"></i><i class="leg b"></i></div>
-  <div id="bow"></div><div id="string"></div><div id="arrow"></div>
-  <div id="powerWrap"><div id="power"></div></div>
-  <div id="guide">長押しで引く　離して放つ</div>
+  <div id="top"><a href="DD_top.html">← 戻る</a><div id="stats"></div></div>
+
+  <div id="searchWindow">
+    <div id="forestTrack">
+      <div class="forestScene"><i class="bush a"></i><i class="bush b"></i></div>
+      <div class="forestScene"><i class="bush a"></i><i class="bush b"></i></div>
+      <div class="forestScene"><i class="bush a"></i><i class="bush b"></i></div>
+      <div class="forestScene"><i class="bush a"></i><i class="bush b"></i><div id="animal"><i class="leg a"></i><i class="leg b"></i></div></div>
+    </div>
+  </div>
+  <div id="searchText">獲物を探している…</div>
+
+  <div id="shootArea">
+    <div id="bow"></div><div id="string"></div><div id="arrow"></div>
+    <div id="timingWrap"><div id="hitZone"></div><div id="timingMarker"></div></div>
+    <div id="guide">長押しで弓を引く　狙った位置で離す</div>
+  </div>
   <div id="result"></div>
 </div>
+
+<script src="DD_hunt_config.js"></script>
 <script>
 (() => {
-  const game=document.getElementById('game'),bar=document.getElementById('power'),string=document.getElementById('string'),arrow=document.getElementById('arrow'),animal=document.getElementById('animal'),result=document.getElementById('result');
-  let pulling=false,start=0,power=0,raf=0;
-  const bowQuality=3,stringStrength=3,arrowStrength=3;
-  function show(text){result.textContent=text;result.style.display='block';clearTimeout(show.t);show.t=setTimeout(()=>result.style.display='none',1200)}
-  function draw(){if(!pulling)return;power=Math.min(100,(performance.now()-start)/12);bar.style.width=power+'%';const px=Math.min(52,power*.52);string.style.transform=`translate(${-px}px,-50%)`;arrow.style.transform=`translate(${-px}px,-50%)`;raf=requestAnimationFrame(draw)}
-  function begin(e){e.preventDefault();if(pulling)return;pulling=true;start=performance.now();power=0;raf=requestAnimationFrame(draw)}
-  function release(e){if(!pulling)return;e.preventDefault();pulling=false;cancelAnimationFrame(raf);const strain=power/100;if(Math.random()<Math.max(0,strain-stringStrength*.17)){reset();show('弓弦が切れた');return}if(Math.random()<Math.max(0,strain-arrowStrength*.19)){reset();show('矢が折れた');return}const hit=Math.random()<0.5;fire(hit)}
-  function fire(hit){const g=game.getBoundingClientRect(),a=animal.getBoundingClientRect(),sx=118,sy=g.height*.53,tx=a.left-g.left+a.width/2,ty=a.top-g.top+a.height/2;const dx=(tx-sx)+(hit?0:(Math.random()<.5?-1:1)*(80+Math.random()*140)),dy=(ty-sy)+(hit?0:(Math.random()<.5?-1:1)*(50+Math.random()*100)),dist=Math.hypot(dx,dy),ang=Math.atan2(dy,dx)*180/Math.PI;arrow.style.transition='none';arrow.style.transform='translate(0,-50%)';arrow.offsetHeight;arrow.style.transition='transform .32s linear';arrow.style.transform=`translate(${dist}px,${dy}px) rotate(${ang}deg)`;setTimeout(()=>{show(hit?'命中':'外れ');setTimeout(reset,400)},330)}
-  function reset(){power=0;bar.style.width='0%';string.style.transform='translateY(-50%)';arrow.style.transition='none';arrow.style.transform='translateY(-50%)'}
-  game.addEventListener('pointerdown',begin,{passive:false});game.addEventListener('pointerup',release,{passive:false});game.addEventListener('pointercancel',release,{passive:false});
+  const config=window.DDHuntConfig||{};
+  const equipment=config.equipment||{};
+  const bowInfo=equipment.bow||{};
+  const stringInfo=equipment.bowstring||{};
+  const arrowInfo=equipment.arrows||{};
+
+  const stats=document.getElementById('stats');
+  const track=document.getElementById('forestTrack');
+  const animal=document.getElementById('animal');
+  const searchText=document.getElementById('searchText');
+  const shootArea=document.getElementById('shootArea');
+  const game=document.getElementById('game');
+  const string=document.getElementById('string');
+  const arrow=document.getElementById('arrow');
+  const timingWrap=document.getElementById('timingWrap');
+  const marker=document.getElementById('timingMarker');
+  const result=document.getElementById('result');
+
+  let arrowsLeft=Number(arrowInfo.count||3);
+  let ready=false;
+  let pulling=false;
+  let pullStart=0;
+  let markerPos=0;
+  let markerDir=1;
+  let markerRaf=0;
+  let pullRaf=0;
+
+  function updateStats(){
+    stats.innerHTML=`${bowInfo.name||'弓'}：${bowInfo.description||''}<br>${stringInfo.name||'弓弦'}：${stringInfo.description||''}<br>${arrowInfo.name||'矢'}：残り ${arrowsLeft}本`;
+  }
+
+  function show(text){
+    result.textContent=text;
+    result.style.display='block';
+    clearTimeout(show.t);
+    show.t=setTimeout(()=>result.style.display='none',1100);
+  }
+
+  function startSearch(){
+    ready=false;
+    pulling=false;
+    shootArea.style.display='none';
+    animal.style.display='none';
+    searchText.textContent='獲物を探している…';
+    track.style.transition='none';
+    track.style.transform='translateX(0)';
+    const passes=2+Math.floor(Math.random()*2);
+    let step=0;
+    function move(){
+      step++;
+      const scene=step%3;
+      track.style.transition='transform .42s ease-in-out';
+      track.style.transform=`translateX(-${scene*25}%)`;
+      if(step<passes*3){setTimeout(move,470);return;}
+      setTimeout(()=>{
+        track.style.transition='transform .5s ease-out';
+        track.style.transform='translateX(-75%)';
+        setTimeout(()=>{
+          animal.style.display='block';
+          searchText.textContent='獲物を見つけた';
+          shootArea.style.display='block';
+          ready=true;
+        },520);
+      },300);
+    }
+    setTimeout(move,350);
+  }
+
+  function animateMarker(){
+    markerPos+=markerDir*1.65;
+    if(markerPos>=100){markerPos=100;markerDir=-1}
+    if(markerPos<=0){markerPos=0;markerDir=1}
+    marker.style.left=`calc(${markerPos}% - 2px)`;
+    markerRaf=requestAnimationFrame(animateMarker);
+  }
+
+  function animatePull(){
+    if(!pulling)return;
+    const elapsed=performance.now()-pullStart;
+    const pullPx=Math.min(48,elapsed/22);
+    string.style.transform=`translate(${-pullPx}px,-50%)`;
+    arrow.style.transform=`translate(${-pullPx}px,-50%)`;
+    pullRaf=requestAnimationFrame(animatePull);
+  }
+
+  function begin(e){
+    if(!ready||pulling||arrowsLeft<=0)return;
+    if(!shootArea.contains(e.target))return;
+    e.preventDefault();
+    pulling=true;
+    pullStart=performance.now();
+    markerPos=0;
+    markerDir=1;
+    cancelAnimationFrame(markerRaf);
+    cancelAnimationFrame(pullRaf);
+    markerRaf=requestAnimationFrame(animateMarker);
+    pullRaf=requestAnimationFrame(animatePull);
+  }
+
+  function release(e){
+    if(!pulling)return;
+    e.preventDefault();
+    pulling=false;
+    cancelAnimationFrame(markerRaf);
+    cancelAnimationFrame(pullRaf);
+    arrowsLeft=Math.max(0,arrowsLeft-1);
+    updateStats();
+
+    const hit=markerPos>=42&&markerPos<=58;
+    show(hit?'命中':'外れ');
+    string.style.transform='translateY(-50%)';
+    arrow.style.transform='translateY(-50%)';
+
+    if(arrowsLeft<=0){
+      ready=false;
+      document.getElementById('guide').textContent='矢がない';
+    }
+  }
+
+  updateStats();
+  game.addEventListener('pointerdown',begin,{passive:false});
+  game.addEventListener('pointerup',release,{passive:false});
+  game.addEventListener('pointercancel',release,{passive:false});
+  startSearch();
 })();
 </script>
 </body>
