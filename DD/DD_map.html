@@ -17,18 +17,26 @@
     #message{flex:0 0 32px;border:1px solid rgba(255,255,255,.24);border-radius:7px;background:rgba(0,0,0,.2);display:flex;align-items:center;justify-content:center;padding:4px 8px;text-align:center;font-size:11px;font-weight:700}
     #boardWrap{position:relative;flex:1 1 auto;min-height:0;border:2px solid #161a15;border-radius:8px;overflow:hidden;background:#354333}
     #board{position:absolute;inset:0;display:grid;grid-template-columns:repeat(7,1fr);grid-template-rows:repeat(7,1fr);gap:1px;background:#151b14}
-    .cell{position:relative;min-width:0;min-height:0;border:0;padding:0;font:inherit;color:#fff;overflow:hidden;cursor:pointer}
-    .cell::after{content:"";position:absolute;inset:0;border:1px solid rgba(255,255,255,.11);pointer-events:none}
+    .cell{position:relative;min-width:0;min-height:0;border:0;padding:0;font:inherit;color:#fff;overflow:hidden;cursor:pointer;isolation:isolate}
+    .cell::after{content:"";position:absolute;inset:0;border:1px solid rgba(255,255,255,.11);pointer-events:none;z-index:8}
     .forest{background:linear-gradient(145deg,#4b6345,#344b32)}
     .plain{background:linear-gradient(145deg,#8d8b57,#6f7047)}
     .river{background:linear-gradient(145deg,#617f88,#496a75)}
     .cabin{background:linear-gradient(145deg,#8b7358,#6f5944)}
     .deepForest{background:linear-gradient(145deg,#344831,#243724)}
-    .cell.reachable{outline:2px solid rgba(255,255,255,.78);outline-offset:-3px}
-    .terrainLabel{position:absolute;left:3px;bottom:2px;font-size:8px;line-height:1;text-shadow:0 1px 2px #000;opacity:.82}
-    .poi{position:absolute;left:50%;top:48%;transform:translate(-50%,-50%);font-size:18px;line-height:1;filter:drop-shadow(0 1px 1px rgba(0,0,0,.65));pointer-events:none}
+
+    .cell.reachable{box-shadow:inset 0 0 0 4px #f4d35e;filter:brightness(1.18) saturate(1.08)}
+    .cell.reachable::before{content:"";position:absolute;inset:4px;background:rgba(255,239,150,.13);pointer-events:none;z-index:1}
+    .cell.selected:not(.current){box-shadow:inset 0 0 0 3px #fff}
+    .cell.current{box-shadow:inset 0 0 0 4px #fff,inset 0 0 0 7px #1a1a1a}
+
+    .terrainLabel{position:absolute;left:3px;bottom:2px;font-size:8px;line-height:1;text-shadow:0 1px 2px #000;opacity:.82;z-index:3}
+    .poi{position:absolute;left:50%;top:48%;transform:translate(-50%,-50%);font-size:18px;line-height:1;filter:drop-shadow(0 1px 1px rgba(0,0,0,.65));pointer-events:none;z-index:4}
     .animal{font-size:22px}
-    .pawn{position:absolute;right:4px;top:4px;width:14px;height:14px;border-radius:50%;background:#fff;border:3px solid #242424;box-shadow:0 1px 3px rgba(0,0,0,.7);z-index:4;pointer-events:none}
+
+    .pawn{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:28px;height:28px;border-radius:50%;background:#fff;border:4px solid #171717;box-shadow:0 0 0 3px #f4d35e,0 3px 7px rgba(0,0,0,.8);z-index:7;pointer-events:none}
+    .pawn::after{content:"";position:absolute;left:50%;top:50%;width:8px;height:8px;border-radius:50%;background:#171717;transform:translate(-50%,-50%)}
+
     #shade{position:absolute;inset:0;pointer-events:none;z-index:20;transition:background .3s ease}
     html[data-dd-phase="朝"] #shade{background:rgba(255,236,176,.03)}
     html[data-dd-phase="昼"] #shade{background:transparent}
@@ -42,7 +50,7 @@
     #actions{display:flex;align-items:center;gap:5px;justify-content:flex-end}
     .action{min-width:64px;min-height:32px;border:1px solid #f0eee5;border-radius:7px;background:#f0eee5;color:#1c1c1c;font:inherit;font-size:11px;font-weight:800}
     .action:disabled{opacity:.38}
-    #legend{flex:0 0 22px;display:flex;align-items:center;justify-content:center;gap:10px;font-size:9px;opacity:.9}
+    #legend{flex:0 0 22px;display:flex;align-items:center;justify-content:center;gap:10px;font-size:9px;opacity:.95}
   </style>
 </head>
 <body>
@@ -55,7 +63,7 @@
     </div>
   </header>
 
-  <div id="message">隣接するマスへ移動する。</div>
+  <div id="message">黄色い枠のマスをタップして移動する。</div>
 
   <div id="boardWrap">
     <div id="board" aria-label="周辺マップ"></div>
@@ -69,7 +77,7 @@
     <div id="actions"></div>
   </div>
 
-  <div id="legend">● 自分　🦌🐇🐦 獲物　✦ 採取場所</div>
+  <div id="legend">◎ 自分　黄色枠 移動可能　🦌🐇🐦 獲物　✦ 採取場所</div>
 </div>
 
 <script src="DD_time.js"></script>
