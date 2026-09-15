@@ -6,6 +6,7 @@
   const actionCosts = Object.freeze({
     travel: 30,
     forestTurn: 6,
+    exploreDraw: 6,
     gather: 20,
     hunt: 120,
     returnHome: 30
