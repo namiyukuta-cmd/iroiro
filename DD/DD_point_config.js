@@ -61,7 +61,7 @@
 
   window.DDPointConfig = {
     battleUnlockEventId: 'return_with_meat_01',
-    encountersPerDeck: 1,
+    encounterWeight: 1,
     zones,
     placeNames
   };
