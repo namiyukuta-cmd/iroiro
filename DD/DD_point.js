@@ -5,7 +5,6 @@
   const zone = zones[params.get('zone')] ? params.get('zone') : 'forest';
   const place = params.get('place') || zone;
   const zoneConfig = zones[zone] || { label: zone, cards: [], encounters: [] };
-  const POINT_RESUME_KEY = 'dd_session_point_resume_v1';
 
   const timeText = document.getElementById('timeText');
   const dayText = document.getElementById('dayText');
@@ -14,7 +13,6 @@
   const placeName = document.getElementById('placeName');
   const placeType = document.getElementById('placeType');
   const deckButton = document.getElementById('deck');
-  const deckCount = document.getElementById('deckCount');
   const deckHint = document.getElementById('deckHint');
   const drawn = document.getElementById('drawn');
   const cardIcon = document.getElementById('cardIcon');
@@ -25,7 +23,6 @@
   const actions = document.getElementById('actions');
   const result = document.getElementById('result');
 
-  let deck = [];
   let currentCard = null;
   let resolved = true;
 
@@ -33,13 +30,9 @@
     return { ...card };
   }
 
-  function shuffle(list) {
-    const out = list.map(clone);
-    for (let i = out.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [out[i], out[j]] = [out[j], out[i]];
-    }
-    return out;
+  function pickRandom(list) {
+    if (!Array.isArray(list) || !list.length) return null;
+    return list[Math.floor(Math.random() * list.length)] || null;
   }
 
   function battleUnlocked() {
@@ -47,22 +40,17 @@
     return Boolean(window.DDEvents?.hasSeen?.(eventId));
   }
 
-  function buildDeck() {
-    const list = (zoneConfig.cards || []).map(clone);
-    if (!battleUnlocked()) return list;
+  function buildDrawPool() {
+    const pool = (zoneConfig.cards || []).map(clone);
+    if (!battleUnlocked()) return pool;
 
     const encounters = zoneConfig.encounters || [];
-    const count = Math.min(
-      encounters.length,
-      Math.max(0, Math.floor(Number(config.encountersPerDeck ?? 1)))
-    );
-
-    if (count > 0) {
-      const candidates = shuffle(encounters);
-      for (let i = 0; i < count; i++) list.push(clone(candidates[i]));
+    const weight = Math.max(0, Math.floor(Number(config.encounterWeight ?? 1)));
+    for (let i = 0; i < weight; i++) {
+      const encounter = pickRandom(encounters);
+      if (encounter) pool.push(clone(encounter));
     }
-
-    return list;
+    return pool;
   }
 
   function clearCardView() {
@@ -74,34 +62,6 @@
     result.textContent = '';
   }
 
-  function resetDeck() {
-    deck = shuffle(buildDeck());
-    resolved = true;
-    clearCardView();
-    refreshDeck();
-  }
-
-  function saveResume() {
-    try {
-      sessionStorage.setItem(POINT_RESUME_KEY, JSON.stringify({ zone, place, deck }));
-    } catch (_) {}
-  }
-
-  function restoreResume() {
-    try {
-      const saved = JSON.parse(sessionStorage.getItem(POINT_RESUME_KEY) || 'null');
-      if (!saved || saved.zone !== zone || saved.place !== place || !Array.isArray(saved.deck)) return false;
-      deck = saved.deck.map(clone);
-      sessionStorage.removeItem(POINT_RESUME_KEY);
-      resolved = true;
-      clearCardView();
-      refreshDeck();
-      return true;
-    } catch (_) {
-      return false;
-    }
-  }
-
   function refreshClock() {
     const state = window.DDTime?.getState?.() || { day: 1, hour: 7, minute: 0, phase: '朝' };
     timeText.textContent = `${String(state.hour).padStart(2, '0')}:${String(state.minute).padStart(2, '0')}`;
@@ -111,11 +71,10 @@
   }
 
   function refreshDeck() {
-    deckCount.textContent = `${deck.length}枚`;
     deckButton.disabled = !resolved;
-    if (!deck.length && resolved) deckHint.textContent = '山札をタップして混ぜ直す';
-    else if (!resolved) deckHint.textContent = '引いた札の行動を選ぶ';
-    else deckHint.textContent = '山札をタップして1枚引く';
+    deckHint.textContent = resolved
+      ? '山札をタップして1枚引く'
+      : '引いた札の行動を選ぶ';
   }
 
   function makeButton(label, handler, primary = false) {
@@ -130,7 +89,6 @@
   function drawNextCard() {
     resolved = true;
     clearCardView();
-    if (!deck.length) deck = shuffle(buildDeck());
     refreshDeck();
     drawCard();
   }
@@ -156,7 +114,6 @@
   }
 
   function doHunt(card) {
-    saveResume();
     const back = `DD_point.html?zone=${encodeURIComponent(zone)}&place=${encodeURIComponent(place)}`;
     location.href = `DD_hunt.html?animal=${encodeURIComponent(card.animalId)}&from=point&return=${encodeURIComponent(back)}`;
   }
@@ -175,7 +132,6 @@
   }
 
   function doBattle(card) {
-    saveResume();
     const back = `DD_point.html?zone=${encodeURIComponent(zone)}&place=${encodeURIComponent(place)}`;
     location.href = `DD_battle.html?enemy=${encodeURIComponent(card.enemyId)}&return=${encodeURIComponent(back)}`;
   }
@@ -216,12 +172,11 @@
 
   function drawCard() {
     if (!resolved) return;
-    if (!deck.length) {
-      resetDeck();
-      return;
-    }
+    const pool = buildDrawPool();
+    const card = pickRandom(pool);
+    if (!card) return;
 
-    currentCard = deck.shift();
+    currentCard = clone(card);
     resolved = false;
     drawn.style.display = 'flex';
     cardIcon.textContent = currentCard.icon || '';
@@ -242,5 +197,6 @@
   document.addEventListener('selectstart', e => e.preventDefault());
 
   refreshClock();
-  if (!restoreResume()) resetDeck();
+  clearCardView();
+  refreshDeck();
 })();
