@@ -12,7 +12,6 @@
     html,body{margin:0;width:100%;min-height:100%;background:#eeeae1;color:#1d1d1b;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
     body{min-height:100dvh}
     #game{width:min(100%,520px);min-height:100dvh;margin:0 auto;padding:max(14px,env(safe-area-inset-top)) 16px max(18px,env(safe-area-inset-bottom));display:flex;flex-direction:column;gap:14px}
-
     header{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}
     #clockArea{display:flex;align-items:center;gap:12px}
     #clockDial{position:relative;width:86px;height:86px;border:5px solid #20201d;border-radius:50%;background:#faf8f2;box-shadow:0 3px 0 rgba(0,0,0,.12)}
@@ -28,7 +27,6 @@
     #placeName{font-size:23px;font-weight:1000}
     #placeType{margin-top:4px;font-size:13px;font-weight:800;opacity:.65}
     .headLink{display:inline-block;margin-top:8px;margin-left:8px;color:#1d1d1b;text-decoration:none;font-size:14px;font-weight:900}
-
     #table{position:relative;min-height:320px;border-top:2px solid #aaa397;border-bottom:2px solid #aaa397;padding:28px 8px 24px}
     #cards{height:220px;position:relative}
     .card{position:absolute;width:132px;height:184px;border:3px solid #24231f;border-radius:12px;background:#fff;box-shadow:0 6px 0 rgba(0,0,0,.15);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:10px;text-align:center}
@@ -41,7 +39,6 @@
     #cardTitle{font-size:19px;font-weight:1000;line-height:1.25}
     #cardSub{margin-top:8px;font-size:13px;font-weight:800;color:#666}
     #deckHint{position:absolute;left:8px;right:8px;bottom:0;text-align:center;font-size:14px;font-weight:900;color:#555}
-
     #eventBox{min-height:154px;border:2px solid #2c2b27;border-radius:12px;background:#faf8f2;padding:14px}
     #eventText{min-height:48px;font-size:18px;font-weight:900;line-height:1.45}
     #eventDetail{min-height:24px;margin-top:5px;font-size:14px;font-weight:700;color:#5d5a53}
@@ -50,7 +47,6 @@
     .action.primary{background:#22211e;color:#fff}
     .action:disabled{opacity:.35}
     #result{min-height:28px;font-size:14px;font-weight:900;color:#514e47}
-
     html[data-dd-phase="夕方"] body{background:#e7d9c9}
     html[data-dd-phase="夜"] body,html[data-dd-phase="深夜"] body{background:#c8ccd2}
   </style>
@@ -59,15 +55,8 @@
 <div id="game">
   <header>
     <div id="clockArea">
-      <div id="clockDial" aria-hidden="true">
-        <div id="hourHand"></div>
-        <div id="minuteHand"></div>
-        <div id="clockPin"></div>
-      </div>
-      <div>
-        <div id="timeText">07:00</div>
-        <div id="dayText">1日目　朝</div>
-      </div>
+      <div id="clockDial" aria-hidden="true"><div id="hourHand"></div><div id="minuteHand"></div><div id="clockPin"></div></div>
+      <div><div id="timeText">07:00</div><div id="dayText">1日目　朝</div></div>
     </div>
     <div id="placeArea">
       <div id="placeName">森</div>
@@ -79,30 +68,21 @@
 
   <section id="table">
     <div id="cards">
-      <button id="deck" class="card" type="button" aria-label="山札を引く">
-        <span id="deckTitle">山札</span>
-        <span id="deckCount">0枚</span>
-      </button>
-      <div id="drawn" class="card" aria-live="polite">
-        <div id="cardIcon"></div>
-        <div id="cardTitle"></div>
-        <div id="cardSub"></div>
-      </div>
+      <button id="deck" class="card" type="button" aria-label="山札を引く"><span id="deckTitle">山札</span><span id="deckCount">0枚</span></button>
+      <div id="drawn" class="card" aria-live="polite"><div id="cardIcon"></div><div id="cardTitle"></div><div id="cardSub"></div></div>
       <div id="deckHint">山札をタップして1枚引く</div>
     </div>
   </section>
 
-  <section id="eventBox">
-    <div id="eventText">カードを引く。</div>
-    <div id="eventDetail"></div>
-    <div id="actions"></div>
-  </section>
+  <section id="eventBox"><div id="eventText">カードを引く。</div><div id="eventDetail"></div><div id="actions"></div></section>
   <div id="result"></div>
 </div>
 
 <script src="DD_time.js"></script>
 <script src="DD_items.js"></script>
 <script src="DD_wolf.js"></script>
+<script src="DD_event.js"></script>
+<script src="DD_point_config.js"></script>
 <script src="DD_point.js"></script>
 </body>
 </html>
