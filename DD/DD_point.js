@@ -450,6 +450,10 @@
   function openChoices() {
     if (!currentCard || acted || busy || currentCard.type === 'enemy') return;
     tapFeedback();
+    if (currentCard.type === 'none') {
+      discardCurrentCard();
+      return;
+    }
     configureChoices(currentCard);
     cardHint.textContent = '下のボタンから選ぶ';
   }
