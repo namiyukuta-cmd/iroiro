@@ -35,6 +35,15 @@
       perishable: true,
       spoil: { enabled: true, duration: null }
     },
+    wolf_pup: {
+      id: 'wolf_pup',
+      name: '狼の子（？）',
+      category: 'special',
+      kind: 'companion',
+      description: '頼りなく「みゅう、みゅう」と鳴く、狼らしい小さな子。',
+      unique: true,
+      perishable: false
+    },
     branch: {
       id: 'branch',
       name: '木の枝',
@@ -112,7 +121,7 @@
       const clean = {};
       Object.entries(parsed).forEach(([id, count]) => {
         const value = Math.max(0, Math.floor(Number(count) || 0));
-        if (items[id] && value > 0) clean[id] = value;
+        if (items[id] && value > 0) clean[id] = items[id].unique ? 1 : value;
       });
       return clean;
     } catch (_) {
@@ -152,7 +161,13 @@
       if (!items[id]) return 0;
       const value = Math.max(0, Math.floor(Number(amount) || 0));
       if (!value) return inventory[id] || 0;
-      inventory[id] = (inventory[id] || 0) + value;
+
+      if (items[id].unique) {
+        inventory[id] = 1;
+      } else {
+        inventory[id] = (inventory[id] || 0) + value;
+      }
+
       syncInventory();
       emitChange();
       return inventory[id];
