@@ -143,7 +143,8 @@
     if (window.DDTime) DDTime.advance(card.minutes || 20, `point:${zone}:gather`);
     const item = window.DDItems?.get?.(card.itemId);
     const name = item?.name || card.title || 'アイテム';
-    resolveCard(`${name}を採集した。`);
+    window.DDItems?.add?.(card.itemId, 1);
+    resolveCard(`${name}を1個、アイテムに入れた。`);
   }
 
   function doHunt(card) {
@@ -158,7 +159,8 @@
     if (window.DDTime) DDTime.advance(minutes, 'point:river:fish');
     const remaining = Math.max(0, hp - attack * turns);
     if (remaining <= 0) {
-      resolveCard('魚を捕まえた。');
+      window.DDItems?.add?.('river_fish', 1);
+      resolveCard('川魚を1匹、アイテムに入れた。');
     } else {
       resolveCard(`素手で追ったが魚は逃げた。　攻撃 ${attack} / ターン ${turns}`);
     }
