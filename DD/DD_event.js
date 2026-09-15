@@ -48,6 +48,10 @@
           hasAnyMeat();
       },
       resolve() {
+        if (window.DDWolf && typeof DDWolf.adopt === 'function') {
+          DDWolf.adopt();
+          return;
+        }
         if (!window.DDItems || typeof DDItems.add !== 'function') return;
         if (DDItems.count('wolf_pup') <= 0) DDItems.add('wolf_pup', 1);
       }
