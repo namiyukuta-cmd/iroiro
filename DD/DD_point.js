@@ -20,11 +20,10 @@
   const cardSub = document.getElementById('cardSub');
   const eventText = document.getElementById('eventText');
   const eventDetail = document.getElementById('eventDetail');
-  const actions = document.getElementById('actions');
   const result = document.getElementById('result');
 
   let currentCard = null;
-  let resolved = true;
+  let acted = false;
 
   function clone(card) {
     return { ...card };
@@ -55,9 +54,10 @@
 
   function clearCardView() {
     currentCard = null;
+    acted = false;
     drawn.style.display = 'none';
-    actions.innerHTML = '';
-    eventText.textContent = 'カードを引く。';
+    drawn.style.cursor = 'default';
+    eventText.textContent = 'カードをめくる。';
     eventDetail.textContent = '';
     result.textContent = '';
   }
@@ -71,120 +71,99 @@
   }
 
   function refreshDeck() {
-    deckButton.disabled = !resolved;
-    deckHint.textContent = resolved
-      ? '山札をタップして1枚引く'
-      : '引いた札の行動を選ぶ';
-  }
-
-  function makeButton(label, handler, primary = false) {
-    const button = document.createElement('button');
-    button.type = 'button';
-    button.className = `action${primary ? ' primary' : ''}`;
-    button.textContent = label;
-    button.addEventListener('click', handler);
-    actions.appendChild(button);
-  }
-
-  function drawNextCard() {
-    resolved = true;
-    clearCardView();
-    refreshDeck();
-    drawCard();
-  }
-
-  function resolveCard(message = '') {
-    resolved = true;
-    actions.innerHTML = '';
-    if (message) result.textContent = message;
-    makeButton('次のカード', drawNextCard, true);
-    refreshDeck();
-  }
-
-  function ignoreCard() {
-    resolveCard('見送った。');
+    deckButton.disabled = false;
+    deckHint.textContent = currentCard
+      ? '山札をタップして次のカードをめくる'
+      : '山札をタップして1枚めくる';
   }
 
   function doGather(card) {
+    if (acted) return;
+    acted = true;
     DDTime?.advance?.(card.minutes || 20, `point:${zone}:gather`);
     const item = DDItems?.get?.(card.itemId);
     const name = item?.name || card.title || 'アイテム';
     DDItems?.add?.(card.itemId, 1);
-    resolveCard(`${name}を1個、アイテムに入れた。`);
+    result.textContent = `${name}を1個、手に入れた。`;
+    eventDetail.textContent = '山札をタップすると次のカード。';
   }
 
   function doHunt(card) {
+    if (acted) return;
+    acted = true;
     const back = `DD_point.html?zone=${encodeURIComponent(zone)}&place=${encodeURIComponent(place)}`;
     location.href = `DD_hunt.html?animal=${encodeURIComponent(card.animalId)}&from=point&return=${encodeURIComponent(back)}`;
   }
 
   function doFish(card) {
+    if (acted) return;
+    acted = true;
     const attack = 1;
     const hp = Math.max(1, Number(card.fishHp || 2));
     const minutes = Math.max(1, Number(card.minutes || 10));
     DDTime?.advance?.(minutes, 'point:river:fish');
     if (hp - attack <= 0) {
       DDItems?.add?.('river_fish', 1);
-      resolveCard('川魚を1匹、アイテムに入れた。');
+      result.textContent = '川魚を1匹、手に入れた。';
     } else {
-      resolveCard('素手で追ったが魚は逃げた。');
+      result.textContent = '素手で追ったが魚は逃げた。';
     }
+    eventDetail.textContent = '山札をタップすると次のカード。';
   }
 
   function doBattle(card) {
+    if (acted) return;
+    acted = true;
     const back = `DD_point.html?zone=${encodeURIComponent(zone)}&place=${encodeURIComponent(place)}`;
     location.href = `DD_battle.html?enemy=${encodeURIComponent(card.enemyId)}&return=${encodeURIComponent(back)}`;
   }
 
-  function showActions(card) {
-    actions.innerHTML = '';
-    eventDetail.textContent = '';
-
+  function showCardInfo(card) {
     if (card.type === 'item') {
-      eventDetail.textContent = `採集には ${card.minutes || 20}分かかる。`;
-      makeButton(`採集する　${card.minutes || 20}分`, () => doGather(card), true);
-      makeButton('見送る', ignoreCard);
+      eventDetail.textContent = `カードをタップして手に入れる。 ${card.minutes || 20}分`;
       return;
     }
-
     if (card.type === 'hunt') {
-      eventDetail.textContent = '狩猟画面へ移る。';
-      makeButton('狩猟する', () => doHunt(card), true);
-      makeButton('見逃す', ignoreCard);
+      eventDetail.textContent = 'カードをタップして狩猟する。';
       return;
     }
-
     if (card.type === 'fish') {
-      eventDetail.textContent = `魚 HP ${card.fishHp || 2}　素手：攻撃1　${card.minutes || 10}分`;
-      makeButton(`素手で捕る　${card.minutes || 10}分`, () => doFish(card), true);
-      makeButton('見送る', ignoreCard);
+      eventDetail.textContent = `カードをタップして捕る。 ${card.minutes || 10}分`;
       return;
     }
-
     if (card.type === 'enemy') {
-      eventDetail.textContent = '狼の子を連れ帰った後から、犬科の敵に狙われるようになった。';
-      makeButton('戦う', () => doBattle(card), true);
+      eventDetail.textContent = 'カードをタップすると戦闘。';
       return;
     }
+    eventDetail.textContent = '';
+  }
 
-    makeButton('次のカード', drawNextCard, true);
+  function actOnCurrentCard() {
+    if (!currentCard || acted) return;
+    if (currentCard.type === 'item') return doGather(currentCard);
+    if (currentCard.type === 'hunt') return doHunt(currentCard);
+    if (currentCard.type === 'fish') return doFish(currentCard);
+    if (currentCard.type === 'enemy') return doBattle(currentCard);
+    // 「何もない」カードは押しても何も起こらない。
   }
 
   function drawCard() {
-    if (!resolved) return;
+    if (currentCard) clearCardView();
+
     const pool = buildDrawPool();
     const card = pickRandom(pool);
     if (!card) return;
 
     currentCard = clone(card);
-    resolved = false;
+    acted = false;
     drawn.style.display = 'flex';
+    drawn.style.cursor = currentCard.type === 'none' ? 'default' : 'pointer';
     cardIcon.textContent = currentCard.icon || '';
     cardTitle.textContent = currentCard.title || '何もない';
     cardSub.textContent = currentCard.type === 'none' ? '空白札' : currentCard.type === 'enemy' ? '遭遇' : '';
     eventText.textContent = currentCard.text || '何も起こらなかった。';
     result.textContent = '';
-    showActions(currentCard);
+    showCardInfo(currentCard);
     refreshDeck();
   }
 
@@ -192,6 +171,13 @@
   placeType.textContent = zoneConfig.label || zone;
 
   deckButton.addEventListener('click', drawCard);
+  drawn.addEventListener('click', actOnCurrentCard);
+  drawn.addEventListener('keydown', event => {
+    if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault();
+      actOnCurrentCard();
+    }
+  });
   window.addEventListener('ddtimechange', refreshClock);
   document.addEventListener('contextmenu', e => e.preventDefault());
   document.addEventListener('selectstart', e => e.preventDefault());
