@@ -29,6 +29,7 @@
   const timingWrap = document.getElementById('timingWrap');
   const result = document.getElementById('result');
   const guide = document.getElementById('guide');
+  const backHome = document.getElementById('backHome');
 
   let arrowsLeft = Number(arrowInfo.count || 3);
   let ready = false;
@@ -42,6 +43,7 @@
   let currentAnimalIndex = 0;
   let currentHp = 0;
   let swipeStartX = null;
+  let huntTimeCharged = false;
 
   const hitZoneWidth = Math.max(
     4,
@@ -65,6 +67,12 @@
     stats.innerHTML = `${bowInfo.name || '弓'}：${bowInfo.description || ''}<br>` +
       `${stringInfo.name || '弓弦'}：${stringInfo.description || ''}<br>` +
       `${arrowInfo.name || '矢'}：残り ${arrowsLeft}本`;
+  }
+
+  function chargeHuntTime() {
+    if (huntTimeCharged) return;
+    if (window.DDTime) DDTime.advanceAction('hunt');
+    huntTimeCharged = true;
   }
 
   function setAnimalImage(data) {
@@ -241,6 +249,8 @@
 
   function endHuntAndReturn(message) {
     ready = false;
+    chargeHuntTime();
+    if (window.DDTime) DDTime.advanceAction('returnHome');
     show(message);
     timingWrap.style.display = 'none';
     animal.style.opacity = '0';
@@ -285,6 +295,7 @@
       ready = false;
       timingWrap.style.display = 'none';
       shootArea.style.display = 'none';
+      chargeHuntTime();
       setTimeout(() => {
         animal.classList.remove('hit');
         animal.classList.add('dead');
@@ -323,6 +334,12 @@
   searchWindow.addEventListener('pointercancel', () => {
     swipeStartX = null;
   });
+
+  if (backHome) {
+    backHome.addEventListener('click', () => {
+      if (window.DDTime) DDTime.advanceAction('returnHome');
+    });
+  }
 
   document.addEventListener('contextmenu', e => e.preventDefault());
   document.addEventListener('selectstart', e => e.preventDefault());
