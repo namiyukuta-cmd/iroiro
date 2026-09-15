@@ -38,7 +38,7 @@ window.DDHuntConfig = {
     {
       id: 'rabbit',
       name: 'ウサギ',
-      hp: 2,
+      hp: 3,
       speed: 1.8,
       description: '体力も素早さも普通。'
     },
