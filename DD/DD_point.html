@@ -33,18 +33,15 @@
     #deck{left:14%;top:6px;background:repeating-linear-gradient(45deg,#2a2d27 0 7px,#3c4038 7px 14px);color:#fff;cursor:pointer}
     #deck::before{content:"";position:absolute;inset:7px;border:2px solid rgba(255,255,255,.75);border-radius:8px}
     #deckTitle{font-size:18px;font-weight:1000;z-index:1}
-    #drawn{right:10%;top:28px;display:none}
+    #drawn{right:10%;top:28px;display:none;touch-action:manipulation}
+    #drawn:focus{outline:3px solid #777;outline-offset:3px}
     #cardIcon{font-size:54px;line-height:1;margin-bottom:12px}
     #cardTitle{font-size:19px;font-weight:1000;line-height:1.25}
     #cardSub{margin-top:8px;font-size:13px;font-weight:800;color:#666}
     #deckHint{position:absolute;left:8px;right:8px;bottom:0;text-align:center;font-size:14px;font-weight:900;color:#555}
-    #eventBox{min-height:154px;border:2px solid #2c2b27;border-radius:12px;background:#faf8f2;padding:14px}
-    #eventText{min-height:48px;font-size:18px;font-weight:900;line-height:1.45}
+    #eventBox{min-height:118px;border:2px solid #2c2b27;border-radius:12px;background:#faf8f2;padding:14px}
+    #eventText{min-height:38px;font-size:18px;font-weight:900;line-height:1.45}
     #eventDetail{min-height:24px;margin-top:5px;font-size:14px;font-weight:700;color:#5d5a53}
-    #actions{display:flex;gap:10px;margin-top:13px}
-    .action{flex:1;min-height:48px;border:2px solid #22211e;border-radius:10px;background:#fff;font:inherit;font-size:16px;font-weight:1000;padding:8px 10px}
-    .action.primary{background:#22211e;color:#fff}
-    .action:disabled{opacity:.35}
     #result{min-height:28px;font-size:14px;font-weight:900;color:#514e47}
     html[data-dd-phase="夕方"] body{background:#e7d9c9}
     html[data-dd-phase="夜"] body,html[data-dd-phase="深夜"] body{background:#c8ccd2}
@@ -67,13 +64,13 @@
 
   <section id="table">
     <div id="cards">
-      <button id="deck" class="card" type="button" aria-label="山札を引く"><span id="deckTitle">山札</span></button>
-      <div id="drawn" class="card" aria-live="polite"><div id="cardIcon"></div><div id="cardTitle"></div><div id="cardSub"></div></div>
-      <div id="deckHint">山札をタップして1枚引く</div>
+      <button id="deck" class="card" type="button" aria-label="山札をめくる"><span id="deckTitle">山札</span></button>
+      <div id="drawn" class="card" role="button" tabindex="0" aria-live="polite"><div id="cardIcon"></div><div id="cardTitle"></div><div id="cardSub"></div></div>
+      <div id="deckHint">山札をタップして1枚めくる</div>
     </div>
   </section>
 
-  <section id="eventBox"><div id="eventText">カードを引く。</div><div id="eventDetail"></div><div id="actions"></div></section>
+  <section id="eventBox"><div id="eventText">カードをめくる。</div><div id="eventDetail"></div></section>
   <div id="result"></div>
 </div>
 
