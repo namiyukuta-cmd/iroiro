@@ -42,12 +42,10 @@
       aspect-ratio: 4 / 3;
       border: 2px solid #202020;
       background: #fff;
-      overflow: hidden;
-    }
-    .scene svg {
-      display: block;
-      width: 100%;
-      height: 100%;
+      display: grid;
+      place-items: center;
+      font-size: 28px;
+      font-weight: 700;
     }
     .choices {
       display: grid;
@@ -73,27 +71,7 @@
     </header>
 
     <main id="game-screen">
-      <section class="scene" aria-label="場面の絵">
-        <svg viewBox="0 0 800 600" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="森と道の場面">
-          <rect width="800" height="600" fill="#ffffff"/>
-          <path d="M0 350 L145 225 L255 330 L385 180 L535 330 L650 235 L800 355" fill="none" stroke="#202020" stroke-width="8" stroke-linejoin="round"/>
-          <path d="M0 420 C150 390 245 410 360 450 C500 500 655 470 800 420" fill="none" stroke="#202020" stroke-width="8"/>
-          <path d="M330 600 C355 545 392 505 430 470 C470 435 520 414 570 405" fill="none" stroke="#202020" stroke-width="18" stroke-linecap="round"/>
-          <g fill="#ffffff" stroke="#202020" stroke-width="7" stroke-linejoin="round">
-            <path d="M95 410 L145 315 L195 410 Z"/>
-            <path d="M125 350 L145 285 L165 350 Z"/>
-            <path d="M625 415 L675 315 L725 415 Z"/>
-            <path d="M650 350 L675 275 L700 350 Z"/>
-            <rect x="137" y="410" width="16" height="72"/>
-            <rect x="667" y="415" width="16" height="74"/>
-          </g>
-          <g fill="#ffffff" stroke="#202020" stroke-width="7">
-            <rect x="525" y="330" width="115" height="85"/>
-            <path d="M510 335 L582 280 L655 335 Z"/>
-            <rect x="565" y="365" width="30" height="50"/>
-          </g>
-        </svg>
-      </section>
+      <section class="scene">絵</section>
       <div class="choices" aria-label="選択肢">
         <button class="choice" type="button"></button>
         <button class="choice" type="button"></button>
