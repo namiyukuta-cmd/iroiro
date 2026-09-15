@@ -11,6 +11,8 @@
     #game{position:relative;width:min(100%,520px);height:100dvh;margin:0 auto;overflow:hidden;background:linear-gradient(#1e241b,#11140f)}
     #top{position:absolute;z-index:30;top:0;left:0;right:0;display:flex;justify-content:space-between;align-items:flex-start;padding:max(10px,env(safe-area-inset-top)) 12px 10px;background:rgba(0,0,0,.62)}
     #top a{color:#fff;text-decoration:none;font-weight:700}
+    #topLeft{display:grid;gap:4px}
+    #clock{font-size:11px;font-weight:800;white-space:nowrap}
     #stats{font-size:12px;text-align:right;line-height:1.45;max-width:72%}
 
     #searchWindow{position:absolute;z-index:10;width:210px;height:210px;left:calc(50% - 105px);top:20%;overflow:hidden;border:4px solid #d8d2c6;border-radius:50%;background:#55604e;box-shadow:0 0 0 7px #27231e,0 10px 25px rgba(0,0,0,.45),inset 0 0 22px rgba(0,0,0,.45);transition:left .46s ease,top .46s ease}
@@ -52,7 +54,10 @@
 <body>
 <div id="game">
   <div id="top">
-    <a href="DD_top.html">← 戻る</a>
+    <div id="topLeft">
+      <a id="backHome" href="DD_top.html">← 戻る</a>
+      <div id="clock" data-dd-clock></div>
+    </div>
     <div id="stats"></div>
   </div>
 
@@ -83,6 +88,7 @@
   <div id="result"></div>
 </div>
 
+<script src="DD_time.js"></script>
 <script src="DD_hunt_config.js"></script>
 <script src="DD_items.js"></script>
 <script src="DD_hunt.js"></script>
