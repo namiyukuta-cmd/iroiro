@@ -9,6 +9,11 @@
     { id: 'bird', name: '鳥', hp: 1, speed: 2.6 }
   ];
 
+  const params = new URLSearchParams(location.search);
+  const fromMap = params.get('from') === 'map';
+  const requestedAnimalId = params.get('animal');
+  const requestedAnimalIndex = animals.findIndex(entry => entry.id === requestedAnimalId);
+
   const bowInfo = equipment.bow || {};
   const stringInfo = equipment.bowstring || {};
   const arrowInfo = equipment.arrows || {};
@@ -40,7 +45,7 @@
   let markerDir = 1;
   let markerRaf = 0;
   let pullRaf = 0;
-  let currentAnimalIndex = 0;
+  let currentAnimalIndex = fromMap && requestedAnimalIndex >= 0 ? requestedAnimalIndex : 0;
   let currentHp = 0;
   let swipeStartX = null;
   let encounterTimeCharged = false;
@@ -54,6 +59,11 @@
 
   hitZone.style.width = hitZoneWidth + '%';
   hitZone.style.left = ((100 - hitZoneWidth) / 2) + '%';
+
+  if (backHome && fromMap) {
+    backHome.href = 'DD_map.html';
+    backHome.textContent = '← マップへ';
+  }
 
   function currentAnimal() {
     return animals[currentAnimalIndex] || animals[0];
@@ -142,7 +152,7 @@
     setAnimalImage(data);
     animalName.textContent = data.name || '獲物';
     searchText.textContent = `${data.name || '獲物'}　HP ${currentHp}/${data.hp || 1}` +
-      `${engaged ? '' : '　←→ スワイプで変更'}`;
+      `${!fromMap && !engaged ? '　←→ スワイプで変更' : ''}`;
   }
 
   function flashHit() {
@@ -179,10 +189,21 @@
         setTimeout(next, 560);
         return;
       }
-      setTimeout(revealAnimal, 600);
+      setTimeout(() => revealAnimal(false), 600);
     }
 
     setTimeout(next, 300);
+  }
+
+  function prepareEncounter() {
+    ready = false;
+    pulling = false;
+    engaged = false;
+    encounterTimeCharged = false;
+    shootArea.style.display = 'none';
+    timingWrap.style.display = 'none';
+    animal.style.display = 'none';
+    animal.className = '';
   }
 
   function startSearch() {
@@ -195,20 +216,23 @@
       return;
     }
 
-    ready = false;
-    pulling = false;
-    engaged = false;
-    encounterTimeCharged = false;
-    shootArea.style.display = 'none';
-    timingWrap.style.display = 'none';
-    animal.style.display = 'none';
-    animal.className = '';
+    prepareEncounter();
+
+    if (fromMap && requestedAnimalIndex >= 0) {
+      currentAnimalIndex = requestedAnimalIndex;
+      searchText.textContent = `${currentAnimal().name}を狙う。`;
+      revealAnimal(true);
+      return;
+    }
+
     searchText.textContent = '獲物を探している…';
     moveSearchWindow();
   }
 
-  function revealAnimal() {
-    currentAnimalIndex = Math.floor(Math.random() * animals.length);
+  function revealAnimal(fixedAnimal) {
+    if (!fixedAnimal) {
+      currentAnimalIndex = Math.floor(Math.random() * animals.length);
+    }
     currentHp = Number(currentAnimal().hp || 1);
     updateAnimalDisplay(false);
     animal.style.display = 'block';
@@ -221,7 +245,7 @@
   }
 
   function switchAnimal(direction) {
-    if (!ready || pulling || engaged || animals.length < 2) return;
+    if (fromMap || !ready || pulling || engaged || animals.length < 2) return;
 
     ready = false;
     animal.style.opacity = '0';
@@ -287,16 +311,20 @@
     arrow.style.transform = 'translateY(-50%)';
   }
 
+  function returnTarget() {
+    return fromMap ? 'DD_map.html' : 'DD_top.html';
+  }
+
   function endHuntAndReturn(message) {
     ready = false;
-    if (window.DDTime) DDTime.advanceAction('returnHome');
+    if (!fromMap && window.DDTime) DDTime.advanceAction('returnHome');
     show(message);
     timingWrap.style.display = 'none';
     animal.style.opacity = '0';
     animal.style.transform = 'translate(120%,-50%)';
     shootArea.style.display = 'none';
     searchText.textContent = message;
-    setTimeout(() => { location.href = 'DD_top.html'; }, 1200);
+    setTimeout(() => { location.href = returnTarget(); }, 1200);
   }
 
   function searchAgain(message) {
@@ -305,6 +333,13 @@
     shootArea.style.display = 'none';
     animal.style.opacity = '0';
     animal.style.transform = 'translate(120%,-50%)';
+
+    if (fromMap) {
+      show(message);
+      searchText.textContent = `${message}　獲物は逃げた。`;
+      setTimeout(() => { location.href = 'DD_map.html'; }, 1000);
+      return;
+    }
 
     if (!canContinueHunt()) {
       setTimeout(() => endHuntAndReturn(stopReason()), 300);
@@ -377,12 +412,12 @@
   }
 
   searchWindow.addEventListener('pointerdown', e => {
-    if (!ready || pulling || engaged) return;
+    if (fromMap || !ready || pulling || engaged) return;
     swipeStartX = e.clientX;
   });
 
   searchWindow.addEventListener('pointerup', e => {
-    if (swipeStartX === null || !ready || pulling || engaged) return;
+    if (fromMap || swipeStartX === null || !ready || pulling || engaged) return;
     const dx = e.clientX - swipeStartX;
     swipeStartX = null;
     if (Math.abs(dx) < 45) return;
@@ -395,7 +430,7 @@
 
   if (backHome) {
     backHome.addEventListener('click', () => {
-      if (window.DDTime) DDTime.advanceAction('returnHome');
+      if (!fromMap && window.DDTime) DDTime.advanceAction('returnHome');
     });
   }
 
