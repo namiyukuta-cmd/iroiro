@@ -17,7 +17,7 @@
       width: min(100%, 520px);
       min-height: 100dvh;
       margin: 0 auto;
-      padding: max(18px, env(safe-area-inset-top)) 16px max(18px, env(safe-area-inset-bottom));
+      padding: max(18px, env(safe-area-inset-top)) 16px calc(92px + env(safe-area-inset-bottom));
     }
     header {
       min-height: 52px;
@@ -62,6 +62,24 @@
       font: inherit;
       cursor: pointer;
     }
+    #huntButton {
+      position: fixed;
+      left: 50%;
+      bottom: max(14px, env(safe-area-inset-bottom));
+      transform: translateX(-50%);
+      z-index: 100;
+      width: min(calc(100% - 32px), 488px);
+      min-height: 58px;
+      display: grid;
+      place-items: center;
+      border: 2px solid #202020;
+      border-radius: 12px;
+      background: #fff;
+      color: #202020;
+      text-decoration: none;
+      font-size: 20px;
+      font-weight: 800;
+    }
   </style>
 </head>
 <body>
@@ -76,12 +94,14 @@
         <img src="IMG_2788.jpeg" alt="DDの絵" />
       </section>
       <div class="choices" aria-label="選択肢">
-        <button class="choice" type="button" onclick="location.href='DD_hunt.html'">狩り</button>
+        <button class="choice" type="button"></button>
         <button class="choice" type="button"></button>
         <button class="choice" type="button"></button>
         <button class="choice" type="button"></button>
       </div>
     </main>
   </div>
+
+  <a id="huntButton" href="DD_hunt.html">狩り</a>
 </body>
 </html>
