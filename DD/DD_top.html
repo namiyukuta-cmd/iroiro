@@ -33,8 +33,33 @@
       font-weight: 700;
     }
     main {
-      min-height: calc(100dvh - 90px);
       padding-top: 16px;
+      display: grid;
+      gap: 14px;
+    }
+    .scene {
+      width: 100%;
+      aspect-ratio: 4 / 3;
+      border: 2px solid #202020;
+      background: #fff;
+      display: grid;
+      place-items: center;
+      font-size: 28px;
+      font-weight: 700;
+    }
+    .choices {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+    }
+    .choice {
+      min-width: 0;
+      min-height: 54px;
+      border: 2px solid #202020;
+      background: #fff;
+      border-radius: 10px;
+      font: inherit;
+      cursor: pointer;
     }
   </style>
 </head>
@@ -46,7 +71,13 @@
     </header>
 
     <main id="game-screen">
-      <!-- 実際のゲーム本体をここに作る -->
+      <section class="scene">絵</section>
+      <div class="choices" aria-label="選択肢">
+        <button class="choice" type="button"></button>
+        <button class="choice" type="button"></button>
+        <button class="choice" type="button"></button>
+        <button class="choice" type="button"></button>
+      </div>
     </main>
   </div>
 </body>
