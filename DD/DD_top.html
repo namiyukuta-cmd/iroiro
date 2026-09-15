@@ -55,6 +55,12 @@
       width: 100%;
       height: auto;
     }
+    #needs{display:grid;gap:8px}
+    .need{border:2px solid #202020;border-radius:10px;background:#fff;padding:9px 10px}
+    .needHead{display:flex;justify-content:space-between;gap:10px;font-size:14px;font-weight:900;margin-bottom:6px}
+    .needBar{height:14px;border:2px solid #202020;border-radius:999px;overflow:hidden;background:#eeeae1}
+    .needFill{height:100%;width:0;background:#202020;transition:width .2s ease}
+    #wolfNeed{display:none}
     .choices {
       display: grid;
       grid-template-columns: 1fr 1fr;
@@ -88,9 +94,22 @@
       <section class="scene">
         <img src="IMG_2788.jpeg" alt="DDの絵" />
       </section>
+
+      <section id="needs" aria-label="空腹">
+        <div class="need">
+          <div class="needHead"><span>主人公の空腹</span><span id="playerHungerText">0 / 100</span></div>
+          <div class="needBar"><div id="playerHungerFill" class="needFill"></div></div>
+        </div>
+        <div id="wolfNeed" class="need">
+          <div class="needHead"><span id="wolfHungerLabel">狼の子の空腹</span><span id="wolfHungerText">0 / 100</span></div>
+          <div class="needBar"><div id="wolfHungerFill" class="needFill"></div></div>
+        </div>
+      </section>
+
       <div class="choices" aria-label="選択肢">
         <button class="choice" type="button" onclick="location.href='DD_map.html'">マップ</button>
         <button class="choice" type="button" onclick="location.href='DD_inventory.html'">アイテム</button>
+        <button class="choice" type="button" onclick="location.href='DD_sleep.html'">寝る</button>
         <button id="wolfCare" class="choice" type="button" onclick="location.href='DD_wolf.html'">狼の子の世話</button>
       </div>
     </main>
@@ -99,20 +118,41 @@
 <script src="DD_time.js"></script>
 <script src="DD_items.js"></script>
 <script src="DD_wolf.js"></script>
+<script src="DD_needs.js"></script>
 <script>
 (() => {
-  const button = document.getElementById('wolfCare');
+  const wolfButton = document.getElementById('wolfCare');
+  const wolfNeed = document.getElementById('wolfNeed');
+  const wolfLabel = document.getElementById('wolfHungerLabel');
+  const playerText = document.getElementById('playerHungerText');
+  const playerFill = document.getElementById('playerHungerFill');
+  const wolfText = document.getElementById('wolfHungerText');
+  const wolfFill = document.getElementById('wolfHungerFill');
+
   function refreshWolfCare() {
-    if (!button || !window.DDWolf) return;
+    if (!wolfButton || !window.DDWolf) return;
     DDWolf.updateAge();
     const state = DDWolf.getState();
-    button.style.display = state.hasCompanion ? 'block' : 'none';
-    button.textContent = state.stage === 'adult' ? '狼（？）の世話' : '狼の子の世話';
+    wolfButton.style.display = state.hasCompanion ? 'block' : 'none';
+    wolfButton.textContent = state.stage === 'adult' ? '狼（？）の世話' : '狼の子の世話';
+    wolfNeed.style.display = state.hasCompanion ? 'block' : 'none';
+    wolfLabel.textContent = state.stage === 'adult' ? '狼（？）の空腹' : '狼の子の空腹';
   }
-  window.addEventListener('ddwolfchange', refreshWolfCare);
-  window.addEventListener('ddinventorychange', refreshWolfCare);
-  window.addEventListener('ddtimechange', refreshWolfCare);
+
+  function refreshNeeds() {
+    const state = window.DDNeeds?.getState?.() || { playerHunger:0, wolfHunger:0, maxHunger:100, hasWolf:false };
+    playerText.textContent = `${state.playerHunger} / ${state.maxHunger}`;
+    playerFill.style.width = `${state.playerHunger}%`;
+    wolfText.textContent = `${state.wolfHunger} / ${state.maxHunger}`;
+    wolfFill.style.width = `${state.wolfHunger}%`;
+  }
+
+  window.addEventListener('ddwolfchange', () => { refreshWolfCare(); refreshNeeds(); });
+  window.addEventListener('ddinventorychange', () => { refreshWolfCare(); refreshNeeds(); });
+  window.addEventListener('ddtimechange', refreshNeeds);
+  window.addEventListener('ddneedschange', refreshNeeds);
   refreshWolfCare();
+  refreshNeeds();
 })();
 </script>
 </body>
