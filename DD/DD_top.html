@@ -20,17 +20,21 @@
       padding: max(18px, env(safe-area-inset-top)) 16px max(18px, env(safe-area-inset-bottom));
     }
     header {
-      min-height: 52px;
+      min-height: 62px;
       display: flex;
       align-items: center;
       justify-content: space-between;
+      gap: 12px;
       border-bottom: 1px solid #bbb;
     }
     h1 { margin: 0; font-size: 24px; }
+    .header-right { text-align: right; display: grid; gap: 4px; }
+    #clock { font-size: 13px; font-weight: 800; }
     .back {
       color: inherit;
       text-decoration: none;
       font-weight: 700;
+      font-size: 12px;
     }
     main {
       padding-top: 16px;
@@ -68,7 +72,10 @@
   <div id="game-root">
     <header>
       <h1>DD</h1>
-      <a class="back" href="DD_index.html">入口へ</a>
+      <div class="header-right">
+        <div id="clock" data-dd-clock></div>
+        <a class="back" href="DD_index.html">入口へ</a>
+      </div>
     </header>
 
     <main id="game-screen">
@@ -76,12 +83,14 @@
         <img src="IMG_2788.jpeg" alt="DDの絵" />
       </section>
       <div class="choices" aria-label="選択肢">
-        <button class="choice" type="button" onclick="location.href='DD_hunt.html'">狩り</button>
-        <button class="choice" type="button" onclick="location.href='DD_forest.html'">森</button>
+        <button class="choice" type="button" onclick="DDTime.advanceAction('travel'); location.href='DD_hunt.html'">狩り</button>
+        <button class="choice" type="button" onclick="DDTime.advanceAction('travel'); location.href='DD_forest.html'">森</button>
         <button class="choice" type="button"></button>
         <button class="choice" type="button"></button>
       </div>
     </main>
   </div>
+
+<script src="DD_time.js"></script>
 </body>
 </html>
