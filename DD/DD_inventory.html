@@ -21,11 +21,14 @@
     #totalCount{font-size:21px}
     #inventory{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;padding-bottom:20px}
     .item{position:relative;min-height:150px;border:2px solid #282722;border-radius:12px;background:#fff;padding:10px;display:grid;grid-template-rows:78px auto auto;align-items:center;text-align:center;box-shadow:0 3px 0 rgba(0,0,0,.08)}
+    .item.companion{grid-template-rows:78px auto auto auto auto}
     .itemVisual{width:100%;height:78px;display:grid;place-items:center;overflow:hidden;border-radius:8px;background:#eeeae1;font-size:40px}
     .itemVisual img{display:block;width:100%;height:100%;object-fit:contain}
     .itemName{margin-top:8px;font-size:16px;font-weight:1000;line-height:1.2}
     .itemMeta{margin-top:4px;font-size:12px;font-weight:800;color:#666257}
     .itemCount{position:absolute;right:7px;top:7px;min-width:34px;height:28px;padding:0 7px;border:2px solid #222;border-radius:999px;background:#222;color:#fff;display:grid;place-items:center;font-size:14px;font-weight:1000}
+    .itemAction{margin-top:8px;min-height:36px;border:2px solid #26251f;border-radius:8px;background:#26251f;color:#fff;font:inherit;font-size:13px;font-weight:900;padding:6px}
+    .itemBehavior{min-height:38px;margin-top:6px;font-size:12px;font-weight:800;line-height:1.35;color:#514e47}
     #empty{display:none;margin-top:42px;border:2px dashed #aaa397;border-radius:12px;padding:28px 14px;text-align:center;font-size:17px;font-weight:900;color:#6d685f}
     html[data-dd-phase="夕方"] body{background:#eadfd1}
     html[data-dd-phase="夜"] body,html[data-dd-phase="深夜"] body{background:#d4d7dc}
@@ -55,6 +58,7 @@
 
 <script src="DD_time.js"></script>
 <script src="DD_items.js"></script>
+<script src="DD_wolf.js"></script>
 <script src="DD_inventory.js"></script>
 </body>
 </html>
