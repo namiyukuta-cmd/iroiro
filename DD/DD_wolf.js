@@ -10,6 +10,10 @@
     return Number(window.DDTime?.getState?.().totalMinutes || 0);
   }
 
+  function hasAdoptionTime() {
+    return state.adoptedAt !== null && state.adoptedAt !== '' && Number.isFinite(Number(state.adoptedAt));
+  }
+
   function loadState() {
     try {
       const parsed = JSON.parse(sessionStorage.getItem(STATE_KEY) || 'null');
@@ -44,7 +48,7 @@
 
   function ensureStateForExistingCompanion() {
     if (!hasCompanion()) return;
-    if (!Number.isFinite(Number(state.adoptedAt))) {
+    if (!hasAdoptionTime()) {
       state.adoptedAt = nowMinutes();
       state.stage = hasAdult() ? 'adult' : 'pup';
       sync();
@@ -54,7 +58,7 @@
   function adopt() {
     if (!window.DDItems) return false;
     if (!hasCompanion()) DDItems.add(PUP_ID, 1);
-    if (!Number.isFinite(Number(state.adoptedAt))) state.adoptedAt = nowMinutes();
+    if (!hasAdoptionTime()) state.adoptedAt = nowMinutes();
     state.stage = hasAdult() ? 'adult' : 'pup';
     state.fedCount = Math.max(0, Number(state.fedCount) || 0);
     sync();
@@ -64,7 +68,7 @@
   }
 
   function ageMinutes() {
-    if (!hasCompanion() || !Number.isFinite(Number(state.adoptedAt))) return 0;
+    if (!hasCompanion() || !hasAdoptionTime()) return 0;
     return Math.max(0, nowMinutes() - Number(state.adoptedAt));
   }
 
@@ -168,7 +172,7 @@
       hasCompanion: hasCompanion(),
       stage: hasAdult() ? 'adult' : hasPup() ? 'pup' : null,
       name: hasAdult() ? '狼（？）' : hasPup() ? '狼の子（？）' : '',
-      adoptedAt: Number.isFinite(Number(state.adoptedAt)) ? Number(state.adoptedAt) : null,
+      adoptedAt: hasAdoptionTime() ? Number(state.adoptedAt) : null,
       ageMinutes: ageMinutes(),
       remainingGrowthMinutes: hasPup() ? Math.max(0, GROWTH_MINUTES - ageMinutes()) : 0,
       fedCount: Math.max(0, Number(state.fedCount) || 0),
