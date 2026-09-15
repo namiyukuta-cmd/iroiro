@@ -11,21 +11,22 @@
     northForest: {
       name: '北の森',
       description: '木の実や枝、蔓などを探しやすい森。',
-      harvest: true
+      zone: 'forest'
     },
     deepForest: {
       name: '深い森',
       description: '木が密集した暗い森。移動に時間がかかる。',
-      harvest: true
+      zone: 'forest'
     },
     plain: {
       name: '開けた平原',
-      description: '見通しのよい狩猟地。鹿、ウサギ、鳥を狙える。',
-      hunt: true
+      description: '見通しのよい平原。採集や狩猟ができる。',
+      zone: 'plain'
     },
     river: {
       name: '川辺',
-      description: '川沿いの場所。漁はまだ未実装。'
+      description: '川沿いの場所。魚や河原のものを探せる。',
+      zone: 'river'
     }
   };
 
@@ -133,23 +134,9 @@
       return;
     }
 
-    if (info.harvest) {
-      makeAction('採取する', () => {
-        location.href = `DD_forest.html?from=map&place=${encodeURIComponent(currentLocation)}`;
-      }, 'harvest');
-    }
-
-    if (info.hunt) {
-      makeAction('鹿を狩る', () => {
-        location.href = 'DD_hunt.html?animal=deer&from=map';
-      }, 'hunt');
-      makeAction('ウサギを狩る', () => {
-        location.href = 'DD_hunt.html?animal=rabbit&from=map';
-      }, 'hunt');
-      makeAction('鳥を狩る', () => {
-        location.href = 'DD_hunt.html?animal=bird&from=map';
-      }, 'hunt');
-    }
+    makeAction('この地点に入る', () => {
+      location.href = `DD_point.html?zone=${encodeURIComponent(info.zone)}&place=${encodeURIComponent(currentLocation)}`;
+    });
   }
 
   function renderPlaces() {
