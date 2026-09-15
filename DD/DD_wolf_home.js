@@ -1,9 +1,12 @@
 (() => {
   const wolf = window.DDWolf;
   const items = window.DDItems;
+  const needs = window.DDNeeds;
   const wolfName = document.getElementById('wolfName');
   const wolfStage = document.getElementById('wolfStage');
   const growth = document.getElementById('growth');
+  const hungerText = document.getElementById('hungerText');
+  const hungerFill = document.getElementById('hungerFill');
   const meatList = document.getElementById('meatList');
   const noMeat = document.getElementById('noMeat');
   const behaviorText = document.getElementById('behaviorText');
@@ -22,6 +25,12 @@
     return parts.join(' ') || 'まもなく';
   }
 
+  function renderHunger() {
+    const state = needs?.getState?.() || { wolfHunger: 0, maxHunger: 100 };
+    hungerText.textContent = `空腹 ${state.wolfHunger} / ${state.maxHunger}`;
+    hungerFill.style.width = `${Math.max(0, Math.min(100, state.wolfHunger))}%`;
+  }
+
   function renderStatus() {
     wolf.updateAge();
     const state = wolf.getState();
@@ -37,6 +46,7 @@
       ? `あと ${formatRemaining(state.remainingGrowthMinutes)} ほどで大きくなる。`
       : 'もう子狼ではない。';
 
+    renderHunger();
     renderMeat();
   }
 
@@ -65,6 +75,7 @@
       button.textContent = '与える';
       button.addEventListener('click', () => {
         const result = wolf.feed(item.id);
+        if (result.ok) needs?.feedWolf?.(25);
         message.textContent = result.message || '';
         renderStatus();
       });
@@ -89,6 +100,7 @@
     renderStatus();
   });
   window.addEventListener('ddtimechange', renderStatus);
+  window.addEventListener('ddneedschange', renderHunger);
 
   renderStatus();
 })();
