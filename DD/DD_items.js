@@ -1,5 +1,7 @@
-window.DDItems = {
-  items: {
+(() => {
+  const INVENTORY_KEY = 'dd_session_inventory_v1';
+
+  const items = {
     meat_bird: {
       id: 'meat_bird',
       name: '鳥肉',
@@ -101,15 +103,88 @@ window.DDItems = {
       perishable: true,
       spoil: { enabled: true, duration: null }
     }
-  },
+  };
 
-  get(id) {
-    return this.items[id] || null;
-  },
-
-  byZone(zoneId) {
-    return Object.values(this.items).filter(item =>
-      item.gatherable && Array.isArray(item.zones) && item.zones.includes(zoneId)
-    );
+  function loadInventory() {
+    try {
+      const parsed = JSON.parse(sessionStorage.getItem(INVENTORY_KEY) || '{}');
+      if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) return {};
+      const clean = {};
+      Object.entries(parsed).forEach(([id, count]) => {
+        const value = Math.max(0, Math.floor(Number(count) || 0));
+        if (items[id] && value > 0) clean[id] = value;
+      });
+      return clean;
+    } catch (_) {
+      return {};
+    }
   }
-};
+
+  let inventory = loadInventory();
+
+  function syncInventory() {
+    try {
+      sessionStorage.setItem(INVENTORY_KEY, JSON.stringify(inventory));
+    } catch (_) {}
+  }
+
+  function emitChange() {
+    window.dispatchEvent(new CustomEvent('ddinventorychange', {
+      detail: { inventory: { ...inventory } }
+    }));
+  }
+
+  const api = {
+    items,
+    inventoryKey: INVENTORY_KEY,
+
+    get(id) {
+      return items[id] || null;
+    },
+
+    byZone(zoneId) {
+      return Object.values(items).filter(item =>
+        item.gatherable && Array.isArray(item.zones) && item.zones.includes(zoneId)
+      );
+    },
+
+    add(id, amount = 1) {
+      if (!items[id]) return 0;
+      const value = Math.max(0, Math.floor(Number(amount) || 0));
+      if (!value) return inventory[id] || 0;
+      inventory[id] = (inventory[id] || 0) + value;
+      syncInventory();
+      emitChange();
+      return inventory[id];
+    },
+
+    remove(id, amount = 1) {
+      if (!items[id]) return 0;
+      const value = Math.max(0, Math.floor(Number(amount) || 0));
+      const next = Math.max(0, (inventory[id] || 0) - value);
+      if (next > 0) inventory[id] = next;
+      else delete inventory[id];
+      syncInventory();
+      emitChange();
+      return next;
+    },
+
+    count(id) {
+      return inventory[id] || 0;
+    },
+
+    getInventory() {
+      return Object.entries(inventory)
+        .filter(([, count]) => count > 0)
+        .map(([id, count]) => ({ item: items[id], count }));
+    },
+
+    clearInventory() {
+      inventory = {};
+      try { sessionStorage.removeItem(INVENTORY_KEY); } catch (_) {}
+      emitChange();
+    }
+  };
+
+  window.DDItems = api;
+})();
