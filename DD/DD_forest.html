@@ -9,16 +9,18 @@
     html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#172018;color:#eee;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
     body{height:100dvh}
     #game{width:min(100%,520px);height:100dvh;margin:0 auto;padding:max(7px,env(safe-area-inset-top)) 9px max(7px,env(safe-area-inset-bottom));background:linear-gradient(#263225,#151b15);display:flex;flex-direction:column;gap:6px;overflow:hidden}
-    header{flex:0 0 34px;display:flex;align-items:center;justify-content:space-between;gap:10px;padding-bottom:5px;border-bottom:1px solid #778071}
+    header{flex:0 0 40px;display:flex;align-items:center;justify-content:space-between;gap:10px;padding-bottom:5px;border-bottom:1px solid #778071}
     h1{margin:0;font-size:19px}
-    a{color:#fff;text-decoration:none;font-weight:700;font-size:12px}
+    .headerRight{text-align:right;display:grid;gap:1px}
+    #clock{font-size:10px;font-weight:800}
+    a{color:#fff;text-decoration:none;font-weight:700;font-size:11px}
     #status{flex:0 0 38px;display:grid;grid-template-columns:1fr 1fr;gap:6px}
     .panel{padding:4px 7px;border:1px solid #87907f;border-radius:7px;background:rgba(0,0,0,.22);font-size:10px;line-height:1.2;text-align:center;display:flex;align-items:center;justify-content:center;gap:5px}
     .panel strong{font-size:13px}
     #message{flex:0 0 28px;padding:4px 7px;border-radius:7px;background:rgba(255,255,255,.08);font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;text-align:center}
-    #board{flex:1 1 auto;min-height:0;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));grid-template-rows:repeat(3,minmax(0,1fr));gap:5px}
-    .card{position:relative;min-width:0;min-height:0;border:1.5px solid #b7b5a4;border-radius:7px;background:#3e4d3a;color:#fff;font:inherit;font-weight:800;font-size:11px;line-height:1.1;overflow:hidden;cursor:pointer;touch-action:manipulation;padding:2px}
-    .card::before{content:'森';position:absolute;inset:0;display:grid;place-items:center;font-size:12px;letter-spacing:.1em;background:linear-gradient(145deg,#4a5a43,#293426)}
+    #board{flex:1 1 auto;min-height:0;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));grid-template-rows:repeat(4,minmax(0,1fr));gap:4px}
+    .card{position:relative;min-width:0;min-height:0;border:1.5px solid #b7b5a4;border-radius:7px;background:#3e4d3a;color:#fff;font:inherit;font-weight:800;font-size:10px;line-height:1.05;overflow:hidden;cursor:pointer;touch-action:manipulation;padding:2px}
+    .card::before{content:'森';position:absolute;inset:0;display:grid;place-items:center;font-size:11px;letter-spacing:.1em;background:linear-gradient(145deg,#4a5a43,#293426)}
     .card.open,.card.matched{background:#eee9d8;color:#222}
     .card.open::before,.card.matched::before{display:none}
     .card.matched{opacity:.58;border-style:dashed}
@@ -32,7 +34,10 @@
 <div id="game">
   <header>
     <h1>森</h1>
-    <a href="DD_top.html">小屋へ戻る</a>
+    <div class="headerRight">
+      <div id="clock" data-dd-clock></div>
+      <a href="DD_top.html" onclick="DDTime.advanceAction('returnHome')">小屋へ戻る</a>
+    </div>
   </header>
 
   <div id="status">
@@ -44,9 +49,10 @@
   <div id="board" aria-label="森の探索"></div>
   <div id="resultBox"></div>
 
-  <button id="finish" type="button" onclick="location.href='DD_top.html'">探索を終えて小屋へ戻る</button>
+  <button id="finish" type="button">探索を終えて小屋へ戻る</button>
 </div>
 
+<script src="DD_time.js"></script>
 <script src="DD_items.js"></script>
 <script src="DD_survival_config.js"></script>
 <script>
@@ -68,15 +74,17 @@
   const itemDefs=(forestItems.length?forestItems:fallbackItems).slice(0,6);
 
   const pairDefs=itemDefs.map(item=>({key:item.id,label:item.name}));
-  while(pairDefs.length<6){
-    const source=pairDefs[pairDefs.length%Math.max(1,pairDefs.length)]||{key:'branch',label:'木の枝'};
-    pairDefs.push({...source,key:source.key+'-extra-'+pairDefs.length});
+  let extraIndex=0;
+  while(pairDefs.length<8){
+    const source=itemDefs[extraIndex%itemDefs.length]||{id:'branch',name:'木の枝'};
+    pairDefs.push({key:source.id,label:source.name});
+    extraIndex++;
   }
 
-  const deck=pairDefs.flatMap(item=>[
-    {...item,cardId:item.key+'-a'},
-    {...item,cardId:item.key+'-b'}
-  ]).slice(0,12);
+  const deck=pairDefs.flatMap((item,index)=>[
+    {...item,cardId:item.key+'-'+index+'-a'},
+    {...item,cardId:item.key+'-'+index+'-b'}
+  ]);
 
   for(let i=deck.length-1;i>0;i--){
     const j=Math.floor(Math.random()*(i+1));
@@ -114,7 +122,7 @@
   }
 
   function checkEnd(){
-    if(pairCount===6){
+    if(pairCount===pairDefs.length){
       endExploration('森で見つけられるペアをすべて見つけた。');
       return true;
     }
@@ -149,6 +157,7 @@
     locked=true;
     turns++;
     turnEl.textContent=turns;
+    if(window.DDTime) DDTime.advanceAction('forestTurn');
 
     if(first.entry.key===second.entry.key){
       first.button.classList.remove('open');
@@ -157,8 +166,7 @@
       second.button.classList.add('matched');
       first.button.disabled=true;
       second.button.disabled=true;
-      const itemKey=entry.key.replace(/-extra-\d+$/,'');
-      counts[itemKey]=(counts[itemKey]||0)+1;
+      counts[entry.key]=(counts[entry.key]||0)+1;
       pairCount++;
       pairsEl.textContent=pairCount;
       updateCounts();
@@ -180,6 +188,11 @@
     button.setAttribute('aria-label','伏せられたカード');
     button.addEventListener('click',()=>choose(entry,button));
     board.appendChild(button);
+  });
+
+  finish.addEventListener('click',()=>{
+    if(window.DDTime) DDTime.advanceAction('returnHome');
+    location.href='DD_top.html';
   });
 
   document.addEventListener('contextmenu',e=>e.preventDefault());
