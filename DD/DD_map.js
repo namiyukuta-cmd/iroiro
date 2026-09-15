@@ -1,83 +1,65 @@
 (() => {
-  const SESSION_KEY = 'dd_session_map_position_v1';
+  const SESSION_KEY = 'dd_session_map_location_v2';
+  const OLD_SESSION_KEY = 'dd_session_map_position_v1';
   const LEGACY_LOCAL_KEY = 'dd_map_position_v1';
-  const SIZE = 7;
 
-  const terrainInfo = {
-    forest: { name: '森', moveMinutes: 20, className: 'forest', description: '木々の多い森。' },
-    deepForest: { name: '深い森', moveMinutes: 30, className: 'deepForest', description: '木が密集して歩きにくい。' },
-    plain: { name: '平原', moveMinutes: 10, className: 'plain', description: '見通しのよい開けた土地。' },
-    river: { name: '川辺', moveMinutes: 15, className: 'river', description: '川沿い。漁はまだ未実装。' },
-    cabin: { name: '小屋', moveMinutes: 20, className: 'cabin', description: '生活の拠点。' }
+  const places = {
+    cabin: {
+      name: '小屋',
+      description: '生活の拠点。休息や料理、保管をする場所。'
+    },
+    northForest: {
+      name: '北の森',
+      description: '木の実や枝、蔓などを探しやすい森。',
+      harvest: true
+    },
+    deepForest: {
+      name: '深い森',
+      description: '木が密集した暗い森。移動に時間がかかる。',
+      harvest: true
+    },
+    plain: {
+      name: '開けた平原',
+      description: '見通しのよい狩猟地。鹿、ウサギ、鳥を狙える。',
+      hunt: true
+    },
+    river: {
+      name: '川辺',
+      description: '川沿いの場所。漁はまだ未実装。'
+    }
   };
 
-  const terrain = [
-    ['deepForest','deepForest','forest','plain','plain','river','river'],
-    ['deepForest','forest','forest','plain','river','river','river'],
-    ['forest','forest','forest','forest','plain','river','river'],
-    ['forest','forest','cabin','forest','plain','plain','river'],
-    ['forest','forest','forest','plain','plain','plain','river'],
-    ['forest','forest','plain','plain','forest','river','river'],
-    ['deepForest','forest','forest','forest','forest','river','river']
-  ];
-
-  const points = {
-    '4,1': { type: 'animal', animalId: 'deer', label: '鹿', icon: '🦌' },
-    '5,4': { type: 'animal', animalId: 'rabbit', label: 'ウサギ', icon: '🐇' },
-    '1,5': { type: 'animal', animalId: 'bird', label: '鳥', icon: '🐦' },
-    '0,2': { type: 'harvest', label: '採取場所', icon: '✦' },
-    '3,2': { type: 'harvest', label: '採取場所', icon: '✦' },
-    '4,6': { type: 'harvest', label: '採取場所', icon: '✦' }
+  const travelMinutes = {
+    cabin:       { cabin:0, northForest:20, deepForest:40, plain:30, river:40 },
+    northForest: { cabin:20, northForest:0, deepForest:20, plain:30, river:45 },
+    deepForest:  { cabin:40, northForest:20, deepForest:0, plain:50, river:60 },
+    plain:       { cabin:30, northForest:30, deepForest:50, plain:0, river:20 },
+    river:       { cabin:40, northForest:45, deepForest:60, plain:20, river:0 }
   };
 
-  const board = document.getElementById('board');
   const message = document.getElementById('message');
   const locationName = document.getElementById('locationName');
   const locationText = document.getElementById('locationText');
   const moveCost = document.getElementById('moveCost');
   const actions = document.getElementById('actions');
   const dayPhase = document.getElementById('dayPhase');
+  const placeButtons = [...document.querySelectorAll('.place[data-place]')];
 
-  function inBounds(x, y) {
-    return x >= 0 && x < SIZE && y >= 0 && y < SIZE;
-  }
-
-  function clearLegacyPersistence() {
+  function clearOldPersistence() {
     try { localStorage.removeItem(LEGACY_LOCAL_KEY); } catch (_) {}
+    try { sessionStorage.removeItem(OLD_SESSION_KEY); } catch (_) {}
   }
 
-  function loadPosition() {
+  function loadLocation() {
     try {
-      const saved = JSON.parse(sessionStorage.getItem(SESSION_KEY) || 'null');
-      if (saved && Number.isInteger(saved.x) && Number.isInteger(saved.y) && inBounds(saved.x, saved.y)) {
-        return saved;
-      }
+      const saved = sessionStorage.getItem(SESSION_KEY);
+      if (saved && places[saved]) return saved;
     } catch (_) {}
-    return { x: 2, y: 3 };
+    return 'cabin';
   }
 
-  clearLegacyPersistence();
-
-  let position = loadPosition();
-  let selected = { ...position };
-  let lastPhase = window.DDTime ? DDTime.phase() : '';
-
-  function key(x, y) {
-    return `${x},${y}`;
-  }
-
-  function syncSessionPosition() {
-    try { sessionStorage.setItem(SESSION_KEY, JSON.stringify(position)); } catch (_) {}
-  }
-
-  function isAdjacent(x, y) {
-    const dx = Math.abs(x - position.x);
-    const dy = Math.abs(y - position.y);
-    return dx <= 1 && dy <= 1 && dx + dy > 0;
-  }
-
-  function getTerrain(x, y) {
-    return terrainInfo[terrain[y][x]];
+  function syncLocation() {
+    try { sessionStorage.setItem(SESSION_KEY, currentLocation); } catch (_) {}
   }
 
   function timeParts() {
@@ -104,146 +86,112 @@
       昼: '日が高くなった。',
       夕方: '日が傾いてきた。',
       夜: '日が沈み、周囲が暗くなった。',
-      深夜: '深夜になった。森はかなり暗い。'
+      深夜: '深夜になった。周囲はかなり暗い。'
     };
     lastPhase = newPhase;
     return texts[newPhase] || '';
   }
 
-  function moveTo(x, y) {
-    if (!isAdjacent(x, y)) return;
+  function costFromHere(placeId) {
+    return Number(travelMinutes[currentLocation]?.[placeId] ?? 0);
+  }
 
-    const info = getTerrain(x, y);
-    if (window.DDTime) DDTime.advance(info.moveMinutes, `move:${terrain[y][x]}`);
+  function moveTo(placeId) {
+    if (!places[placeId] || placeId === currentLocation) return;
 
-    position = { x, y };
-    selected = { x, y };
-    syncSessionPosition();
+    const minutes = costFromHere(placeId);
+    if (minutes > 0 && window.DDTime) {
+      DDTime.advance(minutes, `move:${currentLocation}->${placeId}`);
+    }
+
+    currentLocation = placeId;
+    syncLocation();
 
     const phaseText = window.DDTime ? phaseMessage(DDTime.phase()) : '';
-    message.textContent = phaseText || `${info.name}へ移動した。${info.moveMinutes}分経過。`;
+    message.textContent = phaseText || `${places[placeId].name}へ移動した。${minutes}分経過。`;
     render();
   }
 
-  function makeAction(text, onClick, disabled = false) {
+  function makeAction(text, onClick, className = '') {
     const button = document.createElement('button');
     button.type = 'button';
-    button.className = 'action';
+    button.className = `action ${className}`.trim();
     button.textContent = text;
-    button.disabled = disabled;
     button.addEventListener('click', onClick);
     actions.appendChild(button);
   }
 
-  function renderInfo() {
-    const { x, y } = selected;
-    const info = getTerrain(x, y);
-    const poi = points[key(x, y)];
-    const here = x === position.x && y === position.y;
-
-    locationName.textContent = poi ? `${info.name}・${poi.label}` : info.name;
-    moveCost.textContent = here ? '現在地' : isAdjacent(x, y) ? `移動 ${info.moveMinutes}分` : '移動範囲外';
-    locationText.textContent = poi ? `${info.description} ${poi.label}がある。` : info.description;
+  function renderActions() {
+    const info = places[currentLocation];
+    locationName.textContent = info.name;
+    moveCost.textContent = '現在地';
+    locationText.textContent = info.description;
     actions.innerHTML = '';
 
-    if (!here) {
-      if (isAdjacent(x, y)) {
-        locationText.textContent += ' このマスをタップすると移動する。';
-      }
+    if (currentLocation === 'cabin') {
+      makeAction('小屋に入る', () => { location.href = 'DD_top.html'; });
       return;
     }
 
-    if (poi?.type === 'animal') {
-      makeAction('狩猟する', () => {
-        location.href = `DD_hunt.html?animal=${encodeURIComponent(poi.animalId)}&from=map`;
-      });
-    }
-
-    if (poi?.type === 'harvest') {
+    if (info.harvest) {
       makeAction('採取する', () => {
-        location.href = 'DD_forest.html?from=map';
-      });
+        location.href = `DD_forest.html?from=map&place=${encodeURIComponent(currentLocation)}`;
+      }, 'harvest');
     }
 
-    if (terrain[y][x] === 'cabin') {
-      makeAction('小屋に入る', () => {
-        location.href = 'DD_top.html';
-      });
+    if (info.hunt) {
+      makeAction('鹿を狩る', () => {
+        location.href = 'DD_hunt.html?animal=deer&from=map';
+      }, 'hunt');
+      makeAction('ウサギを狩る', () => {
+        location.href = 'DD_hunt.html?animal=rabbit&from=map';
+      }, 'hunt');
+      makeAction('鳥を狩る', () => {
+        location.href = 'DD_hunt.html?animal=bird&from=map';
+      }, 'hunt');
     }
+  }
+
+  function renderPlaces() {
+    placeButtons.forEach(button => {
+      const id = button.dataset.place;
+      const here = id === currentLocation;
+      const small = button.querySelector('small');
+      const clock = button.querySelector('.placeClock');
+
+      button.classList.toggle('current', here);
+      if (clock) clock.textContent = here ? compactTime() : '';
+      if (small) small.textContent = here ? '現在地' : `移動 ${costFromHere(id)}分`;
+      button.disabled = false;
+    });
   }
 
   function render() {
-    board.innerHTML = '';
     refreshDayPhase();
-
-    for (let y = 0; y < SIZE; y++) {
-      for (let x = 0; x < SIZE; x++) {
-        const info = getTerrain(x, y);
-        const poi = points[key(x, y)];
-        const button = document.createElement('button');
-        const here = x === position.x && y === position.y;
-        const reachable = isAdjacent(x, y);
-        const isSelected = x === selected.x && y === selected.y;
-
-        button.type = 'button';
-        button.className = `cell ${info.className}`;
-        if (reachable) button.classList.add('reachable');
-        if (here) button.classList.add('current');
-        if (isSelected) button.classList.add('selected');
-        button.dataset.x = x;
-        button.dataset.y = y;
-        button.setAttribute('aria-label', poi ? `${info.name} ${poi.label}` : info.name);
-
-        const label = document.createElement('span');
-        label.className = 'terrainLabel';
-        label.textContent = terrain[y][x] === 'deepForest' ? '深森' : info.name;
-        button.appendChild(label);
-
-        if (poi) {
-          const icon = document.createElement('span');
-          icon.className = `poi ${poi.type === 'animal' ? 'animal' : ''}`;
-          icon.textContent = poi.icon;
-          button.appendChild(icon);
-        }
-
-        if (here) {
-          const pawnClock = document.createElement('span');
-          pawnClock.className = 'pawnClock';
-          pawnClock.textContent = compactTime();
-          button.appendChild(pawnClock);
-
-          const pawn = document.createElement('span');
-          pawn.className = 'pawn';
-          pawn.textContent = '♟';
-          button.appendChild(pawn);
-        }
-
-        button.addEventListener('click', () => {
-          if (reachable) {
-            moveTo(x, y);
-            return;
-          }
-
-          selected = { x, y };
-          render();
-
-          if (!here) {
-            message.textContent = '黄色いマスだけ移動できる。';
-          }
-        });
-
-        board.appendChild(button);
-      }
-    }
-
-    renderInfo();
+    renderPlaces();
+    renderActions();
   }
+
+  clearOldPersistence();
+
+  let currentLocation = loadLocation();
+  let lastPhase = window.DDTime ? DDTime.phase() : '';
+
+  placeButtons.forEach(button => {
+    button.addEventListener('click', () => {
+      const id = button.dataset.place;
+      if (id === currentLocation) {
+        message.textContent = `${places[id].name}にいる。`;
+        return;
+      }
+      moveTo(id);
+    });
+  });
 
   if (window.DDTime) {
-    window.addEventListener('ddtimechange', () => render());
+    window.addEventListener('ddtimechange', render);
   }
 
-  board.addEventListener('dblclick', e => e.preventDefault());
   document.addEventListener('contextmenu', e => e.preventDefault());
   document.addEventListener('selectstart', e => e.preventDefault());
 
