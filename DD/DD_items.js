@@ -40,7 +40,16 @@
       name: '狼の子（？）',
       category: 'special',
       kind: 'companion',
-      description: '頼りなく「みゅう、みゅう」と鳴く、狼らしい小さな子。',
+      description: '頼りなく「みゅう、みゅう」と鳴く、狼らしい小さな子。完全肉食。',
+      unique: true,
+      perishable: false
+    },
+    wolf_companion: {
+      id: 'wolf_companion',
+      name: '狼（？）',
+      category: 'special',
+      kind: 'companion',
+      description: '2日を経て大きくなった狼らしい獣。完全肉食。',
       unique: true,
       perishable: false
     },
