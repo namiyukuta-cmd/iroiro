@@ -23,6 +23,9 @@
     #growth{margin-top:8px;font-size:14px;font-weight:800;line-height:1.45}
     .panel{border:2px solid #2a2924;border-radius:12px;background:#faf8f2;padding:14px}
     .panel h2{margin:0 0 10px;font-size:19px}
+    #hungerText{font-size:14px;font-weight:900;margin-bottom:7px}
+    .bar{height:18px;border:2px solid #2a2924;border-radius:999px;overflow:hidden;background:#e7e1d6}
+    #hungerFill{height:100%;width:0;background:#2a2924;transition:width .2s ease}
     #diet{font-size:15px;font-weight:900;margin-bottom:10px}
     #meatList{display:grid;gap:8px}
     .meatRow{display:grid;grid-template-columns:1fr auto;gap:8px;align-items:center}
@@ -56,6 +59,12 @@
   </section>
 
   <section class="panel">
+    <h2>空腹</h2>
+    <div id="hungerText">空腹 0 / 100</div>
+    <div class="bar"><div id="hungerFill"></div></div>
+  </section>
+
+  <section class="panel">
     <h2>食事</h2>
     <div id="diet">完全肉食。肉しか食べない。</div>
     <div id="meatList"></div>
@@ -74,6 +83,7 @@
 <script src="DD_time.js"></script>
 <script src="DD_items.js"></script>
 <script src="DD_wolf.js"></script>
+<script src="DD_needs.js"></script>
 <script src="DD_wolf_home.js"></script>
 </body>
 </html>
