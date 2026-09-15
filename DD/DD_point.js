@@ -20,6 +20,9 @@
   const cardIcon = document.getElementById('cardIcon');
   const cardTitle = document.getElementById('cardTitle');
   const cardSub = document.getElementById('cardSub');
+  const cardActions = document.getElementById('cardActions');
+  const primaryAction = document.getElementById('primaryAction');
+  const discardAction = document.getElementById('discardAction');
   const eventText = document.getElementById('eventText');
   const eventDetail = document.getElementById('eventDetail');
   const result = document.getElementById('result');
@@ -28,12 +31,6 @@
   let currentCard = null;
   let acted = false;
   let busy = false;
-  let pointerId = null;
-  let startX = 0;
-  let startY = 0;
-  let lastX = 0;
-  let lastY = 0;
-  let dragging = false;
 
   function clone(card) {
     return { ...card };
@@ -75,10 +72,10 @@
     hourHand.style.transform = `rotate(${((state.hour % 12) + state.minute / 60) * 30}deg)`;
   }
 
-  function resetCardTransform() {
-    drawn.style.transition = '';
-    drawn.style.transform = '';
-    drawn.style.opacity = '';
+  function hideChoices() {
+    cardActions.classList.remove('show', 'oneChoice');
+    primaryAction.disabled = false;
+    discardAction.disabled = false;
   }
 
   function setDrawnInteractivity() {
@@ -99,14 +96,20 @@
     slotPrompt.textContent = busy ? '時間が進んでいる…' : 'ここをタップして札を出す';
   }
 
+  function resetCardVisual() {
+    drawn.style.transition = '';
+    drawn.style.transform = '';
+    drawn.style.opacity = '';
+    drawn.classList.remove('tapFeedback', 'dealIn');
+  }
+
   function setEmptySlot(message = '', detail = '') {
     currentCard = null;
     acted = false;
-    dragging = false;
-    pointerId = null;
+    busy = false;
     drawn.style.display = 'none';
-    drawn.classList.remove('tapFeedback', 'dealIn');
-    resetCardTransform();
+    resetCardVisual();
+    hideChoices();
     setDrawnInteractivity();
     setSlotState();
     cardHint.textContent = `空白をタップして次の札へ　${drawMinutes()}分`;
@@ -248,19 +251,20 @@
   }
 
   function showCardInfo(card) {
+    hideChoices();
     if (card.type === 'item') {
-      cardHint.textContent = 'タップ：手に入れる　　左右スワイプ：破棄';
-      eventDetail.textContent = `入手 ${card.minutes || 20}分`;
+      cardHint.textContent = '札をタップして選ぶ';
+      eventDetail.textContent = `入手すると${card.minutes || 20}分進む。`;
       return;
     }
     if (card.type === 'hunt') {
-      cardHint.textContent = 'タップ：狩猟する　　左右スワイプ：破棄';
-      eventDetail.textContent = 'タップで狩猟する。';
+      cardHint.textContent = '札をタップして選ぶ';
+      eventDetail.textContent = '狩猟するか見送るか選ぶ。';
       return;
     }
     if (card.type === 'fish') {
-      cardHint.textContent = 'タップ：捕る　　左右スワイプ：破棄';
-      eventDetail.textContent = `捕獲 ${card.minutes || 10}分`;
+      cardHint.textContent = '札をタップして選ぶ';
+      eventDetail.textContent = `捕ると${card.minutes || 10}分進む。`;
       return;
     }
     if (card.type === 'enemy') {
@@ -268,8 +272,28 @@
       eventDetail.textContent = '戦闘開始。';
       return;
     }
-    cardHint.textContent = '左右スワイプ：破棄';
-    eventDetail.textContent = '何もない。左右にスワイプして破棄する。';
+    cardHint.textContent = '札をタップして破棄する';
+    eventDetail.textContent = '何もない。';
+  }
+
+  function configureChoices(card) {
+    cardActions.classList.remove('oneChoice');
+    if (card.type === 'item') {
+      primaryAction.textContent = '入手する';
+      discardAction.textContent = '破棄する';
+    } else if (card.type === 'hunt') {
+      primaryAction.textContent = '狩猟する';
+      discardAction.textContent = '見送る';
+    } else if (card.type === 'fish') {
+      primaryAction.textContent = '捕る';
+      discardAction.textContent = '見送る';
+    } else if (card.type === 'none') {
+      cardActions.classList.add('oneChoice');
+      discardAction.textContent = '破棄する';
+    } else {
+      return;
+    }
+    cardActions.classList.add('show');
   }
 
   function revealCard() {
@@ -284,10 +308,8 @@
 
     currentCard = clone(card);
     acted = false;
-    resetCardTransform();
+    resetCardVisual();
     drawn.style.display = 'flex';
-    drawn.classList.remove('dealIn');
-    void drawn.offsetWidth;
     drawn.classList.add('dealIn');
     setDrawnInteractivity();
     setSlotState();
@@ -310,6 +332,7 @@
   function requestNextCard() {
     if (currentCard || busy) return;
     busy = true;
+    hideChoices();
     setSlotState();
     cardHint.textContent = '';
     eventText.textContent = '札を探している…';
@@ -328,6 +351,7 @@
     if (acted || busy) return;
     acted = true;
     busy = true;
+    hideChoices();
     setDrawnInteractivity();
     const sourceRect = drawn.getBoundingClientRect();
     const minutes = Math.max(1, Number(card.minutes || 20));
@@ -353,6 +377,7 @@
   function doHunt(card) {
     if (acted || busy) return;
     acted = true;
+    hideChoices();
     setDrawnInteractivity();
     const back = pointReturnUrl();
     const target = `DD_hunt.html?animal=${encodeURIComponent(card.animalId)}&from=point&return=${encodeURIComponent(back)}`;
@@ -363,6 +388,7 @@
     if (acted || busy) return;
     acted = true;
     busy = true;
+    hideChoices();
     setDrawnInteractivity();
     const sourceRect = drawn.getBoundingClientRect();
     const minutes = Math.max(1, Number(card.minutes || 10));
@@ -373,18 +399,13 @@
     if (caught) {
       DDItems?.add?.('river_fish', 1);
       animateCardToInventory({ ...card, title: '川魚', icon: card.icon || '🐟' }, sourceRect);
-    } else {
-      drawn.style.transition = 'transform .22s ease, opacity .22s ease';
-      drawn.style.transform = 'translateY(28px) scale(.88)';
-      drawn.style.opacity = '.1';
     }
 
-    setTimeout(() => {
-      drawn.style.display = 'none';
-      currentCard = null;
-      setSlotState();
-      slotPrompt.textContent = '時間が進んでいる…';
-    }, caught ? 0 : 220);
+    drawn.style.display = 'none';
+    currentCard = null;
+    setSlotState();
+    slotPrompt.textContent = '時間が進んでいる…';
+    cardHint.textContent = '';
 
     animateTimeToClock(sourceRect, minutes, () => {
       DDTime?.advance?.(minutes, 'point:river:fish');
@@ -405,90 +426,47 @@
       acted = true;
       setDrawnInteractivity();
     }
+    hideChoices();
     const back = pointReturnUrl();
     location.href = `DD_battle.html?enemy=${encodeURIComponent(card.enemyId)}&return=${encodeURIComponent(back)}`;
   }
 
-  function actOnCurrentCard() {
-    if (!currentCard || acted || busy) return;
-    const card = currentCard;
-    tapFeedback();
-    if (card.type === 'item') return doGather(card);
-    if (card.type === 'hunt') return doHunt(card);
-    if (card.type === 'fish') return doFish(card);
-    if (card.type === 'enemy') return doBattle(card);
-  }
-
-  function discardCurrentCard(direction) {
+  function discardCurrentCard() {
     if (!currentCard || acted || busy) return;
     acted = true;
+    hideChoices();
     setDrawnInteractivity();
-    const distance = Math.max(window.innerWidth, 420) * .8 * direction;
-    drawn.style.transition = 'transform .22s ease-out, opacity .22s ease-out';
-    drawn.style.transform = `translateX(${distance}px) rotate(${direction * 16}deg)`;
+    drawn.style.transition = 'transform .18s ease-out, opacity .18s ease-out';
+    drawn.style.transform = 'translateY(20px) scale(.9)';
     drawn.style.opacity = '.05';
     eventText.textContent = '札を破棄した。';
     eventDetail.textContent = '';
     result.textContent = '';
     setTimeout(() => {
       setEmptySlot('札を破棄した。', '空白をタップして次の札を出す。');
-    }, 230);
+    }, 190);
   }
 
-  function beginGesture(event) {
-    if (!currentCard || acted || busy || pointerId !== null) return;
-    pointerId = event.pointerId;
-    startX = lastX = event.clientX;
-    startY = lastY = event.clientY;
-    dragging = true;
-    drawn.classList.remove('dealIn', 'tapFeedback');
-    drawn.style.transition = 'none';
-    try { drawn.setPointerCapture(event.pointerId); } catch (_) {}
+  function openChoices() {
+    if (!currentCard || acted || busy || currentCard.type === 'enemy') return;
+    tapFeedback();
+    configureChoices(currentCard);
+    cardHint.textContent = '下のボタンから選ぶ';
   }
 
-  function moveGesture(event) {
-    if (!dragging || event.pointerId !== pointerId || !currentCard || acted || busy) return;
-    lastX = event.clientX;
-    lastY = event.clientY;
-    const dx = lastX - startX;
-    const dy = lastY - startY;
-    if (Math.abs(dx) < 4 && Math.abs(dy) < 4) return;
-    event.preventDefault();
-    const rotate = Math.max(-12, Math.min(12, dx / 18));
-    const opacity = Math.max(.45, 1 - Math.abs(dx) / 360);
-    drawn.style.transform = `translateX(${dx}px) rotate(${rotate}deg)`;
-    drawn.style.opacity = String(opacity);
-  }
-
-  function endGesture(event) {
-    if (!dragging || event.pointerId !== pointerId) return;
-    const dx = (event.clientX ?? lastX) - startX;
-    const dy = (event.clientY ?? lastY) - startY;
-    dragging = false;
-    pointerId = null;
-    try { drawn.releasePointerCapture(event.pointerId); } catch (_) {}
-
+  function runPrimaryAction() {
     if (!currentCard || acted || busy) return;
-
-    const horizontalSwipe = Math.abs(dx) >= 55 && Math.abs(dx) > Math.abs(dy) * 1.1;
-    if (horizontalSwipe) {
-      discardCurrentCard(dx > 0 ? 1 : -1);
-      return;
-    }
-
-    drawn.style.transition = 'transform .14s ease, opacity .14s ease';
-    drawn.style.transform = '';
-    drawn.style.opacity = '1';
-
-    const tap = Math.abs(dx) < 12 && Math.abs(dy) < 12;
-    if (tap) actOnCurrentCard();
+    const card = currentCard;
+    if (card.type === 'item') return doGather(card);
+    if (card.type === 'hunt') return doHunt(card);
+    if (card.type === 'fish') return doFish(card);
   }
 
   placeName.textContent = config.placeNames?.[place] || config.placeNames?.[zone] || '探索地点';
   placeType.textContent = zoneConfig.label || zone;
 
   cardSlot.addEventListener('click', event => {
-    if (event.target.closest('#drawn')) return;
+    if (event.target.closest('#drawn') || event.target.closest('#cardActions')) return;
     if (!currentCard && !busy) requestNextCard();
   });
   cardSlot.addEventListener('keydown', event => {
@@ -498,28 +476,27 @@
     }
   });
 
-  drawn.addEventListener('pointerdown', beginGesture);
-  drawn.addEventListener('pointermove', moveGesture, { passive: false });
-  drawn.addEventListener('pointerup', endGesture);
-  drawn.addEventListener('pointercancel', event => {
-    if (event.pointerId !== pointerId) return;
-    dragging = false;
-    pointerId = null;
-    if (currentCard && !acted && !busy) {
-      drawn.style.transition = 'transform .14s ease, opacity .14s ease';
-      drawn.style.transform = '';
-      drawn.style.opacity = '1';
-    }
-  });
   drawn.addEventListener('click', event => {
     event.preventDefault();
     event.stopPropagation();
+    openChoices();
   });
   drawn.addEventListener('keydown', event => {
     if ((event.key === 'Enter' || event.key === ' ') && currentCard && !acted && !busy) {
       event.preventDefault();
-      actOnCurrentCard();
+      openChoices();
     }
+  });
+
+  primaryAction.addEventListener('click', event => {
+    event.preventDefault();
+    event.stopPropagation();
+    runPrimaryAction();
+  });
+  discardAction.addEventListener('click', event => {
+    event.preventDefault();
+    event.stopPropagation();
+    discardCurrentCard();
   });
 
   window.addEventListener('ddtimechange', refreshClock);
@@ -527,6 +504,5 @@
   document.addEventListener('selectstart', e => e.preventDefault());
 
   refreshClock();
-  busy = false;
   setEmptySlot('空白をタップして札を出す。', `札を出すと${drawMinutes()}分進む。`);
 })();
