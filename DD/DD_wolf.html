@@ -30,10 +30,11 @@
     #meatList{display:grid;gap:8px}
     .meatRow{display:grid;grid-template-columns:1fr auto;gap:8px;align-items:center}
     .meatInfo{font-size:15px;font-weight:900}
-    .feedButton,.behaviorButton{min-height:44px;border:2px solid #24231f;border-radius:9px;background:#24231f;color:#fff;font:inherit;font-weight:900;padding:8px 12px}
+    .feedButton,.behaviorButton,.careButton{min-height:44px;border:2px solid #24231f;border-radius:9px;background:#24231f;color:#fff;font:inherit;font-weight:900;padding:8px 12px}
     .feedButton:disabled{opacity:.35}
     #noMeat{font-size:14px;font-weight:800;color:#6c675e}
-    #behaviorText{min-height:70px;border:1px solid #aaa397;border-radius:9px;background:#fff;padding:12px;font-size:16px;font-weight:800;line-height:1.55;margin-bottom:10px}
+    #careButtons{display:grid;grid-template-columns:1fr;gap:8px}
+    #careText,#behaviorText{min-height:70px;border:1px solid #aaa397;border-radius:9px;background:#fff;padding:12px;font-size:16px;font-weight:800;line-height:1.55;margin-bottom:10px}
     #message{min-height:30px;font-size:14px;font-weight:900;color:#59554d}
     html[data-dd-phase="夕方"] body{background:#e7d9c9}
     html[data-dd-phase="夜"] body,html[data-dd-phase="深夜"] body{background:#c8ccd2}
@@ -69,6 +70,16 @@
     <div id="diet">完全肉食。肉しか食べない。</div>
     <div id="meatList"></div>
     <div id="noMeat"></div>
+  </section>
+
+  <section class="panel">
+    <h2>お世話</h2>
+    <div id="careText">どうする？</div>
+    <div id="careButtons">
+      <button id="petButton" class="careButton" type="button">撫でる</button>
+      <button id="hugButton" class="careButton" type="button">抱きしめる</button>
+      <button id="lullabyButton" class="careButton" type="button">子守唄を歌う</button>
+    </div>
   </section>
 
   <section class="panel">
