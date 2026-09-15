@@ -146,7 +146,7 @@
       return;
     }
     if (card.type === 'enemy') {
-      eventDetail.textContent = 'カードをタップすると戦闘。';
+      eventDetail.textContent = '戦闘開始。';
       return;
     }
     eventDetail.textContent = '';
@@ -183,6 +183,10 @@
     result.textContent = '';
     showCardInfo(currentCard);
     refreshDeck();
+
+    if (currentCard.type === 'enemy') {
+      doBattle(currentCard);
+    }
   }
 
   placeName.textContent = config.placeNames?.[place] || config.placeNames?.[zone] || '探索地点';
