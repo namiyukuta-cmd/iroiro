@@ -8,6 +8,12 @@ window.DDSurvivalConfig = {
     available: ['木の実']
   },
 
+  exploration: {
+    type: 'pair_memory_match',
+    maxTurns: 10,
+    description: '探索は、同じもののペアを探す神経衰弱のような方式。1回の探索につき10回まで。'
+  },
+
   food: {
     groups: ['野菜', '肉', '魚'],
     rules: {
