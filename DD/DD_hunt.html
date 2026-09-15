@@ -83,9 +83,9 @@
   const config=window.DDHuntConfig||{};
   const equipment=config.equipment||{};
   const animals=Array.isArray(config.animals)&&config.animals.length?config.animals:[
-    {id:'deer',name:'鹿',hp:3,timingZoneWidth:22},
-    {id:'rabbit',name:'ウサギ',hp:2,timingZoneWidth:16},
-    {id:'bird',name:'鳥',hp:1,timingZoneWidth:8}
+    {id:'deer',name:'鹿',hp:3,speed:1.2},
+    {id:'rabbit',name:'ウサギ',hp:2,speed:1.8},
+    {id:'bird',name:'鳥',hp:1,speed:2.6}
   ];
   const bowInfo=equipment.bow||{};
   const stringInfo=equipment.bowstring||{};
@@ -118,6 +118,11 @@
   let currentHp=0;
   let swipeStartX=null;
 
+  const hitZoneWidth=Math.max(4,Math.min(60,Number(bowInfo.hitZoneBonus||0)+Number(stringInfo.hitZoneBonus||0)));
+  const arrowDamage=Math.max(1,Number(arrowInfo.damage||1));
+  hitZone.style.width=hitZoneWidth+'%';
+  hitZone.style.left=((100-hitZoneWidth)/2)+'%';
+
   function currentAnimal(){return animals[currentAnimalIndex]||animals[0]}
 
   function updateStats(){
@@ -129,9 +134,6 @@
     if(resetHp) currentHp=Number(data.hp||1);
     animal.className=data.id||'';
     animalName.textContent=data.name||'獲物';
-    const width=Math.max(4,Math.min(60,Number(data.timingZoneWidth||16)));
-    hitZone.style.width=width+'%';
-    hitZone.style.left=((100-width)/2)+'%';
     searchText.textContent=`${data.name||'獲物'}　HP ${currentHp}/${data.hp||1}　←→ スワイプで変更`;
   }
 
@@ -192,7 +194,8 @@
   }
 
   function animateMarker(){
-    markerPos+=markerDir*1.65;
+    const speed=Math.max(.2,Number(currentAnimal().speed||1.8));
+    markerPos+=markerDir*speed;
     if(markerPos>=100){markerPos=100;markerDir=-1}
     if(markerPos<=0){markerPos=0;markerDir=1}
     marker.style.left=`calc(${markerPos}% - 2px)`;
@@ -232,20 +235,19 @@
     updateStats();
 
     const data=currentAnimal();
-    const width=Math.max(4,Math.min(60,Number(data.timingZoneWidth||16)));
-    const min=(100-width)/2;
-    const max=min+width;
+    const min=(100-hitZoneWidth)/2;
+    const max=min+hitZoneWidth;
     const hit=markerPos>=min&&markerPos<=max;
 
     if(hit){
-      currentHp=Math.max(0,currentHp-1);
+      currentHp=Math.max(0,currentHp-arrowDamage);
       if(currentHp<=0){
         show(`${data.name}を仕留めた`);
         searchText.textContent=`${data.name}　HP 0/${data.hp||1}`;
         ready=false;
         shootArea.style.display='none';
       }else{
-        show('命中');
+        show(`命中 -${arrowDamage}`);
         updateAnimalDisplay(false);
       }
     }else{
