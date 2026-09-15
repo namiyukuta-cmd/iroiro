@@ -1,11 +1,12 @@
 (() => {
   const nameEl = document.getElementById('animalName');
+  const searchTextEl = document.getElementById('searchText');
   const itemDb = window.DDItems;
   if (!nameEl || !itemDb || typeof itemDb.add !== 'function') return;
 
   const params = new URLSearchParams(location.search);
-  const fromPoint = params.get('from') === 'point';
-  const returnUrl = params.get('return') || 'DD_map.html';
+  const returnUrl = params.get('return') || '';
+  const fromPoint = Boolean(returnUrl);
 
   const meatByAnimal = {
     '鹿': 'meat_deer',
@@ -14,28 +15,32 @@
   };
 
   let awarded = false;
+  let returning = false;
 
-  function finishPointHunt(itemName) {
-    if (!fromPoint) return;
-
+  function hideHuntWindow() {
     const searchWindow = document.getElementById('searchWindow');
     const shootArea = document.getElementById('shootArea');
     const timingWrap = document.getElementById('timingWrap');
-    const searchText = document.getElementById('searchText');
-    const result = document.getElementById('result');
-
     if (searchWindow) searchWindow.style.display = 'none';
     if (shootArea) shootArea.style.display = 'none';
     if (timingWrap) timingWrap.style.display = 'none';
-    if (searchText) searchText.textContent = `${itemName}を手に入れた。`;
+  }
+
+  function returnToDeck(message, delay = 900) {
+    if (!fromPoint || returning) return;
+    returning = true;
+    hideHuntWindow();
+
+    if (searchTextEl) searchTextEl.textContent = message;
+    const result = document.getElementById('result');
     if (result) {
-      result.textContent = `${itemName}を手に入れた。`;
+      result.textContent = message;
       result.style.display = 'block';
     }
 
     setTimeout(() => {
       location.href = returnUrl;
-    }, 1000);
+    }, delay);
   }
 
   function checkReward() {
@@ -51,10 +56,24 @@
     itemDb.add(itemId, 1);
     awarded = true;
 
-    finishPointHunt(item?.name || `${animalName}肉`);
+    returnToDeck(`${item?.name || `${animalName}肉`}を手に入れた。`, 1000);
   }
 
-  const observer = new MutationObserver(checkReward);
-  observer.observe(nameEl, { childList: true, subtree: true, characterData: true });
+  function checkMiss() {
+    if (!fromPoint || awarded || returning || !searchTextEl) return;
+    const text = searchTextEl.textContent || '';
+    if (!text.includes('逃げた')) return;
+    returnToDeck('獲物は逃げた。', 650);
+  }
+
+  const rewardObserver = new MutationObserver(checkReward);
+  rewardObserver.observe(nameEl, { childList: true, subtree: true, characterData: true });
+
+  if (searchTextEl) {
+    const missObserver = new MutationObserver(checkMiss);
+    missObserver.observe(searchTextEl, { childList: true, subtree: true, characterData: true });
+  }
+
   checkReward();
+  checkMiss();
 })();
