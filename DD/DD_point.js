@@ -2,6 +2,7 @@
   const params = new URLSearchParams(location.search);
   const zone = ['forest', 'plain', 'river'].includes(params.get('zone')) ? params.get('zone') : 'forest';
   const place = params.get('place') || zone;
+  const POINT_RESUME_KEY = 'dd_session_point_resume_v1';
 
   const placeNames = {
     northForest: '北の森',
@@ -100,16 +101,45 @@
     return list;
   }
 
-  function resetDeck() {
-    deck = shuffle(buildDeck());
+  function clearCardView() {
     currentCard = null;
-    resolved = true;
     drawn.style.display = 'none';
     actions.innerHTML = '';
     eventText.textContent = 'カードを引く。';
     eventDetail.textContent = '';
     result.textContent = '';
+  }
+
+  function resetDeck() {
+    deck = shuffle(buildDeck());
+    resolved = true;
+    clearCardView();
     refreshDeck();
+  }
+
+  function saveResume() {
+    try {
+      sessionStorage.setItem(POINT_RESUME_KEY, JSON.stringify({
+        zone,
+        place,
+        deck
+      }));
+    } catch (_) {}
+  }
+
+  function restoreResume() {
+    try {
+      const saved = JSON.parse(sessionStorage.getItem(POINT_RESUME_KEY) || 'null');
+      if (!saved || saved.zone !== zone || saved.place !== place || !Array.isArray(saved.deck)) return false;
+      deck = saved.deck.map(card => ({ ...card }));
+      sessionStorage.removeItem(POINT_RESUME_KEY);
+      resolved = true;
+      clearCardView();
+      refreshDeck();
+      return true;
+    } catch (_) {
+      return false;
+    }
   }
 
   function refreshClock() {
@@ -144,19 +174,19 @@
     return button;
   }
 
+  function drawNextCard() {
+    resolved = true;
+    clearCardView();
+    if (!deck.length) deck = shuffle(buildDeck());
+    refreshDeck();
+    drawCard();
+  }
+
   function resolveCard(message = '') {
     resolved = true;
     actions.innerHTML = '';
     if (message) result.textContent = message;
-    makeButton('次のカード', () => {
-      result.textContent = '';
-      currentCard = null;
-      drawn.style.display = 'none';
-      eventText.textContent = 'カードを引く。';
-      eventDetail.textContent = '';
-      actions.innerHTML = '';
-      refreshDeck();
-    }, true);
+    makeButton('次のカード', drawNextCard, true);
     refreshDeck();
   }
 
@@ -173,7 +203,9 @@
   }
 
   function doHunt(card) {
-    location.href = `DD_hunt.html?animal=${encodeURIComponent(card.animalId)}&from=map`;
+    saveResume();
+    const back = `DD_point.html?zone=${encodeURIComponent(zone)}&place=${encodeURIComponent(place)}`;
+    location.href = `DD_hunt.html?animal=${encodeURIComponent(card.animalId)}&from=point&return=${encodeURIComponent(back)}`;
   }
 
   function doFish(card) {
@@ -192,6 +224,7 @@
   }
 
   function doBattle(card) {
+    saveResume();
     const back = `DD_point.html?zone=${encodeURIComponent(zone)}&place=${encodeURIComponent(place)}`;
     location.href = `DD_battle.html?enemy=${encodeURIComponent(card.enemyId)}&return=${encodeURIComponent(back)}`;
   }
@@ -208,7 +241,7 @@
     }
 
     if (card.type === 'hunt') {
-      eventDetail.textContent = '狩猟するなら本格狩猟画面へ移る。';
+      eventDetail.textContent = '狩猟画面へ移る。';
       makeButton('狩猟する', () => doHunt(card), true);
       makeButton('見逃す', ignoreCard);
       return;
@@ -228,7 +261,7 @@
     }
 
     eventDetail.textContent = '行動はない。';
-    makeButton('次へ', () => resolveCard(), true);
+    makeButton('次のカード', drawNextCard, true);
   }
 
   function drawCard() {
@@ -260,5 +293,5 @@
   document.addEventListener('selectstart', e => e.preventDefault());
 
   refreshClock();
-  resetDeck();
+  if (!restoreResume()) resetDeck();
 })();
