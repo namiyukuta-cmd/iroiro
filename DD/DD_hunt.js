@@ -43,7 +43,7 @@
   let currentAnimalIndex = 0;
   let currentHp = 0;
   let swipeStartX = null;
-  let huntTimeCharged = false;
+  let encounterTimeCharged = false;
 
   const hitZoneWidth = Math.max(
     4,
@@ -69,10 +69,40 @@
       `${arrowInfo.name || '矢'}：残り ${arrowsLeft}本`;
   }
 
-  function chargeHuntTime() {
-    if (huntTimeCharged) return;
+  function bowIsUsable() {
+    if (bowInfo.broken === true) return false;
+    const durability = Number(bowInfo.durability);
+    if (Number.isFinite(durability) && durability <= 0) return false;
+    return true;
+  }
+
+  function hasTimeForAnotherHunt() {
+    if (!window.DDTime || typeof DDTime.getState !== 'function') return true;
+
+    const state = DDTime.getState();
+    const now = Number(state.minuteOfDay);
+    const huntCost = Number(DDTime.actionCosts?.hunt || 120);
+    const huntingStart = 5 * 60;
+    const nightStart = 19 * 60;
+
+    return Number.isFinite(now) && now >= huntingStart && now + huntCost <= nightStart;
+  }
+
+  function chargeEncounterTime() {
+    if (encounterTimeCharged) return;
     if (window.DDTime) DDTime.advanceAction('hunt');
-    huntTimeCharged = true;
+    encounterTimeCharged = true;
+  }
+
+  function canContinueHunt() {
+    return arrowsLeft > 0 && bowIsUsable() && hasTimeForAnotherHunt();
+  }
+
+  function stopReason() {
+    if (arrowsLeft <= 0) return '矢がなくなった。小屋へ帰る。';
+    if (!bowIsUsable()) return '弓が壊れている。小屋へ帰る。';
+    if (!hasTimeForAnotherHunt()) return 'もう狩りを続ける時間がない。小屋へ帰る。';
+    return '小屋へ帰る。';
   }
 
   function setAnimalImage(data) {
@@ -156,9 +186,19 @@
   }
 
   function startSearch() {
+    if (!hasTimeForAnotherHunt()) {
+      endHuntAndReturn(stopReason());
+      return;
+    }
+    if (arrowsLeft <= 0 || !bowIsUsable()) {
+      endHuntAndReturn(stopReason());
+      return;
+    }
+
     ready = false;
     pulling = false;
     engaged = false;
+    encounterTimeCharged = false;
     shootArea.style.display = 'none';
     timingWrap.style.display = 'none';
     animal.style.display = 'none';
@@ -226,7 +266,7 @@
   }
 
   function begin(e) {
-    if (!ready || pulling || arrowsLeft <= 0) return;
+    if (!ready || pulling || arrowsLeft <= 0 || !bowIsUsable()) return;
     if (!shootArea.contains(e.target)) return;
 
     e.preventDefault();
@@ -249,15 +289,31 @@
 
   function endHuntAndReturn(message) {
     ready = false;
-    chargeHuntTime();
     if (window.DDTime) DDTime.advanceAction('returnHome');
     show(message);
     timingWrap.style.display = 'none';
     animal.style.opacity = '0';
     animal.style.transform = 'translate(120%,-50%)';
     shootArea.style.display = 'none';
-    searchText.textContent = '獲物を取れなかった。小屋へ帰る。';
+    searchText.textContent = message;
     setTimeout(() => { location.href = 'DD_top.html'; }, 1200);
+  }
+
+  function searchAgain(message) {
+    ready = false;
+    timingWrap.style.display = 'none';
+    shootArea.style.display = 'none';
+    animal.style.opacity = '0';
+    animal.style.transform = 'translate(120%,-50%)';
+
+    if (!canContinueHunt()) {
+      setTimeout(() => endHuntAndReturn(stopReason()), 300);
+      return;
+    }
+
+    show(`${message}　次の獲物を探す`);
+    searchText.textContent = `${message}　次の獲物を探す…`;
+    setTimeout(startSearch, 900);
   }
 
   function killMessage(data) {
@@ -284,7 +340,8 @@
     resetBow();
 
     if (!hit) {
-      endHuntAndReturn('外れ　逃げた');
+      chargeEncounterTime();
+      searchAgain('外れ　逃げた');
       return;
     }
 
@@ -295,7 +352,7 @@
       ready = false;
       timingWrap.style.display = 'none';
       shootArea.style.display = 'none';
-      chargeHuntTime();
+      chargeEncounterTime();
       setTimeout(() => {
         animal.classList.remove('hit');
         animal.classList.add('dead');
@@ -307,15 +364,16 @@
       return;
     }
 
-    const canRetry = currentHp <= Number(data.hp || 1) * retryHpRatio && arrowsLeft > 0;
-    if (canRetry) {
+    const canRetrySameAnimal = currentHp <= Number(data.hp || 1) * retryHpRatio && arrowsLeft > 0 && bowIsUsable();
+    if (canRetrySameAnimal) {
       show(`命中 -${arrowDamage}　もう1射できる`);
       setTimeout(() => updateAnimalDisplay(false), 280);
       ready = true;
       return;
     }
 
-    setTimeout(() => endHuntAndReturn(`命中 -${arrowDamage}　逃げた`), 260);
+    chargeEncounterTime();
+    setTimeout(() => searchAgain(`命中 -${arrowDamage}　逃げた`), 260);
   }
 
   searchWindow.addEventListener('pointerdown', e => {
