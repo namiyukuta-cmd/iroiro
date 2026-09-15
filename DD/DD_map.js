@@ -1,5 +1,6 @@
 (() => {
-  const STORAGE_KEY = 'dd_map_position_v1';
+  const SESSION_KEY = 'dd_session_map_position_v1';
+  const LEGACY_LOCAL_KEY = 'dd_map_position_v1';
   const SIZE = 7;
 
   const terrainInfo = {
@@ -41,15 +42,21 @@
     return x >= 0 && x < SIZE && y >= 0 && y < SIZE;
   }
 
+  function clearLegacyPersistence() {
+    try { localStorage.removeItem(LEGACY_LOCAL_KEY); } catch (_) {}
+  }
+
   function loadPosition() {
     try {
-      const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || 'null');
+      const saved = JSON.parse(sessionStorage.getItem(SESSION_KEY) || 'null');
       if (saved && Number.isInteger(saved.x) && Number.isInteger(saved.y) && inBounds(saved.x, saved.y)) {
         return saved;
       }
     } catch (_) {}
     return { x: 2, y: 3 };
   }
+
+  clearLegacyPersistence();
 
   let position = loadPosition();
   let selected = { ...position };
@@ -59,8 +66,8 @@
     return `${x},${y}`;
   }
 
-  function savePosition() {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(position));
+  function syncSessionPosition() {
+    try { sessionStorage.setItem(SESSION_KEY, JSON.stringify(position)); } catch (_) {}
   }
 
   function isAdjacent(x, y) {
@@ -111,7 +118,7 @@
 
     position = { x, y };
     selected = { x, y };
-    savePosition();
+    syncSessionPosition();
 
     const phaseText = window.DDTime ? phaseMessage(DDTime.phase()) : '';
     message.textContent = phaseText || `${info.name}へ移動した。${info.moveMinutes}分経過。`;
