@@ -21,12 +21,12 @@
       label: '平原',
       cards: [
         { type: 'hunt', icon: '🏹', title: '鹿', text: '鹿を見つけた。', animalId: 'deer' },
+        { type: 'hunt', icon: '🏹', title: '鹿', text: '草の向こうに鹿がいる。', animalId: 'deer' },
         { type: 'hunt', icon: '🏹', title: 'ウサギ', text: 'ウサギを見つけた。', animalId: 'rabbit' },
+        { type: 'hunt', icon: '🏹', title: 'ウサギ', text: '草むらにウサギがいる。', animalId: 'rabbit' },
         { type: 'hunt', icon: '🏹', title: '鳥', text: '鳥を見つけた。', animalId: 'bird' },
+        { type: 'hunt', icon: '🏹', title: '鳥', text: '低く飛ぶ鳥を見つけた。', animalId: 'bird' },
         { type: 'item', icon: '👜', title: '薬草', text: '薬草になりそうな草を見つけた。', itemId: 'herb', minutes: 20 },
-        { type: 'item', icon: '👜', title: '木の実', text: '食べられそうな木の実を見つけた。', itemId: 'nuts', minutes: 20 },
-        { type: 'none', icon: '', title: '', text: '何も見つからなかった。' },
-        { type: 'none', icon: '', title: '', text: '何も見つからなかった。' },
         { type: 'none', icon: '', title: '', text: '風が草を揺らしている。何もいない。' }
       ],
       encounters: [
