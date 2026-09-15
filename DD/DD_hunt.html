@@ -7,52 +7,33 @@
   <style>
     *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
     html,body{margin:0;width:100%;height:100%;overflow:hidden}
-    body{background:#111;color:#eee;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;touch-action:none}
-    #game{position:relative;width:min(100%,520px);height:100dvh;margin:0 auto;overflow:hidden;background:#171b16}
+    body{background:#151812;color:#eee;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;touch-action:none}
+    #game{position:relative;width:min(100%,520px);height:100dvh;margin:0 auto;overflow:hidden;background:linear-gradient(#1e241b,#11140f)}
     #top{position:absolute;z-index:30;top:0;left:0;right:0;display:flex;justify-content:space-between;align-items:flex-start;padding:max(10px,env(safe-area-inset-top)) 12px 10px;background:rgba(0,0,0,.62)}
     #top a{color:#fff;text-decoration:none;font-weight:700}
-    #stats{font-size:12px;text-align:right;line-height:1.45;max-width:70%}
+    #stats{font-size:12px;text-align:right;line-height:1.45;max-width:72%}
 
-    #searchWindow{position:absolute;left:7%;right:7%;top:18%;height:31%;overflow:hidden;border:3px solid #d8d2c6;background:#44503f;box-shadow:0 0 0 5px #27231e,0 10px 25px rgba(0,0,0,.45)}
-    #forestTrack{position:absolute;inset:0;width:400%;display:flex;will-change:transform}
-    .forestScene{position:relative;width:25%;height:100%;flex:0 0 25%;overflow:hidden;background:linear-gradient(#778174 0 42%,#404c3b 42% 100%)}
-    .forestScene:before,.forestScene:after{content:"";position:absolute;bottom:0;width:38px;height:90%;background:#2d382b;border-radius:50% 50% 0 0}
-    .forestScene:before{left:15%}.forestScene:after{right:12%}
-    .bush{position:absolute;bottom:0;width:85px;height:55px;border-radius:50% 50% 0 0;background:#34402f}
-    .bush.a{left:35%}.bush.b{right:25%;height:70px}
+    #searchWindow{position:absolute;z-index:10;width:64%;height:24%;left:18%;top:22%;overflow:hidden;border:3px solid #d8d2c6;background:#55604e;box-shadow:0 0 0 5px #27231e,0 10px 25px rgba(0,0,0,.45);transition:left .46s ease,top .46s ease}
+    #scene{position:absolute;inset:0;background:linear-gradient(#788071 0 44%,#46513f 44% 100%)}
+    #scene:before,#scene:after{content:"";position:absolute;bottom:0;width:35px;height:92%;background:#303a2d;border-radius:50% 50% 0 0}
+    #scene:before{left:13%}#scene:after{right:12%}
+    .bush{position:absolute;bottom:0;width:74px;height:52px;border-radius:50% 50% 0 0;background:#364230}.bush.a{left:31%}.bush.b{right:23%;height:63px}
 
-    #animal{display:none;position:absolute;left:68%;top:58%;transform:translate(-50%,-50%);transition:transform .18s ease,opacity .18s ease;opacity:1}
-    #animalArt{position:relative;display:block}
-    #animalName{position:absolute;left:50%;top:calc(100% + 28px);transform:translateX(-50%);white-space:nowrap;font-size:13px;font-weight:800;text-shadow:0 1px 3px #000}
+    #animal{display:none;position:absolute;left:63%;top:57%;transform:translate(-50%,-50%);transition:transform .18s ease,opacity .18s ease;opacity:1;text-align:center}
+    #animalGlyph{display:block;font-size:48px;line-height:1}
+    #animalName{display:block;margin-top:7px;font-size:13px;font-weight:800;text-shadow:0 1px 3px #000}
+    #searchText{position:absolute;left:4%;right:4%;top:49%;text-align:center;font-weight:800;font-size:15px;line-height:1.35}
 
-    #animal.deer #animalArt{width:78px;height:45px;border-radius:48% 48% 42% 42%;background:#745d43}
-    #animal.deer #animalArt:before{content:"";position:absolute;right:-19px;top:3px;width:27px;height:27px;border-radius:50%;background:#745d43}
-    #animal.deer #animalArt:after{content:"";position:absolute;right:-24px;top:-14px;width:22px;height:20px;border-left:3px solid #745d43;border-right:3px solid #745d43;border-radius:8px 8px 0 0}
-    #animal.deer .leg{display:block;position:absolute;bottom:-23px;width:6px;height:26px;background:#745d43}.deer .leg.a{left:17px}.deer .leg.b{right:14px}
-
-    #animal.rabbit #animalArt{width:50px;height:34px;border-radius:52% 48% 45% 45%;background:#8a7964}
-    #animal.rabbit #animalArt:before{content:"";position:absolute;right:-12px;top:1px;width:22px;height:22px;border-radius:50%;background:#8a7964}
-    #animal.rabbit #animalArt:after{content:"";position:absolute;right:-9px;top:-24px;width:14px;height:28px;border-radius:50% 50% 30% 30%;background:#8a7964;box-shadow:9px 2px 0 #8a7964}
-    #animal.rabbit .leg{display:block;position:absolute;bottom:-12px;width:7px;height:15px;background:#8a7964}.rabbit .leg.a{left:11px}.rabbit .leg.b{right:10px}
-
-    #animal.bird #animalArt{width:42px;height:27px;border-radius:55% 48% 48% 55%;background:#706d64}
-    #animal.bird #animalArt:before{content:"";position:absolute;right:-12px;top:4px;width:20px;height:20px;border-radius:50%;background:#706d64}
-    #animal.bird #animalArt:after{content:"";position:absolute;right:-22px;top:10px;border-left:12px solid #c5a766;border-top:5px solid transparent;border-bottom:5px solid transparent}
-    #animal.bird .leg{display:none}
-
-    #searchText{position:absolute;left:4%;right:4%;top:51%;text-align:center;font-weight:800;font-size:15px;line-height:1.35}
-
-    #shootArea{position:absolute;left:0;right:0;bottom:0;height:48%;display:none}
-    #bow{position:absolute;left:32px;top:40%;width:82px;height:175px;transform:translateY(-50%);border:6px solid #8b6842;border-right:none;border-radius:100% 0 0 100%}
-    #string{position:absolute;left:111px;top:40%;width:3px;height:166px;background:#ddd;transform:translateY(-50%)}
-    #arrow{position:absolute;left:111px;top:40%;width:110px;height:4px;background:#ddd;transform:translateY(-50%)}
+    #shootArea{position:absolute;left:0;right:0;bottom:0;height:44%;display:none}
+    #bow{position:absolute;left:32px;top:37%;width:82px;height:175px;transform:translateY(-50%);border:6px solid #8b6842;border-right:none;border-radius:100% 0 0 100%}
+    #string{position:absolute;left:111px;top:37%;width:3px;height:166px;background:#ddd;transform:translateY(-50%)}
+    #arrow{position:absolute;left:111px;top:37%;width:110px;height:4px;background:#ddd;transform:translateY(-50%)}
     #arrow:after{content:"";position:absolute;right:-10px;top:-5px;border-left:12px solid #ddd;border-top:7px solid transparent;border-bottom:7px solid transparent}
-
     #timingWrap{position:absolute;left:8%;right:8%;bottom:88px;height:30px;border:2px solid #eee;background:#292929;overflow:hidden}
     #hitZone{position:absolute;top:0;bottom:0;background:#8d8d8d}
     #timingMarker{position:absolute;top:-3px;bottom:-3px;width:5px;background:#fff;left:0}
     #guide{position:absolute;left:0;right:0;bottom:35px;text-align:center;font-weight:800;text-shadow:0 1px 3px #000}
-    #result{position:absolute;z-index:40;left:50%;top:55%;transform:translate(-50%,-50%);padding:12px 18px;background:rgba(0,0,0,.82);border:1px solid #aaa;display:none;font-size:20px;white-space:nowrap}
+    #result{position:absolute;z-index:40;left:50%;top:57%;transform:translate(-50%,-50%);padding:12px 18px;background:rgba(0,0,0,.82);border:1px solid #aaa;display:none;font-size:18px;white-space:nowrap}
   </style>
 </head>
 <body>
@@ -60,12 +41,8 @@
   <div id="top"><a href="DD_top.html">← 戻る</a><div id="stats"></div></div>
 
   <div id="searchWindow">
-    <div id="forestTrack">
-      <div class="forestScene"><i class="bush a"></i><i class="bush b"></i></div>
-      <div class="forestScene"><i class="bush a"></i><i class="bush b"></i></div>
-      <div class="forestScene"><i class="bush a"></i><i class="bush b"></i></div>
-      <div class="forestScene"><i class="bush a"></i><i class="bush b"></i><div id="animal"><span id="animalArt"><i class="leg a"></i><i class="leg b"></i></span><span id="animalName"></span></div></div>
-    </div>
+    <div id="scene"><i class="bush a"></i><i class="bush b"></i></div>
+    <div id="animal"><span id="animalGlyph"></span><span id="animalName"></span></div>
   </div>
   <div id="searchText">獲物を探している…</div>
 
@@ -82,6 +59,7 @@
 (() => {
   const config=window.DDHuntConfig||{};
   const equipment=config.equipment||{};
+  const rules=config.huntRules||{};
   const animals=Array.isArray(config.animals)&&config.animals.length?config.animals:[
     {id:'deer',name:'鹿',hp:3,speed:1.2},
     {id:'rabbit',name:'ウサギ',hp:2,speed:1.8},
@@ -92,14 +70,14 @@
   const arrowInfo=equipment.arrows||{};
 
   const stats=document.getElementById('stats');
-  const track=document.getElementById('forestTrack');
-  const animal=document.getElementById('animal');
-  const animalName=document.getElementById('animalName');
   const searchWindow=document.getElementById('searchWindow');
+  const animal=document.getElementById('animal');
+  const animalGlyph=document.getElementById('animalGlyph');
+  const animalName=document.getElementById('animalName');
   const searchText=document.getElementById('searchText');
   const shootArea=document.getElementById('shootArea');
   const game=document.getElementById('game');
-  const string=document.getElementById('string');
+  const bowString=document.getElementById('string');
   const arrow=document.getElementById('arrow');
   const marker=document.getElementById('timingMarker');
   const hitZone=document.getElementById('hitZone');
@@ -109,6 +87,7 @@
   let arrowsLeft=Number(arrowInfo.count||3);
   let ready=false;
   let pulling=false;
+  let engaged=false;
   let pullStart=0;
   let markerPos=0;
   let markerDir=1;
@@ -120,10 +99,12 @@
 
   const hitZoneWidth=Math.max(4,Math.min(60,Number(bowInfo.hitZoneBonus||0)+Number(stringInfo.hitZoneBonus||0)));
   const arrowDamage=Math.max(1,Number(arrowInfo.damage||1));
+  const retryHpRatio=Math.max(0,Math.min(1,Number(rules.retryHpRatio??0.5)));
   hitZone.style.width=hitZoneWidth+'%';
   hitZone.style.left=((100-hitZoneWidth)/2)+'%';
 
   function currentAnimal(){return animals[currentAnimalIndex]||animals[0]}
+  function glyphFor(id){return id==='deer'?'🦌':id==='rabbit'?'🐇':'🐦'}
 
   function updateStats(){
     stats.innerHTML=`${bowInfo.name||'弓'}：${bowInfo.description||''}<br>${stringInfo.name||'弓弦'}：${stringInfo.description||''}<br>${arrowInfo.name||'矢'}：残り ${arrowsLeft}本`;
@@ -132,57 +113,70 @@
   function updateAnimalDisplay(resetHp=true){
     const data=currentAnimal();
     if(resetHp) currentHp=Number(data.hp||1);
-    animal.className=data.id||'';
+    animalGlyph.textContent=glyphFor(data.id);
     animalName.textContent=data.name||'獲物';
-    searchText.textContent=`${data.name||'獲物'}　HP ${currentHp}/${data.hp||1}　←→ スワイプで変更`;
+    searchText.textContent=`${data.name||'獲物'}　HP ${currentHp}/${data.hp||1}${engaged?'':'　←→ スワイプで変更'}`;
   }
 
   function show(text){
     result.textContent=text;
     result.style.display='block';
     clearTimeout(show.t);
-    show.t=setTimeout(()=>result.style.display='none',1100);
+    show.t=setTimeout(()=>result.style.display='none',1200);
+  }
+
+  function moveSearchWindow(){
+    const positions=[
+      {left:'6%',top:'18%'},
+      {left:'30%',top:'25%'},
+      {left:'11%',top:'34%'},
+      {left:'28%',top:'15%'},
+      {left:'18%',top:'28%'}
+    ];
+    const moves=2+Math.floor(Math.random()*2);
+    let step=0;
+    function next(){
+      const p=positions[Math.floor(Math.random()*positions.length)];
+      searchWindow.style.left=p.left;
+      searchWindow.style.top=p.top;
+      step++;
+      if(step<moves){setTimeout(next,560);return;}
+      setTimeout(revealAnimal,600);
+    }
+    setTimeout(next,300);
   }
 
   function startSearch(){
     ready=false;
     pulling=false;
+    engaged=false;
     shootArea.style.display='none';
     animal.style.display='none';
     searchText.textContent='獲物を探している…';
-    track.style.transition='none';
-    track.style.transform='translateX(0)';
-    const passes=2+Math.floor(Math.random()*2);
-    let step=0;
-    function move(){
-      step++;
-      const scene=step%3;
-      track.style.transition='transform .42s ease-in-out';
-      track.style.transform=`translateX(-${scene*25}%)`;
-      if(step<passes*3){setTimeout(move,470);return;}
-      setTimeout(()=>{
-        track.style.transition='transform .5s ease-out';
-        track.style.transform='translateX(-75%)';
-        setTimeout(()=>{
-          currentAnimalIndex=Math.floor(Math.random()*animals.length);
-          updateAnimalDisplay(true);
-          animal.style.display='block';
-          shootArea.style.display='block';
-          ready=true;
-        },520);
-      },300);
-    }
-    setTimeout(move,350);
+    moveSearchWindow();
+  }
+
+  function revealAnimal(){
+    currentAnimalIndex=Math.floor(Math.random()*animals.length);
+    currentHp=Number(currentAnimal().hp||1);
+    updateAnimalDisplay(false);
+    animal.style.display='block';
+    animal.style.opacity='1';
+    animal.style.transform='translate(-50%,-50%)';
+    shootArea.style.display='block';
+    guide.textContent='長押しで弓を引く　狙った位置で離す';
+    ready=true;
   }
 
   function switchAnimal(direction){
-    if(!ready||pulling||animals.length<2)return;
+    if(!ready||pulling||engaged||animals.length<2)return;
     ready=false;
     animal.style.opacity='0';
     animal.style.transform=`translate(${direction>0?80:-180}%,-50%)`;
     setTimeout(()=>{
       currentAnimalIndex=(currentAnimalIndex+direction+animals.length)%animals.length;
-      updateAnimalDisplay(true);
+      currentHp=Number(currentAnimal().hp||1);
+      updateAnimalDisplay(false);
       animal.style.transition='none';
       animal.style.transform=`translate(${direction>0?-180:80}%,-50%)`;
       animal.offsetHeight;
@@ -206,7 +200,7 @@
     if(!pulling)return;
     const elapsed=performance.now()-pullStart;
     const pullPx=Math.min(48,elapsed/22);
-    string.style.transform=`translate(${-pullPx}px,-50%)`;
+    bowString.style.transform=`translate(${-pullPx}px,-50%)`;
     arrow.style.transform=`translate(${-pullPx}px,-50%)`;
     pullRaf=requestAnimationFrame(animatePull);
   }
@@ -216,6 +210,8 @@
     if(!shootArea.contains(e.target))return;
     e.preventDefault();
     pulling=true;
+    engaged=true;
+    updateAnimalDisplay(false);
     pullStart=performance.now();
     markerPos=0;
     markerDir=1;
@@ -223,6 +219,23 @@
     cancelAnimationFrame(pullRaf);
     markerRaf=requestAnimationFrame(animateMarker);
     pullRaf=requestAnimationFrame(animatePull);
+  }
+
+  function resetBow(){
+    bowString.style.transform='translateY(-50%)';
+    arrow.style.transform='translateY(-50%)';
+  }
+
+  function escapeAndSearch(message){
+    ready=false;
+    show(message);
+    animal.style.opacity='0';
+    shootArea.style.display='none';
+    setTimeout(()=>{
+      animal.style.display='none';
+      if(arrowsLeft>0) startSearch();
+      else guide.textContent='矢がない';
+    },900);
   }
 
   function release(e){
@@ -238,37 +251,39 @@
     const min=(100-hitZoneWidth)/2;
     const max=min+hitZoneWidth;
     const hit=markerPos>=min&&markerPos<=max;
+    resetBow();
 
-    if(hit){
-      currentHp=Math.max(0,currentHp-arrowDamage);
-      if(currentHp<=0){
-        show(`${data.name}を仕留めた`);
-        searchText.textContent=`${data.name}　HP 0/${data.hp||1}`;
-        ready=false;
-        shootArea.style.display='none';
-      }else{
-        show(`命中 -${arrowDamage}`);
-        updateAnimalDisplay(false);
-      }
-    }else{
-      show('外れ');
+    if(!hit){
+      escapeAndSearch('外れ　逃げた');
+      return;
     }
 
-    string.style.transform='translateY(-50%)';
-    arrow.style.transform='translateY(-50%)';
-
-    if(arrowsLeft<=0&&currentHp>0){
+    currentHp=Math.max(0,currentHp-arrowDamage);
+    if(currentHp<=0){
+      show(`${data.name}を仕留めた`);
+      searchText.textContent=`${data.name}　HP 0/${data.hp||1}`;
       ready=false;
-      guide.textContent='矢がない';
+      shootArea.style.display='none';
+      return;
     }
+
+    const canRetry=currentHp<=Number(data.hp||1)*retryHpRatio && arrowsLeft>0;
+    if(canRetry){
+      show(`命中 -${arrowDamage}　もう1射できる`);
+      updateAnimalDisplay(false);
+      ready=true;
+      return;
+    }
+
+    escapeAndSearch(`命中 -${arrowDamage}　逃げた`);
   }
 
   searchWindow.addEventListener('pointerdown',e=>{
-    if(!ready||pulling)return;
+    if(!ready||pulling||engaged)return;
     swipeStartX=e.clientX;
   });
   searchWindow.addEventListener('pointerup',e=>{
-    if(swipeStartX===null||!ready||pulling)return;
+    if(swipeStartX===null||!ready||pulling||engaged)return;
     const dx=e.clientX-swipeStartX;
     swipeStartX=null;
     if(Math.abs(dx)<45)return;
