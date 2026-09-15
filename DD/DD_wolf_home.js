@@ -74,8 +74,12 @@
       button.className = 'feedButton';
       button.textContent = '与える';
       button.addEventListener('click', () => {
+        const stageBeforeFeeding = wolf.stage?.();
         const result = wolf.feed(item.id);
-        if (result.ok) needs?.feedWolf?.(25);
+        if (result.ok) {
+          if (stageBeforeFeeding === 'pup') needs?.feedWolf?.(100);
+          else needs?.feedWolf?.(25);
+        }
         message.textContent = result.message || '';
         renderStatus();
       });
