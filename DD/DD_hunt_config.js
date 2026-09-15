@@ -33,21 +33,33 @@ window.DDHuntConfig = {
       name: '鹿',
       hp: 3,
       speed: 1.2,
-      description: '体力が一番多い。'
+      description: '体力が一番多い。',
+      image: 'asset/Hunt/hunt_deer_768x512.png',
+      imagePosition: '28% 40%',
+      imageScale: 2,
+      meatItemId: 'meat_deer'
     },
     {
       id: 'rabbit',
       name: 'ウサギ',
       hp: 3,
       speed: 1.8,
-      description: '体力も素早さも普通。'
+      description: '体力も素早さも普通。',
+      image: 'asset/Hunt/hunt_rabbit_768x512.png',
+      imagePosition: '27% 44%',
+      imageScale: 2.15,
+      meatItemId: 'meat_rabbit'
     },
     {
       id: 'bird',
       name: '鳥',
       hp: 1,
       speed: 2.6,
-      description: '体力が一番少ないが素早い。'
+      description: '体力が一番少ないが素早い。',
+      image: 'asset/Hunt/hunt_bird_768x512.png',
+      imagePosition: '30% 42%',
+      imageScale: 2.1,
+      meatItemId: 'meat_bird'
     }
   ]
 };
