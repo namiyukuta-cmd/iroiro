@@ -31,7 +31,7 @@
 
   const enemy = enemies[enemyId];
   const PLAYER_MAX_HP = 5;
-  const TURN_MINUTES = 10;
+  const TURN_MINUTES = 1;
 
   const enemyName = document.getElementById('enemyName');
   const enemyHpText = document.getElementById('enemyHpText');
