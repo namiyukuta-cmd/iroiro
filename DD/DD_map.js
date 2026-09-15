@@ -35,6 +35,7 @@
   const locationText = document.getElementById('locationText');
   const moveCost = document.getElementById('moveCost');
   const actions = document.getElementById('actions');
+  const dayPhase = document.getElementById('dayPhase');
 
   function inBounds(x, y) {
     return x >= 0 && x < SIZE && y >= 0 && y < SIZE;
@@ -70,6 +71,23 @@
 
   function getTerrain(x, y) {
     return terrainInfo[terrain[y][x]];
+  }
+
+  function timeParts() {
+    if (!window.DDTime || typeof DDTime.getState !== 'function') {
+      return { day: 1, hour: 7, minute: 0, phase: '朝' };
+    }
+    return DDTime.getState();
+  }
+
+  function compactTime() {
+    const state = timeParts();
+    return `${String(state.hour).padStart(2, '0')}:${String(state.minute).padStart(2, '0')}`;
+  }
+
+  function refreshDayPhase() {
+    const state = timeParts();
+    if (dayPhase) dayPhase.textContent = `${state.day}日目　${state.phase}`;
   }
 
   function phaseMessage(newPhase) {
@@ -149,6 +167,7 @@
 
   function render() {
     board.innerHTML = '';
+    refreshDayPhase();
 
     for (let y = 0; y < SIZE; y++) {
       for (let x = 0; x < SIZE; x++) {
@@ -181,8 +200,14 @@
         }
 
         if (here) {
+          const pawnClock = document.createElement('span');
+          pawnClock.className = 'pawnClock';
+          pawnClock.textContent = compactTime();
+          button.appendChild(pawnClock);
+
           const pawn = document.createElement('span');
           pawn.className = 'pawn';
+          pawn.textContent = '♟';
           button.appendChild(pawn);
         }
 
@@ -196,7 +221,7 @@
           render();
 
           if (!here) {
-            message.textContent = '黄色い枠のマスだけ移動できる。';
+            message.textContent = '黄色いマスだけ移動できる。';
           }
         });
 
@@ -205,6 +230,10 @@
     }
 
     renderInfo();
+  }
+
+  if (window.DDTime) {
+    window.addEventListener('ddtimechange', () => render());
   }
 
   board.addEventListener('dblclick', e => e.preventDefault());
