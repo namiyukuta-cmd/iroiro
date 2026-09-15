@@ -6,7 +6,7 @@
 
   function fallbackIcon(item) {
     if (!item) return '□';
-    if (item.id === 'wolf_pup') return '🐺';
+    if (item.kind === 'companion') return '🐺';
     if (item.category === 'food') return '🍖';
     return '👜';
   }
@@ -15,6 +15,7 @@
     if (!item) return '';
     if (item.category === 'food') return item.foodGroup ? `食料・${item.foodGroup}` : '食料';
     if (item.category === 'material') return '素材';
+    if (item.kind === 'companion') return '同行・完全肉食';
     if (item.category === 'special') return '特別';
     return item.category || '';
   }
@@ -39,7 +40,32 @@
     return wrap;
   }
 
+  function addCompanionControls(card, item) {
+    if (item?.kind !== 'companion' || !window.DDWolf) return;
+
+    card.classList.add('companion');
+
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.className = 'itemAction';
+    button.textContent = '様子を見る';
+
+    const behaviorText = document.createElement('div');
+    behaviorText.className = 'itemBehavior';
+
+    button.addEventListener('click', () => {
+      const behavior = DDWolf.randomBehavior();
+      if (!behavior) return;
+      behaviorText.textContent = behavior.combatEffect === 'enemy_flee'
+        ? `${behavior.text}　戦闘中なら敵をひるませて逃げられる。`
+        : behavior.text;
+    });
+
+    card.append(button, behaviorText);
+  }
+
   function render() {
+    window.DDWolf?.updateAge?.();
     const entries = itemDb?.getInventory?.() || [];
     inventory.innerHTML = '';
 
@@ -73,10 +99,12 @@
       card.appendChild(makeVisual(item));
       card.appendChild(name);
       card.appendChild(meta);
+      addCompanionControls(card, item);
       inventory.appendChild(card);
     });
   }
 
   window.addEventListener('ddinventorychange', render);
+  window.addEventListener('ddwolfchange', render);
   render();
 })();
