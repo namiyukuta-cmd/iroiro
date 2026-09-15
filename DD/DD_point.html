@@ -33,7 +33,6 @@
     #deck{left:14%;top:6px;background:repeating-linear-gradient(45deg,#2a2d27 0 7px,#3c4038 7px 14px);color:#fff;cursor:pointer}
     #deck::before{content:"";position:absolute;inset:7px;border:2px solid rgba(255,255,255,.75);border-radius:8px}
     #deckTitle{font-size:18px;font-weight:1000;z-index:1}
-    #deckCount{margin-top:8px;font-size:14px;font-weight:900;z-index:1}
     #drawn{right:10%;top:28px;display:none}
     #cardIcon{font-size:54px;line-height:1;margin-bottom:12px}
     #cardTitle{font-size:19px;font-weight:1000;line-height:1.25}
@@ -68,7 +67,7 @@
 
   <section id="table">
     <div id="cards">
-      <button id="deck" class="card" type="button" aria-label="山札を引く"><span id="deckTitle">山札</span><span id="deckCount">0枚</span></button>
+      <button id="deck" class="card" type="button" aria-label="山札を引く"><span id="deckTitle">山札</span></button>
       <div id="drawn" class="card" aria-live="polite"><div id="cardIcon"></div><div id="cardTitle"></div><div id="cardSub"></div></div>
       <div id="deckHint">山札をタップして1枚引く</div>
     </div>
