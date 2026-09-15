@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no" />
   <title>DD - 狩り</title>
   <style>
-    *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+    *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
     html,body{margin:0;width:100%;height:100%;overflow:hidden}
     body{background:#151812;color:#eee;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;touch-action:none}
     #game{position:relative;width:min(100%,520px);height:100dvh;margin:0 auto;overflow:hidden;background:linear-gradient(#1e241b,#11140f)}
@@ -291,6 +291,8 @@
   });
   searchWindow.addEventListener('pointercancel',()=>{swipeStartX=null});
 
+  document.addEventListener('contextmenu',e=>e.preventDefault());
+  document.addEventListener('selectstart',e=>e.preventDefault());
   updateStats();
   game.addEventListener('pointerdown',begin,{passive:false});
   game.addEventListener('pointerup',release,{passive:false});
