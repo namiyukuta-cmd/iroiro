@@ -2,7 +2,6 @@
   const SESSION_KEY = 'dd_session_map_location_v2';
   const OLD_SESSION_KEY = 'dd_session_map_position_v1';
   const LEGACY_LOCAL_KEY = 'dd_map_position_v1';
-  const POINT_VERSION = '202609160820';
 
   const places = {
     cabin: {
@@ -156,7 +155,7 @@
     }
 
     makeAction('この地点に入る', () => {
-      location.href = `DD_point.html?zone=${encodeURIComponent(info.zone)}&place=${encodeURIComponent(currentLocation)}&v=${POINT_VERSION}`;
+      location.href = `DD_point.html?zone=${encodeURIComponent(info.zone)}&place=${encodeURIComponent(currentLocation)}&v=${Date.now()}`;
     });
   }
 
