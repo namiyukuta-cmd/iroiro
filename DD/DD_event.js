@@ -29,12 +29,27 @@
       id: 'return_with_meat_01',
       once: true,
       title: '帰り道',
-      text: '肉を持って小屋へ帰る途中――。',
+      text: [
+        '小屋へ戻る途中、草むらの奥から頼りない鳴き声がする。',
+        '',
+        '「みゅう、みゅう」',
+        '',
+        '覗いてみると、狼……らしい小さな子が一匹でうずくまっていた。',
+        '周囲を見ても、親や群れの姿はない。',
+        '',
+        'そのまま置いていかず、小屋へ連れ帰ることにした。',
+        '',
+        '狼の子（？）を手に入れた。'
+      ].join('\n'),
       when(context) {
         return context?.type === 'beforeTravel' &&
           context?.to === 'cabin' &&
           context?.from && context.from !== 'cabin' &&
           hasAnyMeat();
+      },
+      resolve() {
+        if (!window.DDItems || typeof DDItems.add !== 'function') return;
+        if (DDItems.count('wolf_pup') <= 0) DDItems.add('wolf_pup', 1);
       }
     }
   ];
@@ -102,7 +117,7 @@
 
     const button = document.createElement('button');
     button.type = 'button';
-    button.textContent = '続ける';
+    button.textContent = '連れて帰る';
     button.style.cssText = [
       'width:100%',
       'min-height:50px',
@@ -117,6 +132,9 @@
     ].join(';');
 
     button.addEventListener('click', () => {
+      if (typeof event.resolve === 'function') {
+        try { event.resolve(); } catch (_) {}
+      }
       if (event.once) markSeen(event.id);
       closeOverlay(overlay);
       if (typeof options.onComplete === 'function') options.onComplete();
