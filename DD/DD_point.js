@@ -1,4 +1,5 @@
 (() => {
+  const PAGE_VERSION = '202609160820';
   const params = new URLSearchParams(location.search);
   const config = window.DDPointConfig || {};
   const zones = config.zones || {};
@@ -84,23 +85,21 @@
   function removeDrawnCard() {
     drawn.style.display = 'none';
     drawn.classList.remove('tapFeedback', 'acquired');
-    setDrawnInteractivity(null);
+    drawn.style.pointerEvents = 'none';
+    drawn.tabIndex = -1;
+    drawn.setAttribute('aria-disabled', 'true');
     currentCard = null;
     refreshDeck();
   }
 
   function animateToInventory(card) {
-    if (!inventoryButton || !drawn || drawn.style.display === 'none') {
-      removeDrawnCard();
-      pulseInventory();
-      return;
-    }
+    const source = drawn?.getBoundingClientRect?.();
+    const target = inventoryButton?.getBoundingClientRect?.();
 
-    const source = drawn.getBoundingClientRect();
-    const target = inventoryButton.getBoundingClientRect();
+    // 入手した瞬間、元の札は探索画面から必ず消す。
+    removeDrawnCard();
 
-    if (!source.width || !source.height || !target.width || !target.height) {
-      removeDrawnCard();
+    if (!source || !target || !source.width || !source.height || !target.width || !target.height) {
       pulseInventory();
       return;
     }
@@ -130,30 +129,19 @@
     const dx = targetCenterX - sourceCenterX;
     const dy = targetCenterY - sourceCenterY;
 
-    removeDrawnCard();
+    fly.style.transform = 'translate(0,0) scale(1) rotate(0deg)';
+    fly.style.opacity = '1';
+    fly.style.transition = 'transform .7s cubic-bezier(.2,.72,.2,1), opacity .7s ease';
 
-    if (typeof fly.animate === 'function') {
-      const animation = fly.animate([
-        { transform: 'translate(0,0) scale(1) rotate(0deg)', opacity: 1, offset: 0 },
-        { transform: `translate(${dx * .4}px,${dy * .34}px) scale(.86) rotate(-4deg)`, opacity: 1, offset: .38 },
-        { transform: `translate(${dx}px,${dy}px) scale(.12) rotate(9deg)`, opacity: .05, offset: 1 }
-      ], {
-        duration: 700,
-        easing: 'cubic-bezier(.2,.72,.2,1)',
-        fill: 'forwards'
-      });
-      animation.onfinish = () => fly.remove();
-      animation.oncancel = () => fly.remove();
-    } else {
-      fly.style.transition = 'transform .7s cubic-bezier(.2,.72,.2,1),opacity .7s ease';
+    requestAnimationFrame(() => {
       requestAnimationFrame(() => {
         fly.style.transform = `translate(${dx}px,${dy}px) scale(.12) rotate(9deg)`;
         fly.style.opacity = '.05';
       });
-      setTimeout(() => fly.remove(), 740);
-    }
+    });
 
     setTimeout(pulseInventory, 500);
+    setTimeout(() => fly.remove(), 760);
   }
 
   function clearCardView() {
@@ -183,6 +171,10 @@
       : `山札をタップして1枚めくる　${minutes}分`;
   }
 
+  function pointReturnUrl() {
+    return `DD_point.html?zone=${encodeURIComponent(zone)}&place=${encodeURIComponent(place)}&v=${PAGE_VERSION}`;
+  }
+
   function doGather(card) {
     if (acted) return;
     acted = true;
@@ -199,7 +191,7 @@
     if (acted) return;
     acted = true;
     setDrawnInteractivity(currentCard);
-    const back = `DD_point.html?zone=${encodeURIComponent(zone)}&place=${encodeURIComponent(place)}`;
+    const back = pointReturnUrl();
     const target = `DD_hunt.html?animal=${encodeURIComponent(card.animalId)}&from=point&return=${encodeURIComponent(back)}`;
     setTimeout(() => { location.href = target; }, 150);
   }
@@ -226,7 +218,7 @@
   function doBattle(card) {
     if (acted) return;
     acted = true;
-    const back = `DD_point.html?zone=${encodeURIComponent(zone)}&place=${encodeURIComponent(place)}`;
+    const back = pointReturnUrl();
     location.href = `DD_battle.html?enemy=${encodeURIComponent(card.enemyId)}&return=${encodeURIComponent(back)}`;
   }
 
