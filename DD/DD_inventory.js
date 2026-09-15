@@ -6,6 +6,7 @@
 
   function fallbackIcon(item) {
     if (!item) return '□';
+    if (item.id === 'wolf_pup') return '🐺';
     if (item.category === 'food') return '🍖';
     return '👜';
   }
@@ -14,6 +15,7 @@
     if (!item) return '';
     if (item.category === 'food') return item.foodGroup ? `食料・${item.foodGroup}` : '食料';
     if (item.category === 'material') return '素材';
+    if (item.category === 'special') return '特別';
     return item.category || '';
   }
 
@@ -57,7 +59,7 @@
 
       const badge = document.createElement('div');
       badge.className = 'itemCount';
-      badge.textContent = `×${count}`;
+      badge.textContent = item?.unique ? '所持' : `×${count}`;
 
       const name = document.createElement('div');
       name.className = 'itemName';
