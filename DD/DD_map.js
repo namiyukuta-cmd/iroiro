@@ -10,7 +10,6 @@
     cabin: { name: '小屋', moveMinutes: 20, className: 'cabin', description: '生活の拠点。' }
   };
 
-  // 7×7。x=横、y=縦。
   const terrain = [
     ['deepForest','deepForest','forest','plain','plain','river','river'],
     ['deepForest','forest','forest','plain','river','river','river'],
@@ -37,6 +36,10 @@
   const moveCost = document.getElementById('moveCost');
   const actions = document.getElementById('actions');
 
+  function inBounds(x, y) {
+    return x >= 0 && x < SIZE && y >= 0 && y < SIZE;
+  }
+
   function loadPosition() {
     try {
       const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || 'null');
@@ -55,10 +58,6 @@
     return `${x},${y}`;
   }
 
-  function inBounds(x, y) {
-    return x >= 0 && x < SIZE && y >= 0 && y < SIZE;
-  }
-
   function savePosition() {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(position));
   }
@@ -66,7 +65,7 @@
   function isAdjacent(x, y) {
     const dx = Math.abs(x - position.x);
     const dy = Math.abs(y - position.y);
-    return (dx <= 1 && dy <= 1 && (dx + dy > 0));
+    return dx <= 1 && dy <= 1 && dx + dy > 0;
   }
 
   function getTerrain(x, y) {
@@ -87,15 +86,11 @@
   }
 
   function moveTo(x, y) {
-    if (!isAdjacent(x, y)) {
-      selected = { x, y };
-      render();
-      message.textContent = '移動できるのは現在地の前後左右・斜め1マスだけ。';
-      return;
-    }
+    if (!isAdjacent(x, y)) return;
 
     const info = getTerrain(x, y);
     if (window.DDTime) DDTime.advance(info.moveMinutes, `move:${terrain[y][x]}`);
+
     position = { x, y };
     selected = { x, y };
     savePosition();
@@ -122,12 +117,14 @@
     const here = x === position.x && y === position.y;
 
     locationName.textContent = poi ? `${info.name}・${poi.label}` : info.name;
-    moveCost.textContent = here ? '現在地' : `移動 ${info.moveMinutes}分`;
+    moveCost.textContent = here ? '現在地' : isAdjacent(x, y) ? `移動 ${info.moveMinutes}分` : '移動範囲外';
     locationText.textContent = poi ? `${info.description} ${poi.label}がある。` : info.description;
     actions.innerHTML = '';
 
     if (!here) {
-      makeAction('ここへ移動', () => moveTo(x, y), !isAdjacent(x, y));
+      if (isAdjacent(x, y)) {
+        locationText.textContent += ' このマスをタップすると移動する。';
+      }
       return;
     }
 
@@ -158,9 +155,15 @@
         const info = getTerrain(x, y);
         const poi = points[key(x, y)];
         const button = document.createElement('button');
+        const here = x === position.x && y === position.y;
+        const reachable = isAdjacent(x, y);
+        const isSelected = x === selected.x && y === selected.y;
+
         button.type = 'button';
         button.className = `cell ${info.className}`;
-        if (isAdjacent(x, y)) button.classList.add('reachable');
+        if (reachable) button.classList.add('reachable');
+        if (here) button.classList.add('current');
+        if (isSelected) button.classList.add('selected');
         button.dataset.x = x;
         button.dataset.y = y;
         button.setAttribute('aria-label', poi ? `${info.name} ${poi.label}` : info.name);
@@ -177,18 +180,23 @@
           button.appendChild(icon);
         }
 
-        if (x === position.x && y === position.y) {
+        if (here) {
           const pawn = document.createElement('span');
           pawn.className = 'pawn';
           button.appendChild(pawn);
         }
 
         button.addEventListener('click', () => {
+          if (reachable) {
+            moveTo(x, y);
+            return;
+          }
+
           selected = { x, y };
-          if (isAdjacent(x, y)) {
-            render();
-          } else {
-            renderInfo();
+          render();
+
+          if (!here) {
+            message.textContent = '黄色い枠のマスだけ移動できる。';
           }
         });
 
