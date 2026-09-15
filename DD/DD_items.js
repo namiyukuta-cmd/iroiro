@@ -6,6 +6,7 @@ window.DDItems = {
       category: 'food',
       foodGroup: '肉',
       source: '鳥',
+      image: 'asset/item/meat_chicken.png',
       quantity: { type: 'weight', unit: 'kg', relative: 'small' },
       perishable: true,
       spoil: { enabled: true, duration: null }
@@ -16,6 +17,7 @@ window.DDItems = {
       category: 'food',
       foodGroup: '肉',
       source: 'ウサギ',
+      image: 'asset/item/meat_rabbit.png',
       quantity: { type: 'weight', unit: 'kg', relative: 'medium' },
       perishable: true,
       spoil: { enabled: true, duration: null }
@@ -26,6 +28,7 @@ window.DDItems = {
       category: 'food',
       foodGroup: '肉',
       source: '鹿',
+      image: 'asset/item/meat_deer.png',
       quantity: { type: 'weight', unit: 'kg', relative: 'large' },
       perishable: true,
       spoil: { enabled: true, duration: null }
