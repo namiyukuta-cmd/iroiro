@@ -36,6 +36,7 @@
     <h1>森</h1>
     <div class="headerRight">
       <div id="clock" data-dd-clock></div>
+      <a href="DD_inventory.html">アイテム</a>
       <a href="DD_top.html" onclick="DDTime.advanceAction('returnHome')">小屋へ戻る</a>
     </div>
   </header>
@@ -167,10 +168,11 @@
       first.button.disabled=true;
       second.button.disabled=true;
       counts[entry.key]=(counts[entry.key]||0)+1;
+      if(typeof itemDb.add==='function') itemDb.add(entry.key,1);
       pairCount++;
       pairsEl.textContent=pairCount;
       updateCounts();
-      message.textContent=`${entry.label}を見つけた。`;
+      message.textContent=`${entry.label}を見つけた。アイテムに入れた。`;
       first=null;
       second=null;
       locked=false;
