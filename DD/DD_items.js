@@ -62,6 +62,14 @@
       uses: ['弓', '矢', '薪', '籠'],
       perishable: false
     },
+    wood_arrow: {
+      id: 'wood_arrow',
+      name: '木の矢',
+      category: 'ammo',
+      kind: 'arrow',
+      description: '木の枝を削って作った簡素な矢。',
+      perishable: false
+    },
     vine: {
       id: 'vine',
       name: '蔓',
