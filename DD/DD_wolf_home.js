@@ -9,6 +9,10 @@
   const hungerFill = document.getElementById('hungerFill');
   const meatList = document.getElementById('meatList');
   const noMeat = document.getElementById('noMeat');
+  const careText = document.getElementById('careText');
+  const petButton = document.getElementById('petButton');
+  const hugButton = document.getElementById('hugButton');
+  const lullabyButton = document.getElementById('lullabyButton');
   const behaviorText = document.getElementById('behaviorText');
   const behaviorButton = document.getElementById('behaviorButton');
   const message = document.getElementById('message');
@@ -88,6 +92,28 @@
       meatList.appendChild(row);
     });
   }
+
+  function care(action) {
+    const stage = wolf.stage?.();
+    const isPup = stage === 'pup';
+    const texts = {
+      pet: isPup
+        ? '頭を撫でると、耳を伏せて手のひらに額を押しつける。'
+        : '頭から首筋を撫でると、目を細めてじっとしている。',
+      hug: isPup
+        ? '抱きしめると、腕の中で丸くなって「みゅう」と小さく鳴く。'
+        : '抱きしめると、大きな体を預けるように寄りかかってくる。',
+      lullaby: isPup
+        ? '子守唄を聞きながら、だんだん目を細めてうとうとし始める。'
+        : '子守唄を聞きながら、そばで伏せて静かに目を閉じる。'
+    };
+    careText.textContent = texts[action] || '';
+    message.textContent = '';
+  }
+
+  petButton?.addEventListener('click', () => care('pet'));
+  hugButton?.addEventListener('click', () => care('hug'));
+  lullabyButton?.addEventListener('click', () => care('lullaby'));
 
   behaviorButton.addEventListener('click', () => {
     const behavior = wolf.randomBehavior();
