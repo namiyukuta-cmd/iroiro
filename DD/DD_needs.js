@@ -1,10 +1,12 @@
 (() => {
   const STATE_KEY = 'dd_session_needs_v1';
+  const RULE_VERSION = 2;
   const MAX_HUNGER = 100;
   const PLAYER_HUNGER_PER_HOUR = 2;
   const WOLF_HUNGER_PER_HOUR = 2;
   const OTHER_FOOD_HOLD_MINUTES = 5 * 60;
   const MEAT_FISH_HOLD_MINUTES = 8 * 60;
+  const PUP_HOLD_MINUTES = 24 * 60;
 
   function nowMinutes() {
     return Math.max(0, Number(window.DDTime?.getState?.().totalMinutes || 0));
@@ -29,7 +31,9 @@
           wolfHunger: clamp(parsed.wolfHunger),
           lastMinutes: finiteOr(parsed.lastMinutes, now),
           playerNoHungerUntil: Math.max(0, finiteOr(parsed.playerNoHungerUntil, 0)),
-          wolfNoHungerUntil: Math.max(0, finiteOr(parsed.wolfNoHungerUntil, 0))
+          wolfNoHungerUntil: Math.max(0, finiteOr(parsed.wolfNoHungerUntil, 0)),
+          wolfLastFedAt: Math.max(0, finiteOr(parsed.wolfLastFedAt, 0)),
+          ruleVersion: Math.max(0, Math.floor(finiteOr(parsed.ruleVersion, 0)))
         };
       }
     } catch (_) {}
@@ -38,7 +42,9 @@
       wolfHunger: 0,
       lastMinutes: now,
       playerNoHungerUntil: 0,
-      wolfNoHungerUntil: 0
+      wolfNoHungerUntil: 0,
+      wolfLastFedAt: 0,
+      ruleVersion: RULE_VERSION
     };
   }
 
@@ -57,6 +63,33 @@
   function hasWolf() {
     return Number(window.DDItems?.count?.('wolf_pup') || 0) > 0 ||
       Number(window.DDItems?.count?.('wolf_companion') || 0) > 0;
+  }
+
+  function wolfStage() {
+    return window.DDWolf?.stage?.() || null;
+  }
+
+  function wolfHoldMinutes() {
+    return wolfStage() === 'pup' ? PUP_HOLD_MINUTES : MEAT_FISH_HOLD_MINUTES;
+  }
+
+  function migrateLegacyState() {
+    if (state.ruleVersion >= RULE_VERSION) return;
+
+    const now = nowMinutes();
+    if (wolfStage() === 'pup' && state.wolfNoHungerUntil > now) {
+      const estimatedFedAt = state.wolfLastFedAt > 0
+        ? state.wolfLastFedAt
+        : Math.max(0, state.wolfNoHungerUntil - MEAT_FISH_HOLD_MINUTES);
+      state.wolfLastFedAt = estimatedFedAt;
+      state.wolfNoHungerUntil = Math.max(
+        state.wolfNoHungerUntil,
+        estimatedFedAt + PUP_HOLD_MINUTES
+      );
+    }
+
+    state.ruleVersion = RULE_VERSION;
+    syncStorage();
   }
 
   function activeElapsed(start, end, holdUntil) {
@@ -120,7 +153,8 @@
     syncTime('before-wolf-feed');
     const now = nowMinutes();
     state.wolfHunger = clamp(state.wolfHunger - Math.max(0, Number(amount) || 0));
-    state.wolfNoHungerUntil = now + MEAT_FISH_HOLD_MINUTES;
+    state.wolfLastFedAt = now;
+    state.wolfNoHungerUntil = now + wolfHoldMinutes();
     state.lastMinutes = now;
     syncStorage();
     emit('wolf-feed');
@@ -142,7 +176,8 @@
       playerNoHungerMinutesLeft: Math.max(0, Math.ceil(state.playerNoHungerUntil - now)),
       wolfNoHungerMinutesLeft: Math.max(0, Math.ceil(state.wolfNoHungerUntil - now)),
       otherFoodHoldMinutes: OTHER_FOOD_HOLD_MINUTES,
-      meatFishHoldMinutes: MEAT_FISH_HOLD_MINUTES
+      meatFishHoldMinutes: MEAT_FISH_HOLD_MINUTES,
+      pupHoldMinutes: PUP_HOLD_MINUTES
     };
   }
 
@@ -152,7 +187,9 @@
       wolfHunger: 0,
       lastMinutes: nowMinutes(),
       playerNoHungerUntil: 0,
-      wolfNoHungerUntil: 0
+      wolfNoHungerUntil: 0,
+      wolfLastFedAt: 0,
+      ruleVersion: RULE_VERSION
     };
     try { sessionStorage.removeItem(STATE_KEY); } catch (_) {}
     emit('reset');
@@ -163,6 +200,7 @@
     maxHunger: MAX_HUNGER,
     otherFoodHoldMinutes: OTHER_FOOD_HOLD_MINUTES,
     meatFishHoldMinutes: MEAT_FISH_HOLD_MINUTES,
+    pupHoldMinutes: PUP_HOLD_MINUTES,
     syncTime,
     getState,
     feedPlayer,
@@ -171,6 +209,7 @@
     reset
   };
 
+  migrateLegacyState();
   syncTime('load');
   window.addEventListener('ddtimechange', () => syncTime('time'));
   window.addEventListener('ddinventorychange', () => syncTime('inventory'));
