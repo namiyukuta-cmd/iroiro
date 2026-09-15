@@ -17,7 +17,12 @@
     #clock{font-size:14px;font-weight:900;text-align:right}
     .nav{display:block;margin-top:7px;color:#20201d;text-decoration:none;font-size:14px;font-weight:900;text-align:right}
     main{padding-top:16px}
-    #craftList{border:2px dashed #aaa397;border-radius:12px;padding:28px 14px;text-align:center;font-size:17px;font-weight:900;color:#6d685f;background:#fff}
+    #craftList{display:grid;gap:12px}
+    .recipe{border:2px solid #20201d;border-radius:12px;background:#fff;padding:15px}
+    .recipeTitle{font-size:21px;font-weight:1000}
+    .recipeMaterial,.recipeOwned{margin-top:8px;font-size:15px;font-weight:850}
+    .craftButton{width:100%;min-height:48px;margin-top:14px;border:2px solid #20201d;border-radius:9px;background:#20201d;color:#fff;font:inherit;font-size:16px;font-weight:1000}
+    .craftButton:disabled{opacity:.35}
     html[data-dd-phase="夕方"] body{background:#eadfd1}
     html[data-dd-phase="夜"] body,html[data-dd-phase="深夜"] body{background:#d4d7dc}
   </style>
@@ -32,10 +37,11 @@
     </div>
   </header>
   <main>
-    <div id="craftList">まだ制作レシピがない。</div>
+    <div id="craftList"></div>
   </main>
 </div>
 <script src="DD_time.js"></script>
 <script src="DD_items.js"></script>
+<script src="DD_craft.js"></script>
 </body>
 </html>
