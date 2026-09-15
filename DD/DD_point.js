@@ -90,6 +90,9 @@
 
   function buildDeck() {
     const list = decks[zone].map(card => ({ ...card }));
+
+    if (!window.DDWolf?.hasCompanion?.()) return list;
+
     (encounterCards[zone] || []).forEach(card => {
       const weight = Math.max(1, Math.floor(Number(window.DDWolf?.getEncounterRisk?.(card.enemyId, 1) || 1)));
       for (let i = 0; i < weight; i++) list.push({ ...card });
@@ -219,8 +222,7 @@
     }
 
     if (card.type === 'enemy') {
-      const increased = window.DDWolf?.hasCompanion?.() ? ' 狼の気配のせいか、犬科の敵に見つかりやすくなっている。' : '';
-      eventDetail.textContent = `戦闘になる。${increased}`;
+      eventDetail.textContent = '狼の子（？）を連れているため、犬科の敵に見つかりやすくなっている。戦闘になる。';
       makeButton('戦う', () => doBattle(card), true);
       return;
     }
