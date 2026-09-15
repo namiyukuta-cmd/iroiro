@@ -12,7 +12,7 @@
     header{flex:0 0 50px;display:flex;align-items:center;justify-content:space-between;gap:8px;border-bottom:1px solid rgba(255,255,255,.28);padding:0 3px 5px}
     h1{margin:0;font-size:22px}
     .headerRight{text-align:right;display:grid;gap:2px}
-    #clock{font-size:16px;font-weight:800}
+    #dayPhase{font-size:15px;font-weight:800}
     header a{color:#fff;text-decoration:none;font-size:14px;font-weight:700}
     #message{flex:0 0 40px;border:1px solid rgba(255,255,255,.24);border-radius:7px;background:rgba(0,0,0,.2);display:flex;align-items:center;justify-content:center;padding:5px 8px;text-align:center;font-size:14px;font-weight:700}
     #boardWrap{position:relative;flex:1 1 auto;min-height:0;border:2px solid #161a15;border-radius:8px;overflow:hidden;background:#354333}
@@ -25,17 +25,17 @@
     .cabin{background:linear-gradient(145deg,#8b7358,#6f5944)}
     .deepForest{background:linear-gradient(145deg,#344831,#243724)}
 
-    .cell.reachable{box-shadow:inset 0 0 0 4px #f4d35e;filter:brightness(1.18) saturate(1.08)}
-    .cell.reachable::before{content:"";position:absolute;inset:4px;background:rgba(255,239,150,.13);pointer-events:none;z-index:1}
-    .cell.selected:not(.current){box-shadow:inset 0 0 0 3px #fff}
-    .cell.current{box-shadow:inset 0 0 0 4px #fff,inset 0 0 0 7px #1a1a1a}
+    .cell.reachable{box-shadow:inset 0 0 0 4px #f4d35e;filter:brightness(1.15) saturate(1.08)}
+    .cell.reachable::before{content:"";position:absolute;inset:4px;background:rgba(255,239,150,.16);pointer-events:none;z-index:1}
+    .cell.selected:not(.current):not(.reachable){box-shadow:inset 0 0 0 3px #fff}
+    .cell.current{background:linear-gradient(145deg,#4d5264,#343846);box-shadow:inset 0 0 0 4px #e9edf7,inset 0 0 0 7px #232631;filter:none}
 
     .terrainLabel{position:absolute;left:4px;bottom:3px;font-size:11px;font-weight:700;line-height:1;text-shadow:0 1px 2px #000;opacity:.9;z-index:3}
     .poi{position:absolute;left:50%;top:48%;transform:translate(-50%,-50%);font-size:20px;line-height:1;filter:drop-shadow(0 1px 1px rgba(0,0,0,.65));pointer-events:none;z-index:4}
     .animal{font-size:24px}
 
-    .pawn{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:28px;height:28px;border-radius:50%;background:#fff;border:4px solid #171717;box-shadow:0 0 0 3px #f4d35e,0 3px 7px rgba(0,0,0,.8);z-index:7;pointer-events:none}
-    .pawn::after{content:"";position:absolute;left:50%;top:50%;width:8px;height:8px;border-radius:50%;background:#171717;transform:translate(-50%,-50%)}
+    .pawn{position:absolute;left:50%;top:53%;transform:translate(-50%,-50%);z-index:7;pointer-events:none;color:#fff;font-family:Georgia,"Times New Roman",serif;font-size:38px;font-weight:700;line-height:1;text-shadow:0 2px 2px #000,0 0 5px rgba(0,0,0,.85)}
+    .pawnClock{position:absolute;left:50%;top:7px;transform:translateX(-50%);z-index:7;pointer-events:none;min-width:54px;padding:2px 5px;border:2px solid #fff;border-radius:8px;background:#17191f;color:#fff;font-size:16px;font-weight:900;line-height:1.1;text-align:center;box-shadow:0 2px 5px rgba(0,0,0,.65);white-space:nowrap}
 
     #shade{position:absolute;inset:0;pointer-events:none;z-index:20;transition:background .3s ease}
     html[data-dd-phase="朝"] #shade{background:rgba(255,236,176,.03)}
@@ -58,12 +58,12 @@
   <header>
     <h1>周辺マップ</h1>
     <div class="headerRight">
-      <div id="clock" data-dd-clock></div>
+      <div id="dayPhase"></div>
       <a href="DD_top.html">小屋画面へ</a>
     </div>
   </header>
 
-  <div id="message">黄色い枠のマスをタップして移動する。</div>
+  <div id="message">黄色いマスをタップして移動する。</div>
 
   <div id="boardWrap">
     <div id="board" aria-label="周辺マップ"></div>
@@ -77,7 +77,7 @@
     <div id="actions"></div>
   </div>
 
-  <div id="legend">◎ 自分　黄色枠 移動可能　🦌🐇🐦 獲物　✦ 採取場所</div>
+  <div id="legend">♟ 自分　黄色 移動可能　🦌🐇🐦 獲物　✦ 採取場所</div>
 </div>
 
 <script src="DD_time.js"></script>
