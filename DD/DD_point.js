@@ -52,11 +52,19 @@
     return pool;
   }
 
+  function setDrawnInteractivity(card) {
+    const actionable = Boolean(card && card.type !== 'none');
+    drawn.style.pointerEvents = actionable ? 'auto' : 'none';
+    drawn.style.cursor = actionable ? 'pointer' : 'default';
+    drawn.tabIndex = actionable ? 0 : -1;
+    drawn.setAttribute('aria-disabled', actionable ? 'false' : 'true');
+  }
+
   function clearCardView() {
     currentCard = null;
     acted = false;
     drawn.style.display = 'none';
-    drawn.style.cursor = 'default';
+    setDrawnInteractivity(null);
     eventText.textContent = 'カードをめくる。';
     eventDetail.textContent = '';
     result.textContent = '';
@@ -144,20 +152,22 @@
     if (currentCard.type === 'hunt') return doHunt(currentCard);
     if (currentCard.type === 'fish') return doFish(currentCard);
     if (currentCard.type === 'enemy') return doBattle(currentCard);
-    // 「何もない」カードは押しても何も起こらない。
   }
 
   function drawCard() {
-    if (currentCard) clearCardView();
+    clearCardView();
 
     const pool = buildDrawPool();
     const card = pickRandom(pool);
-    if (!card) return;
+    if (!card) {
+      refreshDeck();
+      return;
+    }
 
     currentCard = clone(card);
     acted = false;
     drawn.style.display = 'flex';
-    drawn.style.cursor = currentCard.type === 'none' ? 'default' : 'pointer';
+    setDrawnInteractivity(currentCard);
     cardIcon.textContent = currentCard.icon || '';
     cardTitle.textContent = currentCard.title || '何もない';
     cardSub.textContent = currentCard.type === 'none' ? '空白札' : currentCard.type === 'enemy' ? '遭遇' : '';
@@ -170,7 +180,10 @@
   placeName.textContent = config.placeNames?.[place] || config.placeNames?.[zone] || '探索地点';
   placeType.textContent = zoneConfig.label || zone;
 
-  deckButton.addEventListener('click', drawCard);
+  deckButton.addEventListener('click', event => {
+    event.preventDefault();
+    drawCard();
+  });
   drawn.addEventListener('click', actOnCurrentCard);
   drawn.addEventListener('keydown', event => {
     if (event.key === 'Enter' || event.key === ' ') {
