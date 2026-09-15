@@ -59,7 +59,7 @@
   }
 
   function setDrawnInteractivity(card) {
-    const actionable = Boolean(card && card.type !== 'none');
+    const actionable = Boolean(card && card.type !== 'none' && !acted);
     drawn.style.pointerEvents = actionable ? 'auto' : 'none';
     drawn.style.cursor = actionable ? 'pointer' : 'default';
     drawn.tabIndex = actionable ? 0 : -1;
@@ -70,7 +70,15 @@
     drawn.classList.remove('tapFeedback');
     void drawn.offsetWidth;
     drawn.classList.add('tapFeedback');
-    setTimeout(() => drawn.classList.remove('tapFeedback'), 150);
+    setTimeout(() => drawn.classList.remove('tapFeedback'), 170);
+  }
+
+  function pulseInventory() {
+    if (!inventoryButton) return;
+    inventoryButton.classList.remove('receive');
+    void inventoryButton.offsetWidth;
+    inventoryButton.classList.add('receive');
+    setTimeout(() => inventoryButton.classList.remove('receive'), 260);
   }
 
   function animateToInventory(card) {
@@ -78,23 +86,17 @@
 
     const source = drawn.getBoundingClientRect();
     const target = inventoryButton.getBoundingClientRect();
-    if (!source.width || !target.width) return;
-
-    const width = 104;
-    const height = 144;
-    const left = source.left + (source.width - width) / 2;
-    const top = source.top + (source.height - height) / 2;
-    const sourceCenterX = left + width / 2;
-    const sourceCenterY = top + height / 2;
-    const targetCenterX = target.left + target.width / 2;
-    const targetCenterY = target.top + target.height / 2;
-    const dx = targetCenterX - sourceCenterX;
-    const dy = targetCenterY - sourceCenterY;
+    if (!source.width || !source.height || !target.width || !target.height) {
+      pulseInventory();
+      return;
+    }
 
     const fly = document.createElement('div');
     fly.className = 'inventoryFly';
-    fly.style.left = `${left}px`;
-    fly.style.top = `${top}px`;
+    fly.style.left = `${source.left}px`;
+    fly.style.top = `${source.top}px`;
+    fly.style.width = `${source.width}px`;
+    fly.style.height = `${source.height}px`;
 
     const icon = document.createElement('div');
     icon.className = 'flyIcon';
@@ -107,26 +109,48 @@
     fly.append(icon, title);
     document.body.appendChild(fly);
 
-    requestAnimationFrame(() => {
-      requestAnimationFrame(() => {
-        fly.style.transform = `translate(${dx}px,${dy}px) scale(.2) rotate(7deg)`;
-        fly.style.opacity = '.12';
+    const sourceCenterX = source.left + source.width / 2;
+    const sourceCenterY = source.top + source.height / 2;
+    const targetCenterX = target.left + target.width / 2;
+    const targetCenterY = target.top + target.height / 2;
+    const dx = targetCenterX - sourceCenterX;
+    const dy = targetCenterY - sourceCenterY;
+
+    if (typeof fly.animate === 'function') {
+      const animation = fly.animate([
+        { transform: 'translate(0,0) scale(1) rotate(0deg)', opacity: 1, offset: 0 },
+        { transform: `translate(${dx * .35}px,${dy * .28}px) scale(.9) rotate(-4deg)`, opacity: 1, offset: .32 },
+        { transform: `translate(${dx}px,${dy}px) scale(.16) rotate(8deg)`, opacity: .15, offset: 1 }
+      ], {
+        duration: 720,
+        easing: 'cubic-bezier(.22,.72,.22,1)',
+        fill: 'forwards'
       });
-    });
+      animation.onfinish = () => fly.remove();
+      animation.oncancel = () => fly.remove();
+    } else {
+      fly.style.transition = 'transform .72s cubic-bezier(.22,.72,.22,1),opacity .72s ease';
+      requestAnimationFrame(() => {
+        fly.style.transform = `translate(${dx}px,${dy}px) scale(.16) rotate(8deg)`;
+        fly.style.opacity = '.15';
+      });
+      setTimeout(() => fly.remove(), 760);
+    }
 
-    setTimeout(() => {
-      inventoryButton.classList.add('receive');
-      setTimeout(() => inventoryButton.classList.remove('receive'), 180);
-    }, 360);
+    setTimeout(pulseInventory, 520);
+  }
 
-    setTimeout(() => fly.remove(), 520);
+  function markCardAcquired() {
+    drawn.classList.add('acquired');
+    cardSub.textContent = '取得済み';
+    setDrawnInteractivity(currentCard);
   }
 
   function clearCardView() {
     currentCard = null;
     acted = false;
     drawn.style.display = 'none';
-    drawn.classList.remove('tapFeedback');
+    drawn.classList.remove('tapFeedback', 'acquired');
     setDrawnInteractivity(null);
     eventText.textContent = 'カードをめくる。';
     eventDetail.textContent = '';
@@ -157,21 +181,24 @@
     const name = item?.name || card.title || 'アイテム';
     DDItems?.add?.(card.itemId, 1);
     animateToInventory(card);
+    markCardAcquired();
     result.textContent = `${name}を1個、手に入れた。`;
-    eventDetail.textContent = '山札をタップすると次のカード。';
+    eventDetail.textContent = 'アイテムに入れた。山札をタップすると次のカード。';
   }
 
   function doHunt(card) {
     if (acted) return;
     acted = true;
+    setDrawnInteractivity(currentCard);
     const back = `DD_point.html?zone=${encodeURIComponent(zone)}&place=${encodeURIComponent(place)}`;
     const target = `DD_hunt.html?animal=${encodeURIComponent(card.animalId)}&from=point&return=${encodeURIComponent(back)}`;
-    setTimeout(() => { location.href = target; }, 120);
+    setTimeout(() => { location.href = target; }, 150);
   }
 
   function doFish(card) {
     if (acted) return;
     acted = true;
+    setDrawnInteractivity(currentCard);
     const attack = 1;
     const hp = Math.max(1, Number(card.fishHp || 2));
     const minutes = Math.max(1, Number(card.minutes || 10));
@@ -179,11 +206,13 @@
     if (hp - attack <= 0) {
       DDItems?.add?.('river_fish', 1);
       animateToInventory({ ...card, title: '川魚', icon: card.icon || '🐟' });
+      markCardAcquired();
       result.textContent = '川魚を1匹、手に入れた。';
+      eventDetail.textContent = 'アイテムに入れた。山札をタップすると次のカード。';
     } else {
       result.textContent = '素手で追ったが魚は逃げた。';
+      eventDetail.textContent = '山札をタップすると次のカード。';
     }
-    eventDetail.textContent = '山札をタップすると次のカード。';
   }
 
   function doBattle(card) {
