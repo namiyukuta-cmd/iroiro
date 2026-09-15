@@ -226,16 +226,13 @@
     arrow.style.transform='translateY(-50%)';
   }
 
-  function escapeAndSearch(message){
+  function endHuntAndReturn(message){
     ready=false;
     show(message);
     animal.style.opacity='0';
     shootArea.style.display='none';
-    setTimeout(()=>{
-      animal.style.display='none';
-      if(arrowsLeft>0) startSearch();
-      else guide.textContent='矢がない';
-    },900);
+    searchText.textContent='獲物を取れなかった。小屋へ帰る。';
+    setTimeout(()=>{ location.href='DD_top.html'; },1200);
   }
 
   function release(e){
@@ -254,7 +251,7 @@
     resetBow();
 
     if(!hit){
-      escapeAndSearch('外れ　逃げた');
+      endHuntAndReturn('外れ　逃げた');
       return;
     }
 
@@ -275,7 +272,7 @@
       return;
     }
 
-    escapeAndSearch(`命中 -${arrowDamage}　逃げた`);
+    endHuntAndReturn(`命中 -${arrowDamage}　逃げた`);
   }
 
   searchWindow.addEventListener('pointerdown',e=>{
