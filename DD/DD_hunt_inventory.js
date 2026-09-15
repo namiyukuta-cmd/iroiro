@@ -6,7 +6,7 @@
 
   const params = new URLSearchParams(location.search);
   const returnUrl = params.get('return') || '';
-  const fromPoint = Boolean(returnUrl);
+  const fromPoint = params.get('from') === 'point' && Boolean(returnUrl);
 
   const meatByAnimal = {
     '鹿': 'meat_deer',
@@ -26,7 +26,7 @@
     if (timingWrap) timingWrap.style.display = 'none';
   }
 
-  function returnToDeck(message, delay = 900) {
+  function returnToDeck(message, delay = 1000) {
     if (!fromPoint || returning) return;
     returning = true;
     hideHuntWindow();
@@ -56,24 +56,10 @@
     itemDb.add(itemId, 1);
     awarded = true;
 
-    returnToDeck(`${item?.name || `${animalName}肉`}を手に入れた。`, 1000);
-  }
-
-  function checkMiss() {
-    if (!fromPoint || awarded || returning || !searchTextEl) return;
-    const text = searchTextEl.textContent || '';
-    if (!text.includes('逃げた')) return;
-    returnToDeck('獲物は逃げた。', 650);
+    returnToDeck(`${item?.name || `${animalName}肉`}を手に入れた。`);
   }
 
   const rewardObserver = new MutationObserver(checkReward);
   rewardObserver.observe(nameEl, { childList: true, subtree: true, characterData: true });
-
-  if (searchTextEl) {
-    const missObserver = new MutationObserver(checkMiss);
-    missObserver.observe(searchTextEl, { childList: true, subtree: true, characterData: true });
-  }
-
   checkReward();
-  checkMiss();
 })();
