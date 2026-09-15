@@ -3,6 +3,9 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no" />
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+  <meta http-equiv="Pragma" content="no-cache" />
+  <meta http-equiv="Expires" content="0" />
   <title>DD - 狩り</title>
   <style>
     *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
@@ -15,20 +18,19 @@
     #clock{font-size:11px;font-weight:800;white-space:nowrap}
     #stats{font-size:12px;text-align:right;line-height:1.45;max-width:72%}
 
-    #searchWindow{position:absolute;z-index:10;width:210px;height:210px;left:calc(50% - 105px);top:20%;overflow:hidden;border:4px solid #d8d2c6;border-radius:50%;background:#55604e;box-shadow:0 0 0 7px #27231e,0 10px 25px rgba(0,0,0,.45),inset 0 0 22px rgba(0,0,0,.45);transition:left .46s ease,top .46s ease}
+    #searchWindow{position:absolute;z-index:10;width:230px;height:230px;left:calc(50% - 115px);top:20%;overflow:hidden;border:4px solid #d8d2c6;border-radius:50%;background:#55604e;box-shadow:0 0 0 7px #27231e,0 10px 25px rgba(0,0,0,.45),inset 0 0 22px rgba(0,0,0,.45);transition:left .46s ease,top .46s ease}
     #scene{position:absolute;inset:0;background:linear-gradient(#788071 0 44%,#46513f 44% 100%)}
     #scene:before,#scene:after{content:"";position:absolute;bottom:0;width:35px;height:92%;background:#303a2d;border-radius:50% 50% 0 0}
     #scene:before{left:13%}#scene:after{right:12%}
     .bush{position:absolute;bottom:0;width:74px;height:52px;border-radius:50% 50% 0 0;background:#364230}.bush.a{left:31%}.bush.b{right:23%;height:63px}
 
-    #animal{display:none;position:absolute;left:63%;top:52%;width:112px;transform:translate(-50%,-50%);transition:transform .22s ease,opacity .22s ease;opacity:1;text-align:center;transform-origin:50% 85%}
-    #animalVisual{width:112px;height:92px;overflow:hidden;border-radius:12px;background:rgba(245,242,232,.9);box-shadow:0 2px 8px rgba(0,0,0,.28)}
-    #animalImage{display:none;width:100%;height:100%;object-fit:cover;object-position:50% 50%;transform:scale(var(--animal-image-scale,1));transform-origin:center}
-    #animalGlyph{display:none;width:100%;height:100%;place-items:center;font-size:48px;line-height:1}
-    #animalName{display:block;margin-top:7px;font-size:13px;font-weight:800;text-shadow:0 1px 3px #000}
+    #animal{display:none;position:absolute;left:50%;top:41%;width:174px;height:138px;transform:translate(-50%,-50%);transition:transform .22s ease,opacity .22s ease;opacity:1;text-align:center;transform-origin:50% 85%;z-index:5;pointer-events:none}
+    #animalVisual{width:100%;height:100%;overflow:hidden;background:transparent;box-shadow:none}
+    #animalImage{display:none;width:100%;height:100%;object-fit:cover;object-position:50% 50%;transform:scale(var(--animal-image-scale,1));transform-origin:28% 36%;mix-blend-mode:multiply;filter:saturate(.96) contrast(1.04)}
+    #animalGlyph{display:none;width:100%;height:100%;place-items:center;font-size:62px;line-height:1}
+    #animalName{display:block;position:absolute;z-index:14;left:18px;right:18px;bottom:49px;text-align:center;font-size:16px;font-weight:900;line-height:1;text-shadow:0 2px 4px #000;pointer-events:none}
     #animal.hit{animation:animalHit .26s ease}
     #animal.dead{transform:translate(-50%,-43%) rotate(72deg);opacity:.88}
-    #animal.dead #animalName{font-size:14px}
     @keyframes animalHit{
       0%{transform:translate(-50%,-50%)}
       25%{transform:translate(-58%,-50%) rotate(-5deg)}
@@ -36,11 +38,11 @@
       100%{transform:translate(-50%,-50%)}
     }
 
-    #timingWrap{display:none;position:absolute;z-index:15;left:22px;right:22px;bottom:22px;height:20px;border:2px solid rgba(255,255,255,.95);border-radius:10px;background:rgba(20,20,20,.78);overflow:hidden;box-shadow:0 1px 5px rgba(0,0,0,.5)}
+    #timingWrap{display:none;position:absolute;z-index:15;left:24px;right:24px;bottom:20px;height:20px;border:2px solid rgba(255,255,255,.95);border-radius:10px;background:rgba(20,20,20,.78);overflow:hidden;box-shadow:0 1px 5px rgba(0,0,0,.5)}
     #hitZone{position:absolute;top:0;bottom:0;background:rgba(210,210,210,.58)}
     #timingMarker{position:absolute;top:-2px;bottom:-2px;width:5px;background:#fff;left:0;box-shadow:0 0 4px #000}
 
-    #searchText{position:absolute;left:4%;right:4%;top:49%;text-align:center;font-weight:800;font-size:15px;line-height:1.35}
+    #searchText{position:absolute;left:4%;right:4%;top:50%;text-align:center;font-weight:800;font-size:15px;line-height:1.35}
 
     #shootArea{position:absolute;left:0;right:0;bottom:0;height:44%;display:none}
     #bow{position:absolute;left:32px;top:37%;width:82px;height:175px;transform:translateY(-50%);border:6px solid #8b6842;border-right:none;border-radius:100% 0 0 100%}
@@ -68,8 +70,8 @@
         <img id="animalImage" alt="" />
         <span id="animalGlyph"></span>
       </div>
-      <span id="animalName"></span>
     </div>
+    <span id="animalName"></span>
     <div id="timingWrap">
       <div id="hitZone"></div>
       <div id="timingMarker"></div>
