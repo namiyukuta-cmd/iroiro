@@ -1,0 +1,187 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no" />
+  <title>DD - 森</title>
+  <style>
+    *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
+    html,body{margin:0;width:100%;min-height:100%;background:#172018;color:#eee;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+    body{min-height:100dvh}
+    #game{width:min(100%,520px);min-height:100dvh;margin:0 auto;padding:max(14px,env(safe-area-inset-top)) 14px max(18px,env(safe-area-inset-bottom));background:linear-gradient(#263225,#151b15)}
+    header{display:flex;align-items:center;justify-content:space-between;gap:12px;padding-bottom:12px;border-bottom:1px solid #778071}
+    h1{margin:0;font-size:24px}
+    a{color:#fff;text-decoration:none;font-weight:700}
+    #status{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:14px 0 10px}
+    .panel{padding:10px 12px;border:1px solid #87907f;border-radius:10px;background:rgba(0,0,0,.22);font-size:14px;line-height:1.5}
+    #message{min-height:46px;margin-bottom:12px;padding:10px 12px;border-radius:10px;background:rgba(255,255,255,.08);font-weight:700;display:flex;align-items:center}
+    #board{display:grid;grid-template-columns:repeat(3,1fr);gap:9px}
+    .card{position:relative;aspect-ratio:1/1.18;border:2px solid #b7b5a4;border-radius:12px;background:#3e4d3a;color:#fff;font:inherit;font-weight:800;font-size:16px;overflow:hidden;cursor:pointer;touch-action:manipulation}
+    .card::before{content:'森';position:absolute;inset:0;display:grid;place-items:center;font-size:18px;letter-spacing:.2em;background:linear-gradient(145deg,#4a5a43,#293426)}
+    .card.open,.card.matched{background:#eee9d8;color:#222}
+    .card.open::before,.card.matched::before{display:none}
+    .card.matched{opacity:.58;border-style:dashed}
+    .card:disabled{cursor:default}
+    #resultBox{margin-top:14px;padding:12px;border:1px solid #87907f;border-radius:10px;background:rgba(0,0,0,.22);line-height:1.65}
+    #finish{display:none;width:100%;margin-top:12px;min-height:48px;border:2px solid #eee;border-radius:10px;background:#eee;color:#171717;font:inherit;font-weight:800}
+  </style>
+</head>
+<body>
+<div id="game">
+  <header>
+    <h1>森</h1>
+    <a href="DD_top.html">小屋へ戻る</a>
+  </header>
+
+  <div id="status">
+    <div class="panel">探索回数<br><strong><span id="turn">0</span> / <span id="maxTurns">10</span></strong></div>
+    <div class="panel">見つけたペア<br><strong><span id="pairs">0</span></strong></div>
+  </div>
+
+  <div id="message">同じものを2枚見つける。</div>
+  <div id="board" aria-label="森の探索"></div>
+
+  <div id="resultBox">
+    木の実：<span id="count-nuts">0</span><br>
+    キノコ：<span id="count-mushroom">0</span><br>
+    木の枝：<span id="count-branch">0</span>
+  </div>
+
+  <button id="finish" type="button" onclick="location.href='DD_top.html'">探索を終えて小屋へ戻る</button>
+</div>
+
+<script src="DD_survival_config.js"></script>
+<script>
+(() => {
+  const config=window.DDSurvivalConfig||{};
+  const maxTurns=Math.max(1,Number(config.exploration?.maxTurns||10));
+  document.getElementById('maxTurns').textContent=maxTurns;
+
+  const itemDefs=[
+    {key:'nuts',label:'木の実'},
+    {key:'mushroom',label:'キノコ'},
+    {key:'branch',label:'木の枝'}
+  ];
+
+  const pairDefs=[
+    {pairId:'nuts-1',key:'nuts',label:'木の実'},
+    {pairId:'nuts-2',key:'nuts',label:'木の実'},
+    {pairId:'mushroom-1',key:'mushroom',label:'キノコ'},
+    {pairId:'mushroom-2',key:'mushroom',label:'キノコ'},
+    {pairId:'branch-1',key:'branch',label:'木の枝'},
+    {pairId:'branch-2',key:'branch',label:'木の枝'}
+  ];
+
+  const deck=pairDefs.flatMap(p=>[
+    {...p,cardId:p.pairId+'-a'},
+    {...p,cardId:p.pairId+'-b'}
+  ]);
+
+  for(let i=deck.length-1;i>0;i--){
+    const j=Math.floor(Math.random()*(i+1));
+    [deck[i],deck[j]]=[deck[j],deck[i]];
+  }
+
+  const board=document.getElementById('board');
+  const turnEl=document.getElementById('turn');
+  const pairsEl=document.getElementById('pairs');
+  const message=document.getElementById('message');
+  const finish=document.getElementById('finish');
+  const counts={nuts:0,mushroom:0,branch:0};
+
+  let turns=0;
+  let pairCount=0;
+  let first=null;
+  let second=null;
+  let locked=false;
+  let ended=false;
+
+  function updateCounts(){
+    itemDefs.forEach(item=>{
+      document.getElementById('count-'+item.key).textContent=counts[item.key];
+    });
+  }
+
+  function endExploration(text){
+    ended=true;
+    locked=true;
+    message.textContent=text;
+    finish.style.display='block';
+    board.querySelectorAll('.card').forEach(btn=>btn.disabled=true);
+  }
+
+  function checkEnd(){
+    if(pairCount===pairDefs.length){
+      endExploration('森で見つけられるペアをすべて見つけた。');
+      return true;
+    }
+    if(turns>=maxTurns){
+      endExploration('10回の探索が終わった。');
+      return true;
+    }
+    return false;
+  }
+
+  function closeCards(){
+    if(first) first.button.classList.remove('open');
+    if(second) second.button.classList.remove('open');
+    first=null;
+    second=null;
+    locked=false;
+    checkEnd();
+  }
+
+  function choose(entry,button){
+    if(ended||locked||button.classList.contains('open')||button.classList.contains('matched'))return;
+
+    button.classList.add('open');
+    button.textContent=entry.label;
+
+    if(!first){
+      first={entry,button};
+      return;
+    }
+
+    second={entry,button};
+    locked=true;
+    turns++;
+    turnEl.textContent=turns;
+
+    if(first.entry.pairId===second.entry.pairId){
+      first.button.classList.remove('open');
+      second.button.classList.remove('open');
+      first.button.classList.add('matched');
+      second.button.classList.add('matched');
+      first.button.disabled=true;
+      second.button.disabled=true;
+      counts[entry.key]++;
+      pairCount++;
+      pairsEl.textContent=pairCount;
+      updateCounts();
+      message.textContent=`${entry.label}を見つけた。`;
+      first=null;
+      second=null;
+      locked=false;
+      checkEnd();
+    }else{
+      message.textContent='違う。';
+      setTimeout(closeCards,700);
+    }
+  }
+
+  deck.forEach(entry=>{
+    const button=document.createElement('button');
+    button.type='button';
+    button.className='card';
+    button.setAttribute('aria-label','伏せられたカード');
+    button.addEventListener('click',()=>choose(entry,button));
+    board.appendChild(button);
+  });
+
+  document.addEventListener('contextmenu',e=>e.preventDefault());
+  document.addEventListener('selectstart',e=>e.preventDefault());
+  updateCounts();
+})();
+</script>
+</body>
+</html>
