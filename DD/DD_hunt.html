@@ -20,11 +20,27 @@
     .forestScene:before{left:15%}.forestScene:after{right:12%}
     .bush{position:absolute;bottom:0;width:85px;height:55px;border-radius:50% 50% 0 0;background:#34402f}
     .bush.a{left:35%}.bush.b{right:25%;height:70px}
-    #animal{display:none;position:absolute;left:68%;top:58%;width:78px;height:45px;border-radius:48% 48% 42% 42%;background:#745d43;transform:translate(-50%,-50%)}
-    #animal:before{content:"";position:absolute;right:-19px;top:3px;width:27px;height:27px;border-radius:50%;background:#745d43}
-    #animal:after{content:"";position:absolute;right:-21px;top:11px;width:6px;height:6px;border-radius:50%;background:#111}
-    .leg{position:absolute;bottom:-23px;width:6px;height:26px;background:#745d43}.leg.a{left:17px}.leg.b{right:14px}
-    #searchText{position:absolute;left:0;right:0;top:51%;text-align:center;font-weight:800;font-size:16px}
+
+    #animal{display:none;position:absolute;left:68%;top:58%;transform:translate(-50%,-50%);transition:transform .18s ease,opacity .18s ease;opacity:1}
+    #animalArt{position:relative;display:block}
+    #animalName{position:absolute;left:50%;top:calc(100% + 28px);transform:translateX(-50%);white-space:nowrap;font-size:13px;font-weight:800;text-shadow:0 1px 3px #000}
+
+    #animal.deer #animalArt{width:78px;height:45px;border-radius:48% 48% 42% 42%;background:#745d43}
+    #animal.deer #animalArt:before{content:"";position:absolute;right:-19px;top:3px;width:27px;height:27px;border-radius:50%;background:#745d43}
+    #animal.deer #animalArt:after{content:"";position:absolute;right:-24px;top:-14px;width:22px;height:20px;border-left:3px solid #745d43;border-right:3px solid #745d43;border-radius:8px 8px 0 0}
+    #animal.deer .leg{display:block;position:absolute;bottom:-23px;width:6px;height:26px;background:#745d43}.deer .leg.a{left:17px}.deer .leg.b{right:14px}
+
+    #animal.rabbit #animalArt{width:50px;height:34px;border-radius:52% 48% 45% 45%;background:#8a7964}
+    #animal.rabbit #animalArt:before{content:"";position:absolute;right:-12px;top:1px;width:22px;height:22px;border-radius:50%;background:#8a7964}
+    #animal.rabbit #animalArt:after{content:"";position:absolute;right:-9px;top:-24px;width:14px;height:28px;border-radius:50% 50% 30% 30%;background:#8a7964;box-shadow:9px 2px 0 #8a7964}
+    #animal.rabbit .leg{display:block;position:absolute;bottom:-12px;width:7px;height:15px;background:#8a7964}.rabbit .leg.a{left:11px}.rabbit .leg.b{right:10px}
+
+    #animal.bird #animalArt{width:42px;height:27px;border-radius:55% 48% 48% 55%;background:#706d64}
+    #animal.bird #animalArt:before{content:"";position:absolute;right:-12px;top:4px;width:20px;height:20px;border-radius:50%;background:#706d64}
+    #animal.bird #animalArt:after{content:"";position:absolute;right:-22px;top:10px;border-left:12px solid #c5a766;border-top:5px solid transparent;border-bottom:5px solid transparent}
+    #animal.bird .leg{display:none}
+
+    #searchText{position:absolute;left:4%;right:4%;top:51%;text-align:center;font-weight:800;font-size:15px;line-height:1.35}
 
     #shootArea{position:absolute;left:0;right:0;bottom:0;height:48%;display:none}
     #bow{position:absolute;left:32px;top:40%;width:82px;height:175px;transform:translateY(-50%);border:6px solid #8b6842;border-right:none;border-radius:100% 0 0 100%}
@@ -33,7 +49,7 @@
     #arrow:after{content:"";position:absolute;right:-10px;top:-5px;border-left:12px solid #ddd;border-top:7px solid transparent;border-bottom:7px solid transparent}
 
     #timingWrap{position:absolute;left:8%;right:8%;bottom:88px;height:30px;border:2px solid #eee;background:#292929;overflow:hidden}
-    #hitZone{position:absolute;left:42%;width:16%;top:0;bottom:0;background:#8d8d8d}
+    #hitZone{position:absolute;top:0;bottom:0;background:#8d8d8d}
     #timingMarker{position:absolute;top:-3px;bottom:-3px;width:5px;background:#fff;left:0}
     #guide{position:absolute;left:0;right:0;bottom:35px;text-align:center;font-weight:800;text-shadow:0 1px 3px #000}
     #result{position:absolute;z-index:40;left:50%;top:55%;transform:translate(-50%,-50%);padding:12px 18px;background:rgba(0,0,0,.82);border:1px solid #aaa;display:none;font-size:20px;white-space:nowrap}
@@ -48,7 +64,7 @@
       <div class="forestScene"><i class="bush a"></i><i class="bush b"></i></div>
       <div class="forestScene"><i class="bush a"></i><i class="bush b"></i></div>
       <div class="forestScene"><i class="bush a"></i><i class="bush b"></i></div>
-      <div class="forestScene"><i class="bush a"></i><i class="bush b"></i><div id="animal"><i class="leg a"></i><i class="leg b"></i></div></div>
+      <div class="forestScene"><i class="bush a"></i><i class="bush b"></i><div id="animal"><span id="animalArt"><i class="leg a"></i><i class="leg b"></i></span><span id="animalName"></span></div></div>
     </div>
   </div>
   <div id="searchText">獲物を探している…</div>
@@ -66,6 +82,11 @@
 (() => {
   const config=window.DDHuntConfig||{};
   const equipment=config.equipment||{};
+  const animals=Array.isArray(config.animals)&&config.animals.length?config.animals:[
+    {id:'deer',name:'鹿',hp:3,timingZoneWidth:22},
+    {id:'rabbit',name:'ウサギ',hp:2,timingZoneWidth:16},
+    {id:'bird',name:'鳥',hp:1,timingZoneWidth:8}
+  ];
   const bowInfo=equipment.bow||{};
   const stringInfo=equipment.bowstring||{};
   const arrowInfo=equipment.arrows||{};
@@ -73,14 +94,17 @@
   const stats=document.getElementById('stats');
   const track=document.getElementById('forestTrack');
   const animal=document.getElementById('animal');
+  const animalName=document.getElementById('animalName');
+  const searchWindow=document.getElementById('searchWindow');
   const searchText=document.getElementById('searchText');
   const shootArea=document.getElementById('shootArea');
   const game=document.getElementById('game');
   const string=document.getElementById('string');
   const arrow=document.getElementById('arrow');
-  const timingWrap=document.getElementById('timingWrap');
   const marker=document.getElementById('timingMarker');
+  const hitZone=document.getElementById('hitZone');
   const result=document.getElementById('result');
+  const guide=document.getElementById('guide');
 
   let arrowsLeft=Number(arrowInfo.count||3);
   let ready=false;
@@ -90,9 +114,25 @@
   let markerDir=1;
   let markerRaf=0;
   let pullRaf=0;
+  let currentAnimalIndex=0;
+  let currentHp=0;
+  let swipeStartX=null;
+
+  function currentAnimal(){return animals[currentAnimalIndex]||animals[0]}
 
   function updateStats(){
     stats.innerHTML=`${bowInfo.name||'弓'}：${bowInfo.description||''}<br>${stringInfo.name||'弓弦'}：${stringInfo.description||''}<br>${arrowInfo.name||'矢'}：残り ${arrowsLeft}本`;
+  }
+
+  function updateAnimalDisplay(resetHp=true){
+    const data=currentAnimal();
+    if(resetHp) currentHp=Number(data.hp||1);
+    animal.className=data.id||'';
+    animalName.textContent=data.name||'獲物';
+    const width=Math.max(4,Math.min(60,Number(data.timingZoneWidth||16)));
+    hitZone.style.width=width+'%';
+    hitZone.style.left=((100-width)/2)+'%';
+    searchText.textContent=`${data.name||'獲物'}　HP ${currentHp}/${data.hp||1}　←→ スワイプで変更`;
   }
 
   function show(text){
@@ -122,14 +162,33 @@
         track.style.transition='transform .5s ease-out';
         track.style.transform='translateX(-75%)';
         setTimeout(()=>{
+          currentAnimalIndex=Math.floor(Math.random()*animals.length);
+          updateAnimalDisplay(true);
           animal.style.display='block';
-          searchText.textContent='獲物を見つけた';
           shootArea.style.display='block';
           ready=true;
         },520);
       },300);
     }
     setTimeout(move,350);
+  }
+
+  function switchAnimal(direction){
+    if(!ready||pulling||animals.length<2)return;
+    ready=false;
+    animal.style.opacity='0';
+    animal.style.transform=`translate(${direction>0?80:-180}%,-50%)`;
+    setTimeout(()=>{
+      currentAnimalIndex=(currentAnimalIndex+direction+animals.length)%animals.length;
+      updateAnimalDisplay(true);
+      animal.style.transition='none';
+      animal.style.transform=`translate(${direction>0?-180:80}%,-50%)`;
+      animal.offsetHeight;
+      animal.style.transition='transform .18s ease,opacity .18s ease';
+      animal.style.opacity='1';
+      animal.style.transform='translate(-50%,-50%)';
+      setTimeout(()=>{ready=true},190);
+    },180);
   }
 
   function animateMarker(){
@@ -172,16 +231,48 @@
     arrowsLeft=Math.max(0,arrowsLeft-1);
     updateStats();
 
-    const hit=markerPos>=42&&markerPos<=58;
-    show(hit?'命中':'外れ');
+    const data=currentAnimal();
+    const width=Math.max(4,Math.min(60,Number(data.timingZoneWidth||16)));
+    const min=(100-width)/2;
+    const max=min+width;
+    const hit=markerPos>=min&&markerPos<=max;
+
+    if(hit){
+      currentHp=Math.max(0,currentHp-1);
+      if(currentHp<=0){
+        show(`${data.name}を仕留めた`);
+        searchText.textContent=`${data.name}　HP 0/${data.hp||1}`;
+        ready=false;
+        shootArea.style.display='none';
+      }else{
+        show('命中');
+        updateAnimalDisplay(false);
+      }
+    }else{
+      show('外れ');
+    }
+
     string.style.transform='translateY(-50%)';
     arrow.style.transform='translateY(-50%)';
 
-    if(arrowsLeft<=0){
+    if(arrowsLeft<=0&&currentHp>0){
       ready=false;
-      document.getElementById('guide').textContent='矢がない';
+      guide.textContent='矢がない';
     }
   }
+
+  searchWindow.addEventListener('pointerdown',e=>{
+    if(!ready||pulling)return;
+    swipeStartX=e.clientX;
+  });
+  searchWindow.addEventListener('pointerup',e=>{
+    if(swipeStartX===null||!ready||pulling)return;
+    const dx=e.clientX-swipeStartX;
+    swipeStartX=null;
+    if(Math.abs(dx)<45)return;
+    switchAnimal(dx<0?1:-1);
+  });
+  searchWindow.addEventListener('pointercancel',()=>{swipeStartX=null});
 
   updateStats();
   game.addEventListener('pointerdown',begin,{passive:false});
