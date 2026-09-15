@@ -23,6 +23,10 @@ window.DDHuntConfig = {
     }
   },
 
+  huntRules: {
+    retryHpRatio: 0.5
+  },
+
   animals: [
     {
       id: 'deer',
