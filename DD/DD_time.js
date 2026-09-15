@@ -127,6 +127,7 @@
       sessionStorage.removeItem('dd_session_events_v1');
       sessionStorage.removeItem('dd_session_wolf_v1');
       sessionStorage.removeItem('dd_session_needs_v1');
+      sessionStorage.removeItem('dd_session_point_resume_v1');
       sessionStorage.removeItem(SESSION_KEY);
     } catch (_) {}
     clearLegacyPersistence();
