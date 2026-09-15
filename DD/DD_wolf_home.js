@@ -29,6 +29,12 @@
     return parts.join(' ') || 'まもなく';
   }
 
+  function pupIsSleeping() {
+    if (wolf.stage?.() !== 'pup') return false;
+    const hour = Number(window.DDTime?.getState?.().hour ?? 12);
+    return hour >= 20 || hour < 7;
+  }
+
   function renderHunger() {
     const state = needs?.getState?.() || { wolfHunger: 0, maxHunger: 100 };
     hungerText.textContent = `空腹 ${state.wolfHunger} / ${state.maxHunger}`;
@@ -52,18 +58,20 @@
 
     renderHunger();
     renderMeat();
+    renderCareAvailability();
   }
 
   function renderMeat() {
     meatList.innerHTML = '';
     const available = wolf.availableMeat();
+    const sleeping = pupIsSleeping();
 
     if (!available.length) {
       noMeat.textContent = '与えられる肉を持っていない。';
       return;
     }
 
-    noMeat.textContent = '';
+    noMeat.textContent = sleeping ? '20時を過ぎると子狼は眠る。' : '';
 
     available.forEach(({ item, count }) => {
       const row = document.createElement('div');
@@ -77,7 +85,9 @@
       button.type = 'button';
       button.className = 'feedButton';
       button.textContent = '与える';
+      button.disabled = sleeping;
       button.addEventListener('click', () => {
+        if (pupIsSleeping()) return;
         const stageBeforeFeeding = wolf.stage?.();
         const result = wolf.feed(item.id);
         if (result.ok) {
@@ -93,7 +103,23 @@
     });
   }
 
+  function renderCareAvailability() {
+    const sleeping = pupIsSleeping();
+    [petButton, hugButton, lullabyButton, behaviorButton].forEach(button => {
+      if (button) button.disabled = sleeping;
+    });
+    if (sleeping) {
+      careText.textContent = '丸くなって眠っている。';
+      behaviorText.textContent = '静かな寝息を立てている。';
+      message.textContent = '子狼は20時になると眠る。朝までそっとしておく。';
+    }
+  }
+
   function care(action) {
+    if (pupIsSleeping()) {
+      renderCareAvailability();
+      return;
+    }
     const stage = wolf.stage?.();
     const isPup = stage === 'pup';
     const texts = {
@@ -116,6 +142,10 @@
   lullabyButton?.addEventListener('click', () => care('lullaby'));
 
   behaviorButton.addEventListener('click', () => {
+    if (pupIsSleeping()) {
+      renderCareAvailability();
+      return;
+    }
     const behavior = wolf.randomBehavior();
     if (!behavior) return;
     behaviorText.textContent = behavior.text;
