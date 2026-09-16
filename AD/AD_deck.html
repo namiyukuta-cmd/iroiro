@@ -1,0 +1,143 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no" />
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+  <meta http-equiv="Pragma" content="no-cache" />
+  <meta http-equiv="Expires" content="0" />
+  <title>AD - 山札</title>
+  <style>
+    *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;-webkit-user-select:none;user-select:none}
+    html,body{margin:0;width:100%;min-height:100%}
+    body{min-height:100dvh;background:#f5f4ef;color:#202020;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+    #app{width:min(100%,520px);min-height:100dvh;margin:0 auto;padding:max(14px,env(safe-area-inset-top)) 14px max(14px,env(safe-area-inset-bottom));display:flex;flex-direction:column;gap:14px}
+    header{min-height:58px;display:flex;align-items:center;justify-content:space-between;gap:12px;border-bottom:1px solid #bbb}
+    h1{margin:0;font-size:26px}.back{color:inherit;text-decoration:none;font-size:13px;font-weight:800}
+    #table{flex:1;display:grid;grid-template-columns:1fr 1fr;gap:18px;align-items:center}
+    .card{min-height:250px;border:3px solid #202020;border-radius:14px;background:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:16px;box-shadow:0 5px 0 rgba(0,0,0,.14)}
+    #deckCard{background:repeating-linear-gradient(45deg,#20201d 0 8px,#383832 8px 16px);color:#fff}
+    #deckCount{margin-top:12px;font-size:15px;font-weight:900}
+    #drawnCard{visibility:hidden}
+    #drawnIcon{font-size:54px;line-height:1;margin-bottom:14px}
+    #drawnName{font-size:22px;font-weight:1000}
+    #drawnText{margin-top:10px;font-size:13px;font-weight:800;color:#666257;line-height:1.45}
+    #log{min-height:58px;border:2px solid #202020;border-radius:10px;background:#fff;padding:10px 12px;display:flex;align-items:center;justify-content:center;text-align:center;font-weight:800}
+    #actions{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+    button{min-height:54px;border:2px solid #202020;border-radius:10px;background:#202020;color:#fff;font:inherit;font-size:17px;font-weight:900}
+    button.secondary{background:#fff;color:#202020}
+    @media(max-width:380px){#table{gap:10px}.card{min-height:220px;padding:10px}#drawnIcon{font-size:46px}}
+  </style>
+</head>
+<body>
+<div id="app">
+  <header>
+    <h1>山札</h1>
+    <a class="back" href="AD_top.html">トップへ</a>
+  </header>
+
+  <main id="table">
+    <div id="deckCard" class="card" role="button" tabindex="0" aria-label="山札から1枚引く">
+      <strong>山札</strong>
+      <div id="deckCount">0枚</div>
+    </div>
+
+    <div id="drawnCard" class="card">
+      <div id="drawnIcon">□</div>
+      <div id="drawnName">カード</div>
+      <div id="drawnText"></div>
+    </div>
+  </main>
+
+  <div id="log">山札から1枚引く。</div>
+
+  <div id="actions">
+    <button id="drawButton" type="button">1枚引く</button>
+    <button id="resetButton" class="secondary" type="button">混ぜ直す</button>
+  </div>
+</div>
+
+<script>
+(() => {
+  // DDの山札と同じ基本方式：元カード配列 → シャッフル → 先頭から1枚ずつ引く → 0枚で再補充。
+  const CARD_SOURCE = [
+    { id:'card_01', icon:'◆', name:'カード1', text:'仮カード' },
+    { id:'card_02', icon:'●', name:'カード2', text:'仮カード' },
+    { id:'card_03', icon:'▲', name:'カード3', text:'仮カード' },
+    { id:'card_04', icon:'■', name:'カード4', text:'仮カード' },
+    { id:'card_05', icon:'★', name:'カード5', text:'仮カード' }
+  ];
+
+  const deckCount = document.getElementById('deckCount');
+  const deckCard = document.getElementById('deckCard');
+  const drawnCard = document.getElementById('drawnCard');
+  const drawnIcon = document.getElementById('drawnIcon');
+  const drawnName = document.getElementById('drawnName');
+  const drawnText = document.getElementById('drawnText');
+  const log = document.getElementById('log');
+  const drawButton = document.getElementById('drawButton');
+  const resetButton = document.getElementById('resetButton');
+
+  let deck = [];
+
+  function shuffle(list) {
+    const out = list.map(card => ({ ...card }));
+    for (let i = out.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [out[i], out[j]] = [out[j], out[i]];
+    }
+    return out;
+  }
+
+  function refillDeck() {
+    deck = shuffle(CARD_SOURCE);
+    refresh();
+  }
+
+  function drawCard() {
+    if (!deck.length) refillDeck();
+    return deck.shift();
+  }
+
+  function refresh() {
+    deckCount.textContent = `${deck.length}枚`;
+  }
+
+  function showCard(card) {
+    drawnCard.style.visibility = 'visible';
+    drawnIcon.textContent = card.icon || '□';
+    drawnName.textContent = card.name || '';
+    drawnText.textContent = card.text || '';
+  }
+
+  function draw() {
+    const wasEmpty = deck.length === 0;
+    const card = drawCard();
+    showCard(card);
+    refresh();
+    log.textContent = wasEmpty
+      ? `山札を混ぜ直して「${card.name}」を引いた。`
+      : `「${card.name}」を引いた。`;
+  }
+
+  function reset() {
+    refillDeck();
+    drawnCard.style.visibility = 'hidden';
+    log.textContent = '山札を混ぜ直した。';
+  }
+
+  drawButton.addEventListener('click', draw);
+  resetButton.addEventListener('click', reset);
+  deckCard.addEventListener('click', draw);
+  deckCard.addEventListener('keydown', event => {
+    if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault();
+      draw();
+    }
+  });
+
+  refillDeck();
+})();
+</script>
+</body>
+</html>
