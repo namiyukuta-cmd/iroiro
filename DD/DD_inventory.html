@@ -6,6 +6,7 @@
   <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0" />
   <meta http-equiv="Pragma" content="no-cache" />
   <meta http-equiv="Expires" content="0" />
+  <meta name="dd-build" content="202609161115" />
   <title>DD - アイテム</title>
   <style>
     *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
@@ -17,8 +18,10 @@
     #headerRight{text-align:right;display:grid;gap:6px}
     #clock{font-size:14px;font-weight:900}
     .nav{color:#20201d;text-decoration:none;font-size:14px;font-weight:900}
-    #summary{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:14px 2px 10px;font-size:15px;font-weight:900}
+    #summary{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:14px 2px 8px;font-size:15px;font-weight:900}
     #totalCount{font-size:21px}
+    #foodMessage{min-height:0;margin-bottom:10px;border-radius:9px;font-size:14px;font-weight:900;line-height:1.4}
+    #foodMessage:not(:empty){min-height:42px;border:2px solid #aaa397;background:#faf8f2;padding:9px 11px}
     #inventory{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;padding-bottom:20px}
     .item{position:relative;min-height:150px;border:2px solid #282722;border-radius:12px;background:#fff;padding:10px;display:grid;grid-template-rows:78px auto auto;align-items:center;text-align:center;box-shadow:0 3px 0 rgba(0,0,0,.08)}
     .item.companion{grid-template-rows:78px auto auto auto auto}
@@ -28,7 +31,7 @@
     .itemMeta{margin-top:4px;font-size:12px;font-weight:800;color:#666257}
     .itemCount{position:absolute;right:7px;top:7px;min-width:34px;height:28px;padding:0 7px;border:2px solid #222;border-radius:999px;background:#222;color:#fff;display:grid;place-items:center;font-size:14px;font-weight:1000}
     .itemAction{margin-top:8px;min-height:36px;border:2px solid #26251f;border-radius:8px;background:#26251f;color:#fff;font:inherit;font-size:13px;font-weight:900;padding:6px}
-    .itemBehavior{min-height:38px;margin-top:6px;font-size:12px;font-weight:800;line-height:1.35;color:#514e47}
+    .itemBehavior{min-height:30px;margin-top:6px;font-size:12px;font-weight:800;line-height:1.35;color:#514e47}
     #empty{display:none;margin-top:42px;border:2px dashed #aaa397;border-radius:12px;padding:28px 14px;text-align:center;font-size:17px;font-weight:900;color:#6d685f}
     html[data-dd-phase="夕方"] body{background:#eadfd1}
     html[data-dd-phase="夜"] body,html[data-dd-phase="深夜"] body{background:#d4d7dc}
@@ -37,9 +40,7 @@
 <body>
 <div id="game">
   <header>
-    <div>
-      <h1>アイテム</h1>
-    </div>
+    <div><h1>アイテム</h1></div>
     <div id="headerRight">
       <div id="clock" data-dd-clock></div>
       <a class="nav" href="DD_top.html">小屋へ</a>
@@ -51,14 +52,16 @@
     <span>所持品</span>
     <span id="totalCount">0個</span>
   </div>
+  <div id="foodMessage" aria-live="polite"></div>
 
   <main id="inventory" aria-label="アイテムインベントリ"></main>
   <div id="empty">まだアイテムを持っていない。</div>
 </div>
 
-<script src="DD_time.js"></script>
-<script src="DD_items.js"></script>
-<script src="DD_wolf.js"></script>
-<script src="DD_inventory.js"></script>
+<script src="DD_time.js?v=202609161115"></script>
+<script src="DD_items.js?v=202609161115"></script>
+<script src="DD_wolf.js?v=202609161115"></script>
+<script src="DD_needs.js?v=202609161115"></script>
+<script src="DD_inventory.js?v=202609161115"></script>
 </body>
 </html>
