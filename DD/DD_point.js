@@ -15,6 +15,7 @@
   const placeName = document.getElementById('placeName');
   const placeType = document.getElementById('placeType');
   const autoButton = document.getElementById('autoButton');
+  const autoSpeedButton = document.getElementById('autoSpeedButton');
   const cardSlot = document.getElementById('cardSlot');
   const slotPrompt = document.getElementById('slotPrompt');
   const cardHint = document.getElementById('cardHint');
@@ -35,6 +36,14 @@
   let busy = false;
   let autoMode = false;
   let autoTimer = 0;
+  let autoSpeed = 'slow';
+
+  const AUTO_SPEEDS = {
+    slow: { label: 'ゆっくり', next: 1800, action: 900 },
+    normal: { label: '普通', next: 800, action: 400 },
+    fast: { label: '速い', next: 320, action: 160 }
+  };
+  const AUTO_SPEED_ORDER = ['slow', 'normal', 'fast'];
 
   const AUTO_ENEMIES = {
     wolf: {
@@ -137,6 +146,18 @@
     autoButton.setAttribute('aria-pressed', autoMode ? 'true' : 'false');
   }
 
+  function updateAutoSpeedButton() {
+    if (!autoSpeedButton) return;
+    const setting = AUTO_SPEEDS[autoSpeed] || AUTO_SPEEDS.slow;
+    autoSpeedButton.textContent = `速度：${setting.label}`;
+    autoSpeedButton.setAttribute('aria-label', `オート速度 ${setting.label}。タップで変更`);
+  }
+
+  function autoDelay(kind) {
+    const setting = AUTO_SPEEDS[autoSpeed] || AUTO_SPEEDS.slow;
+    return Math.max(0, Number(setting[kind] || 0));
+  }
+
   function setDrawnInteractivity() {
     const enabled = Boolean(currentCard && !acted && !busy && !autoMode);
     drawn.style.pointerEvents = enabled ? 'auto' : 'none';
@@ -169,14 +190,23 @@
     autoTimer = 0;
   }
 
-  function scheduleAutoNext(delay = 360) {
+  function scheduleAutoNext() {
     clearAutoTimer();
     if (!autoMode) return;
     autoTimer = setTimeout(() => {
       autoTimer = 0;
       if (!autoMode || busy || currentCard) return;
       requestNextCard();
-    }, delay);
+    }, autoDelay('next'));
+  }
+
+  function scheduleAutoAction(card) {
+    clearAutoTimer();
+    if (!autoMode || !card) return;
+    autoTimer = setTimeout(() => {
+      autoTimer = 0;
+      if (autoMode && currentCard === card && !acted && !busy) runAutoAction(card);
+    }, autoDelay('action'));
   }
 
   function setEmptySlot(message = '', detail = '') {
@@ -331,7 +361,7 @@
 
   function showCardInfo(card) {
     if (autoMode) {
-      cardHint.textContent = 'オート処理中';
+      cardHint.textContent = `オート処理中・${AUTO_SPEEDS[autoSpeed].label}`;
       if (card.type === 'item') eventDetail.textContent = '自動で入手する。';
       else if (card.type === 'hunt') eventDetail.textContent = '装備と矢を確認して自動判定する。';
       else if (card.type === 'fish') eventDetail.textContent = '自動で捕獲を試みる。';
@@ -392,10 +422,7 @@
     if (autoMode) {
       hideChoices();
       setDrawnInteractivity();
-      const autoCard = currentCard;
-      setTimeout(() => {
-        if (autoMode && currentCard === autoCard && !acted && !busy) runAutoAction(autoCard);
-      }, 220);
+      scheduleAutoAction(currentCard);
       return;
     }
 
@@ -738,18 +765,27 @@
     }
 
     hideChoices();
-    eventDetail.textContent = 'この地点にいる間だけ自動で探索する。';
+    eventDetail.textContent = `この地点にいる間だけ自動で探索する。速度：${AUTO_SPEEDS[autoSpeed].label}`;
     if (currentCard && !acted && !busy) {
       showCardInfo(currentCard);
-      const card = currentCard;
-      autoTimer = setTimeout(() => {
-        autoTimer = 0;
-        if (autoMode && currentCard === card && !acted && !busy) runAutoAction(card);
-      }, 120);
+      scheduleAutoAction(currentCard);
       return;
     }
 
     if (!currentCard && !busy) requestNextCard();
+  }
+
+  function cycleAutoSpeed() {
+    const index = AUTO_SPEED_ORDER.indexOf(autoSpeed);
+    autoSpeed = AUTO_SPEED_ORDER[(index + 1) % AUTO_SPEED_ORDER.length];
+    updateAutoSpeedButton();
+
+    if (!autoMode) return;
+    eventDetail.textContent = `オート速度を「${AUTO_SPEEDS[autoSpeed].label}」に変更した。`;
+    clearAutoTimer();
+    if (busy) return;
+    if (currentCard && !acted) scheduleAutoAction(currentCard);
+    else if (!currentCard) scheduleAutoNext();
   }
 
   function runPrimaryAction() {
@@ -770,6 +806,7 @@
   placeType.textContent = zoneConfig.label || zone;
 
   autoButton?.addEventListener('click', () => setAutoMode(!autoMode));
+  autoSpeedButton?.addEventListener('click', cycleAutoSpeed);
 
   cardSlot.addEventListener('click', event => {
     if (event.target.closest('#drawn') || event.target.closest('#cardActions')) return;
@@ -815,5 +852,6 @@
 
   refreshClock();
   updateAutoButton();
+  updateAutoSpeedButton();
   setEmptySlot('空白をタップして札を出す。', `札を出すと${drawMinutes()}分進む。`);
 })();
