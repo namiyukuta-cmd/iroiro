@@ -4,9 +4,31 @@
   const partyNote = document.getElementById('partyNote');
   if (!actionGrid || !partyPanel) return;
 
-  const QUICK_LIMIT = 7;
   const SKILL_LIMIT = 7;
   let arranging = false;
+
+  const style = document.createElement('style');
+  style.id = 'ddQuickUiFourSlotStyle';
+  style.textContent = `
+    #actionGrid{display:block!important}
+    .quickUiLabel{height:14px;display:flex;align-items:center;font-size:9px;font-weight:1000;color:#66615a;letter-spacing:.02em}
+    .quickUiLabel.skillLabel{margin-top:4px}
+    .quickSlotRow{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px}
+    .skillSlotRow{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:4px}
+    .quickSlotRow .actionTile{height:58px}
+    .quickSlotRow .actionIcon{font-size:24px}
+    .quickSlotRow .slotType{font-size:8px;line-height:1;font-weight:1000;color:#77736c;margin-bottom:1px}
+    .quickSlotRow .actionCount{font-size:8px}
+    .skillSlotRow .actionTile{height:54px}
+    #partyPanel.wolfMode .skillSlotRow{margin-top:1px}
+    @media (max-width:370px){
+      .quickSlotRow{gap:4px}
+      .skillSlotRow{gap:3px}
+      .quickSlotRow .actionTile{height:54px}
+      .skillSlotRow .actionTile{height:50px}
+    }
+  `;
+  document.head.appendChild(style);
 
   function makeLabel(text, className) {
     const label = document.createElement('div');
@@ -15,10 +37,26 @@
     return label;
   }
 
-  function makeEmptySlot(kind) {
+  function makeRow(className) {
+    const row = document.createElement('div');
+    row.className = className;
+    return row;
+  }
+
+  function addSlotType(tile, text) {
+    tile.querySelector('.slotType')?.remove();
+    const type = document.createElement('span');
+    type.className = 'slotType';
+    type.textContent = text;
+    tile.prepend(type);
+    return tile;
+  }
+
+  function makeEmptySlot(kind, label) {
     const slot = document.createElement('div');
     slot.className = `actionTile emptyActionSlot ${kind}`;
     slot.setAttribute('aria-hidden', 'true');
+    addSlotType(slot, label);
     const icon = document.createElement('span');
     icon.className = 'actionIcon';
     icon.textContent = '·';
@@ -26,20 +64,30 @@
     return slot;
   }
 
+  function arrowCount() {
+    return (window.DDItems?.getInventory?.() || [])
+      .filter(entry => entry?.item?.kind === 'arrow')
+      .reduce((sum, entry) => sum + Math.max(0, Number(entry.count || 0)), 0);
+  }
+
   function makeBowTile() {
     const bow = window.DDHuntConfig?.equipment?.bow;
-    if (!bow) return null;
+    if (!bow) return makeEmptySlot('quickSlot', '武器');
     const tile = document.createElement('button');
     tile.type = 'button';
     tile.className = 'actionTile quickSlot quickUiSynthetic equipmentTile';
     tile.dataset.action = 'equipment:bow';
     tile.disabled = true;
+    addSlotType(tile, '武器');
     const icon = document.createElement('span');
     icon.className = 'actionIcon';
     icon.textContent = '🏹';
     const label = document.createElement('span');
     label.textContent = bow.name || '弓';
-    tile.append(icon, label);
+    const count = document.createElement('span');
+    count.className = 'actionCount';
+    count.textContent = `矢×${arrowCount()}`;
+    tile.append(icon, label, count);
     return tile;
   }
 
@@ -51,28 +99,12 @@
     return id.startsWith('wolf:') || ['bite', 'claw', 'growl', 'guard'].includes(id);
   }
 
-  function classify(tile, wolfMode) {
-    const id = actionId(tile);
-    tile.classList.remove('quickSlot', 'skillSlot');
-
-    if (wolfMode || isWolfTile(id) || id === 'wait') {
-      tile.classList.add('skillSlot');
-      return 'skill';
-    }
-    if (id.startsWith('hero:')) {
-      tile.classList.add('skillSlot');
-      return 'skill';
-    }
-    tile.classList.add('quickSlot');
-    return 'quick';
+  function isHeroSkill(id) {
+    return id.startsWith('hero:') || id === 'wait';
   }
 
-  function quickPriority(tile) {
-    const id = actionId(tile);
-    if (id === 'equipment:bow') return 0;
-    if (id.includes('wood_arrow') || id.includes('arrow')) return 1;
-    if (id.includes('pebble')) return 2;
-    return 10;
+  function isSupportedTool(id) {
+    return id.includes('pebble');
   }
 
   function skillPriority(tile) {
@@ -86,56 +118,77 @@
     arranging = true;
     observer.disconnect();
 
-    actionGrid.querySelectorAll('.quickUiLabel,.quickUiSynthetic,.emptyActionSlot').forEach(node => node.remove());
-    const tiles = [...actionGrid.querySelectorAll('.actionTile')];
+    actionGrid.querySelectorAll('.quickUiLabel,.quickUiSynthetic,.emptyActionSlot,.quickSlotRow,.skillSlotRow').forEach(node => {
+      if (node.classList.contains('quickSlotRow') || node.classList.contains('skillSlotRow')) {
+        [...node.children].forEach(child => {
+          if (child.classList.contains('actionTile') && !child.classList.contains('quickUiSynthetic') && !child.classList.contains('emptyActionSlot')) actionGrid.appendChild(child);
+        });
+      }
+      node.remove();
+    });
+
+    const tiles = [...actionGrid.querySelectorAll(':scope > .actionTile')];
     const wolfMode = partyPanel.classList.contains('wolfMode') || tiles.some(tile => isWolfTile(actionId(tile)));
     actionGrid.classList.toggle('wolfLayout', wolfMode);
 
-    const quick = [];
     const skills = [];
+    const toolCandidates = [];
     tiles.forEach(tile => {
       tile.hidden = false;
-      if (classify(tile, wolfMode) === 'skill') skills.push(tile);
-      else quick.push(tile);
+      tile.classList.remove('quickSlot', 'skillSlot');
+      const id = actionId(tile);
+      if (wolfMode || isWolfTile(id) || isHeroSkill(id)) {
+        tile.classList.add('skillSlot');
+        skills.push(tile);
+      } else if (isSupportedTool(id)) {
+        tile.classList.add('quickSlot');
+        toolCandidates.push(tile);
+      }
     });
 
-    if (!wolfMode) {
-      const bowTile = makeBowTile();
-      if (bowTile) quick.unshift(bowTile);
-    }
-
-    quick.sort((a, b) => quickPriority(a) - quickPriority(b));
     skills.sort((a, b) => skillPriority(a) - skillPriority(b));
-
-    const visibleQuick = wolfMode ? [] : quick.slice(0, QUICK_LIMIT);
     const visibleSkills = skills.slice(0, SKILL_LIMIT);
-    quick.slice(QUICK_LIMIT).forEach(tile => { tile.hidden = true; });
-    skills.slice(SKILL_LIMIT).forEach(tile => { tile.hidden = true; });
+    const visibleTools = toolCandidates.slice(0, 2);
 
     actionGrid.innerHTML = '';
 
     if (!wolfMode) {
       actionGrid.appendChild(makeLabel('装備・すぐ使う', 'quickLabel'));
-      visibleQuick.forEach(tile => actionGrid.appendChild(tile));
-      for (let i = visibleQuick.length; i < QUICK_LIMIT; i++) actionGrid.appendChild(makeEmptySlot('quickSlot'));
+      const quickRow = makeRow('quickSlotRow');
+      quickRow.appendChild(makeBowTile());
+      quickRow.appendChild(makeEmptySlot('quickSlot', '防具'));
+
+      const tool1 = visibleTools[0];
+      if (tool1) {
+        addSlotType(tool1, '道具1');
+        quickRow.appendChild(tool1);
+      } else quickRow.appendChild(makeEmptySlot('quickSlot', '道具1'));
+
+      const tool2 = visibleTools[1];
+      if (tool2) {
+        addSlotType(tool2, '道具2');
+        quickRow.appendChild(tool2);
+      } else quickRow.appendChild(makeEmptySlot('quickSlot', '道具2'));
+      actionGrid.appendChild(quickRow);
     }
 
     actionGrid.appendChild(makeLabel(wolfMode ? '能力' : '行動・スキル', 'skillLabel'));
-    visibleSkills.forEach(tile => actionGrid.appendChild(tile));
-    for (let i = visibleSkills.length; i < SKILL_LIMIT; i++) actionGrid.appendChild(makeEmptySlot('skillSlot'));
+    const skillRow = makeRow('skillSlotRow');
+    visibleSkills.forEach(tile => skillRow.appendChild(tile));
+    for (let i = visibleSkills.length; i < SKILL_LIMIT; i++) skillRow.appendChild(makeEmptySlot('skillSlot', ''));
+    actionGrid.appendChild(skillRow);
 
     if (partyNote) {
       if (wolfMode) partyNote.textContent = '狼（？）の能力。戦闘中は使える能力だけ明るく表示する。';
-      else if (tiles.some(tile => actionId(tile).startsWith('hero:'))) partyNote.textContent = '上段は装備・すぐ使える物、下段は行動・スキル。';
-      else partyNote.textContent = '上段に装備・すぐ使える物を最大7枠表示する。';
+      else partyNote.textContent = '武器1・防具1・道具2。下段は行動・スキル。';
     }
 
-    observer.observe(actionGrid, { childList: true, subtree: false });
+    observer.observe(actionGrid, { childList: true, subtree: true });
     arranging = false;
   }
 
   const observer = new MutationObserver(() => queueMicrotask(arrange));
-  observer.observe(actionGrid, { childList: true, subtree: false });
+  observer.observe(actionGrid, { childList: true, subtree: true });
   window.addEventListener('ddinventorychange', () => queueMicrotask(arrange));
   window.addEventListener('ddwolfchange', () => queueMicrotask(arrange));
   queueMicrotask(arrange);
