@@ -22,12 +22,10 @@
   const message=document.getElementById('message');
   const dayPhase=document.getElementById('dayPhase');
   const pin=document.getElementById('mapPin');
-  const pinLabel=document.getElementById('pinLabel');
-  const prev=document.getElementById('placePrev');
-  const next=document.getElementById('placeNext');
-  const selectedPlace=document.getElementById('selectedPlace');
+  const placeMenu=document.getElementById('placeMenu');
   const selectedInfo=document.getElementById('selectedInfo');
   const confirmMove=document.getElementById('confirmMove');
+  const mapPlaces=[...document.querySelectorAll('.mapPlace[data-place]')];
 
   function clearOldPersistence(){try{localStorage.removeItem(LEGACY_LOCAL_KEY)}catch(_){}try{sessionStorage.removeItem(OLD_SESSION_KEY)}catch(_){}}
   function loadLocation(){try{const saved=sessionStorage.getItem(SESSION_KEY);if(saved&&places[saved])return saved}catch(_){}return'cabin'}
@@ -36,28 +34,65 @@
   function refreshDayPhase(){const state=timeParts();dayPhase.textContent=`${state.day}日目　${state.phase}`}
   function costFromHere(placeId){return Number(travelMinutes[currentLocation]?.[placeId]??0)}
   function selectedId(){return order[selectedIndex]||currentLocation}
-  function setPin(id){const p=places[id];pin.style.left=`${p.x}%`;pin.style.top=`${p.y}%`;pinLabel.style.left=`${p.x}%`;pinLabel.style.top=`${p.y}%`;pinLabel.textContent=p.name}
+
+  function setPin(id){const p=places[id];pin.style.left=`${p.x}%`;pin.style.top=`${p.y}%`}
+
+  function renderMapPlaces(){
+    const selected=selectedId();
+    mapPlaces.forEach(button=>{
+      const id=button.dataset.place;
+      button.classList.toggle('current',id===currentLocation);
+      button.classList.toggle('selected',id===selected);
+      button.setAttribute('aria-pressed',id===selected?'true':'false');
+    });
+  }
+
+  function renderMenu(){
+    const selected=selectedId();
+    placeMenu.innerHTML='';
+    order.forEach((id,i)=>{
+      const p=places[id];
+      const here=id===currentLocation;
+      const button=document.createElement('button');
+      button.type='button';
+      button.className=`placeMenuItem${i===selectedIndex?' selected':''}`;
+      const cost=costFromHere(id);
+      button.innerHTML=`${p.name}${here?'<span class="here">現在地</span>':''}<span class="cost">${here?'':`${cost}分`}</span>`;
+      button.addEventListener('pointerdown',()=>{selectedIndex=i;render()});
+      button.addEventListener('click',()=>{selectedIndex=i;render()});
+      placeMenu.appendChild(button);
+    });
+    const info=places[selected];
+    const here=selected===currentLocation;
+    selectedInfo.textContent=here?info.description:`${info.description}　移動 ${costFromHere(selected)}分`;
+    confirmMove.textContent=here?(selected==='cabin'?'小屋に入る':'この地点に入る'):`ここへ移動する　${costFromHere(selected)}分`;
+  }
 
   function render(){
     refreshDayPhase();
     const id=selectedId();
-    const info=places[id];
-    const here=id===currentLocation;
-    const cost=costFromHere(id);
     setPin(id);
-    selectedPlace.innerHTML=`${info.name}${here?'<span class="currentMark">現在地</span>':''}`;
-    selectedInfo.textContent=here?info.description:`${info.description}　移動 ${cost}分`;
-    if(here) confirmMove.textContent=id==='cabin'?'小屋に入る':'この地点に入る';
-    else confirmMove.textContent=`ここへ移動する　${cost}分`;
+    renderMapPlaces();
+    renderMenu();
   }
 
-  function moveSelection(step){selectedIndex=(selectedIndex+step+order.length)%order.length;message.textContent='▲▼で場所を選ぶ。';render()}
-  function enterCurrent(){const info=places[currentLocation];if(currentLocation==='cabin'){location.href='DD_top.html';return}location.href=`DD_point.html?zone=${encodeURIComponent(info.zone)}&place=${encodeURIComponent(currentLocation)}&v=${Date.now()}`}
+  function moveSelection(step){
+    selectedIndex=(selectedIndex+step+order.length)%order.length;
+    message.textContent='場所を選ぶとピンが移動する。';
+    render();
+  }
+  function enterCurrent(){
+    const info=places[currentLocation];
+    if(currentLocation==='cabin'){location.href='DD_top.html';return}
+    location.href=`DD_point.html?zone=${encodeURIComponent(info.zone)}&place=${encodeURIComponent(currentLocation)}&v=${Date.now()}`;
+  }
   function completeMove(placeId){
     const from=currentLocation;
     const minutes=Number(travelMinutes[from]?.[placeId]??0);
     if(minutes>0&&window.DDTime)DDTime.advance(minutes,`move:${from}->${placeId}`);
-    currentLocation=placeId;syncLocation();selectedIndex=order.indexOf(placeId);
+    currentLocation=placeId;
+    syncLocation();
+    selectedIndex=order.indexOf(placeId);
     message.textContent=`${places[placeId].name}へ移動した。${minutes}分経過。`;
     render();
   }
@@ -73,10 +108,22 @@
   clearOldPersistence();
   let currentLocation=loadLocation();
   let selectedIndex=Math.max(0,order.indexOf(currentLocation));
-  prev.addEventListener('click',()=>moveSelection(-1));
-  next.addEventListener('click',()=>moveSelection(1));
-  selectedPlace.addEventListener('click',confirm);
+
+  mapPlaces.forEach(button=>{
+    button.addEventListener('click',()=>{
+      const i=order.indexOf(button.dataset.place);
+      if(i<0)return;
+      selectedIndex=i;
+      message.textContent=`${places[button.dataset.place].name}を選択。`;
+      render();
+    });
+  });
   confirmMove.addEventListener('click',confirm);
+  document.addEventListener('keydown',e=>{
+    if(e.key==='ArrowUp'){e.preventDefault();moveSelection(-1)}
+    else if(e.key==='ArrowDown'){e.preventDefault();moveSelection(1)}
+    else if(e.key==='Enter'||e.key===' '){e.preventDefault();confirm()}
+  });
   window.addEventListener('ddtimechange',render);
   document.addEventListener('contextmenu',e=>e.preventDefault());
   document.addEventListener('selectstart',e=>e.preventDefault());
