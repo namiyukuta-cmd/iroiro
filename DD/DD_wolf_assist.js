@@ -95,14 +95,15 @@
     const result = originalAdd(id, amount);
 
     if (gatherByHero) {
-      const wolfDraw = pickRandom(zoneConfig?.cards || []);
-      if (wolfDraw?.type === 'item' && wolfDraw.itemId) {
+      const wolfGatherPool = (zoneConfig?.cards || []).filter(entry => entry?.type === 'item' && entry.itemId);
+      const wolfDraw = pickRandom(wolfGatherPool);
+      if (wolfDraw) {
         internalAdd = true;
         originalAdd(wolfDraw.itemId, 1);
         internalAdd = false;
         setPendingResult(`${itemName(id)}を1個、手に入れた。狼（？）は別に${itemName(wolfDraw.itemId)}を1個見つけた。`);
       } else {
-        setPendingResult(`${itemName(id)}を1個、手に入れた。狼（？）も別に周囲を探したが、何も見つけなかった。`);
+        setPendingResult(`${itemName(id)}を1個、手に入れた。狼（？）も別に周囲を探したが、採取できる物はなかった。`);
       }
     }
 
