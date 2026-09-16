@@ -3,141 +3,100 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no" />
-  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+  <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0" />
   <meta http-equiv="Pragma" content="no-cache" />
   <meta http-equiv="Expires" content="0" />
   <title>AD - 山札</title>
   <style>
-    *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;-webkit-user-select:none;user-select:none}
-    html,body{margin:0;width:100%;min-height:100%}
-    body{min-height:100dvh;background:#f5f4ef;color:#202020;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
-    #app{width:min(100%,520px);min-height:100dvh;margin:0 auto;padding:max(14px,env(safe-area-inset-top)) 14px max(14px,env(safe-area-inset-bottom));display:flex;flex-direction:column;gap:14px}
-    header{min-height:58px;display:flex;align-items:center;justify-content:space-between;gap:12px;border-bottom:1px solid #bbb}
-    h1{margin:0;font-size:26px}.back{color:inherit;text-decoration:none;font-size:13px;font-weight:800}
-    #table{flex:1;display:grid;grid-template-columns:1fr 1fr;gap:18px;align-items:center}
-    .card{min-height:250px;border:3px solid #202020;border-radius:14px;background:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:16px;box-shadow:0 5px 0 rgba(0,0,0,.14)}
-    #deckCard{background:repeating-linear-gradient(45deg,#20201d 0 8px,#383832 8px 16px);color:#fff}
-    #deckCount{margin-top:12px;font-size:15px;font-weight:900}
-    #drawnCard{visibility:hidden}
-    #drawnIcon{font-size:54px;line-height:1;margin-bottom:14px}
-    #drawnName{font-size:22px;font-weight:1000}
-    #drawnText{margin-top:10px;font-size:13px;font-weight:800;color:#666257;line-height:1.45}
-    #log{min-height:58px;border:2px solid #202020;border-radius:10px;background:#fff;padding:10px 12px;display:flex;align-items:center;justify-content:center;text-align:center;font-weight:800}
-    #actions{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-    button{min-height:54px;border:2px solid #202020;border-radius:10px;background:#202020;color:#fff;font:inherit;font-size:17px;font-weight:900}
-    button.secondary{background:#fff;color:#202020}
-    @media(max-width:380px){#table{gap:10px}.card{min-height:220px;padding:10px}#drawnIcon{font-size:46px}}
+    *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
+    html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#23231f;color:#f4f1e8;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+    body{height:100dvh}
+    #game{width:min(100%,520px);height:100dvh;margin:0 auto;padding:max(10px,env(safe-area-inset-top)) 12px max(10px,env(safe-area-inset-bottom));display:flex;flex-direction:column;gap:9px;background:#292923}
+    header{flex:0 0 52px;display:flex;align-items:flex-start;justify-content:space-between;gap:12px;border-bottom:1px solid #68665e;padding:2px 2px 7px}
+    h1{margin:0;font-size:24px}
+    #clock{font-size:13px;font-weight:900;text-align:right}
+    #turn{font-size:12px;font-weight:800;opacity:.8;text-align:right;margin-top:4px}
+
+    #enemyBox{flex:1 1 auto;min-height:0;border:2px solid #ddd7c7;border-radius:12px;background:#37372f;padding:10px;display:flex;flex-direction:column;gap:8px}
+    #enemyHead{display:flex;align-items:center;justify-content:space-between;gap:8px}
+    #enemyName{font-size:22px;font-weight:1000}
+    .hp{font-size:14px;font-weight:900}
+    .bar{height:12px;border:2px solid #ece7dc;border-radius:999px;overflow:hidden;background:#171714;margin-top:4px}
+    .fill{height:100%;background:#e9e3d5;width:100%;transition:width .2s ease}
+    #enemyTable{position:relative;flex:1 1 auto;min-height:180px;display:flex;align-items:center;justify-content:center;gap:28px}
+    .enemyCard{width:118px;height:164px;border:3px solid #e9e4d8;border-radius:11px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:8px;box-shadow:0 5px 0 rgba(0,0,0,.24)}
+    #enemyDeck{background:repeating-linear-gradient(45deg,#1e211d 0 7px,#343832 7px 14px);color:#fff}
+    #enemyDeck small{display:block;margin-top:8px;font-size:12px}
+    #enemyDrawn{background:#f8f6ef;color:#222;visibility:hidden}
+    #enemyIcon{font-size:42px;line-height:1;margin-bottom:10px}
+    #enemyAction{font-size:17px;font-weight:1000}
+    #enemyPower{margin-top:7px;font-size:12px;font-weight:900;color:#67635a}
+
+    #log{flex:0 0 70px;border:1px solid #77736b;border-radius:9px;background:#1c1c19;padding:8px 10px;font-size:14px;font-weight:800;line-height:1.45;display:flex;align-items:center;justify-content:center;text-align:center}
+
+    #playerBox{flex:0 0 250px;border:2px solid #d9d4c8;border-radius:12px;background:#efebe1;color:#23221f;padding:10px;display:flex;flex-direction:column;gap:8px}
+    #playerHead{display:flex;align-items:flex-start;justify-content:space-between;gap:10px}
+    #playerTitle{font-size:18px;font-weight:1000}
+    #playerHpWrap{min-width:135px;text-align:right}
+    #playerHpWrap .bar{border-color:#292824;background:#c9c4b8}
+    #playerHpFill{background:#292824}
+    #hand{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px;align-content:start}
+    .handCard{min-height:82px;border:2px solid #272621;border-radius:9px;background:#fff;color:#20201d;font:inherit;padding:7px 5px;text-align:center;font-weight:1000;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px}
+    .handCard .icon{font-size:25px;line-height:1}
+    .handCard .sub{font-size:11px;font-weight:800;color:#666257;line-height:1.15}
+    .handCard:disabled{opacity:.4}
+    #endActions{display:none;gap:8px}
+    #endActions button{flex:1;min-height:48px;border:2px solid #24231f;border-radius:9px;background:#24231f;color:#fff;font:inherit;font-size:16px;font-weight:1000}
   </style>
 </head>
 <body>
-<div id="app">
+<div id="game">
   <header>
-    <h1>山札</h1>
-    <a class="back" href="AD_top.html">トップへ</a>
+    <h1>戦闘</h1>
+    <div>
+      <div id="clock" data-dd-clock></div>
+      <div id="turn">1ターン目</div>
+    </div>
   </header>
 
-  <main id="table">
-    <div id="deckCard" class="card" role="button" tabindex="0" aria-label="山札から1枚引く">
-      <strong>山札</strong>
-      <div id="deckCount">0枚</div>
+  <section id="enemyBox">
+    <div id="enemyHead">
+      <div id="enemyName">敵</div>
+      <div class="hp">HP <span id="enemyHpText">0 / 0</span></div>
     </div>
+    <div class="bar"><div id="enemyHpFill" class="fill"></div></div>
 
-    <div id="drawnCard" class="card">
-      <div id="drawnIcon">□</div>
-      <div id="drawnName">カード</div>
-      <div id="drawnText"></div>
+    <div id="enemyTable">
+      <div id="enemyDeck" class="enemyCard">
+        <strong>敵の山札</strong>
+        <small id="enemyDeckCount">0枚</small>
+      </div>
+      <div id="enemyDrawn" class="enemyCard">
+        <div id="enemyIcon"></div>
+        <div id="enemyAction"></div>
+        <div id="enemyPower"></div>
+      </div>
     </div>
-  </main>
+  </section>
 
-  <div id="log">山札から1枚引く。</div>
+  <div id="log">手札から1枚選ぶ。</div>
 
-  <div id="actions">
-    <button id="drawButton" type="button">1枚引く</button>
-    <button id="resetButton" class="secondary" type="button">混ぜ直す</button>
-  </div>
+  <section id="playerBox">
+    <div id="playerHead">
+      <div id="playerTitle">自分の手札</div>
+      <div id="playerHpWrap">
+        <div class="hp">HP <span id="playerHpText">5 / 5</span></div>
+        <div class="bar"><div id="playerHpFill" class="fill"></div></div>
+      </div>
+    </div>
+    <div id="hand"></div>
+    <div id="endActions"><button id="returnButton" type="button">探索へ戻る</button></div>
+  </section>
 </div>
 
-<script>
-(() => {
-  // DDの山札と同じ基本方式：元カード配列 → シャッフル → 先頭から1枚ずつ引く → 0枚で再補充。
-  const CARD_SOURCE = [
-    { id:'card_01', icon:'◆', name:'カード1', text:'仮カード' },
-    { id:'card_02', icon:'●', name:'カード2', text:'仮カード' },
-    { id:'card_03', icon:'▲', name:'カード3', text:'仮カード' },
-    { id:'card_04', icon:'■', name:'カード4', text:'仮カード' },
-    { id:'card_05', icon:'★', name:'カード5', text:'仮カード' }
-  ];
-
-  const deckCount = document.getElementById('deckCount');
-  const deckCard = document.getElementById('deckCard');
-  const drawnCard = document.getElementById('drawnCard');
-  const drawnIcon = document.getElementById('drawnIcon');
-  const drawnName = document.getElementById('drawnName');
-  const drawnText = document.getElementById('drawnText');
-  const log = document.getElementById('log');
-  const drawButton = document.getElementById('drawButton');
-  const resetButton = document.getElementById('resetButton');
-
-  let deck = [];
-
-  function shuffle(list) {
-    const out = list.map(card => ({ ...card }));
-    for (let i = out.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [out[i], out[j]] = [out[j], out[i]];
-    }
-    return out;
-  }
-
-  function refillDeck() {
-    deck = shuffle(CARD_SOURCE);
-    refresh();
-  }
-
-  function drawCard() {
-    if (!deck.length) refillDeck();
-    return deck.shift();
-  }
-
-  function refresh() {
-    deckCount.textContent = `${deck.length}枚`;
-  }
-
-  function showCard(card) {
-    drawnCard.style.visibility = 'visible';
-    drawnIcon.textContent = card.icon || '□';
-    drawnName.textContent = card.name || '';
-    drawnText.textContent = card.text || '';
-  }
-
-  function draw() {
-    const wasEmpty = deck.length === 0;
-    const card = drawCard();
-    showCard(card);
-    refresh();
-    log.textContent = wasEmpty
-      ? `山札を混ぜ直して「${card.name}」を引いた。`
-      : `「${card.name}」を引いた。`;
-  }
-
-  function reset() {
-    refillDeck();
-    drawnCard.style.visibility = 'hidden';
-    log.textContent = '山札を混ぜ直した。';
-  }
-
-  drawButton.addEventListener('click', draw);
-  resetButton.addEventListener('click', reset);
-  deckCard.addEventListener('click', draw);
-  deckCard.addEventListener('keydown', event => {
-    if (event.key === 'Enter' || event.key === ' ') {
-      event.preventDefault();
-      draw();
-    }
-  });
-
-  refillDeck();
-})();
-</script>
+<script src="../DD/DD_time.js"></script>
+<script src="../DD/DD_items.js"></script>
+<script src="../DD/DD_wolf.js"></script>
+<script src="AD_deck.js"></script>
 </body>
 </html>
