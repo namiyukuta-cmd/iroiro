@@ -78,6 +78,23 @@
     discardAction.disabled = false;
   }
 
+  function showChoices(card) {
+    hideChoices();
+    if (card.type === 'item') {
+      primaryAction.textContent = '入手する';
+      discardAction.textContent = '見送る';
+    } else if (card.type === 'hunt') {
+      primaryAction.textContent = '狩猟する';
+      discardAction.textContent = '見送る';
+    } else if (card.type === 'fish') {
+      primaryAction.textContent = '捕る';
+      discardAction.textContent = '見送る';
+    } else {
+      return;
+    }
+    cardActions.classList.add('show');
+  }
+
   function setDrawnInteractivity() {
     const enabled = Boolean(currentCard && !acted && !busy);
     drawn.style.pointerEvents = enabled ? 'auto' : 'none';
@@ -251,19 +268,18 @@
   }
 
   function showCardInfo(card) {
-    hideChoices();
     if (card.type === 'item') {
-      cardHint.textContent = '札をタップして選ぶ';
+      cardHint.textContent = '入手する / 見送る';
       eventDetail.textContent = `入手すると${card.minutes || 20}分進む。`;
       return;
     }
     if (card.type === 'hunt') {
-      cardHint.textContent = '札をタップして選ぶ';
+      cardHint.textContent = '狩猟する / 見送る';
       eventDetail.textContent = '狩猟するか見送るか選ぶ。';
       return;
     }
     if (card.type === 'fish') {
-      cardHint.textContent = '札をタップして選ぶ';
+      cardHint.textContent = '捕る / 見送る';
       eventDetail.textContent = `捕ると${card.minutes || 10}分進む。`;
       return;
     }
@@ -274,26 +290,6 @@
     }
     cardHint.textContent = '札をタップして破棄する';
     eventDetail.textContent = '何もない。';
-  }
-
-  function configureChoices(card) {
-    cardActions.classList.remove('oneChoice');
-    if (card.type === 'item') {
-      primaryAction.textContent = '入手する';
-      discardAction.textContent = '破棄する';
-    } else if (card.type === 'hunt') {
-      primaryAction.textContent = '狩猟する';
-      discardAction.textContent = '見送る';
-    } else if (card.type === 'fish') {
-      primaryAction.textContent = '捕る';
-      discardAction.textContent = '見送る';
-    } else if (card.type === 'none') {
-      cardActions.classList.add('oneChoice');
-      discardAction.textContent = '破棄する';
-    } else {
-      return;
-    }
-    cardActions.classList.add('show');
   }
 
   function revealCard() {
@@ -323,10 +319,19 @@
 
     if (currentCard.type === 'enemy') {
       acted = true;
+      hideChoices();
       setDrawnInteractivity();
       const enemy = currentCard;
       setTimeout(() => doBattle(enemy, true), 180);
+      return;
     }
+
+    if (currentCard.type === 'none') {
+      hideChoices();
+      return;
+    }
+
+    showChoices(currentCard);
   }
 
   function requestNextCard() {
@@ -439,23 +444,12 @@
     drawn.style.transition = 'transform .18s ease-out, opacity .18s ease-out';
     drawn.style.transform = 'translateY(20px) scale(.9)';
     drawn.style.opacity = '.05';
-    eventText.textContent = '札を破棄した。';
+    eventText.textContent = '札を見送った。';
     eventDetail.textContent = '';
     result.textContent = '';
     setTimeout(() => {
-      setEmptySlot('札を破棄した。', '空白をタップして次の札を出す。');
+      setEmptySlot('札を見送った。', '空白をタップして次の札を出す。');
     }, 190);
-  }
-
-  function openChoices() {
-    if (!currentCard || acted || busy || currentCard.type === 'enemy') return;
-    tapFeedback();
-    if (currentCard.type === 'none') {
-      discardCurrentCard();
-      return;
-    }
-    configureChoices(currentCard);
-    cardHint.textContent = '下のボタンから選ぶ';
   }
 
   function runPrimaryAction() {
@@ -464,6 +458,12 @@
     if (card.type === 'item') return doGather(card);
     if (card.type === 'hunt') return doHunt(card);
     if (card.type === 'fish') return doFish(card);
+  }
+
+  function tapCard() {
+    if (!currentCard || acted || busy || currentCard.type === 'enemy') return;
+    tapFeedback();
+    if (currentCard.type === 'none') discardCurrentCard();
   }
 
   placeName.textContent = config.placeNames?.[place] || config.placeNames?.[zone] || '探索地点';
@@ -483,12 +483,12 @@
   drawn.addEventListener('click', event => {
     event.preventDefault();
     event.stopPropagation();
-    openChoices();
+    tapCard();
   });
   drawn.addEventListener('keydown', event => {
     if ((event.key === 'Enter' || event.key === ' ') && currentCard && !acted && !busy) {
       event.preventDefault();
-      openChoices();
+      tapCard();
     }
   });
 
