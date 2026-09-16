@@ -6,93 +6,46 @@
   <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0" />
   <meta http-equiv="Pragma" content="no-cache" />
   <meta http-equiv="Expires" content="0" />
-  <meta name="dd-build" content="202609160830" />
+  <meta name="dd-build" content="20260916mapsel1" />
   <title>DD - マップ</title>
   <style>
     *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
-    html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#1b2119;color:#f1efe7;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
-    body{height:100dvh}
+    html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#1b2119;color:#f1efe7;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}body{height:100dvh}
     #game{position:relative;width:min(100%,520px);height:100dvh;margin:0 auto;padding:max(8px,env(safe-area-inset-top)) 10px max(8px,env(safe-area-inset-bottom));display:flex;flex-direction:column;gap:8px;background:#263024;overflow:hidden}
-    header{flex:0 0 54px;display:flex;align-items:center;justify-content:space-between;gap:8px;border-bottom:1px solid rgba(255,255,255,.28);padding:0 3px 6px}
-    h1{margin:0;font-size:24px}
-    .headerRight{text-align:right;display:grid;gap:2px}
-    #dayPhase{font-size:17px;font-weight:900}
-    header a{color:#fff;text-decoration:none;font-size:14px;font-weight:800}
-    #message{flex:0 0 44px;border:1px solid rgba(255,255,255,.24);border-radius:9px;background:rgba(0,0,0,.2);display:flex;align-items:center;justify-content:center;padding:6px 10px;text-align:center;font-size:15px;font-weight:800}
-
+    header{flex:0 0 54px;display:flex;align-items:center;justify-content:space-between;gap:8px;border-bottom:1px solid rgba(255,255,255,.28);padding:0 3px 6px}h1{margin:0;font-size:24px}.headerRight{text-align:right;display:grid;gap:2px}#dayPhase{font-size:17px;font-weight:900}header a{color:#fff;text-decoration:none;font-size:14px;font-weight:800}
+    #message{flex:0 0 36px;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;color:#d9ddd6}
     #mapWrap{position:relative;flex:1 1 auto;min-height:0;border:2px solid #161a15;border-radius:12px;overflow:hidden;background:#53634c}
-    #mapScene{position:absolute;inset:0;background:
-      radial-gradient(circle at 18% 18%,rgba(25,55,27,.95) 0 16%,transparent 17%),
-      radial-gradient(circle at 31% 32%,rgba(45,80,40,.9) 0 18%,transparent 19%),
-      linear-gradient(110deg,#496344 0 42%,#7d7a4d 43% 76%,#527681 77% 100%)}
+    #mapScene{position:absolute;inset:0;background:radial-gradient(circle at 18% 18%,rgba(25,55,27,.95) 0 16%,transparent 17%),radial-gradient(circle at 31% 32%,rgba(45,80,40,.9) 0 18%,transparent 19%),linear-gradient(110deg,#496344 0 42%,#7d7a4d 43% 76%,#527681 77% 100%)}
     #mapScene::before{content:"";position:absolute;left:77%;top:-5%;width:14%;height:115%;background:rgba(92,142,159,.72);transform:rotate(4deg);border-left:2px solid rgba(215,235,239,.35);border-right:2px solid rgba(215,235,239,.25)}
     #mapScene::after{content:"";position:absolute;left:37%;top:0;width:2px;height:100%;background:rgba(232,219,175,.18);transform:rotate(-18deg);transform-origin:top}
-
-    .place{position:absolute;transform:translate(-50%,-50%);min-width:92px;min-height:58px;padding:7px 8px;border:2px solid rgba(255,255,255,.85);border-radius:13px;background:rgba(25,29,24,.8);color:#fff;font:inherit;font-weight:900;font-size:15px;line-height:1.15;text-align:center;box-shadow:0 3px 9px rgba(0,0,0,.36);z-index:4;touch-action:manipulation}
-    .place small{display:block;margin-top:3px;font-size:11px;font-weight:700;opacity:.85}
-    .place.current{border:3px solid #ffe36b;background:rgba(41,44,33,.94);box-shadow:0 0 0 4px rgba(255,227,107,.24),0 4px 10px rgba(0,0,0,.46)}
-    .place.current::after{content:"♟";position:absolute;left:50%;top:-36px;transform:translateX(-50%);font-family:Georgia,"Times New Roman",serif;font-size:36px;line-height:1;color:#fff;text-shadow:0 2px 3px #000,0 0 6px #000}
-    .placeClock{display:none;position:absolute;left:50%;bottom:-34px;transform:translateX(-50%);min-width:64px;padding:3px 7px;border:2px solid #fff;border-radius:8px;background:#17191f;color:#fff;font-size:16px;font-weight:900;white-space:nowrap;box-shadow:0 2px 5px rgba(0,0,0,.6)}
-    .place.current .placeClock{display:block}
-
-    #place-cabin{left:39%;top:58%}
-    #place-northForest{left:31%;top:29%}
-    #place-deepForest{left:14%;top:15%}
-    #place-plain{left:67%;top:40%}
-    #place-river{left:84%;top:72%}
-
-    #shade{position:absolute;inset:0;pointer-events:none;z-index:10;transition:background .3s ease}
-    html[data-dd-phase="朝"] #shade{background:rgba(255,236,176,.04)}
-    html[data-dd-phase="昼"] #shade{background:transparent}
-    html[data-dd-phase="夕方"] #shade{background:rgba(111,54,20,.18)}
-    html[data-dd-phase="夜"] #shade{background:rgba(11,19,48,.44)}
-    html[data-dd-phase="深夜"] #shade{background:rgba(4,8,22,.6)}
-
-    #actionBox{flex:0 0 150px;border:1px solid rgba(255,255,255,.25);border-radius:10px;background:rgba(0,0,0,.24);padding:10px;display:grid;grid-template-columns:1fr auto;grid-template-rows:auto auto 1fr;gap:6px 10px}
-    #locationName{font-size:18px;font-weight:900}
-    #moveCost{font-size:14px;text-align:right;opacity:.92;font-weight:800}
-    #locationText{grid-column:1/-1;font-size:14px;line-height:1.35}
-    #actions{grid-column:1/-1;display:flex;align-items:end;gap:7px;flex-wrap:wrap}
-    .action{flex:1 1 110px;min-height:42px;border:1px solid #f0eee5;border-radius:8px;background:#f0eee5;color:#1c1c1c;font:inherit;font-size:14px;font-weight:900;padding:6px 9px}
-    .action.hunt{background:#ead8bd}
-    .action.harvest{background:#d8e3c8}
-    .action:disabled{opacity:.4}
+    #mapPin{position:absolute;z-index:5;width:28px;height:28px;border:4px solid #fff;border-radius:50% 50% 50% 0;background:#ffe36b;transform:translate(-50%,-85%) rotate(-45deg);box-shadow:0 3px 8px rgba(0,0,0,.5);transition:left .24s ease,top .24s ease}
+    #mapPin::after{content:"";position:absolute;width:8px;height:8px;border-radius:50%;background:#25231f;left:50%;top:50%;transform:translate(-50%,-50%)}
+    #pinLabel{position:absolute;z-index:6;transform:translate(-50%,8px);min-width:92px;padding:6px 8px;border:2px solid rgba(255,255,255,.88);border-radius:9px;background:rgba(25,29,24,.9);color:#fff;font-size:14px;font-weight:900;text-align:center;white-space:nowrap;transition:left .24s ease,top .24s ease}
+    #shade{position:absolute;inset:0;pointer-events:none;z-index:8;transition:background .3s ease}html[data-dd-phase="朝"] #shade{background:rgba(255,236,176,.04)}html[data-dd-phase="昼"] #shade{background:transparent}html[data-dd-phase="夕方"] #shade{background:rgba(111,54,20,.18)}html[data-dd-phase="夜"] #shade{background:rgba(11,19,48,.44)}html[data-dd-phase="深夜"] #shade{background:rgba(4,8,22,.6)}
+    #selectorBox{flex:0 0 184px;border:1px solid rgba(255,255,255,.25);border-radius:11px;background:rgba(0,0,0,.24);padding:9px;display:grid;grid-template-columns:54px 1fr 54px;grid-template-rows:58px auto auto;gap:7px}
+    .arrow{border:1.5px solid #f0eee5;border-radius:9px;background:#313a2f;color:#fff;font-size:23px;font-weight:1000}
+    #selectedPlace{border:1.5px solid #f0eee5;border-radius:9px;background:#f0eee5;color:#1c1c1c;font-size:18px;font-weight:1000}
+    #selectedInfo{grid-column:1/-1;font-size:13px;line-height:1.35;min-height:38px}.currentMark{font-size:11px;opacity:.75;margin-left:5px}
+    #confirmMove{grid-column:1/-1;min-height:46px;border:0;border-radius:9px;background:#f0eee5;color:#171817;font-size:16px;font-weight:1000}
   </style>
 </head>
 <body>
 <div id="game">
-  <header>
-    <h1>周辺マップ</h1>
-    <div class="headerRight">
-      <div id="dayPhase"></div>
-      <a href="DD_top.html">小屋画面へ</a>
-    </div>
-  </header>
-
-  <div id="message">行きたい場所をタップして移動する。</div>
-
-  <div id="mapWrap">
-    <div id="mapScene"></div>
-    <button id="place-deepForest" class="place" type="button" data-place="deepForest">深い森<small></small><span class="placeClock"></span></button>
-    <button id="place-northForest" class="place" type="button" data-place="northForest">北の森<small></small><span class="placeClock"></span></button>
-    <button id="place-cabin" class="place" type="button" data-place="cabin">小屋<small></small><span class="placeClock"></span></button>
-    <button id="place-plain" class="place" type="button" data-place="plain">開けた平原<small></small><span class="placeClock"></span></button>
-    <button id="place-river" class="place" type="button" data-place="river">川辺<small></small><span class="placeClock"></span></button>
-    <div id="shade"></div>
-  </div>
-
-  <div id="actionBox">
-    <div id="locationName">現在地</div>
-    <div id="moveCost"></div>
-    <div id="locationText"></div>
-    <div id="actions"></div>
-  </div>
+  <header><h1>周辺マップ</h1><div class="headerRight"><div id="dayPhase"></div><a href="DD_top.html">小屋画面へ</a></div></header>
+  <div id="message">▲▼で場所を選ぶ。</div>
+  <div id="mapWrap"><div id="mapScene"></div><div id="mapPin" aria-hidden="true"></div><div id="pinLabel"></div><div id="shade"></div></div>
+  <section id="selectorBox" aria-label="場所選択">
+    <button id="placePrev" class="arrow" type="button" aria-label="前の場所">▲</button>
+    <button id="selectedPlace" type="button"></button>
+    <button id="placeNext" class="arrow" type="button" aria-label="次の場所">▼</button>
+    <div id="selectedInfo"></div>
+    <button id="confirmMove" type="button"></button>
+  </section>
 </div>
-
-<script src="DD_time.js?v=202609160830"></script>
-<script src="DD_items.js?v=202609160830"></script>
-<script src="DD_wolf.js?v=202609160830"></script>
-<script src="DD_event.js?v=202609160830"></script>
-<script src="DD_map.js?v=202609160830"></script>
+<script src="DD_time.js?v=20260916mapsel1"></script>
+<script src="DD_items.js?v=20260916mapsel1"></script>
+<script src="DD_wolf.js?v=20260916mapsel1"></script>
+<script src="DD_event.js?v=20260916mapsel1"></script>
+<script src="DD_map.js?v=20260916mapsel1"></script>
 </body>
 </html>
