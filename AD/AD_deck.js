@@ -1,251 +1,266 @@
 (() => {
   const params = new URLSearchParams(location.search);
-  const enemyId = ['wolf', 'wild_dog'].includes(params.get('enemy')) ? params.get('enemy') : 'wild_dog';
-  const returnUrl = params.get('return') || 'AD_top.html';
+  const config = window.ADDeckConfig || {};
+  const zones = config.zones || {};
+  const zone = zones[params.get('zone')] ? params.get('zone') : 'forest';
+  const zoneConfig = zones[zone] || { label: zone, cards: [], encounters: [] };
 
-  const enemies = {
-    wolf: {
-      id: 'wolf',
-      name: '狼',
-      hp: 4,
-      deck: [
-        { id: 'attack', icon: '⚔', name: '噛みつく', damage: 1 },
-        { id: 'attack', icon: '⚔', name: '噛みつく', damage: 1 },
-        { id: 'strong', icon: '‼', name: '飛びかかる', damage: 2 },
-        { id: 'guard', icon: '◼', name: '身構える', guard: 1 },
-        { id: 'watch', icon: '…', name: '様子を見る', damage: 0 }
-      ]
-    },
-    wild_dog: {
-      id: 'wild_dog',
-      name: '野犬',
-      hp: 3,
-      deck: [
-        { id: 'attack', icon: '⚔', name: '噛みつく', damage: 1 },
-        { id: 'attack', icon: '⚔', name: '噛みつく', damage: 1 },
-        { id: 'strong', icon: '‼', name: '飛びかかる', damage: 2 },
-        { id: 'watch', icon: '…', name: '様子を見る', damage: 0 }
-      ]
-    }
+  const placeName = document.getElementById('placeName');
+  const autoButton = document.getElementById('autoButton');
+  const autoSpeedButton = document.getElementById('autoSpeedButton');
+  const cardSlot = document.getElementById('cardSlot');
+  const slotPrompt = document.getElementById('slotPrompt');
+  const cardHint = document.getElementById('cardHint');
+  const drawn = document.getElementById('drawn');
+  const cardIcon = document.getElementById('cardIcon');
+  const cardTitle = document.getElementById('cardTitle');
+  const cardSub = document.getElementById('cardSub');
+  const cardActions = document.getElementById('cardActions');
+  const primaryAction = document.getElementById('primaryAction');
+  const discardAction = document.getElementById('discardAction');
+  const statusName = document.getElementById('statusName');
+  const statusValue = document.getElementById('statusValue');
+  const enemyIntent = document.getElementById('enemyIntent');
+  const eventText = document.getElementById('eventText');
+  const eventDetail = document.getElementById('eventDetail');
+  const result = document.getElementById('result');
+
+  const AUTO_SPEEDS = {
+    slow: { label: 'ゆっくり', next: 1800, action: 900 },
+    normal: { label: '普通', next: 800, action: 400 },
+    fast: { label: '速い', next: 320, action: 160 }
   };
+  const AUTO_SPEED_ORDER = ['slow', 'normal', 'fast'];
 
-  const enemy = enemies[enemyId];
-  const PLAYER_MAX_HP = 5;
-  const TURN_MINUTES = 1;
+  let currentCard = null;
+  let acted = false;
+  let busy = false;
+  let autoMode = false;
+  let autoTimer = 0;
+  let autoSpeed = 'slow';
 
-  const enemyName = document.getElementById('enemyName');
-  const enemyHpText = document.getElementById('enemyHpText');
-  const enemyHpFill = document.getElementById('enemyHpFill');
-  const enemyDeckCount = document.getElementById('enemyDeckCount');
-  const enemyDrawn = document.getElementById('enemyDrawn');
-  const enemyIcon = document.getElementById('enemyIcon');
-  const enemyAction = document.getElementById('enemyAction');
-  const enemyPower = document.getElementById('enemyPower');
-  const playerHpText = document.getElementById('playerHpText');
-  const playerHpFill = document.getElementById('playerHpFill');
-  const hand = document.getElementById('hand');
-  const log = document.getElementById('log');
-  const turnEl = document.getElementById('turn');
-  const endActions = document.getElementById('endActions');
-  const returnButton = document.getElementById('returnButton');
-
-  let enemyHp = enemy.hp;
-  let playerHp = PLAYER_MAX_HP;
-  let turn = 1;
-  let ended = false;
-  let enemyDeck = [];
-
-  function shuffle(list) {
-    const out = list.map(card => ({ ...card }));
-    for (let i = out.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [out[i], out[j]] = [out[j], out[i]];
-    }
-    return out;
+  function clone(value) { return value ? { ...value } : value; }
+  function pickRandom(list) {
+    if (!Array.isArray(list) || !list.length) return null;
+    return list[Math.floor(Math.random() * list.length)] || null;
   }
 
-  function refillEnemyDeck() {
-    enemyDeck = shuffle(enemy.deck);
+  function buildDrawPool() {
+    return (zoneConfig.cards || []).map(clone);
   }
 
-  function drawEnemyCard() {
-    if (!enemyDeck.length) refillEnemyDeck();
-    return enemyDeck.shift();
+  function hideChoices() {
+    cardActions.classList.remove('show');
+    primaryAction.disabled = false;
+    discardAction.disabled = false;
   }
 
-  function percent(value, max) {
-    if (!max) return 0;
-    return Math.max(0, Math.min(100, (value / max) * 100));
+  function showChoices(card) {
+    hideChoices();
+    if (card.type === 'item') primaryAction.textContent = '入手する';
+    else if (card.type === 'hunt') primaryAction.textContent = '狩猟する';
+    else if (card.type === 'fish') primaryAction.textContent = '捕る';
+    else return;
+    discardAction.textContent = '見送る';
+    cardActions.classList.add('show');
   }
 
-  function refreshStatus() {
-    enemyName.textContent = enemy.name;
-    enemyHpText.textContent = `${enemyHp} / ${enemy.hp}`;
-    enemyHpFill.style.width = `${percent(enemyHp, enemy.hp)}%`;
-    playerHpText.textContent = `${playerHp} / ${PLAYER_MAX_HP}`;
-    playerHpFill.style.width = `${percent(playerHp, PLAYER_MAX_HP)}%`;
-    enemyDeckCount.textContent = `${enemyDeck.length}枚`;
-    turnEl.textContent = `${turn}ターン目`;
+  function updateAutoButton() {
+    autoButton.textContent = autoMode ? 'オート：ON' : 'オート：OFF';
+    autoButton.classList.toggle('on', autoMode);
+    autoButton.setAttribute('aria-pressed', autoMode ? 'true' : 'false');
   }
 
-  function makeHandCard(card) {
-    const button = document.createElement('button');
-    button.type = 'button';
-    button.className = 'handCard';
-    button.disabled = ended;
-
-    const icon = document.createElement('div');
-    icon.className = 'icon';
-    icon.textContent = card.icon || '□';
-
-    const name = document.createElement('div');
-    name.textContent = card.name;
-
-    const sub = document.createElement('div');
-    sub.className = 'sub';
-    sub.textContent = card.sub || '';
-
-    button.append(icon, name, sub);
-    button.addEventListener('click', () => play(card));
-    return button;
+  function updateAutoSpeedButton() {
+    autoSpeedButton.textContent = `速度：${AUTO_SPEEDS[autoSpeed].label}`;
   }
 
-  function getPlayerHand() {
-    const cards = [
-      { id: 'strike', icon: '✊', name: '素手', damage: 1, sub: '攻撃 1' },
-      { id: 'guard', icon: '◼', name: '防御', guard: 1, sub: '被害 -1' },
-      { id: 'flee', icon: '↩', name: '逃げる', sub: '敵札次第' }
-    ];
-
-    if (Number(window.DDItems?.count?.('pebble') || 0) > 0) {
-      cards.push({ id: 'stone', icon: '●', name: '石を投げる', damage: 2, consume: 'pebble', sub: '攻撃 2 / 小石×1' });
-    }
-
-    if (window.DDWolf?.hasCompanion?.()) {
-      const label = window.DDWolf.stage?.() === 'pup' ? '子狼の遠吠え' : '遠吠え';
-      cards.push({ id: 'howl', icon: '🐺', name: label, sub: '確実に逃走' });
-    }
-
-    return cards;
+  function clearAutoTimer() {
+    if (autoTimer) clearTimeout(autoTimer);
+    autoTimer = 0;
   }
 
-  function renderHand() {
-    hand.innerHTML = '';
-    getPlayerHand().forEach(card => hand.appendChild(makeHandCard(card)));
+  function setDrawnInteractivity() {
+    const enabled = Boolean(currentCard && !acted && !busy && !autoMode);
+    drawn.style.pointerEvents = enabled ? 'auto' : 'none';
+    drawn.style.cursor = enabled ? 'pointer' : 'default';
+    drawn.tabIndex = enabled ? 0 : -1;
   }
 
-  function showEnemyCard(card) {
-    enemyDrawn.style.visibility = 'visible';
-    enemyIcon.textContent = card.icon || '□';
-    enemyAction.textContent = card.name || '';
-    if (card.damage) enemyPower.textContent = `攻撃 ${card.damage}`;
-    else if (card.guard) enemyPower.textContent = `防御 ${card.guard}`;
-    else enemyPower.textContent = '行動なし';
+  function setSlotState() {
+    const empty = !currentCard;
+    cardSlot.classList.toggle('empty', empty);
+    cardSlot.classList.toggle('busy', busy || autoMode);
+    cardSlot.tabIndex = empty && !busy && !autoMode ? 0 : -1;
+    slotPrompt.style.display = empty ? 'grid' : 'none';
+    if (busy) slotPrompt.textContent = '札を探している…';
+    else if (autoMode) slotPrompt.textContent = 'オート探索中…';
+    else slotPrompt.textContent = 'ここをタップして札を出す';
   }
 
-  function finish(text, buttonLabel = '探索へ戻る', target = returnUrl) {
-    ended = true;
-    log.textContent = text;
-    renderHand();
-    endActions.style.display = 'flex';
-    returnButton.textContent = buttonLabel;
-    returnButton.onclick = () => { location.href = target; };
+  function scheduleAutoNext() {
+    clearAutoTimer();
+    if (!autoMode) return;
+    autoTimer = setTimeout(() => {
+      autoTimer = 0;
+      if (!autoMode || busy || currentCard) return;
+      requestNextCard();
+    }, AUTO_SPEEDS[autoSpeed].next);
   }
 
-  function escapeByHowl() {
-    const result = window.DDWolf?.combatHowl?.() || { canEscape: false, text: '' };
-    if (!result.canEscape) return false;
-    if (window.DDTime) DDTime.advance(TURN_MINUTES, 'battle:howl');
-    finish(result.text || '敵がひるんだ。逃げられる。');
-    return true;
+  function scheduleAutoAction(card) {
+    clearAutoTimer();
+    if (!autoMode || !card) return;
+    autoTimer = setTimeout(() => {
+      autoTimer = 0;
+      if (autoMode && currentCard === card && !acted && !busy) discardCurrentCard('札を見送った。');
+    }, AUTO_SPEEDS[autoSpeed].action);
   }
 
-  function play(playerCard) {
-    if (ended) return;
+  function setEmptySlot(message = '', detail = '') {
+    currentCard = null;
+    acted = false;
+    busy = false;
+    drawn.style.display = 'none';
+    drawn.style.transition = '';
+    drawn.style.transform = '';
+    drawn.style.opacity = '';
+    drawn.classList.remove('dealIn');
+    hideChoices();
+    setDrawnInteractivity();
+    setSlotState();
+    statusName.textContent = '出る札';
+    statusValue.textContent = '—';
+    enemyIntent.textContent = '';
+    cardHint.textContent = autoMode ? 'オートで次の札へ' : '空白をタップして次の札へ';
+    if (message) eventText.textContent = message;
+    if (detail !== undefined) eventDetail.textContent = detail;
+    if (autoMode) scheduleAutoNext();
+  }
 
-    if (playerCard.id === 'howl') {
-      escapeByHowl();
+  function showCardInfo(card) {
+    statusName.textContent = card?.title || '出る札';
+    statusValue.textContent = card?.type || '—';
+    enemyIntent.textContent = card?.type === 'none' ? '何もない。' : '札を確認する。';
+
+    if (autoMode) {
+      cardHint.textContent = `オート処理中・${AUTO_SPEEDS[autoSpeed].label}`;
+      eventDetail.textContent = '自動で見送る。';
       return;
     }
 
-    const enemyCard = drawEnemyCard();
-    showEnemyCard(enemyCard);
-    if (window.DDTime) DDTime.advance(TURN_MINUTES, `battle:${enemy.id}:turn`);
-
-    let enemyDamage = Math.max(0, Number(enemyCard.damage || 0));
-    let playerDamage = Math.max(0, Number(playerCard.damage || 0));
-    const enemyGuard = Math.max(0, Number(enemyCard.guard || 0));
-    const playerGuard = Math.max(0, Number(playerCard.guard || 0));
-    const messages = [];
-
-    if (playerCard.id === 'flee') {
-      const success = enemyCard.id === 'watch' || enemyCard.id === 'guard';
-      if (success) {
-        refreshStatus();
-        finish(`${enemy.name}の隙をついて逃げた。`);
-        return;
-      }
-      messages.push('逃げようとしたが、回り込まれた。');
-    }
-
-    if (playerCard.consume) {
-      const before = Number(window.DDItems?.count?.(playerCard.consume) || 0);
-      if (before <= 0) {
-        renderHand();
-        log.textContent = '使える小石がない。';
-        return;
-      }
-      window.DDItems.remove(playerCard.consume, 1);
-    }
-
-    if (enemyGuard > 0 && playerDamage > 0) {
-      playerDamage = Math.max(0, playerDamage - enemyGuard);
-    }
-
-    if (playerDamage > 0) {
-      enemyHp = Math.max(0, enemyHp - playerDamage);
-      messages.push(`${enemy.name}に ${playerDamage} ダメージ。`);
-    } else if (playerCard.id === 'strike' || playerCard.id === 'stone') {
-      messages.push(`${enemy.name}に防がれた。`);
-    }
-
-    if (enemyHp <= 0) {
-      refreshStatus();
-      renderHand();
-      finish(`${enemy.name}を倒した。`);
-      return;
-    }
-
-    if (playerGuard > 0 && enemyDamage > 0) {
-      enemyDamage = Math.max(0, enemyDamage - playerGuard);
-    }
-
-    if (enemyDamage > 0) {
-      playerHp = Math.max(0, playerHp - enemyDamage);
-      messages.push(`${enemy.name}から ${enemyDamage} ダメージ。`);
-    } else if (Number(enemyCard.damage || 0) > 0) {
-      messages.push('攻撃を防いだ。');
-    } else if (enemyCard.id === 'watch') {
-      messages.push(`${enemy.name}はこちらを窺っている。`);
-    } else if (enemyCard.id === 'guard') {
-      messages.push(`${enemy.name}は身構えている。`);
-    }
-
-    refreshStatus();
-    renderHand();
-
-    if (playerHp <= 0) {
-      finish('戦闘を続けられない。', 'トップへ戻る', 'AD_top.html');
-      return;
-    }
-
-    log.textContent = messages.join(' ');
-    turn += 1;
-    turnEl.textContent = `${turn}ターン目`;
+    if (card.type === 'item') { cardHint.textContent = '入手する / 見送る'; eventDetail.textContent = `入手すると${card.minutes || 20}分進む。`; return; }
+    if (card.type === 'hunt') { cardHint.textContent = '狩猟する / 見送る'; eventDetail.textContent = '狩猟するか見送るか選ぶ。'; return; }
+    if (card.type === 'fish') { cardHint.textContent = '捕る / 見送る'; eventDetail.textContent = `捕ると${card.minutes || 10}分進む。`; return; }
+    cardHint.textContent = '札をタップして破棄する';
+    eventDetail.textContent = '何もない。';
   }
 
-  returnButton.addEventListener('click', () => { location.href = returnUrl; });
-  refillEnemyDeck();
-  refreshStatus();
-  renderHand();
+  function revealCard() {
+    const card = pickRandom(buildDrawPool());
+    busy = false;
+    if (!card) { setEmptySlot('出る札がない。', ''); return; }
+
+    currentCard = clone(card);
+    acted = false;
+    drawn.style.transition = '';
+    drawn.style.transform = '';
+    drawn.style.opacity = '';
+    drawn.classList.remove('dealIn');
+    void drawn.offsetWidth;
+    drawn.style.display = 'flex';
+    drawn.classList.add('dealIn');
+    cardIcon.textContent = currentCard.icon || '';
+    cardTitle.textContent = currentCard.title || '何もない';
+    cardSub.textContent = currentCard.type === 'none' ? '空白札' : '';
+    eventText.textContent = currentCard.text || '何も起こらなかった。';
+    result.textContent = '';
+    showCardInfo(currentCard);
+    setDrawnInteractivity();
+    setSlotState();
+
+    if (autoMode) {
+      hideChoices();
+      scheduleAutoAction(currentCard);
+      return;
+    }
+    if (currentCard.type === 'none') { hideChoices(); return; }
+    showChoices(currentCard);
+  }
+
+  function requestNextCard() {
+    if (currentCard || busy) return;
+    busy = true;
+    hideChoices();
+    setSlotState();
+    cardHint.textContent = '';
+    eventText.textContent = autoMode ? 'オートで札を探している…' : '札を探している…';
+    eventDetail.textContent = '6分経過する。';
+    result.textContent = '';
+    setTimeout(revealCard, autoMode ? AUTO_SPEEDS[autoSpeed].action : 300);
+  }
+
+  function discardCurrentCard(message = '札を見送った。') {
+    if (!currentCard || acted || busy) return;
+    acted = true;
+    hideChoices();
+    drawn.style.transition = 'transform .18s ease-out,opacity .18s ease-out';
+    drawn.style.transform = 'translateY(16px) scale(.92)';
+    drawn.style.opacity = '.05';
+    eventText.textContent = message;
+    eventDetail.textContent = '';
+    setTimeout(() => setEmptySlot(message, autoMode ? 'オート探索を続ける。' : '空白をタップして次の札を出す。'), 190);
+  }
+
+  function resolvePrimary() {
+    if (!currentCard || acted || busy) return;
+    const label = currentCard.type === 'item' ? '入手した。' : currentCard.type === 'hunt' ? '狩猟を選んだ。' : currentCard.type === 'fish' ? '捕るを選んだ。' : '札を処理した。';
+    result.textContent = label;
+    discardCurrentCard(label);
+  }
+
+  function setAutoMode(enabled) {
+    autoMode = Boolean(enabled);
+    clearAutoTimer();
+    updateAutoButton();
+    setDrawnInteractivity();
+    setSlotState();
+    hideChoices();
+    eventDetail.textContent = `この画面にいる間だけ自動で札を出す。速度：${AUTO_SPEEDS[autoSpeed].label}`;
+    if (currentCard && !acted && !busy) scheduleAutoAction(currentCard);
+    else if (!currentCard && !busy) requestNextCard();
+  }
+
+  function cycleAutoSpeed() {
+    const index = AUTO_SPEED_ORDER.indexOf(autoSpeed);
+    autoSpeed = AUTO_SPEED_ORDER[(index + 1) % AUTO_SPEED_ORDER.length];
+    updateAutoSpeedButton();
+    if (autoMode) setAutoMode(true);
+  }
+
+  placeName.textContent = zoneConfig.label || zone;
+  autoButton.addEventListener('click', () => setAutoMode(!autoMode));
+  autoSpeedButton.addEventListener('click', cycleAutoSpeed);
+
+  cardSlot.addEventListener('click', event => {
+    if (event.target.closest('#drawn')) return;
+    if (!autoMode && !currentCard && !busy) requestNextCard();
+  });
+  cardSlot.addEventListener('keydown', event => {
+    if ((event.key === 'Enter' || event.key === ' ') && !autoMode && !currentCard && !busy) {
+      event.preventDefault();
+      requestNextCard();
+    }
+  });
+  drawn.addEventListener('click', event => {
+    event.preventDefault();
+    event.stopPropagation();
+    if (currentCard?.type === 'none') discardCurrentCard();
+  });
+  primaryAction.addEventListener('click', resolvePrimary);
+  discardAction.addEventListener('click', () => discardCurrentCard());
+
+  updateAutoButton();
+  updateAutoSpeedButton();
+  setEmptySlot('札を出す。', '');
 })();
