@@ -348,6 +348,19 @@
     return item ? `${data.name}を仕留めた　${item.name}` : `${data.name}を仕留めた`;
   }
 
+  function finishWithWolf(data, message) {
+    ready = false;
+    hideCombatUi();
+    chargeEncounterTime();
+    setTimeout(() => {
+      animal.classList.remove('hit');
+      animal.classList.add('dead');
+      animalName.textContent = `${data.name}　仕留めた`;
+      searchText.textContent = message;
+      show(message);
+    }, 220);
+  }
+
   function release(e) {
     if (!pulling) return;
     e.preventDefault();
@@ -364,6 +377,10 @@
     resetBow();
 
     if (!hit) {
+      if (window.DDWolfAssist?.canCoverMiss?.(data.id)) {
+        finishWithWolf(data, `矢は外れたが、狼（？）が${data.name}を追って仕留めた。`);
+        return;
+      }
       chargeEncounterTime();
       escapeAfterMiss('外れ');
       return;
@@ -384,6 +401,14 @@
         searchText.textContent = message;
         show(message);
       }, 220);
+      return;
+    }
+
+    if (window.DDWolfAssist?.canFinishHunt?.(data.id, currentHp, Number(data.hp || 1))) {
+      const message = data.id === 'deer'
+        ? '鹿の体力が半分以下になり、狼（？）がとどめを刺した。'
+        : `主人公が傷を負わせ、狼（？）が${data.name}を仕留めた。`;
+      finishWithWolf(data, message);
       return;
     }
 
