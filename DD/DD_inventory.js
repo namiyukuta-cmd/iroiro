@@ -2,18 +2,27 @@
   const inventory = document.getElementById('inventory');
   const empty = document.getElementById('empty');
   const totalCount = document.getElementById('totalCount');
+  const foodMessage = document.getElementById('foodMessage');
   const itemDb = window.DDItems;
 
   function fallbackIcon(item) {
     if (!item) return '□';
     if (item.kind === 'companion') return '🐺';
+    if (item.id === 'nuts') return '🌰';
+    if (item.id === 'mushroom') return '🍄';
+    if (item.foodGroup === '魚') return '🐟';
     if (item.category === 'food') return '🍖';
     return '👜';
   }
 
   function categoryLabel(item) {
     if (!item) return '';
-    if (item.category === 'food') return item.foodGroup ? `食料・${item.foodGroup}` : '食料';
+    if (item.category === 'food') {
+      const base = item.foodGroup ? `食料・${item.foodGroup}` : '食料';
+      if (item.requiresCooking) return `${base}・要調理`;
+      if (item.edible) return `${base}・食べられる`;
+      return base;
+    }
     if (item.category === 'material') return '素材';
     if (item.kind === 'companion') return '同行・完全肉食';
     if (item.category === 'special') return '特別';
@@ -38,6 +47,34 @@
 
     wrap.textContent = fallbackIcon(item);
     return wrap;
+  }
+
+  function addFoodControls(card, item) {
+    if (item?.category !== 'food') return;
+
+    if (item.requiresCooking) {
+      const note = document.createElement('div');
+      note.className = 'itemBehavior';
+      note.textContent = '小屋で調理が必要。';
+      card.appendChild(note);
+      return;
+    }
+
+    if (!item.edible || !window.DDNeeds) return;
+
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.className = 'itemAction';
+    button.textContent = '食べる';
+    button.addEventListener('click', () => {
+      if (itemDb.count(item.id) < 1) return;
+      itemDb.remove(item.id, 1);
+      DDNeeds.feedPlayer?.(item.hungerRestore || 100, item.foodType || 'other');
+      const holdMinutes = Number(DDNeeds.holdMinutesForFood?.(item.foodType || 'other') || 0);
+      const hours = Math.round(holdMinutes / 60);
+      if (foodMessage) foodMessage.textContent = `${item.name}を食べた。${hours}時間、空腹は増えない。`;
+    });
+    card.appendChild(button);
   }
 
   function addCompanionControls(card, item) {
@@ -99,6 +136,7 @@
       card.appendChild(makeVisual(item));
       card.appendChild(name);
       card.appendChild(meta);
+      addFoodControls(card, item);
       addCompanionControls(card, item);
       inventory.appendChild(card);
     });
