@@ -9,94 +9,84 @@
   <title>AD - 山札</title>
   <style>
     *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
-    html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#23231f;color:#f4f1e8;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
-    body{height:100dvh}
-    #game{width:min(100%,520px);height:100dvh;margin:0 auto;padding:max(10px,env(safe-area-inset-top)) 12px max(10px,env(safe-area-inset-bottom));display:flex;flex-direction:column;gap:9px;background:#292923}
-    header{flex:0 0 52px;display:flex;align-items:flex-start;justify-content:space-between;gap:12px;border-bottom:1px solid #68665e;padding:2px 2px 7px}
-    h1{margin:0;font-size:24px}
-    #clock{font-size:13px;font-weight:900;text-align:right}
-    #turn{font-size:12px;font-weight:800;opacity:.8;text-align:right;margin-top:4px}
+    :root{--ink:#282722;--paper:#f7f3eb;--purple:#62509d;--danger:#b94c3e;--card:#e4c74c;--muted:#716d65}
+    html,body{margin:0;width:100%;min-height:100%;background:#efebe3;color:#1c1b18;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+    body{min-height:100dvh;overflow-x:hidden}
+    button,a{font:inherit}
+    button{touch-action:manipulation}
+    #game{width:min(100%,520px);min-height:100dvh;margin:0 auto;padding:max(6px,env(safe-area-inset-top)) 8px calc(8px + env(safe-area-inset-bottom));display:flex;flex-direction:column;gap:6px}
 
-    #enemyBox{flex:1 1 auto;min-height:0;border:2px solid #ddd7c7;border-radius:12px;background:#37372f;padding:10px;display:flex;flex-direction:column;gap:8px}
-    #enemyHead{display:flex;align-items:center;justify-content:space-between;gap:8px}
-    #enemyName{font-size:22px;font-weight:1000}
-    .hp{font-size:14px;font-weight:900}
-    .bar{height:12px;border:2px solid #ece7dc;border-radius:999px;overflow:hidden;background:#171714;margin-top:4px}
-    .fill{height:100%;background:#e9e3d5;width:100%;transition:width .2s ease}
-    #enemyTable{position:relative;flex:1 1 auto;min-height:180px;display:flex;align-items:center;justify-content:center;gap:28px}
-    .enemyCard{width:118px;height:164px;border:3px solid #e9e4d8;border-radius:11px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:8px;box-shadow:0 5px 0 rgba(0,0,0,.24)}
-    #enemyDeck{background:repeating-linear-gradient(45deg,#1e211d 0 7px,#343832 7px 14px);color:#fff}
-    #enemyDeck small{display:block;margin-top:8px;font-size:12px}
-    #enemyDrawn{background:#f8f6ef;color:#222;visibility:hidden}
-    #enemyIcon{font-size:42px;line-height:1;margin-bottom:10px}
-    #enemyAction{font-size:17px;font-weight:1000}
-    #enemyPower{margin-top:7px;font-size:12px;font-weight:900;color:#67635a}
+    #topPanel{min-height:86px;border:2px solid var(--purple);border-radius:13px;background:#faf8f3;padding:6px 8px;display:grid;grid-template-columns:1fr auto;gap:8px;align-items:center}
+    #placeBlock{min-width:0}
+    #placeName{font-size:20px;font-weight:1000;line-height:1.1}
+    #placeType{margin-top:4px;font-size:10px;font-weight:900;opacity:.58}
+    #topRight{display:grid;gap:6px;justify-items:end}
+    #topLinks{display:flex;gap:8px}.headLink{color:#292725;text-decoration:none;font-size:10px;font-weight:1000;white-space:nowrap}
+    #autoControls{display:flex;gap:5px}
+    #autoButton,#autoSpeedButton{height:30px;border:1.5px solid var(--ink);border-radius:7px;background:#fff;color:#1d1d1b;font-size:10px;font-weight:1000;padding:0 7px;box-shadow:0 1px 0 rgba(0,0,0,.13);white-space:nowrap}
+    #autoSpeedButton{background:#e9e4da}#autoButton.on{background:var(--ink);color:#fff}
 
-    #log{flex:0 0 70px;border:1px solid #77736b;border-radius:9px;background:#1c1c19;padding:8px 10px;font-size:14px;font-weight:800;line-height:1.45;display:flex;align-items:center;justify-content:center;text-align:center}
+    #encounterArea{position:relative;border:1.5px solid #aaa397;border-radius:12px;background:rgba(255,255,255,.25);padding:6px 7px 6px}
+    #encounterStage{position:relative;height:210px;display:grid;grid-template-columns:minmax(0,1fr) 100px;gap:6px;align-items:center}
+    #cardColumn{position:relative;height:100%;display:grid;place-items:center}
+    #cardSlot{position:relative;width:140px;height:190px;border:2px dashed #8b867c;border-radius:11px;background:rgba(255,255,255,.48);display:grid;place-items:center;cursor:pointer;transition:transform .12s ease,background .15s ease,border-color .15s ease}
+    #cardSlot.empty:active{transform:scale(.97);background:#fff}#cardSlot.busy{cursor:default;border-style:solid;border-color:#b8b1a6}
+    #slotPrompt{padding:11px;text-align:center;font-size:12px;font-weight:1000;line-height:1.35;color:#625f58}
+    #drawn{position:absolute;inset:7px;width:auto;height:auto;border:3px solid var(--card);border-radius:9px;background:#fff;box-shadow:0 4px 0 rgba(0,0,0,.13);display:none;flex-direction:column;align-items:center;justify-content:center;padding:7px;text-align:center;transform-origin:center;z-index:2}
+    #drawn.dealIn{animation:dealIn .18s ease-out}@keyframes dealIn{from{opacity:.2;transform:translateY(-8px) scale(.95)}to{opacity:1;transform:none}}
+    #cardIcon{font-size:45px;line-height:1;margin-bottom:7px}#cardTitle{font-size:16px;font-weight:1000;line-height:1.15}#cardSub{margin-top:5px;font-size:10px;font-weight:900;color:#666}
+    #encounterStatus{align-self:stretch;display:flex;flex-direction:column;justify-content:center;gap:6px;min-width:0}
+    #statusName{font-size:13px;font-weight:1000;line-height:1.2;min-height:15px}#statusValue{font-size:10px;font-weight:1000;text-align:right}#enemyIntent{font-size:10px;font-weight:800;line-height:1.25;color:#5d5952;min-height:30px}
+    #cardActions{display:none;gap:6px;margin-top:3px}#cardActions.show{display:flex}#cardActions button{flex:1;height:35px;border:1.5px solid var(--ink);border-radius:8px;background:#fff;font-size:11px;font-weight:1000;box-shadow:0 2px 0 rgba(0,0,0,.11)}#discardAction{background:#e7e2d8!important}
+    #cardHint{text-align:center;min-height:15px;margin-top:4px;font-size:10px;font-weight:900;color:#5d5952;line-height:1.25}
+    #eventStrip{border:1.5px solid #3a3833;border-radius:8px;background:#faf8f2;padding:8px;min-height:70px}
+    #eventText{font-size:12px;font-weight:1000;line-height:1.25;min-height:15px}#eventDetail{margin-top:4px;font-size:10px;font-weight:800;color:#5d5952;line-height:1.3}#result{margin-top:4px;font-size:10px;font-weight:1000;color:#514e47;line-height:1.2}
 
-    #playerBox{flex:0 0 250px;border:2px solid #d9d4c8;border-radius:12px;background:#efebe1;color:#23221f;padding:10px;display:flex;flex-direction:column;gap:8px}
-    #playerHead{display:flex;align-items:flex-start;justify-content:space-between;gap:10px}
-    #playerTitle{font-size:18px;font-weight:1000}
-    #playerHpWrap{min-width:135px;text-align:right}
-    #playerHpWrap .bar{border-color:#292824;background:#c9c4b8}
-    #playerHpFill{background:#292824}
-    #hand{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px;align-content:start}
-    .handCard{min-height:82px;border:2px solid #272621;border-radius:9px;background:#fff;color:#20201d;font:inherit;padding:7px 5px;text-align:center;font-weight:1000;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px}
-    .handCard .icon{font-size:25px;line-height:1}
-    .handCard .sub{font-size:11px;font-weight:800;color:#666257;line-height:1.15}
-    .handCard:disabled{opacity:.4}
-    #endActions{display:none;gap:8px}
-    #endActions button{flex:1;min-height:48px;border:2px solid #24231f;border-radius:9px;background:#24231f;color:#fff;font:inherit;font-size:16px;font-weight:1000}
+    @media(max-width:370px){#game{padding-left:6px;padding-right:6px;gap:5px}#encounterStage{grid-template-columns:minmax(0,1fr) 88px;height:198px}#cardSlot{width:132px;height:180px}}
   </style>
 </head>
 <body>
 <div id="game">
-  <header>
-    <h1>戦闘</h1>
-    <div>
-      <div id="clock" data-dd-clock></div>
-      <div id="turn">1ターン目</div>
+  <section id="topPanel">
+    <div id="placeBlock">
+      <div id="placeName">森</div>
+      <div id="placeType">DDの地点探索の札システム</div>
     </div>
-  </header>
-
-  <section id="enemyBox">
-    <div id="enemyHead">
-      <div id="enemyName">敵</div>
-      <div class="hp">HP <span id="enemyHpText">0 / 0</span></div>
-    </div>
-    <div class="bar"><div id="enemyHpFill" class="fill"></div></div>
-
-    <div id="enemyTable">
-      <div id="enemyDeck" class="enemyCard">
-        <strong>敵の山札</strong>
-        <small id="enemyDeckCount">0枚</small>
-      </div>
-      <div id="enemyDrawn" class="enemyCard">
-        <div id="enemyIcon"></div>
-        <div id="enemyAction"></div>
-        <div id="enemyPower"></div>
-      </div>
+    <div id="topRight">
+      <div id="topLinks"><a class="headLink" href="AD_top.html">トップへ</a></div>
+      <div id="autoControls"><button id="autoButton" type="button">オート：OFF</button><button id="autoSpeedButton" type="button">速度：ゆっくり</button></div>
     </div>
   </section>
 
-  <div id="log">手札から1枚選ぶ。</div>
-
-  <section id="playerBox">
-    <div id="playerHead">
-      <div id="playerTitle">自分の手札</div>
-      <div id="playerHpWrap">
-        <div class="hp">HP <span id="playerHpText">5 / 5</span></div>
-        <div class="bar"><div id="playerHpFill" class="fill"></div></div>
+  <section id="encounterArea">
+    <div id="encounterStage">
+      <div id="cardColumn">
+        <div id="cardSlot" class="empty" tabindex="0">
+          <div id="slotPrompt">ここをタップして札を出す</div>
+          <div id="drawn" tabindex="-1">
+            <div id="cardIcon"></div>
+            <div id="cardTitle"></div>
+            <div id="cardSub"></div>
+          </div>
+        </div>
+      </div>
+      <div id="encounterStatus">
+        <div id="statusName">出る札</div>
+        <div id="statusValue">—</div>
+        <div id="enemyIntent"></div>
+        <div id="cardActions"><button id="primaryAction" type="button">入手する</button><button id="discardAction" type="button">見送る</button></div>
       </div>
     </div>
-    <div id="hand"></div>
-    <div id="endActions"><button id="returnButton" type="button">探索へ戻る</button></div>
+    <div id="cardHint">空白をタップして次の札へ</div>
+  </section>
+
+  <section id="eventStrip">
+    <div id="eventText">札を出す。</div>
+    <div id="eventDetail"></div>
+    <div id="result"></div>
   </section>
 </div>
-
-<script src="../DD/DD_time.js"></script>
-<script src="../DD/DD_items.js"></script>
-<script src="../DD/DD_wolf.js"></script>
+<script src="AD_deck_config.js"></script>
 <script src="AD_deck.js"></script>
 </body>
 </html>
