@@ -65,4 +65,10 @@
     zones,
     placeNames
   };
+
+  if (/\/AD\/AD_deck\.html$/i.test(location.pathname)) {
+    const script = document.createElement('script');
+    script.src = `AD_finite_deck.js?v=${Date.now()}`;
+    document.head.appendChild(script);
+  }
 })();
