@@ -1,6 +1,7 @@
 (() => {
   const params = new URLSearchParams(location.search);
   const config = window.DDPointConfig || {};
+  const huntConfig = window.DDHuntConfig || {};
   const zones = config.zones || {};
   const zone = zones[params.get('zone')] ? params.get('zone') : 'forest';
   const place = params.get('place') || zone;
@@ -13,6 +14,7 @@
   const clockDial = document.getElementById('clockDial');
   const placeName = document.getElementById('placeName');
   const placeType = document.getElementById('placeType');
+  const autoButton = document.getElementById('autoButton');
   const cardSlot = document.getElementById('cardSlot');
   const slotPrompt = document.getElementById('slotPrompt');
   const cardHint = document.getElementById('cardHint');
@@ -31,6 +33,30 @@
   let currentCard = null;
   let acted = false;
   let busy = false;
+  let autoMode = false;
+  let autoTimer = 0;
+
+  const AUTO_ENEMIES = {
+    wolf: {
+      name: '狼',
+      deck: [
+        { id: 'attack', damage: 1 },
+        { id: 'attack', damage: 1 },
+        { id: 'strong', damage: 2 },
+        { id: 'guard', damage: 0 },
+        { id: 'watch', damage: 0 }
+      ]
+    },
+    wild_dog: {
+      name: '野犬',
+      deck: [
+        { id: 'attack', damage: 1 },
+        { id: 'attack', damage: 1 },
+        { id: 'strong', damage: 2 },
+        { id: 'watch', damage: 0 }
+      ]
+    }
+  };
 
   function clone(card) {
     return { ...card };
@@ -39,6 +65,15 @@
   function pickRandom(list) {
     if (!Array.isArray(list) || !list.length) return null;
     return list[Math.floor(Math.random() * list.length)] || null;
+  }
+
+  function shuffle(list) {
+    const out = (list || []).map(clone);
+    for (let i = out.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [out[i], out[j]] = [out[j], out[i]];
+    }
+    return out;
   }
 
   function battleUnlocked() {
@@ -95,8 +130,15 @@
     cardActions.classList.add('show');
   }
 
+  function updateAutoButton() {
+    if (!autoButton) return;
+    autoButton.textContent = autoMode ? 'オート：ON' : 'オート：OFF';
+    autoButton.classList.toggle('on', autoMode);
+    autoButton.setAttribute('aria-pressed', autoMode ? 'true' : 'false');
+  }
+
   function setDrawnInteractivity() {
-    const enabled = Boolean(currentCard && !acted && !busy);
+    const enabled = Boolean(currentCard && !acted && !busy && !autoMode);
     drawn.style.pointerEvents = enabled ? 'auto' : 'none';
     drawn.style.cursor = enabled ? 'pointer' : 'default';
     drawn.tabIndex = enabled ? 0 : -1;
@@ -106,11 +148,13 @@
   function setSlotState() {
     const empty = !currentCard;
     cardSlot.classList.toggle('empty', empty);
-    cardSlot.classList.toggle('busy', busy);
-    cardSlot.tabIndex = empty && !busy ? 0 : -1;
-    cardSlot.setAttribute('aria-disabled', empty && !busy ? 'false' : 'true');
+    cardSlot.classList.toggle('busy', busy || autoMode);
+    cardSlot.tabIndex = empty && !busy && !autoMode ? 0 : -1;
+    cardSlot.setAttribute('aria-disabled', empty && !busy && !autoMode ? 'false' : 'true');
     slotPrompt.style.display = empty ? 'grid' : 'none';
-    slotPrompt.textContent = busy ? '時間が進んでいる…' : 'ここをタップして札を出す';
+    if (busy) slotPrompt.textContent = '時間が進んでいる…';
+    else if (autoMode) slotPrompt.textContent = 'オート探索中…';
+    else slotPrompt.textContent = 'ここをタップして札を出す';
   }
 
   function resetCardVisual() {
@@ -118,6 +162,21 @@
     drawn.style.transform = '';
     drawn.style.opacity = '';
     drawn.classList.remove('tapFeedback', 'dealIn');
+  }
+
+  function clearAutoTimer() {
+    if (autoTimer) clearTimeout(autoTimer);
+    autoTimer = 0;
+  }
+
+  function scheduleAutoNext(delay = 360) {
+    clearAutoTimer();
+    if (!autoMode) return;
+    autoTimer = setTimeout(() => {
+      autoTimer = 0;
+      if (!autoMode || busy || currentCard) return;
+      requestNextCard();
+    }, delay);
   }
 
   function setEmptySlot(message = '', detail = '') {
@@ -129,9 +188,12 @@
     hideChoices();
     setDrawnInteractivity();
     setSlotState();
-    cardHint.textContent = `空白をタップして次の札へ　${drawMinutes()}分`;
+    cardHint.textContent = autoMode
+      ? `オートで次の札へ　${drawMinutes()}分`
+      : `空白をタップして次の札へ　${drawMinutes()}分`;
     if (message) eventText.textContent = message;
     if (detail !== undefined) eventDetail.textContent = detail;
+    if (autoMode) scheduleAutoNext();
   }
 
   function tapFeedback() {
@@ -268,6 +330,16 @@
   }
 
   function showCardInfo(card) {
+    if (autoMode) {
+      cardHint.textContent = 'オート処理中';
+      if (card.type === 'item') eventDetail.textContent = '自動で入手する。';
+      else if (card.type === 'hunt') eventDetail.textContent = '装備と矢を確認して自動判定する。';
+      else if (card.type === 'fish') eventDetail.textContent = '自動で捕獲を試みる。';
+      else if (card.type === 'enemy') eventDetail.textContent = '自動で逃走を試みる。';
+      else eventDetail.textContent = '自動で見送る。';
+      return;
+    }
+
     if (card.type === 'item') {
       cardHint.textContent = '入手する / 見送る';
       eventDetail.textContent = `入手すると${card.minutes || 20}分進む。`;
@@ -317,6 +389,16 @@
     result.textContent = '';
     showCardInfo(currentCard);
 
+    if (autoMode) {
+      hideChoices();
+      setDrawnInteractivity();
+      const autoCard = currentCard;
+      setTimeout(() => {
+        if (autoMode && currentCard === autoCard && !acted && !busy) runAutoAction(autoCard);
+      }, 220);
+      return;
+    }
+
     if (currentCard.type === 'enemy') {
       acted = true;
       hideChoices();
@@ -340,7 +422,7 @@
     hideChoices();
     setSlotState();
     cardHint.textContent = '';
-    eventText.textContent = '札を探している…';
+    eventText.textContent = autoMode ? 'オートで札を探している…' : '札を探している…';
     eventDetail.textContent = `${drawMinutes()}分経過する。`;
     result.textContent = '';
 
@@ -374,7 +456,7 @@
     animateTimeToClock(sourceRect, minutes, () => {
       DDTime?.advance?.(minutes, `point:${zone}:gather`);
       busy = false;
-      setEmptySlot(`${name}を1個、手に入れた。`, '空白をタップして次の札を出す。');
+      setEmptySlot(`${name}を1個、手に入れた。`, autoMode ? 'オート探索を続ける。' : '空白をタップして次の札を出す。');
       result.textContent = `${name}を1個、手に入れた。`;
     });
   }
@@ -416,10 +498,10 @@
       DDTime?.advance?.(minutes, 'point:river:fish');
       busy = false;
       if (caught) {
-        setEmptySlot('川魚を1匹、手に入れた。', '空白をタップして次の札を出す。');
+        setEmptySlot('川魚を1匹、手に入れた。', autoMode ? 'オート探索を続ける。' : '空白をタップして次の札を出す。');
         result.textContent = '川魚を1匹、手に入れた。';
       } else {
-        setEmptySlot('素手で追ったが魚は逃げた。', '空白をタップして次の札を出す。');
+        setEmptySlot('素手で追ったが魚は逃げた。', autoMode ? 'オート探索を続ける。' : '空白をタップして次の札を出す。');
         result.textContent = '素手で追ったが魚は逃げた。';
       }
     });
@@ -436,7 +518,7 @@
     location.href = `DD_battle.html?enemy=${encodeURIComponent(card.enemyId)}&return=${encodeURIComponent(back)}`;
   }
 
-  function discardCurrentCard() {
+  function discardCurrentCard(message = '札を見送った。') {
     if (!currentCard || acted || busy) return;
     acted = true;
     hideChoices();
@@ -444,16 +526,234 @@
     drawn.style.transition = 'transform .18s ease-out, opacity .18s ease-out';
     drawn.style.transform = 'translateY(20px) scale(.9)';
     drawn.style.opacity = '.05';
-    eventText.textContent = '札を見送った。';
+    eventText.textContent = message;
     eventDetail.textContent = '';
     result.textContent = '';
     setTimeout(() => {
-      setEmptySlot('札を見送った。', '空白をタップして次の札を出す。');
+      setEmptySlot(message, autoMode ? 'オート探索を続ける。' : '空白をタップして次の札を出す。');
     }, 190);
   }
 
+  function equipmentPartUsable(part) {
+    if (!part || part.broken === true) return false;
+    const durability = Number(part.durability);
+    return !Number.isFinite(durability) || durability > 0;
+  }
+
+  function huntEquipmentState() {
+    const equipment = huntConfig.equipment || {};
+    return {
+      bow: equipment.bow || null,
+      bowstring: equipment.bowstring || null,
+      bowOk: equipmentPartUsable(equipment.bow),
+      bowstringOk: equipmentPartUsable(equipment.bowstring)
+    };
+  }
+
+  function inventoryArrows() {
+    const defaultDamage = Math.max(1, Number(huntConfig.equipment?.arrows?.damage || 1));
+    const entries = DDItems?.getInventory?.() || [];
+    return entries
+      .filter(entry => entry?.item?.kind === 'arrow' && Number(entry.count || 0) > 0)
+      .map(entry => ({
+        id: entry.item.id,
+        name: entry.item.name || '矢',
+        count: Number(entry.count || 0),
+        damage: Math.max(1, Number(entry.item.damage || defaultDamage))
+      }))
+      .sort((a, b) => a.damage - b.damage);
+  }
+
+  function animalData(animalId) {
+    return (huntConfig.animals || []).find(animal => animal.id === animalId) || null;
+  }
+
+  function arrowForAnimal(animal) {
+    const hp = Math.max(1, Number(animal?.hp || 1));
+    return inventoryArrows().find(arrow => arrow.damage >= hp) || null;
+  }
+
+  function hasTimeForAutoHunt() {
+    if (!window.DDTime?.getState) return true;
+    const state = DDTime.getState();
+    const now = Number(state.minuteOfDay);
+    const huntCost = Math.max(1, Number(DDTime.actionCosts?.hunt || 120));
+    return Number.isFinite(now) && now >= 5 * 60 && now + huntCost <= 19 * 60;
+  }
+
+  function autoSkipHunt(reason) {
+    discardCurrentCard(`狩猟を見送った。${reason}`);
+  }
+
+  function doAutoHunt(card) {
+    if (acted || busy) return;
+    const equipment = huntEquipmentState();
+    const animal = animalData(card.animalId);
+    const arrow = arrowForAnimal(animal);
+
+    if (!animal) return autoSkipHunt('獲物の情報がない。');
+    if (!equipment.bowOk) return autoSkipHunt('弓が使えない。');
+    if (!equipment.bowstringOk) return autoSkipHunt('弓弦が使えない。');
+    if (!inventoryArrows().length) return autoSkipHunt('矢を持っていない。');
+    if (!arrow) return autoSkipHunt('持っている矢の攻撃力では仕留められない。');
+    if (!hasTimeForAutoHunt()) return autoSkipHunt('狩りを続ける時間がない。');
+
+    acted = true;
+    busy = true;
+    hideChoices();
+    setDrawnInteractivity();
+    const sourceRect = drawn.getBoundingClientRect();
+    const minutes = Math.max(1, Number(DDTime?.actionCosts?.hunt || 120));
+    const hitZoneWidth = Math.max(4, Math.min(60,
+      Number(equipment.bow?.hitZoneBonus || 0) + Number(equipment.bowstring?.hitZoneBonus || 0)
+    ));
+    const hit = Math.random() * 100 < hitZoneWidth;
+
+    DDItems?.remove?.(arrow.id, 1);
+
+    let message = `${animal.name}を狙ったが外れた。${arrow.name}を1本使った。`;
+    if (hit) {
+      const meat = DDItems?.get?.(animal.meatItemId);
+      if (animal.meatItemId) DDItems?.add?.(animal.meatItemId, 1);
+      if (meat) animateCardToInventory({ icon: '🍖', title: meat.name }, sourceRect);
+      message = `${animal.name}を仕留めた。${meat?.name || '獲物'}を手に入れた。${arrow.name}を1本使った。`;
+    }
+
+    drawn.style.display = 'none';
+    currentCard = null;
+    setSlotState();
+    slotPrompt.textContent = '時間が進んでいる…';
+    cardHint.textContent = '';
+
+    animateTimeToClock(sourceRect, minutes, () => {
+      DDTime?.advance?.(minutes, `point:${zone}:auto-hunt`);
+      busy = false;
+      setEmptySlot(message, autoMode ? 'オート探索を続ける。' : '空白をタップして次の札を出す。');
+      result.textContent = message;
+    });
+  }
+
+  function resolveAutoBattle(enemyId) {
+    const enemy = AUTO_ENEMIES[enemyId] || AUTO_ENEMIES.wild_dog;
+    let playerHp = 5;
+    let turns = 0;
+    let deck = shuffle(enemy.deck);
+    let escaped = false;
+    let howlText = '';
+
+    while (turns < 20 && playerHp > 0 && !escaped) {
+      turns += 1;
+
+      if (window.DDWolf?.hasCompanion?.()) {
+        const behavior = DDWolf.randomBehavior?.();
+        if (behavior?.combatEffect === 'enemy_flee') {
+          const howl = DDWolf.combatHowl?.() || {};
+          escaped = true;
+          howlText = howl.text || `${DDWolf.name?.() || '狼'}が遠吠えした。敵がひるんだ。`;
+          break;
+        }
+      }
+
+      if (!deck.length) deck = shuffle(enemy.deck);
+      const enemyCard = deck.shift() || { id: 'watch', damage: 0 };
+      if (enemyCard.id === 'watch' || enemyCard.id === 'guard') {
+        escaped = true;
+        break;
+      }
+
+      playerHp = Math.max(0, playerHp - Math.max(0, Number(enemyCard.damage || 0)));
+    }
+
+    return { enemyName: enemy.name, turns: Math.max(1, turns), playerHp, escaped, howlText };
+  }
+
+  function doAutoBattle(card) {
+    if (acted || busy) return;
+    acted = true;
+    busy = true;
+    hideChoices();
+    setDrawnInteractivity();
+    const sourceRect = drawn.getBoundingClientRect();
+    const outcome = resolveAutoBattle(card.enemyId);
+    const minutes = outcome.turns;
+    const message = outcome.escaped
+      ? (outcome.howlText || `${outcome.enemyName}の隙をついて逃げた。`)
+      : `${outcome.enemyName}から逃げ切れず、戦闘を続けられない。`;
+
+    drawn.style.display = 'none';
+    currentCard = null;
+    setSlotState();
+    slotPrompt.textContent = '戦闘判定中…';
+    cardHint.textContent = '';
+
+    animateTimeToClock(sourceRect, minutes, () => {
+      DDTime?.advance?.(minutes, `point:${zone}:auto-battle`);
+      busy = false;
+      if (!outcome.escaped) {
+        autoMode = false;
+        clearAutoTimer();
+        updateAutoButton();
+      }
+      setEmptySlot(message, outcome.escaped && autoMode ? 'オート探索を続ける。' : 'オートを停止した。');
+      result.textContent = message;
+    });
+  }
+
+  function runAutoAction(card) {
+    if (!autoMode || !card || card !== currentCard || acted || busy) return;
+    if (card.type === 'item') return doGather(card);
+    if (card.type === 'hunt') return doAutoHunt(card);
+    if (card.type === 'fish') return doFish(card);
+    if (card.type === 'enemy') return doAutoBattle(card);
+    return discardCurrentCard('何もないので見送った。');
+  }
+
+  function setAutoMode(next) {
+    autoMode = Boolean(next);
+    clearAutoTimer();
+    updateAutoButton();
+    setDrawnInteractivity();
+    setSlotState();
+
+    if (!autoMode) {
+      eventDetail.textContent = 'この地点のオートを終了した。';
+      if (!currentCard) {
+        cardHint.textContent = `空白をタップして次の札へ　${drawMinutes()}分`;
+        return;
+      }
+
+      showCardInfo(currentCard);
+      if (currentCard.type === 'enemy' && !acted && !busy) {
+        acted = true;
+        hideChoices();
+        setDrawnInteractivity();
+        const enemy = currentCard;
+        setTimeout(() => doBattle(enemy, true), 180);
+      } else if (currentCard.type === 'none') {
+        hideChoices();
+      } else if (!acted && !busy) {
+        showChoices(currentCard);
+      }
+      return;
+    }
+
+    hideChoices();
+    eventDetail.textContent = 'この地点にいる間だけ自動で探索する。';
+    if (currentCard && !acted && !busy) {
+      showCardInfo(currentCard);
+      const card = currentCard;
+      autoTimer = setTimeout(() => {
+        autoTimer = 0;
+        if (autoMode && currentCard === card && !acted && !busy) runAutoAction(card);
+      }, 120);
+      return;
+    }
+
+    if (!currentCard && !busy) requestNextCard();
+  }
+
   function runPrimaryAction() {
-    if (!currentCard || acted || busy) return;
+    if (!currentCard || acted || busy || autoMode) return;
     const card = currentCard;
     if (card.type === 'item') return doGather(card);
     if (card.type === 'hunt') return doHunt(card);
@@ -461,7 +761,7 @@
   }
 
   function tapCard() {
-    if (!currentCard || acted || busy || currentCard.type === 'enemy') return;
+    if (!currentCard || acted || busy || autoMode || currentCard.type === 'enemy') return;
     tapFeedback();
     if (currentCard.type === 'none') discardCurrentCard();
   }
@@ -469,12 +769,14 @@
   placeName.textContent = config.placeNames?.[place] || config.placeNames?.[zone] || '探索地点';
   placeType.textContent = zoneConfig.label || zone;
 
+  autoButton?.addEventListener('click', () => setAutoMode(!autoMode));
+
   cardSlot.addEventListener('click', event => {
     if (event.target.closest('#drawn') || event.target.closest('#cardActions')) return;
-    if (!currentCard && !busy) requestNextCard();
+    if (!autoMode && !currentCard && !busy) requestNextCard();
   });
   cardSlot.addEventListener('keydown', event => {
-    if ((event.key === 'Enter' || event.key === ' ') && !currentCard && !busy) {
+    if ((event.key === 'Enter' || event.key === ' ') && !autoMode && !currentCard && !busy) {
       event.preventDefault();
       requestNextCard();
     }
@@ -486,7 +788,7 @@
     tapCard();
   });
   drawn.addEventListener('keydown', event => {
-    if ((event.key === 'Enter' || event.key === ' ') && currentCard && !acted && !busy) {
+    if ((event.key === 'Enter' || event.key === ' ') && !autoMode && currentCard && !acted && !busy) {
       event.preventDefault();
       tapCard();
     }
@@ -500,13 +802,18 @@
   discardAction.addEventListener('click', event => {
     event.preventDefault();
     event.stopPropagation();
-    discardCurrentCard();
+    if (!autoMode) discardCurrentCard();
   });
 
   window.addEventListener('ddtimechange', refreshClock);
+  window.addEventListener('pagehide', () => {
+    autoMode = false;
+    clearAutoTimer();
+  });
   document.addEventListener('contextmenu', e => e.preventDefault());
   document.addEventListener('selectstart', e => e.preventDefault());
 
   refreshClock();
+  updateAutoButton();
   setEmptySlot('空白をタップして札を出す。', `札を出すと${drawMinutes()}分進む。`);
 })();
