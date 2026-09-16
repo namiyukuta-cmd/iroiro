@@ -6,167 +6,69 @@
   <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate" />
   <meta http-equiv="Pragma" content="no-cache" />
   <meta http-equiv="Expires" content="0" />
-  <meta name="dd-build" content="202609161115" />
+  <meta name="dd-build" content="20260916menu1" />
   <title>DD - Game</title>
   <style>
-    * { box-sizing: border-box; }
-    html, body { margin: 0; width: 100%; min-height: 100%; }
-    body {
-      min-height: 100dvh;
-      background: #f5f4ef;
-      color: #202020;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-    }
-    #game-root {
-      width: min(100%, 520px);
-      min-height: 100dvh;
-      margin: 0 auto;
-      padding: max(18px, env(safe-area-inset-top)) 16px max(18px, env(safe-area-inset-bottom));
-    }
-    header {
-      min-height: 62px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 12px;
-      border-bottom: 1px solid #bbb;
-    }
-    h1 { margin: 0; font-size: 24px; }
-    .header-right { text-align: right; display: grid; gap: 4px; }
-    #clock { font-size: 13px; font-weight: 800; }
-    .back {
-      color: inherit;
-      text-decoration: none;
-      font-weight: 700;
-      font-size: 12px;
-    }
-    main {
-      padding-top: 16px;
-      display: grid;
-      gap: 14px;
-    }
-    .scene {
-      width: 100%;
-      border: 2px solid #202020;
-      background: #fff;
-      overflow: hidden;
-    }
-    .scene img {
-      display: block;
-      width: 100%;
-      height: auto;
-    }
-    #needs{display:grid;gap:8px}
-    .need{border:2px solid #202020;border-radius:10px;background:#fff;padding:9px 10px}
-    .needHead{display:flex;justify-content:space-between;gap:10px;font-size:14px;font-weight:900;margin-bottom:6px}
-    .needBar{height:14px;border:2px solid #202020;border-radius:999px;overflow:hidden;background:#eeeae1}
-    .needFill{height:100%;width:0;background:#202020;transition:width .2s ease}
-    #wolfNeed{display:none}
-    .choices {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 8px;
-    }
-    .choice {
-      width: 100%;
-      min-height: 60px;
-      border: 2px solid #202020;
-      background: #fff;
-      border-radius: 10px;
-      font: inherit;
-      font-size: 18px;
-      font-weight: 700;
-      cursor: pointer;
-    }
-    .choice:disabled{opacity:.48;cursor:default}
-    #wolfCare{display:none;grid-column:1/-1;background:#eee8dc}
+    *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+    html,body{margin:0;width:100%;min-height:100%}
+    body{min-height:100dvh;background:#f5f4ef;color:#202020;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+    #game-root{width:min(100%,520px);min-height:100dvh;margin:0 auto;padding:max(18px,env(safe-area-inset-top)) 16px max(18px,env(safe-area-inset-bottom))}
+    header{min-height:62px;display:flex;align-items:center;justify-content:space-between;gap:12px;border-bottom:1px solid #bbb}
+    h1{margin:0;font-size:24px}.header-right{text-align:right;display:grid;gap:4px}#clock{font-size:13px;font-weight:800}.back{color:inherit;text-decoration:none;font-weight:700;font-size:12px}
+    main{padding-top:16px;display:grid;gap:14px}.scene{width:100%;border:2px solid #202020;background:#fff;overflow:hidden}.scene img{display:block;width:100%;height:auto}
+    #needs{display:grid;gap:8px}.need{border:2px solid #202020;border-radius:10px;background:#fff;padding:9px 10px}.needHead{display:flex;justify-content:space-between;gap:10px;font-size:14px;font-weight:900;margin-bottom:6px}.needBar{height:14px;border:2px solid #202020;border-radius:999px;overflow:hidden;background:#eeeae1}.needFill{height:100%;width:0;background:#202020;transition:width .2s ease}#wolfNeed{display:none}
+    #menuBox{border:2px solid #202020;border-radius:14px;background:#fff;padding:10px;display:grid;grid-template-columns:52px 1fr 52px;gap:8px;align-items:stretch}
+    .menuArrow{border:2px solid #202020;border-radius:10px;background:#eeeae1;font-size:24px;font-weight:1000;min-height:64px}
+    #menuChoice{border:2px solid #202020;border-radius:10px;background:#fff;font-size:21px;font-weight:1000;min-height:64px;padding:8px 10px}
+    #menuChoice:disabled{opacity:.45}.menuMeta{grid-column:1/-1;text-align:center;font-size:11px;font-weight:800;color:#666;margin-top:-2px}
   </style>
 </head>
 <body>
-  <div id="game-root">
-    <header>
-      <h1>DD</h1>
-      <div class="header-right">
-        <div id="clock" data-dd-clock></div>
-        <a class="back" href="DD_index.html">入口へ</a>
-      </div>
-    </header>
-
-    <main id="game-screen">
-      <section class="scene">
-        <img src="IMG_2788.jpeg" alt="DDの絵" />
-      </section>
-
-      <section id="needs" aria-label="空腹">
-        <div class="need">
-          <div class="needHead"><span>主人公の空腹</span><span id="playerHungerText">0 / 100</span></div>
-          <div class="needBar"><div id="playerHungerFill" class="needFill"></div></div>
-        </div>
-        <div id="wolfNeed" class="need">
-          <div class="needHead"><span id="wolfHungerLabel">狼の子の空腹</span><span id="wolfHungerText">0 / 100</span></div>
-          <div class="needBar"><div id="wolfHungerFill" class="needFill"></div></div>
-        </div>
-      </section>
-
-      <div class="choices" aria-label="選択肢">
-        <button class="choice" type="button" onclick="location.href='DD_map.html'">マップ</button>
-        <button class="choice" type="button" onclick="location.href='DD_inventory.html'">アイテム</button>
-        <button class="choice" type="button" onclick="location.href='DD_sleep.html'">寝る</button>
-        <button class="choice" type="button" onclick="location.href='DD_craft.html'">制作</button>
-        <button class="choice" type="button" onclick="location.href='DD_cook.html'">料理</button>
-        <button id="wolfCare" class="choice" type="button" onclick="location.href='DD_wolf.html'">狼の子の世話</button>
-      </div>
-    </main>
-  </div>
-
-<script src="DD_time.js?v=202609161115"></script>
-<script src="DD_items.js?v=202609161115"></script>
-<script src="DD_wolf.js?v=202609161115"></script>
-<script src="DD_needs.js?v=202609161115"></script>
+<div id="game-root">
+  <header><h1>DD</h1><div class="header-right"><div id="clock" data-dd-clock></div><a class="back" href="DD_index.html">入口へ</a></div></header>
+  <main id="game-screen">
+    <section class="scene"><img src="IMG_2788.jpeg" alt="DDの絵" /></section>
+    <section id="needs" aria-label="空腹">
+      <div class="need"><div class="needHead"><span>主人公の空腹</span><span id="playerHungerText">0 / 100</span></div><div class="needBar"><div id="playerHungerFill" class="needFill"></div></div></div>
+      <div id="wolfNeed" class="need"><div class="needHead"><span id="wolfHungerLabel">狼の子の空腹</span><span id="wolfHungerText">0 / 100</span></div><div class="needBar"><div id="wolfHungerFill" class="needFill"></div></div></div>
+    </section>
+    <section id="menuBox" aria-label="ホームメニュー">
+      <button id="menuPrev" class="menuArrow" type="button" aria-label="前の項目">▲</button>
+      <button id="menuChoice" type="button">マップ</button>
+      <button id="menuNext" class="menuArrow" type="button" aria-label="次の項目">▼</button>
+      <div id="menuMeta" class="menuMeta"></div>
+    </section>
+  </main>
+</div>
+<script src="DD_time.js?v=20260916menu1"></script>
+<script src="DD_items.js?v=20260916menu1"></script>
+<script src="DD_wolf.js?v=20260916menu1"></script>
+<script src="DD_needs.js?v=20260916menu1"></script>
 <script>
 (() => {
-  const wolfButton = document.getElementById('wolfCare');
-  const wolfNeed = document.getElementById('wolfNeed');
-  const wolfLabel = document.getElementById('wolfHungerLabel');
-  const playerText = document.getElementById('playerHungerText');
-  const playerFill = document.getElementById('playerHungerFill');
-  const wolfText = document.getElementById('wolfHungerText');
-  const wolfFill = document.getElementById('wolfHungerFill');
-
-  function pupIsSleeping(state) {
-    if (state?.stage !== 'pup') return false;
-    const hour = Number(window.DDTime?.getState?.().hour ?? 12);
-    return hour >= 20 || hour < 7;
+  const playerText=document.getElementById('playerHungerText'),playerFill=document.getElementById('playerHungerFill');
+  const wolfNeed=document.getElementById('wolfNeed'),wolfLabel=document.getElementById('wolfHungerLabel'),wolfText=document.getElementById('wolfHungerText'),wolfFill=document.getElementById('wolfHungerFill');
+  const prev=document.getElementById('menuPrev'),next=document.getElementById('menuNext'),choice=document.getElementById('menuChoice'),meta=document.getElementById('menuMeta');
+  let index=0;
+  function pupIsSleeping(state){if(state?.stage!=='pup')return false;const h=Number(window.DDTime?.getState?.().hour??12);return h>=20||h<7}
+  function menuItems(){
+    const items=[
+      {label:'マップ',href:'DD_map.html'},
+      {label:'アイテム',href:'DD_inventory.html'},
+      {label:'寝る',href:'DD_sleep.html'},
+      {label:'制作',href:'DD_craft.html'},
+      {label:'料理',href:'DD_cook.html'}
+    ];
+    const state=window.DDWolf?.getState?.();
+    if(state?.hasCompanion) items.push({label:state.stage==='adult'?'狼（？）の世話':pupIsSleeping(state)?'狼の子は眠っている':'狼の子の世話',href:'DD_wolf.html',disabled:pupIsSleeping(state)});
+    return items;
   }
-
-  function refreshWolfCare() {
-    if (!wolfButton || !window.DDWolf) return;
-    DDWolf.updateAge();
-    const state = DDWolf.getState();
-    const sleeping = pupIsSleeping(state);
-    wolfButton.style.display = state.hasCompanion ? 'block' : 'none';
-    wolfButton.disabled = sleeping;
-    wolfButton.textContent = sleeping
-      ? '狼の子は眠っている'
-      : state.stage === 'adult' ? '狼（？）の世話' : '狼の子の世話';
-    wolfNeed.style.display = state.hasCompanion ? 'block' : 'none';
-    wolfLabel.textContent = state.stage === 'adult' ? '狼（？）の空腹' : '狼の子の空腹';
-  }
-
-  function refreshNeeds() {
-    const state = window.DDNeeds?.getState?.() || { playerHunger:0, wolfHunger:0, maxHunger:100, hasWolf:false };
-    playerText.textContent = `${state.playerHunger} / ${state.maxHunger}`;
-    playerFill.style.width = `${state.playerHunger}%`;
-    wolfText.textContent = `${state.wolfHunger} / ${state.maxHunger}`;
-    wolfFill.style.width = `${state.wolfHunger}%`;
-  }
-
-  window.addEventListener('ddwolfchange', () => { refreshWolfCare(); refreshNeeds(); });
-  window.addEventListener('ddinventorychange', () => { refreshWolfCare(); refreshNeeds(); });
-  window.addEventListener('ddtimechange', () => { refreshWolfCare(); refreshNeeds(); });
-  window.addEventListener('ddneedschange', refreshNeeds);
-  refreshWolfCare();
-  refreshNeeds();
+  function renderMenu(){const items=menuItems();if(index>=items.length)index=0;const item=items[index];choice.textContent=item.label;choice.disabled=!!item.disabled;choice.dataset.href=item.href;meta.textContent=`${index+1} / ${items.length}　▲▼で選ぶ・中央をタップで決定`}
+  function move(step){const items=menuItems();index=(index+step+items.length)%items.length;renderMenu()}
+  prev.addEventListener('click',()=>move(-1));next.addEventListener('click',()=>move(1));choice.addEventListener('click',()=>{if(!choice.disabled&&choice.dataset.href)location.href=choice.dataset.href});
+  function refreshNeeds(){const state=window.DDNeeds?.getState?.()||{playerHunger:0,wolfHunger:0,maxHunger:100,hasWolf:false};playerText.textContent=`${state.playerHunger} / ${state.maxHunger}`;playerFill.style.width=`${state.playerHunger}%`;wolfText.textContent=`${state.wolfHunger} / ${state.maxHunger}`;wolfFill.style.width=`${state.wolfHunger}%`;wolfNeed.style.display=state.hasWolf?'block':'none';const w=window.DDWolf?.getState?.();wolfLabel.textContent=w?.stage==='adult'?'狼（？）の空腹':'狼の子の空腹'}
+  function refresh(){window.DDWolf?.updateAge?.();refreshNeeds();renderMenu()}
+  ['ddwolfchange','ddinventorychange','ddtimechange','ddneedschange'].forEach(name=>window.addEventListener(name,refresh));refresh();
 })();
 </script>
 </body>
