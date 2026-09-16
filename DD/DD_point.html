@@ -6,7 +6,7 @@
   <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0" />
   <meta http-equiv="Pragma" content="no-cache" />
   <meta http-equiv="Expires" content="0" />
-  <meta name="dd-build" content="20260916balancedlayout1" />
+  <meta name="dd-build" content="20260916quickslots4" />
   <title>DD - 地点探索</title>
   <style>
     *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
@@ -17,7 +17,6 @@
     button{touch-action:manipulation}
     #game{width:min(100%,520px);min-height:100dvh;margin:0 auto;padding:max(6px,env(safe-area-inset-top)) 8px calc(8px + env(safe-area-inset-bottom));display:flex;flex-direction:column;gap:6px}
 
-    /* 上部：時計・場所・オート */
     #topPanel{min-height:86px;border:2px solid var(--purple);border-radius:13px;background:#faf8f3;padding:6px 8px;display:grid;grid-template-columns:auto 1fr;gap:8px;align-items:center}
     #clockArea{display:flex;align-items:center;gap:7px;min-width:0}
     #clockDial{position:relative;width:58px;height:58px;flex:0 0 58px;border:3px solid var(--purple);border-radius:50%;background:#fff}
@@ -42,7 +41,6 @@
     #autoSpeedButton{background:#e9e4da}
     #autoButton.on{background:var(--ink);color:#fff}
 
-    /* 上半分：縦札 + 右に状態 */
     #encounterArea{position:relative;border:1.5px solid #aaa397;border-radius:12px;background:rgba(255,255,255,.25);padding:6px 7px 6px}
     #encounterStage{position:relative;height:210px;display:grid;grid-template-columns:minmax(0,1fr) 100px;gap:6px;align-items:center}
     #cardColumn{position:relative;height:100%;display:grid;place-items:center}
@@ -72,13 +70,11 @@
     #discardAction{background:#e7e2d8!important}
     #cardHint{text-align:center;min-height:15px;margin-top:4px;font-size:10px;font-weight:900;color:#5d5952;line-height:1.25}
 
-    /* ログ */
     #eventStrip{border:1.5px solid #3a3833;border-radius:8px;background:#faf8f2;padding:6px 8px;min-height:48px;max-height:62px;overflow:hidden}
     #eventText{font-size:12px;font-weight:1000;line-height:1.25;min-height:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
     #eventDetail{margin-top:2px;font-size:10px;font-weight:800;color:#5d5952;line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
     #result{margin-top:1px;font-size:10px;font-weight:1000;color:#514e47;line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 
-    /* 下半分：主人公/狼タブ + 7列アイコン */
     #partyArea{position:relative;min-height:238px;margin-top:0}
     #partyTabs{height:38px;display:flex;align-items:flex-end;padding:0 6px;gap:0;position:relative;z-index:3}
     .partyTab{min-width:108px;height:38px;border:2px solid var(--ink);border-bottom:0;border-radius:10px 10px 0 0;background:#fff;font-weight:1000;font-size:12px;padding:4px 9px;position:relative;top:2px;line-height:1.05}
@@ -148,7 +144,7 @@
     </div>
     <div id="topInfo">
       <div id="placeBlock"><div id="placeName">森</div><div id="placeType">探索地点</div></div>
-      <div id="topLinks"><a class="headLink" href="DD_inventory.html">アイテム</a><a class="headLink" href="DD_map.html?v=20260916balancedlayout1">← マップ</a></div>
+      <div id="topLinks"><a class="headLink" href="DD_inventory.html">アイテム</a><a class="headLink" href="DD_map.html?v=20260916quickslots4">← マップ</a></div>
       <div id="autoControls"><button id="autoButton" type="button" aria-pressed="false">オート：OFF</button><button id="autoSpeedButton" type="button">速度：ゆっくり</button></div>
     </div>
   </header>
@@ -184,19 +180,19 @@
       <div id="partyHead"><div id="turnLabel">主人公</div><a id="inventoryButton" href="DD_inventory.html" aria-label="全アイテム" title="全アイテム">▣</a></div>
       <div id="allyStatus"><div id="allyStatusName">主人公</div><div id="allyHpBar"><div id="allyHpFill"></div></div><div id="allyHpValue">—</div></div>
       <div id="actionGrid"></div>
-      <div id="partyNote">装備・すぐ使える物と行動を分けて表示する。</div>
+      <div id="partyNote">武器1・防具1・道具2。下段は行動・スキル。</div>
     </div>
   </section>
 </div>
 
-<script src="DD_time.js?v=20260916balancedlayout1"></script>
-<script src="DD_items.js?v=20260916balancedlayout1"></script>
-<script src="DD_wolf.js?v=20260916balancedlayout1"></script>
-<script src="DD_event.js?v=20260916balancedlayout1"></script>
-<script src="DD_hunt_config.js?v=20260916balancedlayout1"></script>
-<script src="DD_point_config.js?v=20260916balancedlayout1"></script>
-<script src="DD_wolf_assist.js?v=20260916balancedlayout1"></script>
-<script src="DD_point.js?v=20260916balancedlayout1"></script>
-<script src="DD_quick_ui.js?v=20260916balancedlayout1"></script>
+<script src="DD_time.js?v=20260916quickslots4"></script>
+<script src="DD_items.js?v=20260916quickslots4"></script>
+<script src="DD_wolf.js?v=20260916quickslots4"></script>
+<script src="DD_event.js?v=20260916quickslots4"></script>
+<script src="DD_hunt_config.js?v=20260916quickslots4"></script>
+<script src="DD_point_config.js?v=20260916quickslots4"></script>
+<script src="DD_wolf_assist.js?v=20260916quickslots4"></script>
+<script src="DD_point.js?v=20260916quickslots4"></script>
+<script src="DD_quick_ui.js?v=20260916quickslots4"></script>
 </body>
 </html>
