@@ -180,7 +180,7 @@
     chooseButton.addEventListener('click', () => {
       if(!selected) return;
       localStorage.setItem('adSelectedDumpBook', JSON.stringify(selected));
-      selection.textContent = `${selected.name}を選んだ。`;
+      window.location.href = 'AD_enemy_rabbit.html';
     });
   </script>
 </body>
