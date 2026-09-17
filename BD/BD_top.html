@@ -77,10 +77,27 @@
       overflow:hidden;
     }
     .slot.empty{background:repeating-linear-gradient(135deg,#fff 0 8px,#f3f1eb 8px 16px)}
-    .slot-name{font-size:10px;font-weight:900;text-align:center;line-height:1.15;padding:3px;word-break:keep-all}
-    .slot-sub{position:absolute;left:2px;right:2px;bottom:2px;font-size:8px;font-weight:800;text-align:center;line-height:1.05;background:rgba(255,255,255,.86)}
-    .slot-count{position:absolute;right:3px;top:2px;font-size:11px;font-weight:1000}
-    .slot.cooling::after{content:"";position:absolute;inset:0;background:rgba(32,32,32,.13);pointer-events:none}
+    .slot-icon{position:absolute;inset:0;display:grid;place-items:center;z-index:1}
+    .slot-count{position:absolute;right:3px;top:2px;font-size:11px;font-weight:1000;z-index:4;background:rgba(255,255,255,.88);padding:0 2px;border-radius:3px;line-height:1.1}
+    .slot-time{position:absolute;left:2px;right:2px;bottom:2px;font-size:9px;font-weight:1000;text-align:center;line-height:1.05;z-index:4;background:rgba(255,255,255,.9);border-radius:3px;padding:1px 0;min-height:11px}
+    .slot-time:empty{background:transparent;padding:0;min-height:0}
+    .cooldown-cover{position:absolute;left:0;right:0;bottom:0;height:0;background:#202020;z-index:3;pointer-events:none}
+
+    .supply-icon{width:22px;height:27px;border:2px solid #202020;border-radius:5px 5px 7px 7px;position:relative;background:#fff}
+    .supply-icon::before{content:"";position:absolute;left:50%;top:-7px;width:10px;height:7px;transform:translateX(-50%);border:2px solid #202020;border-bottom:0;border-radius:3px 3px 0 0;background:#fff}
+    .supply-icon::after{content:"+";position:absolute;inset:0;display:grid;place-items:center;font-size:18px;font-weight:1000;line-height:1;color:#202020}
+
+    .smash-icon{width:25px;height:25px;position:relative;display:grid;place-items:center}
+    .smash-icon::before,.smash-icon::after{content:"";position:absolute;left:50%;top:50%;background:#202020;transform-origin:center}
+    .smash-icon::before{width:25px;height:4px;transform:translate(-50%,-50%) rotate(45deg)}
+    .smash-icon::after{width:25px;height:4px;transform:translate(-50%,-50%) rotate(-45deg)}
+    .smash-core{width:11px;height:11px;border:3px solid #202020;transform:rotate(45deg);background:#fff;z-index:1}
+
+    .double-icon,.slash-icon{width:30px;height:30px;position:relative}
+    .double-icon::before,.double-icon::after,.slash-icon::before{content:"";position:absolute;width:25px;height:4px;border-radius:999px;background:#202020;left:50%;top:50%}
+    .double-icon::before{transform:translate(-50%,-75%) rotate(-35deg)}
+    .double-icon::after{transform:translate(-50%,75%) rotate(-35deg)}
+    .slash-icon::before{transform:translate(-50%,-50%) rotate(-35deg)}
 
     @keyframes slashFx{0%{opacity:0;transform:translate(-50%,-50%) scale(.35) rotate(var(--rot))}25%{opacity:1}100%{opacity:0;transform:translate(-50%,-50%) scale(1.45) rotate(var(--rot))}}
     @keyframes impactFx{0%{opacity:1;transform:translate(-50%,-50%) scale(.25)}100%{opacity:0;transform:translate(-50%,-50%) scale(1.8)}}
@@ -92,8 +109,7 @@
     @media (max-height:700px){
       #game-root{grid-template-rows:32px 42px minmax(0,1fr) auto;gap:4px;padding-top:max(4px,env(safe-area-inset-top));padding-bottom:max(4px,env(safe-area-inset-bottom))}
       #loadout{gap:2px}
-      .slot-name{font-size:9px}
-      .slot-sub{font-size:7px}
+      .slot-time{font-size:8px}
     }
   </style>
 </head>
@@ -123,10 +139,25 @@
   </section>
 
   <section id="loadout" aria-label="補給品とスキルのマス目">
-    <div class="slot" id="supplySlot"><div class="slot-name">補給品</div><div class="slot-count" id="supplyCount">5</div><div class="slot-sub">HP45以下</div></div>
-    <div class="slot" id="skillSlot0"><div class="slot-name">強打</div><div class="slot-sub" id="skillSub0">AC55</div></div>
-    <div class="slot" id="skillSlot1"><div class="slot-name">連撃</div><div class="slot-sub" id="skillSub1">AC35</div></div>
-    <div class="slot" id="skillSlot2"><div class="slot-name">斬撃</div><div class="slot-sub" id="skillSub2">AC15</div></div>
+    <div class="slot" id="supplySlot">
+      <div class="slot-icon"><div class="supply-icon" aria-label="補給品"></div></div>
+      <div class="slot-count" id="supplyCount">5</div>
+    </div>
+    <div class="slot skill-slot" id="skillSlot0">
+      <div class="slot-icon"><div class="smash-icon" aria-label="強打"><div class="smash-core"></div></div></div>
+      <div class="cooldown-cover" id="skillCover0"></div>
+      <div class="slot-time" id="skillTime0"></div>
+    </div>
+    <div class="slot skill-slot" id="skillSlot1">
+      <div class="slot-icon"><div class="double-icon" aria-label="連撃"></div></div>
+      <div class="cooldown-cover" id="skillCover1"></div>
+      <div class="slot-time" id="skillTime1"></div>
+    </div>
+    <div class="slot skill-slot" id="skillSlot2">
+      <div class="slot-icon"><div class="slash-icon" aria-label="斬撃"></div></div>
+      <div class="cooldown-cover" id="skillCover2"></div>
+      <div class="slot-time" id="skillTime2"></div>
+    </div>
     <div class="slot empty"></div>
     <div class="slot empty"></div><div class="slot empty"></div><div class="slot empty"></div><div class="slot empty"></div><div class="slot empty"></div>
   </section>
@@ -144,8 +175,8 @@
   const hpText=document.getElementById('hpText'),hpFill=document.getElementById('hpFill');
   const acText=document.getElementById('acText'),acFill=document.getElementById('acFill');
   const supplyCount=document.getElementById('supplyCount');
-  const skillSlots=[document.getElementById('skillSlot0'),document.getElementById('skillSlot1'),document.getElementById('skillSlot2')];
-  const skillSubs=[document.getElementById('skillSub0'),document.getElementById('skillSub1'),document.getElementById('skillSub2')];
+  const skillCovers=[document.getElementById('skillCover0'),document.getElementById('skillCover1'),document.getElementById('skillCover2')];
+  const skillTimes=[document.getElementById('skillTime0'),document.getElementById('skillTime1'),document.getElementById('skillTime2')];
 
   const PLAYER_SIZE=20,ENEMY_SIZE=18,MAX_FX=24;
   let fieldW=320,fieldH=420,lastHud=0;
@@ -245,7 +276,7 @@
     acText.textContent=`${Math.floor(state.ac)} / ${state.maxAc}`;acFill.style.width=`${Math.max(0,state.ac/state.maxAc*100)}%`;
     supplyCount.textContent=state.supplies;
     const remain=Math.max(0,state.roundEnd-now);timeText.textContent=(remain/1000).toFixed(1);killText.textContent=state.kills;
-    skills.forEach((s,i)=>{const wait=Math.max(0,(s.readyAt-now)/1000);skillSlots[i].classList.toggle('cooling',wait>0);skillSubs[i].textContent=wait>0?`${wait.toFixed(1)}秒`:state.ac>=s.cost?`AC${s.cost}`:'AC不足';});
+    skills.forEach((s,i)=>{const remainMs=Math.max(0,s.readyAt-now);const ratio=Math.max(0,Math.min(1,remainMs/s.cooldown));skillCovers[i].style.height=(ratio*100)+'%';skillTimes[i].textContent=remainMs>0?(remainMs/1000).toFixed(1):'';});
   }
 
   function respawnEnemy(e,now){
