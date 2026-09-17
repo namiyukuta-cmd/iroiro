@@ -33,9 +33,64 @@
     #stonesPanel{border:1.5px solid var(--line);border-radius:12px;background:#f5f1e8;padding:8px}
     #stonesTitle{font-size:11px;font-weight:1000;margin:0 0 7px 2px}
     #stones{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:5px}
-    .stone{height:43px;border:1.5px solid #5f584f;border-radius:9px;background:linear-gradient(#eee8dc,#cec5b6);box-shadow:inset 0 1px 0 #fff,0 2px 0 rgba(0,0,0,.15);font-family:Georgia,"Times New Roman",serif;font-size:20px;font-weight:1000;color:#282521;touch-action:manipulation}
-    .stone:active{transform:translateY(2px);box-shadow:inset 0 1px 0 #fff}
-    .stone.used{opacity:.32}
+    .stone{
+      position:relative;
+      isolation:isolate;
+      height:46px;
+      overflow:hidden;
+      border:1.5px solid #4f493f;
+      border-radius:46% 54% 49% 51% / 52% 45% 55% 48%;
+      background:
+        radial-gradient(circle at 30% 23%,rgba(255,255,255,.58) 0 7%,transparent 8%),
+        radial-gradient(circle at 69% 72%,rgba(70,58,43,.13) 0 5%,transparent 6%),
+        linear-gradient(145deg,#eee8db 0%,#d7cdbc 46%,#b9ad9a 100%);
+      box-shadow:
+        inset 2px 2px 2px rgba(255,255,255,.55),
+        inset -3px -3px 5px rgba(68,55,42,.22),
+        0 2px 0 rgba(0,0,0,.18),
+        0 4px 7px rgba(50,42,34,.13);
+      color:transparent;
+      font-family:Georgia,"Times New Roman",serif;
+      font-size:0;
+      touch-action:manipulation;
+    }
+    .stone::before{
+      content:"";
+      position:absolute;
+      inset:5px 6px;
+      z-index:-1;
+      border:1px solid rgba(83,69,51,.32);
+      border-radius:50%;
+      box-shadow:inset 0 0 0 1px rgba(255,255,255,.16),0 0 5px rgba(72,55,32,.08);
+      transform:rotate(-7deg);
+    }
+    .stone::after{
+      content:attr(data-letter);
+      position:absolute;
+      inset:0;
+      display:grid;
+      place-items:center;
+      color:#342d24;
+      font-family:Georgia,"Times New Roman",serif;
+      font-size:24px;
+      font-weight:900;
+      line-height:1;
+      letter-spacing:-.06em;
+      -webkit-text-stroke:.35px #1f1a15;
+      text-shadow:
+        -1px -1px 0 rgba(255,255,255,.55),
+        1px 1px 0 rgba(40,31,23,.48),
+        0 0 1px #1b1713,
+        0 0 7px rgba(103,72,31,.15);
+      transform:scaleX(.94) rotate(-1deg);
+    }
+    .stone:nth-child(3n)::after{transform:scaleX(.91) rotate(1.5deg)}
+    .stone:nth-child(4n)::after{transform:scaleX(.97) rotate(-2deg)}
+    .stone:nth-child(5n){border-radius:52% 48% 55% 45% / 46% 55% 45% 54%}
+    .stone:nth-child(7n){border-radius:45% 55% 47% 53% / 56% 43% 57% 44%}
+    .stone:active{transform:translateY(2px) scale(.97);box-shadow:inset 2px 2px 4px rgba(70,55,42,.25)}
+    .stone:active::after{color:#211c17;text-shadow:0 1px 0 rgba(255,255,255,.3)}
+    .stone.used{opacity:.32;filter:grayscale(.7)}
     #enemyCard.hit{animation:hit .42s ease}
     @keyframes hit{0%,100%{transform:none}20%{transform:translateX(-8px) rotate(-1deg)}45%{transform:translateX(8px) rotate(1deg)}70%{transform:translateX(-4px)}}
     #enemyCard.wrong{animation:wrong .25s ease}
@@ -52,7 +107,7 @@
     @keyframes win{from{transform:scale(.8);opacity:0}to{transform:scale(1);opacity:1}}
     #retry{margin-top:8px;width:100%;height:44px;border:2px solid var(--ink);border-radius:9px;background:#fff;font-weight:1000;display:none}
     #retry.show{display:block}
-    @media(max-width:370px){.char,.blank{width:38px;height:50px;font-size:26px}#stones{grid-template-columns:repeat(7,minmax(0,1fr));gap:4px}.stone{height:40px;font-size:18px}}
+    @media(max-width:370px){.char,.blank{width:38px;height:50px;font-size:26px}#stones{grid-template-columns:repeat(7,minmax(0,1fr));gap:4px}.stone{height:42px}.stone::after{font-size:22px}}
   </style>
 </head>
 <body>
@@ -162,8 +217,14 @@
 
   document.querySelectorAll('.blank').forEach(blank=>blank.addEventListener('click',()=>selectBlank(blank)));
   alphabet.forEach(letter=>{
-    const b=document.createElement('button'); b.type='button'; b.className='stone'; b.textContent=letter;
-    b.addEventListener('click',()=>hit(letter,b)); stones.appendChild(b);
+    const b=document.createElement('button');
+    b.type='button';
+    b.className='stone';
+    b.textContent=letter;
+    b.dataset.letter=letter;
+    b.setAttribute('aria-label',`${letter}の石`);
+    b.addEventListener('click',()=>hit(letter,b));
+    stones.appendChild(b);
   });
   retry.addEventListener('click',()=>location.reload());
 })();
