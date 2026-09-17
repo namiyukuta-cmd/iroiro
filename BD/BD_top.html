@@ -196,19 +196,23 @@
   const PLAYER_SIZE=20,ENEMY_SIZE=18,MAX_FX=40;
   let fieldW=320,fieldH=420,lastHud=0;
 
-  const state={maxHp:100,hp:100,maxAc:100,ac:100,acRegenPerSec:16,supplies:5,supplyHeal:40,autoSupplyThreshold:30,x:40,y:80,vx:155,vy:118,nextTurn:0,lastTime:performance.now(),dead:false,nextPlayerHit:0,roundDuration:30000,roundStart:0,roundEnd:0,kills:0,finished:false};
-  const initial=[[.18,.18],[.76,.16],[.48,.38],[.20,.62],[.78,.68],[.50,.86]];
-  const enemies=enemyEls.map((el,i)=>({el,id:i+1,hp:4,maxHp:4,x:0,y:0,vx:0,vy:0,nextTurn:0,nextContactHit:0,dead:false,respawnAt:0}));
+  const state={maxHp:100,hp:100,maxAc:100,ac:100,acRegenPerSec:16,supplies:5,supplyHeal:40,autoSupplyThreshold:30,x:0,y:0,vx:0,vy:0,nextTurn:0,lastTime:performance.now(),dead:false,nextPlayerHit:0,roundDuration:30000,roundStart:0,roundEnd:0,kills:0,finished:false};
+  const enemies=enemyEls.map((el,i)=>({el,id:i+1,hp:4,maxHp:4,x:0,y:0,vx:0,vy:0,speed:34+(i%3)*5,nextTurn:0,nextContactHit:0,dead:false,respawnAt:0}));
   const skills=[
     {name:'強打',cost:5,cooldown:5000,damage:3,range:150,readyAt:0},
     {name:'連撃',cost:3,cooldown:3000,damage:2,range:115,readyAt:0},
     {name:'斬撃',cost:1,cooldown:1000,damage:1,range:85,readyAt:0}
   ];
 
+  function placePlayer(){
+    state.x=Math.max(0,(fieldW-PLAYER_SIZE)/2);
+    state.y=Math.max(0,fieldH*.64-PLAYER_SIZE/2);
+    state.vx=0;state.vy=0;
+  }
+
   function refreshBounds(){
     fieldW=field.clientWidth;fieldH=field.clientHeight;
-    state.x=Math.min(Math.max(0,state.x),Math.max(0,fieldW-PLAYER_SIZE));
-    state.y=Math.min(Math.max(0,state.y),Math.max(0,fieldH-PLAYER_SIZE));
+    placePlayer();
     for(const e of enemies){e.x=Math.min(Math.max(0,e.x),Math.max(0,fieldW-ENEMY_SIZE));e.y=Math.min(Math.max(0,e.y),Math.max(0,fieldH-ENEMY_SIZE));}
   }
 
@@ -219,23 +223,28 @@
   function nearestEnemy(maxRange){let best=null,bestD=maxRange;for(const e of enemies){if(e.dead)continue;const d=dist(e);if(d<=bestD){best=e;bestD=d;}}return best;}
 
   function setEnemyDirection(e,now){
-    const v=randomVelocity(70,130);e.vx=v.vx;e.vy=v.vy;
-    if(Math.random()<.28&&!state.dead){const p=centerPlayer(),q=centerEnemy(e),a=Math.atan2(p.y-q.y,p.x-q.x)+(Math.random()-.5)*1.2,s=75+Math.random()*55;e.vx=Math.cos(a)*s;e.vy=Math.sin(a)*s;}
-    e.nextTurn=now+650+Math.random()*1700;
+    const p=centerPlayer(),q=centerEnemy(e);
+    const a=Math.atan2(p.y-q.y,p.x-q.x);
+    e.vx=Math.cos(a)*e.speed;
+    e.vy=Math.sin(a)*e.speed;
+    e.nextTurn=now+180;
   }
 
-  function setPlayerDirection(now){
-    const target=nearestEnemy(Infinity),speed=135+Math.random()*80;
-    if(target&&Math.random()<.7){const p=centerPlayer(),q=centerEnemy(target),a=Math.atan2(q.y-p.y,q.x-p.x)+(Math.random()-.5)*.9;state.vx=Math.cos(a)*speed;state.vy=Math.sin(a)*speed;}
-    else{const v=randomVelocity(135,215);state.vx=v.vx;state.vy=v.vy;}
-    state.nextTurn=now+450+Math.random()*1200;
+  function moveEnemyTowardPlayer(e,dt,now){
+    if(now>=e.nextTurn)setEnemyDirection(e,now);
+    e.x+=e.vx*dt;
+    e.y+=e.vy*dt;
+    e.x=Math.min(Math.max(0,e.x),Math.max(0,fieldW-ENEMY_SIZE));
+    e.y=Math.min(Math.max(0,e.y),Math.max(0,fieldH-ENEMY_SIZE));
   }
 
-  function moveEntity(o,size,dt){
-    o.x+=o.vx*dt;o.y+=o.vy*dt;
-    const maxX=Math.max(0,fieldW-size),maxY=Math.max(0,fieldH-size);
-    if(o.x<=0){o.x=0;o.vx=Math.abs(o.vx);}else if(o.x>=maxX){o.x=maxX;o.vx=-Math.abs(o.vx);}
-    if(o.y<=0){o.y=0;o.vy=Math.abs(o.vy);}else if(o.y>=maxY){o.y=maxY;o.vy=-Math.abs(o.vy);}
+  function spawnEnemyAtEdge(e,now){
+    const side=Math.floor(Math.random()*4);
+    if(side===0){e.x=Math.random()*Math.max(0,fieldW-ENEMY_SIZE);e.y=0;}
+    else if(side===1){e.x=Math.max(0,fieldW-ENEMY_SIZE);e.y=Math.random()*Math.max(0,fieldH-ENEMY_SIZE);}
+    else if(side===2){e.x=Math.random()*Math.max(0,fieldW-ENEMY_SIZE);e.y=Math.max(0,fieldH-ENEMY_SIZE);}
+    else{e.x=0;e.y=Math.random()*Math.max(0,fieldH-ENEMY_SIZE);}
+    setEnemyDirection(e,now);
   }
 
   function renderPositions(){
@@ -273,6 +282,13 @@
   function skillFx(skill,e){
     const p=centerPlayer(),q=centerEnemy(e),a=Math.atan2(q.y-p.y,q.x-p.x)*180/Math.PI;
     addFx('cast-ring',p.x,p.y);
+
+    if(skill.name==='強打'){
+      const dx=(q.x-p.x),dy=(q.y-p.y),len=Math.hypot(dx,dy)||1;
+      const base=`translate3d(${state.x.toFixed(1)}px,${state.y.toFixed(1)}px,0)`;
+      const step=`translate3d(${(state.x+dx/len*10).toFixed(1)}px,${(state.y+dy/len*10).toFixed(1)}px,0)`;
+      playerEl.animate([{transform:base},{transform:step},{transform:base}],{duration:180,easing:'ease-out'});
+    }
 
     if(skill.name==='斬撃'){
       projectileFx(p.x,p.y,q.x,q.y,'light',120);
@@ -318,7 +334,7 @@
 
   function contactCheck(now){
     if(state.dead)return;
-    for(const e of enemies){if(e.dead||now<e.nextContactHit)continue;if(dist(e)<=19){e.nextContactHit=now+900;damagePlayer(10,now);const p=centerPlayer(),q=centerEnemy(e),dx=q.x-p.x,dy=q.y-p.y,len=Math.hypot(dx,dy)||1;e.vx+=(dx/len)*70;e.vy+=(dy/len)*70;state.vx-=(dx/len)*55;state.vy-=(dy/len)*55;}}
+    for(const e of enemies){if(e.dead||now<e.nextContactHit)continue;if(dist(e)<=19){e.nextContactHit=now+900;damagePlayer(10,now);const p=centerPlayer(),q=centerEnemy(e),dx=q.x-p.x,dy=q.y-p.y,len=Math.hypot(dx,dy)||1;e.x+=dx/len*8;e.y+=dy/len*8;}}
   }
 
   function updateHud(now){
@@ -331,10 +347,7 @@
 
   function respawnEnemy(e,now){
     e.hp=e.maxHp;e.dead=false;e.respawnAt=0;e.el.classList.remove('dead','hit');
-    e.x=Math.random()*Math.max(0,fieldW-ENEMY_SIZE);e.y=Math.random()*Math.max(0,fieldH-ENEMY_SIZE);
-    const p=centerPlayer(),q=centerEnemy(e);
-    if(Math.hypot(q.x-p.x,q.y-p.y)<90){e.x=Math.max(0,Math.min(fieldW-ENEMY_SIZE,fieldW-e.x-ENEMY_SIZE));e.y=Math.max(0,Math.min(fieldH-ENEMY_SIZE,fieldH-e.y-ENEMY_SIZE));}
-    setEnemyDirection(e,now);
+    spawnEnemyAtEdge(e,now);
   }
 
   function finishRound(){
@@ -348,8 +361,8 @@
   function init(){
     refreshBounds();const now=performance.now();
     state.roundStart=now;state.roundEnd=now+state.roundDuration;
-    enemies.forEach((e,i)=>{e.x=Math.max(0,Math.min(fieldW-ENEMY_SIZE,fieldW*initial[i][0]-ENEMY_SIZE/2));e.y=Math.max(0,Math.min(fieldH-ENEMY_SIZE,fieldH*initial[i][1]-ENEMY_SIZE/2));setEnemyDirection(e,now);});
-    setPlayerDirection(now);renderPositions();updateHud(now);
+    enemies.forEach(e=>spawnEnemyAtEdge(e,now));
+    renderPositions();updateHud(now);
   }
 
   const ro=window.ResizeObserver?new ResizeObserver(refreshBounds):null;if(ro)ro.observe(field);else window.addEventListener('resize',refreshBounds,{passive:true});
@@ -358,8 +371,8 @@
     const dt=Math.min((now-state.lastTime)/1000,.035);state.lastTime=now;
     if(!state.finished&&now>=state.roundEnd)finishRound();
     if(!state.finished){
-      if(!state.dead){state.ac=Math.min(state.maxAc,state.ac+state.acRegenPerSec*dt);if(now>=state.nextTurn)setPlayerDirection(now);moveEntity(state,PLAYER_SIZE,dt);}
-      for(const e of enemies){if(e.dead){if(now>=e.respawnAt)respawnEnemy(e,now);continue;}if(now>=e.nextTurn)setEnemyDirection(e,now);moveEntity(e,ENEMY_SIZE,dt);}
+      if(!state.dead){state.ac=Math.min(state.maxAc,state.ac+state.acRegenPerSec*dt);}
+      for(const e of enemies){if(e.dead){if(now>=e.respawnAt)respawnEnemy(e,now);continue;}moveEnemyTowardPlayer(e,dt,now);}
       contactCheck(now);trySkills(now);
     }
     renderPositions();
