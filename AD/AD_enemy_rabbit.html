@@ -97,7 +97,7 @@
     <div id="timeBox">残り時間：<span id="remainingTime">100</span></div>
     <div id="completeActions">
       <a class="completeButton" href="AD_dump.html">次の本を探す</a>
-      <a class="completeButton primary" href="AD_repair.html">家に帰る</a>
+      <a class="completeButton primary" href="AD_morning.html">家に帰る</a>
     </div>
   </section>
 </div>
@@ -162,7 +162,10 @@
     const book = selectedBook || {id:'book_rabbit',name:'RABBITの本',difficulty:'★',condition:'文字補修済み'};
     book.word = 'RABBIT';
     book.textRepairComplete = true;
-    localStorage.setItem('adPendingRepairBook', JSON.stringify(book));
+    const recoveredBooks = JSON.parse(localStorage.getItem('adRecoveredBooks') || '[]');
+    if(!recoveredBooks.some(item => item.id === book.id)) recoveredBooks.push(book);
+    localStorage.setItem('adRecoveredBooks', JSON.stringify(recoveredBooks));
+    localStorage.removeItem('adPendingRepairBook');
   }
 
   function repair(letter, button){
