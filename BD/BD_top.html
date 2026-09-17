@@ -36,10 +36,10 @@
     #battle-wrap{min-height:0;position:relative}
     #battle-field{width:100%;height:100%;border:2px solid #202020;background:#fff;position:relative;overflow:hidden;contain:layout paint style}
     #player,.enemy{position:absolute;left:0;top:0;will-change:transform;transform:translate3d(0,0,0)}
-    #player{width:28px;height:28px;border-radius:50%;background:#202020;z-index:3}
+    #player{width:20px;height:20px;border-radius:50%;background:#202020;z-index:3}
     #player.hit{filter:brightness(2)}
     #player.heal{box-shadow:0 0 0 6px rgba(32,32,32,.18)}
-    .enemy{width:26px;height:26px;border-radius:50%;background:#b3261e;border:2px solid #68120d;z-index:2;transition:opacity .16s ease,filter .07s linear}
+    .enemy{width:18px;height:18px;border-radius:50%;background:#b3261e;border:2px solid #68120d;z-index:2;transition:opacity .16s ease,filter .07s linear}
     .enemy.hit{filter:brightness(1.8)}
     .enemy.dead{opacity:0;pointer-events:none}
 
@@ -147,7 +147,7 @@
   const skillSlots=[document.getElementById('skillSlot0'),document.getElementById('skillSlot1'),document.getElementById('skillSlot2')];
   const skillSubs=[document.getElementById('skillSub0'),document.getElementById('skillSub1'),document.getElementById('skillSub2')];
 
-  const PLAYER_SIZE=28,ENEMY_SIZE=26,MAX_FX=24;
+  const PLAYER_SIZE=20,ENEMY_SIZE=18,MAX_FX=24;
   let fieldW=320,fieldH=420,lastHud=0;
 
   const state={maxHp:100,hp:100,maxAc:100,ac:100,acRegenPerSec:16,supplies:5,supplyHeal:40,autoSupplyThreshold:45,x:40,y:80,vx:155,vy:118,nextTurn:0,lastTime:performance.now(),dead:false,nextPlayerHit:0,roundDuration:30000,roundStart:0,roundEnd:0,kills:0,finished:false};
@@ -237,7 +237,7 @@
 
   function contactCheck(now){
     if(state.dead)return;
-    for(const e of enemies){if(e.dead||now<e.nextContactHit)continue;if(dist(e)<=26){e.nextContactHit=now+900;damagePlayer(10,now);const p=centerPlayer(),q=centerEnemy(e),dx=q.x-p.x,dy=q.y-p.y,len=Math.hypot(dx,dy)||1;e.vx+=(dx/len)*70;e.vy+=(dy/len)*70;state.vx-=(dx/len)*55;state.vy-=(dy/len)*55;}}
+    for(const e of enemies){if(e.dead||now<e.nextContactHit)continue;if(dist(e)<=19){e.nextContactHit=now+900;damagePlayer(10,now);const p=centerPlayer(),q=centerEnemy(e),dx=q.x-p.x,dy=q.y-p.y,len=Math.hypot(dx,dy)||1;e.vx+=(dx/len)*70;e.vy+=(dy/len)*70;state.vx-=(dx/len)*55;state.vy-=(dy/len)*55;}}
   }
 
   function updateHud(now){
