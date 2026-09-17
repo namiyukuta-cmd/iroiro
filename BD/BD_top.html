@@ -46,6 +46,17 @@
       position: relative;
       overflow: hidden;
     }
+    #player {
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      background: #202020;
+      transform: translate3d(0,0,0);
+      will-change: transform;
+    }
   </style>
 </head>
 <body>
@@ -55,8 +66,73 @@
       <a class="back" href="BD_index.html">入口へ</a>
     </header>
     <main>
-      <section id="battle-field" aria-label="オートバトル画面"></section>
+      <section id="battle-field" aria-label="オートバトル画面">
+        <div id="player" aria-label="主人公"></div>
+      </section>
     </main>
   </div>
+
+  <script>
+    (() => {
+      const field = document.getElementById('battle-field');
+      const player = document.getElementById('player');
+
+      const state = {
+        x: 40,
+        y: 80,
+        vx: 155,
+        vy: 118,
+        lastTime: performance.now(),
+        nextTurn: performance.now() + 900
+      };
+
+      function chooseDirection(now) {
+        const speed = 135 + Math.random() * 85;
+        const angle = Math.random() * Math.PI * 2;
+        state.vx = Math.cos(angle) * speed;
+        state.vy = Math.sin(angle) * speed;
+        state.nextTurn = now + 500 + Math.random() * 1400;
+      }
+
+      function animate(now) {
+        const rect = field.getBoundingClientRect();
+        const size = player.offsetWidth;
+        const maxX = Math.max(0, rect.width - size - 4);
+        const maxY = Math.max(0, rect.height - size - 4);
+        const dt = Math.min((now - state.lastTime) / 1000, 0.04);
+        state.lastTime = now;
+
+        if (now >= state.nextTurn) chooseDirection(now);
+
+        state.x += state.vx * dt;
+        state.y += state.vy * dt;
+
+        if (state.x <= 0) {
+          state.x = 0;
+          state.vx = Math.abs(state.vx);
+          state.vy += (Math.random() - 0.5) * 100;
+        } else if (state.x >= maxX) {
+          state.x = maxX;
+          state.vx = -Math.abs(state.vx);
+          state.vy += (Math.random() - 0.5) * 100;
+        }
+
+        if (state.y <= 0) {
+          state.y = 0;
+          state.vy = Math.abs(state.vy);
+          state.vx += (Math.random() - 0.5) * 100;
+        } else if (state.y >= maxY) {
+          state.y = maxY;
+          state.vy = -Math.abs(state.vy);
+          state.vx += (Math.random() - 0.5) * 100;
+        }
+
+        player.style.transform = `translate3d(${state.x}px, ${state.y}px, 0)`;
+        requestAnimationFrame(animate);
+      }
+
+      requestAnimationFrame(animate);
+    })();
+  </script>
 </body>
 </html>
