@@ -37,7 +37,37 @@
       font-weight: 700;
       font-size: 12px;
     }
-    main { padding-top: 16px; }
+    main { padding-top: 14px; display: grid; gap: 12px; }
+    #status {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+    .status-card {
+      border: 2px solid #202020;
+      border-radius: 10px;
+      background: #fff;
+      padding: 8px 10px;
+      font-size: 13px;
+      font-weight: 800;
+    }
+    .status-head { display: flex; justify-content: space-between; gap: 8px; margin-bottom: 5px; }
+    .bar {
+      width: 100%;
+      height: 12px;
+      border: 2px solid #202020;
+      border-radius: 999px;
+      background: #ece9e1;
+      overflow: hidden;
+    }
+    .fill { height: 100%; width: 100%; background: #202020; }
+    #supplies {
+      grid-column: 1 / -1;
+      min-height: 38px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
     #battle-field {
       width: 100%;
       aspect-ratio: 3 / 4;
@@ -56,7 +86,7 @@
       background: #202020;
       transform: translate3d(0,0,0);
       will-change: transform;
-      z-index: 2;
+      z-index: 3;
     }
     .enemy {
       position: absolute;
@@ -68,6 +98,33 @@
       transform: translate(-50%, -50%);
       z-index: 1;
     }
+    .enemy.dead { display: none; }
+    .enemy.hit { outline: 4px solid rgba(0,0,0,.18); }
+    #skills {
+      display: grid;
+      gap: 7px;
+    }
+    .skill {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 8px;
+      align-items: center;
+      min-height: 44px;
+      border: 1px solid #aaa;
+      border-radius: 9px;
+      background: #fff;
+      padding: 7px 10px;
+      font-size: 13px;
+    }
+    .skill-name { font-weight: 900; }
+    .skill-meta { color: #666; font-size: 11px; margin-top: 2px; }
+    .skill-state { min-width: 72px; text-align: right; font-weight: 800; }
+    #message {
+      min-height: 22px;
+      font-size: 12px;
+      font-weight: 700;
+      color: #555;
+    }
   </style>
 </head>
 <body>
@@ -77,15 +134,30 @@
       <a class="back" href="BD_index.html">入口へ</a>
     </header>
     <main>
+      <section id="status" aria-label="主人公の状態">
+        <div class="status-card">
+          <div class="status-head"><span>HP</span><span id="hpText">100 / 100</span></div>
+          <div class="bar"><div id="hpFill" class="fill"></div></div>
+        </div>
+        <div class="status-card">
+          <div class="status-head"><span>AC</span><span id="acText">100 / 100</span></div>
+          <div class="bar"><div id="acFill" class="fill"></div></div>
+        </div>
+        <div id="supplies" class="status-card"><span>補給品</span><span id="supplyText">5</span></div>
+      </section>
+
       <section id="battle-field" aria-label="オートバトル画面">
-        <div class="enemy" style="left:18%; top:18%;" aria-label="敵1"></div>
-        <div class="enemy" style="left:76%; top:16%;" aria-label="敵2"></div>
-        <div class="enemy" style="left:48%; top:38%;" aria-label="敵3"></div>
-        <div class="enemy" style="left:20%; top:62%;" aria-label="敵4"></div>
-        <div class="enemy" style="left:78%; top:68%;" aria-label="敵5"></div>
-        <div class="enemy" style="left:50%; top:86%;" aria-label="敵6"></div>
+        <div class="enemy" data-hp="3" style="left:18%; top:18%;" aria-label="敵1"></div>
+        <div class="enemy" data-hp="3" style="left:76%; top:16%;" aria-label="敵2"></div>
+        <div class="enemy" data-hp="3" style="left:48%; top:38%;" aria-label="敵3"></div>
+        <div class="enemy" data-hp="3" style="left:20%; top:62%;" aria-label="敵4"></div>
+        <div class="enemy" data-hp="3" style="left:78%; top:68%;" aria-label="敵5"></div>
+        <div class="enemy" data-hp="3" style="left:50%; top:86%;" aria-label="敵6"></div>
         <div id="player" aria-label="主人公"></div>
       </section>
+
+      <section id="skills" aria-label="自動発動スキル"></section>
+      <div id="message" aria-live="polite"></div>
     </main>
   </div>
 
@@ -93,22 +165,171 @@
     (() => {
       const field = document.getElementById('battle-field');
       const player = document.getElementById('player');
+      const hpText = document.getElementById('hpText');
+      const hpFill = document.getElementById('hpFill');
+      const acText = document.getElementById('acText');
+      const acFill = document.getElementById('acFill');
+      const supplyText = document.getElementById('supplyText');
+      const skillsBox = document.getElementById('skills');
+      const message = document.getElementById('message');
+      const enemies = [...document.querySelectorAll('.enemy')].map((el, i) => ({
+        el,
+        id: i + 1,
+        hp: Number(el.dataset.hp) || 3,
+        maxHp: Number(el.dataset.hp) || 3,
+        nextContactHit: 0
+      }));
 
       const state = {
+        maxHp: 100,
+        hp: 100,
+        maxAc: 100,
+        ac: 100,
+        acRegenPerSec: 16,
+        supplies: 5,
+        supplyHeal: 40,
+        autoSupplyThreshold: 45,
         x: 40,
         y: 80,
         vx: 155,
         vy: 118,
         lastTime: performance.now(),
-        nextTurn: performance.now() + 900
+        nextTurn: performance.now() + 900,
+        dead: false
       };
+
+      const skills = [
+        { name: '強打', cost: 55, cooldown: 5.0, damage: 3, range: 150, readyAt: 0 },
+        { name: '連撃', cost: 35, cooldown: 3.0, damage: 2, range: 115, readyAt: 0 },
+        { name: '斬撃', cost: 15, cooldown: 1.2, damage: 1, range: 85, readyAt: 0 }
+      ];
+
+      function aliveEnemies() {
+        return enemies.filter(e => e.hp > 0);
+      }
+
+      function enemyCenter(enemy) {
+        const f = field.getBoundingClientRect();
+        const r = enemy.el.getBoundingClientRect();
+        return { x: r.left - f.left + r.width / 2, y: r.top - f.top + r.height / 2 };
+      }
+
+      function playerCenter() {
+        return { x: state.x + player.offsetWidth / 2, y: state.y + player.offsetHeight / 2 };
+      }
+
+      function distanceTo(enemy) {
+        const p = playerCenter();
+        const e = enemyCenter(enemy);
+        return Math.hypot(e.x - p.x, e.y - p.y);
+      }
+
+      function nearestEnemy(maxRange = Infinity) {
+        let best = null;
+        let bestDist = maxRange;
+        for (const enemy of aliveEnemies()) {
+          const d = distanceTo(enemy);
+          if (d <= bestDist) {
+            best = enemy;
+            bestDist = d;
+          }
+        }
+        return best;
+      }
 
       function chooseDirection(now) {
         const speed = 135 + Math.random() * 85;
-        const angle = Math.random() * Math.PI * 2;
-        state.vx = Math.cos(angle) * speed;
-        state.vy = Math.sin(angle) * speed;
-        state.nextTurn = now + 500 + Math.random() * 1400;
+        const target = nearestEnemy();
+        if (target && Math.random() < 0.72) {
+          const p = playerCenter();
+          const e = enemyCenter(target);
+          const angle = Math.atan2(e.y - p.y, e.x - p.x) + (Math.random() - 0.5) * 0.9;
+          state.vx = Math.cos(angle) * speed;
+          state.vy = Math.sin(angle) * speed;
+        } else {
+          const angle = Math.random() * Math.PI * 2;
+          state.vx = Math.cos(angle) * speed;
+          state.vy = Math.sin(angle) * speed;
+        }
+        state.nextTurn = now + 450 + Math.random() * 1200;
+      }
+
+      function useSupplyIfNeeded() {
+        if (state.dead) return;
+        if (state.hp <= state.autoSupplyThreshold && state.supplies > 0 && state.hp < state.maxHp) {
+          state.supplies -= 1;
+          state.hp = Math.min(state.maxHp, state.hp + state.supplyHeal);
+          message.textContent = `補給品を自動使用：HP +${state.supplyHeal}`;
+        }
+      }
+
+      function damagePlayer(amount) {
+        if (state.dead) return;
+        state.hp = Math.max(0, state.hp - amount);
+        useSupplyIfNeeded();
+        if (state.hp <= 0) {
+          state.dead = true;
+          state.vx = 0;
+          state.vy = 0;
+          message.textContent = '主人公は倒れた';
+        }
+      }
+
+      function damageEnemy(enemy, amount, skillName) {
+        if (!enemy || enemy.hp <= 0) return;
+        enemy.hp = Math.max(0, enemy.hp - amount);
+        enemy.el.classList.add('hit');
+        setTimeout(() => enemy.el.classList.remove('hit'), 120);
+        if (enemy.hp <= 0) {
+          enemy.el.classList.add('dead');
+          message.textContent = `${skillName}で敵${enemy.id}を倒した`;
+        } else {
+          message.textContent = `${skillName}発動：敵${enemy.id}に${amount}ダメージ`;
+        }
+      }
+
+      function trySkills(now) {
+        if (state.dead) return;
+        for (const skill of skills) {
+          if (now < skill.readyAt) continue;
+          if (state.ac < skill.cost) continue;
+          const target = nearestEnemy(skill.range);
+          if (!target) continue;
+          state.ac -= skill.cost;
+          skill.readyAt = now + skill.cooldown * 1000;
+          damageEnemy(target, skill.damage, skill.name);
+          break;
+        }
+      }
+
+      function processEnemyContact(now) {
+        if (state.dead) return;
+        for (const enemy of aliveEnemies()) {
+          if (distanceTo(enemy) <= 31 && now >= enemy.nextContactHit) {
+            enemy.nextContactHit = now + 900;
+            damagePlayer(12);
+          }
+        }
+      }
+
+      function renderSkills(now) {
+        skillsBox.innerHTML = '';
+        for (const skill of skills) {
+          const wait = Math.max(0, (skill.readyAt - now) / 1000);
+          const row = document.createElement('div');
+          row.className = 'skill';
+          row.innerHTML = `<div><div class="skill-name">${skill.name}</div><div class="skill-meta">威力 ${skill.damage} / AC ${skill.cost} / 待機 ${skill.cooldown.toFixed(1)}秒</div></div><div class="skill-state">${wait > 0 ? `待機 ${wait.toFixed(1)}秒` : state.ac >= skill.cost ? '発動可能' : 'AC不足'}</div>`;
+          skillsBox.appendChild(row);
+        }
+      }
+
+      function render(now) {
+        hpText.textContent = `${Math.ceil(state.hp)} / ${state.maxHp}`;
+        hpFill.style.width = `${Math.max(0, state.hp / state.maxHp * 100)}%`;
+        acText.textContent = `${Math.floor(state.ac)} / ${state.maxAc}`;
+        acFill.style.width = `${Math.max(0, state.ac / state.maxAc * 100)}%`;
+        supplyText.textContent = state.supplies;
+        renderSkills(now);
       }
 
       function animate(now) {
@@ -119,35 +340,43 @@
         const dt = Math.min((now - state.lastTime) / 1000, 0.04);
         state.lastTime = now;
 
-        if (now >= state.nextTurn) chooseDirection(now);
+        if (!state.dead) {
+          state.ac = Math.min(state.maxAc, state.ac + state.acRegenPerSec * dt);
+          if (now >= state.nextTurn) chooseDirection(now);
 
-        state.x += state.vx * dt;
-        state.y += state.vy * dt;
+          state.x += state.vx * dt;
+          state.y += state.vy * dt;
 
-        if (state.x <= 0) {
-          state.x = 0;
-          state.vx = Math.abs(state.vx);
-          state.vy += (Math.random() - 0.5) * 100;
-        } else if (state.x >= maxX) {
-          state.x = maxX;
-          state.vx = -Math.abs(state.vx);
-          state.vy += (Math.random() - 0.5) * 100;
-        }
+          if (state.x <= 0) {
+            state.x = 0;
+            state.vx = Math.abs(state.vx);
+            state.vy += (Math.random() - 0.5) * 100;
+          } else if (state.x >= maxX) {
+            state.x = maxX;
+            state.vx = -Math.abs(state.vx);
+            state.vy += (Math.random() - 0.5) * 100;
+          }
 
-        if (state.y <= 0) {
-          state.y = 0;
-          state.vy = Math.abs(state.vy);
-          state.vx += (Math.random() - 0.5) * 100;
-        } else if (state.y >= maxY) {
-          state.y = maxY;
-          state.vy = -Math.abs(state.vy);
-          state.vx += (Math.random() - 0.5) * 100;
+          if (state.y <= 0) {
+            state.y = 0;
+            state.vy = Math.abs(state.vy);
+            state.vx += (Math.random() - 0.5) * 100;
+          } else if (state.y >= maxY) {
+            state.y = maxY;
+            state.vy = -Math.abs(state.vy);
+            state.vx += (Math.random() - 0.5) * 100;
+          }
+
+          trySkills(now);
+          processEnemyContact(now);
         }
 
         player.style.transform = `translate3d(${state.x}px, ${state.y}px, 0)`;
+        render(now);
         requestAnimationFrame(animate);
       }
 
+      render(performance.now());
       requestAnimationFrame(animate);
     })();
   </script>
