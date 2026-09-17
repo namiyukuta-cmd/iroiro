@@ -79,8 +79,8 @@
     .slot.empty{background:repeating-linear-gradient(135deg,#fff 0 8px,#f3f1eb 8px 16px)}
     .slot-icon{position:absolute;inset:0;display:grid;place-items:center;z-index:1}
     .slot-count{position:absolute;right:3px;top:2px;font-size:11px;font-weight:1000;z-index:4;background:rgba(255,255,255,.88);padding:0 2px;border-radius:3px;line-height:1.1}
-    .slot-time{position:absolute;left:2px;right:2px;bottom:2px;font-size:9px;font-weight:1000;text-align:center;line-height:1.05;z-index:4;background:rgba(255,255,255,.9);border-radius:3px;padding:1px 0;min-height:11px}
-    .slot-time:empty{background:transparent;padding:0;min-height:0}
+    .slot-time{position:absolute;inset:0;display:grid;place-items:center;font-size:16px;font-weight:1000;text-align:center;line-height:1;z-index:4;color:#fff;mix-blend-mode:difference;pointer-events:none}
+    .slot-time:empty{display:none}
     .cooldown-cover{position:absolute;left:0;right:0;bottom:0;height:0;background:#202020;z-index:3;pointer-events:none}
 
     .supply-icon{width:22px;height:27px;border:2px solid #202020;border-radius:5px 5px 7px 7px;position:relative;background:#fff}
@@ -109,7 +109,7 @@
     @media (max-height:700px){
       #game-root{grid-template-rows:32px 42px minmax(0,1fr) auto;gap:4px;padding-top:max(4px,env(safe-area-inset-top));padding-bottom:max(4px,env(safe-area-inset-bottom))}
       #loadout{gap:2px}
-      .slot-time{font-size:8px}
+      .slot-time{font-size:14px}
     }
   </style>
 </head>
@@ -185,9 +185,9 @@
   const initial=[[.18,.18],[.76,.16],[.48,.38],[.20,.62],[.78,.68],[.50,.86]];
   const enemies=enemyEls.map((el,i)=>({el,id:i+1,hp:4,maxHp:4,x:0,y:0,vx:0,vy:0,nextTurn:0,nextContactHit:0,dead:false,respawnAt:0}));
   const skills=[
-    {name:'強打',cost:55,cooldown:5000,damage:3,range:150,readyAt:0},
-    {name:'連撃',cost:35,cooldown:3000,damage:2,range:115,readyAt:0},
-    {name:'斬撃',cost:15,cooldown:1200,damage:1,range:85,readyAt:0}
+    {name:'強打',cost:5,cooldown:5000,damage:3,range:150,readyAt:0},
+    {name:'連撃',cost:3,cooldown:3000,damage:2,range:115,readyAt:0},
+    {name:'斬撃',cost:1,cooldown:1000,damage:1,range:85,readyAt:0}
   ];
 
   function refreshBounds(){
