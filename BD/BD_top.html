@@ -10,121 +10,50 @@
   <style>
     * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
     html, body { margin: 0; width: 100%; min-height: 100%; }
-    body {
-      min-height: 100dvh;
-      background: #f5f4ef;
-      color: #202020;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-    }
-    #game-root {
-      width: min(100%, 520px);
-      min-height: 100dvh;
-      margin: 0 auto;
-      padding: max(18px, env(safe-area-inset-top)) 16px max(18px, env(safe-area-inset-bottom));
-    }
-    header {
-      min-height: 62px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 12px;
-      border-bottom: 1px solid #bbb;
-    }
+    body { min-height: 100dvh; background: #f5f4ef; color: #202020; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+    #game-root { width: min(100%, 520px); min-height: 100dvh; margin: 0 auto; padding: max(18px, env(safe-area-inset-top)) 16px max(18px, env(safe-area-inset-bottom)); }
+    header { min-height: 62px; display: flex; align-items: center; justify-content: space-between; gap: 12px; border-bottom: 1px solid #bbb; }
     h1 { margin: 0; font-size: 24px; }
-    .back {
-      color: inherit;
-      text-decoration: none;
-      font-weight: 700;
-      font-size: 12px;
-    }
+    .back { color: inherit; text-decoration: none; font-weight: 700; font-size: 12px; }
     main { padding-top: 14px; display: grid; gap: 12px; }
-    #status {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 8px;
-    }
-    .status-card {
-      border: 2px solid #202020;
-      border-radius: 10px;
-      background: #fff;
-      padding: 8px 10px;
-      font-size: 13px;
-      font-weight: 800;
-    }
+    #status { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    .status-card { border: 2px solid #202020; border-radius: 10px; background: #fff; padding: 8px 10px; font-size: 13px; font-weight: 800; }
     .status-head { display: flex; justify-content: space-between; gap: 8px; margin-bottom: 5px; }
-    .bar {
-      width: 100%;
-      height: 12px;
-      border: 2px solid #202020;
-      border-radius: 999px;
-      background: #ece9e1;
-      overflow: hidden;
-    }
-    .fill { height: 100%; width: 100%; background: #202020; }
-    #supplies {
-      grid-column: 1 / -1;
-      min-height: 38px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-    }
-    #battle-field {
-      width: 100%;
-      aspect-ratio: 3 / 4;
-      border: 2px solid #202020;
-      background: #fff;
-      position: relative;
-      overflow: hidden;
-    }
-    #player {
-      position: absolute;
-      left: 0;
-      top: 0;
-      width: 30px;
-      height: 30px;
-      border-radius: 50%;
-      background: #202020;
-      transform: translate3d(0,0,0);
-      will-change: transform;
-      z-index: 3;
-    }
-    .enemy {
-      position: absolute;
-      width: 28px;
-      height: 28px;
-      border-radius: 50%;
-      background: #b3261e;
-      border: 2px solid #68120d;
-      transform: translate(-50%, -50%);
-      z-index: 1;
-    }
-    .enemy.dead { display: none; }
-    .enemy.hit { outline: 4px solid rgba(0,0,0,.18); }
-    #skills {
-      display: grid;
-      gap: 7px;
-    }
-    .skill {
-      display: grid;
-      grid-template-columns: 1fr auto;
-      gap: 8px;
-      align-items: center;
-      min-height: 44px;
-      border: 1px solid #aaa;
-      border-radius: 9px;
-      background: #fff;
-      padding: 7px 10px;
-      font-size: 13px;
-    }
+    .bar { width: 100%; height: 12px; border: 2px solid #202020; border-radius: 999px; background: #ece9e1; overflow: hidden; }
+    .fill { height: 100%; width: 100%; background: #202020; transition: width .12s linear; }
+    #supplies { grid-column: 1 / -1; min-height: 38px; display: flex; align-items: center; justify-content: space-between; }
+    #battle-field { width: 100%; aspect-ratio: 3 / 4; border: 2px solid #202020; background: #fff; position: relative; overflow: hidden; }
+    #player { position: absolute; left: 0; top: 0; width: 30px; height: 30px; border-radius: 50%; background: #202020; transform: translate3d(0,0,0); will-change: transform; z-index: 3; }
+    #player.hit { animation: playerHit .18s linear; }
+    #player.heal { animation: playerHeal .55s ease-out; }
+    .enemy { position: absolute; width: 28px; height: 28px; border-radius: 50%; background: #b3261e; border: 2px solid #68120d; transform: translate(-50%, -50%); z-index: 1; transition: opacity .2s ease, transform .12s ease; }
+    .enemy.dead { opacity: 0; transform: translate(-50%, -50%) scale(.35); pointer-events: none; }
+    .enemy.hit { filter: brightness(1.65); transform: translate(-50%, -50%) scale(1.25); }
+    #fx-layer { position: absolute; inset: 0; pointer-events: none; z-index: 5; overflow: hidden; }
+    .slash-fx { position: absolute; width: 64px; height: 8px; border-radius: 999px; background: #202020; transform-origin: center; animation: slashFx .26s ease-out forwards; }
+    .impact-fx { position: absolute; width: 24px; height: 24px; border: 3px solid #202020; border-radius: 50%; animation: impactFx .3s ease-out forwards; }
+    .burst-fx { position: absolute; width: 18px; height: 18px; border: 3px solid #202020; transform: rotate(45deg); animation: burstFx .34s ease-out forwards; }
+    .heal-fx { position: absolute; width: 24px; height: 24px; animation: healFx .7s ease-out forwards; }
+    .heal-fx::before, .heal-fx::after { content: ""; position: absolute; left: 50%; top: 50%; background: #202020; border-radius: 3px; transform: translate(-50%, -50%); }
+    .heal-fx::before { width: 24px; height: 8px; }
+    .heal-fx::after { width: 8px; height: 24px; }
+    .float-text { position: absolute; transform: translate(-50%, 0); font-size: 14px; font-weight: 900; white-space: nowrap; color: #202020; text-shadow: 0 1px 0 #fff; animation: floatText .8s ease-out forwards; }
+    #field-flash { position: absolute; inset: 0; background: rgba(32,32,32,.1); opacity: 0; pointer-events: none; z-index: 4; }
+    #field-flash.active { animation: fieldFlash .2s ease-out; }
+    #skills { display: grid; gap: 7px; }
+    .skill { display: grid; grid-template-columns: 1fr auto; gap: 8px; align-items: center; min-height: 44px; border: 1px solid #aaa; border-radius: 9px; background: #fff; padding: 7px 10px; font-size: 13px; }
     .skill-name { font-weight: 900; }
     .skill-meta { color: #666; font-size: 11px; margin-top: 2px; }
     .skill-state { min-width: 72px; text-align: right; font-weight: 800; }
-    #message {
-      min-height: 22px;
-      font-size: 12px;
-      font-weight: 700;
-      color: #555;
-    }
+    #message { min-height: 22px; font-size: 12px; font-weight: 700; color: #555; }
+    @keyframes slashFx { 0% { opacity: 0; transform: translate(-50%,-50%) scale(.35) rotate(var(--rot)); } 25% { opacity: 1; } 100% { opacity: 0; transform: translate(-50%,-50%) scale(1.5) rotate(var(--rot)); } }
+    @keyframes impactFx { 0% { opacity: 1; transform: translate(-50%,-50%) scale(.25); } 100% { opacity: 0; transform: translate(-50%,-50%) scale(1.9); } }
+    @keyframes burstFx { 0% { opacity: 1; transform: translate(-50%,-50%) rotate(45deg) scale(.25); } 100% { opacity: 0; transform: translate(-50%,-50%) rotate(225deg) scale(2.4); } }
+    @keyframes healFx { 0% { opacity: 0; transform: translate(-50%,-30%) scale(.45); } 25% { opacity: 1; } 100% { opacity: 0; transform: translate(-50%,-120%) scale(1.35); } }
+    @keyframes floatText { 0% { opacity: 0; transform: translate(-50%, 0) scale(.8); } 15% { opacity: 1; transform: translate(-50%, -4px) scale(1); } 100% { opacity: 0; transform: translate(-50%, -34px) scale(1.06); } }
+    @keyframes fieldFlash { 0% { opacity: 0; } 40% { opacity: 1; } 100% { opacity: 0; } }
+    @keyframes playerHit { 0%,100% { transform: translate3d(var(--px),var(--py),0) scale(1); } 50% { transform: translate3d(var(--px),var(--py),0) scale(1.28); } }
+    @keyframes playerHeal { 0%,100% { filter: brightness(1); } 50% { filter: brightness(1.8); } }
   </style>
 </head>
 <body>
@@ -153,6 +82,8 @@
         <div class="enemy" data-hp="3" style="left:20%; top:62%;" aria-label="敵4"></div>
         <div class="enemy" data-hp="3" style="left:78%; top:68%;" aria-label="敵5"></div>
         <div class="enemy" data-hp="3" style="left:50%; top:86%;" aria-label="敵6"></div>
+        <div id="field-flash"></div>
+        <div id="fx-layer"></div>
         <div id="player" aria-label="主人公"></div>
       </section>
 
@@ -165,6 +96,8 @@
     (() => {
       const field = document.getElementById('battle-field');
       const player = document.getElementById('player');
+      const fxLayer = document.getElementById('fx-layer');
+      const fieldFlash = document.getElementById('field-flash');
       const hpText = document.getElementById('hpText');
       const hpFill = document.getElementById('hpFill');
       const acText = document.getElementById('acText');
@@ -172,30 +105,13 @@
       const supplyText = document.getElementById('supplyText');
       const skillsBox = document.getElementById('skills');
       const message = document.getElementById('message');
-      const enemies = [...document.querySelectorAll('.enemy')].map((el, i) => ({
-        el,
-        id: i + 1,
-        hp: Number(el.dataset.hp) || 3,
-        maxHp: Number(el.dataset.hp) || 3,
-        nextContactHit: 0
-      }));
+      const enemies = [...document.querySelectorAll('.enemy')].map((el, i) => ({ el, id: i + 1, hp: Number(el.dataset.hp) || 3, maxHp: Number(el.dataset.hp) || 3, nextContactHit: 0 }));
 
       const state = {
-        maxHp: 100,
-        hp: 100,
-        maxAc: 100,
-        ac: 100,
-        acRegenPerSec: 16,
-        supplies: 5,
-        supplyHeal: 40,
-        autoSupplyThreshold: 45,
-        x: 40,
-        y: 80,
-        vx: 155,
-        vy: 118,
-        lastTime: performance.now(),
-        nextTurn: performance.now() + 900,
-        dead: false
+        maxHp: 100, hp: 100, maxAc: 100, ac: 100, acRegenPerSec: 16,
+        supplies: 5, supplyHeal: 40, autoSupplyThreshold: 45,
+        x: 40, y: 80, vx: 155, vy: 118,
+        lastTime: performance.now(), nextTurn: performance.now() + 900, dead: false
       };
 
       const skills = [
@@ -204,45 +120,62 @@
         { name: '斬撃', cost: 15, cooldown: 1.2, damage: 1, range: 85, readyAt: 0 }
       ];
 
-      function aliveEnemies() {
-        return enemies.filter(e => e.hp > 0);
+      const aliveEnemies = () => enemies.filter(e => e.hp > 0);
+      function enemyCenter(enemy) { const f = field.getBoundingClientRect(); const r = enemy.el.getBoundingClientRect(); return { x: r.left - f.left + r.width / 2, y: r.top - f.top + r.height / 2 }; }
+      function playerCenter() { return { x: state.x + player.offsetWidth / 2, y: state.y + player.offsetHeight / 2 }; }
+      function distanceTo(enemy) { const p = playerCenter(), e = enemyCenter(enemy); return Math.hypot(e.x - p.x, e.y - p.y); }
+      function nearestEnemy(maxRange = Infinity) { let best = null, bestDist = maxRange; for (const enemy of aliveEnemies()) { const d = distanceTo(enemy); if (d <= bestDist) { best = enemy; bestDist = d; } } return best; }
+
+      function addFx(className, x, y, rot = null) {
+        const el = document.createElement('div');
+        el.className = className;
+        el.style.left = `${x}px`;
+        el.style.top = `${y}px`;
+        if (rot !== null) el.style.setProperty('--rot', `${rot}deg`);
+        fxLayer.appendChild(el);
+        el.addEventListener('animationend', () => el.remove(), { once: true });
       }
 
-      function enemyCenter(enemy) {
-        const f = field.getBoundingClientRect();
-        const r = enemy.el.getBoundingClientRect();
-        return { x: r.left - f.left + r.width / 2, y: r.top - f.top + r.height / 2 };
+      function floatText(x, y, text) {
+        const el = document.createElement('div');
+        el.className = 'float-text';
+        el.textContent = text;
+        el.style.left = `${x}px`;
+        el.style.top = `${y}px`;
+        fxLayer.appendChild(el);
+        el.addEventListener('animationend', () => el.remove(), { once: true });
       }
 
-      function playerCenter() {
-        return { x: state.x + player.offsetWidth / 2, y: state.y + player.offsetHeight / 2 };
+      function flashField() {
+        fieldFlash.classList.remove('active');
+        void fieldFlash.offsetWidth;
+        fieldFlash.classList.add('active');
       }
 
-      function distanceTo(enemy) {
+      function skillEffect(skill, target) {
         const p = playerCenter();
-        const e = enemyCenter(enemy);
-        return Math.hypot(e.x - p.x, e.y - p.y);
-      }
-
-      function nearestEnemy(maxRange = Infinity) {
-        let best = null;
-        let bestDist = maxRange;
-        for (const enemy of aliveEnemies()) {
-          const d = distanceTo(enemy);
-          if (d <= bestDist) {
-            best = enemy;
-            bestDist = d;
-          }
+        const e = enemyCenter(target);
+        const angle = Math.atan2(e.y - p.y, e.x - p.x) * 180 / Math.PI;
+        if (skill.name === '斬撃') {
+          addFx('slash-fx', e.x, e.y, angle);
+          addFx('impact-fx', e.x, e.y);
+        } else if (skill.name === '連撃') {
+          addFx('slash-fx', e.x - 8, e.y - 5, angle - 22);
+          setTimeout(() => addFx('slash-fx', e.x + 8, e.y + 5, angle + 22), 90);
+          addFx('impact-fx', e.x, e.y);
+        } else {
+          addFx('burst-fx', e.x, e.y);
+          addFx('impact-fx', e.x, e.y);
+          flashField();
         }
-        return best;
+        floatText(e.x, e.y - 18, skill.name);
       }
 
       function chooseDirection(now) {
         const speed = 135 + Math.random() * 85;
         const target = nearestEnemy();
         if (target && Math.random() < 0.72) {
-          const p = playerCenter();
-          const e = enemyCenter(target);
+          const p = playerCenter(), e = enemyCenter(target);
           const angle = Math.atan2(e.y - p.y, e.x - p.x) + (Math.random() - 0.5) * 0.9;
           state.vx = Math.cos(angle) * speed;
           state.vy = Math.sin(angle) * speed;
@@ -259,6 +192,12 @@
         if (state.hp <= state.autoSupplyThreshold && state.supplies > 0 && state.hp < state.maxHp) {
           state.supplies -= 1;
           state.hp = Math.min(state.maxHp, state.hp + state.supplyHeal);
+          const p = playerCenter();
+          addFx('heal-fx', p.x, p.y);
+          floatText(p.x, p.y - 14, `HP +${state.supplyHeal}`);
+          player.classList.remove('heal');
+          void player.offsetWidth;
+          player.classList.add('heal');
           message.textContent = `補給品を自動使用：HP +${state.supplyHeal}`;
         }
       }
@@ -266,6 +205,15 @@
       function damagePlayer(amount) {
         if (state.dead) return;
         state.hp = Math.max(0, state.hp - amount);
+        const p = playerCenter();
+        addFx('impact-fx', p.x, p.y);
+        floatText(p.x, p.y - 10, `-${amount}`);
+        flashField();
+        player.style.setProperty('--px', `${state.x}px`);
+        player.style.setProperty('--py', `${state.y}px`);
+        player.classList.remove('hit');
+        void player.offsetWidth;
+        player.classList.add('hit');
         useSupplyIfNeeded();
         if (state.hp <= 0) {
           state.dead = true;
@@ -275,29 +223,32 @@
         }
       }
 
-      function damageEnemy(enemy, amount, skillName) {
+      function damageEnemy(enemy, amount, skill) {
         if (!enemy || enemy.hp <= 0) return;
+        skillEffect(skill, enemy);
         enemy.hp = Math.max(0, enemy.hp - amount);
         enemy.el.classList.add('hit');
         setTimeout(() => enemy.el.classList.remove('hit'), 120);
+        const e = enemyCenter(enemy);
+        floatText(e.x, e.y - 2, `-${amount}`);
         if (enemy.hp <= 0) {
           enemy.el.classList.add('dead');
-          message.textContent = `${skillName}で敵${enemy.id}を倒した`;
+          setTimeout(() => floatText(e.x, e.y - 24, '撃破'), 80);
+          message.textContent = `${skill.name}で敵${enemy.id}を倒した`;
         } else {
-          message.textContent = `${skillName}発動：敵${enemy.id}に${amount}ダメージ`;
+          message.textContent = `${skill.name}発動：敵${enemy.id}に${amount}ダメージ`;
         }
       }
 
       function trySkills(now) {
         if (state.dead) return;
         for (const skill of skills) {
-          if (now < skill.readyAt) continue;
-          if (state.ac < skill.cost) continue;
+          if (now < skill.readyAt || state.ac < skill.cost) continue;
           const target = nearestEnemy(skill.range);
           if (!target) continue;
           state.ac -= skill.cost;
           skill.readyAt = now + skill.cooldown * 1000;
-          damageEnemy(target, skill.damage, skill.name);
+          damageEnemy(target, skill.damage, skill);
           break;
         }
       }
@@ -343,35 +294,21 @@
         if (!state.dead) {
           state.ac = Math.min(state.maxAc, state.ac + state.acRegenPerSec * dt);
           if (now >= state.nextTurn) chooseDirection(now);
-
           state.x += state.vx * dt;
           state.y += state.vy * dt;
 
-          if (state.x <= 0) {
-            state.x = 0;
-            state.vx = Math.abs(state.vx);
-            state.vy += (Math.random() - 0.5) * 100;
-          } else if (state.x >= maxX) {
-            state.x = maxX;
-            state.vx = -Math.abs(state.vx);
-            state.vy += (Math.random() - 0.5) * 100;
-          }
-
-          if (state.y <= 0) {
-            state.y = 0;
-            state.vy = Math.abs(state.vy);
-            state.vx += (Math.random() - 0.5) * 100;
-          } else if (state.y >= maxY) {
-            state.y = maxY;
-            state.vy = -Math.abs(state.vy);
-            state.vx += (Math.random() - 0.5) * 100;
-          }
+          if (state.x <= 0) { state.x = 0; state.vx = Math.abs(state.vx); state.vy += (Math.random() - 0.5) * 100; }
+          else if (state.x >= maxX) { state.x = maxX; state.vx = -Math.abs(state.vx); state.vy += (Math.random() - 0.5) * 100; }
+          if (state.y <= 0) { state.y = 0; state.vy = Math.abs(state.vy); state.vx += (Math.random() - 0.5) * 100; }
+          else if (state.y >= maxY) { state.y = maxY; state.vy = -Math.abs(state.vy); state.vx += (Math.random() - 0.5) * 100; }
 
           trySkills(now);
           processEnemyContact(now);
         }
 
-        player.style.transform = `translate3d(${state.x}px, ${state.y}px, 0)`;
+        player.style.setProperty('--px', `${state.x}px`);
+        player.style.setProperty('--py', `${state.y}px`);
+        if (!player.classList.contains('hit')) player.style.transform = `translate3d(${state.x}px, ${state.y}px, 0)`;
         render(now);
         requestAnimationFrame(animate);
       }
