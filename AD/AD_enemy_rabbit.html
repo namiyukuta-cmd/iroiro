@@ -9,7 +9,7 @@
   <title>AD - 本の補修 RABBIT</title>
   <style>
     *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;user-select:none;-webkit-user-select:none}
-    :root{--ink:#25231f;--paper:#f7f3e9;--line:#8b8377;--enemy:#a7473f;--stone:#ded6c8}
+    :root{--ink:#25231f;--paper:#f7f3e9;--line:#8b8377;--repair:#6f8762;--stone:#ded6c8}
     html,body{margin:0;width:100%;min-height:100%;background:#e9e4da;color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
     body{min-height:100dvh;overflow-x:hidden}
     button,a{font:inherit}
@@ -22,7 +22,7 @@
     #enemyType{font-size:10px;font-weight:900;opacity:.55;margin-top:2px}
     #hpBox{min-width:104px;text-align:right;font-weight:1000;font-size:11px}
     #hpBar{height:12px;border:1.5px solid var(--ink);border-radius:999px;background:#d8d1c5;overflow:hidden;margin-top:4px}
-    #hpFill{height:100%;width:0%;background:var(--enemy);transition:width .28s ease}
+    #hpFill{height:100%;width:0%;background:var(--repair);transition:width .28s ease}
     #problem{margin:18px 0 8px;display:flex;justify-content:center;align-items:center;gap:5px;flex-wrap:nowrap}
     .char,.blank{width:43px;height:54px;border:1.5px solid var(--line);border-radius:8px;background:#fff;display:grid;place-items:center;font-family:Georgia,"Times New Roman",serif;font-size:29px;font-weight:800;line-height:1}
     .blank{border:2px dashed #554f47;background:#eee9df;cursor:pointer}
@@ -33,57 +33,9 @@
     #stonesPanel{border:1.5px solid var(--line);border-radius:12px;background:#f5f1e8;padding:8px}
     #stonesTitle{font-size:11px;font-weight:1000;margin:0 0 7px 2px}
     #stones{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:5px}
-    .stone{
-      position:relative;
-      isolation:isolate;
-      height:46px;
-      overflow:hidden;
-      border:1.5px solid #4f493f;
-      border-radius:46% 54% 49% 51% / 52% 45% 55% 48%;
-      background:
-        radial-gradient(circle at 30% 23%,rgba(255,255,255,.58) 0 7%,transparent 8%),
-        radial-gradient(circle at 69% 72%,rgba(70,58,43,.13) 0 5%,transparent 6%),
-        linear-gradient(145deg,#eee8db 0%,#d7cdbc 46%,#b9ad9a 100%);
-      box-shadow:
-        inset 2px 2px 2px rgba(255,255,255,.55),
-        inset -3px -3px 5px rgba(68,55,42,.22),
-        0 2px 0 rgba(0,0,0,.18),
-        0 4px 7px rgba(50,42,34,.13);
-      color:transparent;
-      font-family:Georgia,"Times New Roman",serif;
-      font-size:0;
-      touch-action:manipulation;
-    }
-    .stone::before{
-      content:"";
-      position:absolute;
-      inset:5px 6px;
-      z-index:-1;
-      border:1px solid rgba(83,69,51,.32);
-      border-radius:50%;
-      box-shadow:inset 0 0 0 1px rgba(255,255,255,.16),0 0 5px rgba(72,55,32,.08);
-      transform:rotate(-7deg);
-    }
-    .stone::after{
-      content:attr(data-letter);
-      position:absolute;
-      inset:0;
-      display:grid;
-      place-items:center;
-      color:#342d24;
-      font-family:Georgia,"Times New Roman",serif;
-      font-size:24px;
-      font-weight:900;
-      line-height:1;
-      letter-spacing:-.06em;
-      -webkit-text-stroke:.35px #1f1a15;
-      text-shadow:
-        -1px -1px 0 rgba(255,255,255,.55),
-        1px 1px 0 rgba(40,31,23,.48),
-        0 0 1px #1b1713,
-        0 0 7px rgba(103,72,31,.15);
-      transform:scaleX(.94) rotate(-1deg);
-    }
+    .stone{position:relative;isolation:isolate;height:46px;overflow:hidden;border:1.5px solid #4f493f;border-radius:46% 54% 49% 51% / 52% 45% 55% 48%;background:radial-gradient(circle at 30% 23%,rgba(255,255,255,.58) 0 7%,transparent 8%),radial-gradient(circle at 69% 72%,rgba(70,58,43,.13) 0 5%,transparent 6%),linear-gradient(145deg,#eee8db 0%,#d7cdbc 46%,#b9ad9a 100%);box-shadow:inset 2px 2px 2px rgba(255,255,255,.55),inset -3px -3px 5px rgba(68,55,42,.22),0 2px 0 rgba(0,0,0,.18),0 4px 7px rgba(50,42,34,.13);color:transparent;font-family:Georgia,"Times New Roman",serif;font-size:0;touch-action:manipulation}
+    .stone::before{content:"";position:absolute;inset:5px 6px;z-index:-1;border:1px solid rgba(83,69,51,.32);border-radius:50%;box-shadow:inset 0 0 0 1px rgba(255,255,255,.16),0 0 5px rgba(72,55,32,.08);transform:rotate(-7deg)}
+    .stone::after{content:attr(data-letter);position:absolute;inset:0;display:grid;place-items:center;color:#342d24;font-family:Georgia,"Times New Roman",serif;font-size:24px;font-weight:900;line-height:1;letter-spacing:-.06em;-webkit-text-stroke:.35px #1f1a15;text-shadow:-1px -1px 0 rgba(255,255,255,.55),1px 1px 0 rgba(40,31,23,.48),0 0 1px #1b1713,0 0 7px rgba(103,72,31,.15);transform:scaleX(.94) rotate(-1deg)}
     .stone:nth-child(3n)::after{transform:scaleX(.91) rotate(1.5deg)}
     .stone:nth-child(4n)::after{transform:scaleX(.97) rotate(-2deg)}
     .stone:nth-child(5n){border-radius:52% 48% 55% 45% / 46% 55% 45% 54%}
@@ -102,18 +54,22 @@
     @keyframes beam{0%{transform:translate(-50%,-50%) scale(.35);opacity:1}100%{transform:translate(var(--dx),var(--dy)) scale(1.7);opacity:0}}
     .burst{position:fixed;z-index:121;pointer-events:none;font-size:20px;font-weight:1000;animation:burst .55s ease-out forwards}
     @keyframes burst{0%{transform:translate(-50%,-50%) scale(.5);opacity:1}100%{transform:translate(calc(-50% + var(--x)),calc(-50% + var(--y))) scale(1.4);opacity:0}}
-    #win{display:none;border:2px solid var(--ink);border-radius:12px;background:#fff;padding:15px;text-align:center;font-size:23px;font-weight:1000}
-    #win.show{display:block;animation:win .45s ease}
+    #complete{display:none;border:2px solid var(--ink);border-radius:12px;background:#fff;padding:14px;text-align:center}
+    #complete.show{display:block;animation:win .45s ease}
+    #completeTitle{font-size:22px;font-weight:1000}
+    #completeText{margin-top:7px;font-size:12px;font-weight:850;line-height:1.6}
+    #timeBox{margin-top:9px;border:1.5px solid var(--line);border-radius:9px;background:#f4efe5;padding:8px;font-size:13px;font-weight:1000}
+    #completeActions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
+    .completeButton{min-height:46px;border:2px solid var(--ink);border-radius:9px;background:#fff;color:var(--ink);font-weight:1000;text-decoration:none;display:grid;place-items:center}
+    .completeButton.primary{background:#433c34;color:#fff}
     @keyframes win{from{transform:scale(.8);opacity:0}to{transform:scale(1);opacity:1}}
-    #retry{margin-top:8px;width:100%;height:44px;border:2px solid var(--ink);border-radius:9px;background:#fff;font-weight:1000;display:none}
-    #retry.show{display:block}
     @media(max-width:370px){.char,.blank{width:38px;height:50px;font-size:26px}#stones{grid-template-columns:repeat(7,minmax(0,1fr));gap:4px}.stone{height:42px}.stone::after{font-size:22px}}
   </style>
 </head>
 <body>
 <div id="flash"></div>
 <div id="game">
-  <div id="top"><b>AD　本の補修</b><a class="back" href="AD_top.html">トップへ</a></div>
+  <div id="top"><b>AD　本の補修</b><a class="back" href="AD_dump.html">ゴミ捨て場へ</a></div>
 
   <section id="enemyCard">
     <div id="enemyHead">
@@ -135,8 +91,15 @@
     <div id="stones"></div>
   </section>
 
-  <div id="win">RABBIT の補修完了</div>
-  <button id="retry" type="button">もう一度</button>
+  <section id="complete">
+    <div id="completeTitle">補修完了</div>
+    <div id="completeText">文字をすべて本に戻した。<br>本を回収した。</div>
+    <div id="timeBox">残り時間：<span id="remainingTime">100</span></div>
+    <div id="completeActions">
+      <a class="completeButton" href="AD_dump.html">次の本を探す</a>
+      <a class="completeButton primary" href="AD_repair.html">家に帰る</a>
+    </div>
+  </section>
 </div>
 <script>
 (() => {
@@ -147,11 +110,16 @@
   const hpText = document.getElementById('hpText');
   const message = document.getElementById('message');
   const flash = document.getElementById('flash');
-  const win = document.getElementById('win');
-  const retry = document.getElementById('retry');
+  const complete = document.getElementById('complete');
+  const remainingTime = document.getElementById('remainingTime');
+  const selectedBook = JSON.parse(localStorage.getItem('adSelectedDumpBook') || 'null');
   let selectedBlank = document.querySelector('.blank.selected');
   let hp = 0;
   let finished = false;
+
+  const savedTime = Number(localStorage.getItem('adRemainingTime'));
+  const time = Number.isFinite(savedTime) && savedTime >= 0 ? savedTime : 100;
+  remainingTime.textContent = time;
 
   function selectBlank(blank){
     if (finished || blank.classList.contains('filled')) return;
@@ -190,6 +158,13 @@
     if(next) selectBlank(next);
   }
 
+  function saveRecoveredBook(){
+    const book = selectedBook || {id:'book_rabbit',name:'RABBITの本',difficulty:'★',condition:'文字補修済み'};
+    book.word = 'RABBIT';
+    book.textRepairComplete = true;
+    localStorage.setItem('adPendingRepairBook', JSON.stringify(book));
+  }
+
   function repair(letter, button){
     if (finished || !selectedBlank) return;
     if (selectedBlank.dataset.answer !== letter){
@@ -208,7 +183,12 @@
     message.textContent = `${letter} 正解　文字が戻った！`;
     if(hp === 2){
       finished = true;
-      setTimeout(()=>{message.textContent='RABBIT 補修完了';win.classList.add('show');retry.classList.add('show');},520);
+      saveRecoveredBook();
+      setTimeout(()=>{
+        message.textContent='文字の補修が終わった';
+        document.getElementById('stonesPanel').style.display='none';
+        complete.classList.add('show');
+      },520);
     } else {
       selectedBlank = null;
       setTimeout(nextBlank,420);
@@ -226,7 +206,6 @@
     b.addEventListener('click',()=>repair(letter,b));
     stones.appendChild(b);
   });
-  retry.addEventListener('click',()=>location.reload());
 })();
 </script>
 </body>
