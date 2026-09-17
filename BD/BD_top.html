@@ -20,7 +20,6 @@
     .status-head{display:flex;justify-content:space-between;gap:8px;margin-bottom:5px}
     .bar{width:100%;height:12px;border:2px solid #202020;border-radius:999px;background:#ece9e1;overflow:hidden}
     .fill{height:100%;width:100%;background:#202020;transition:width .12s linear}
-    #supplies{grid-column:1/-1;min-height:38px;display:flex;align-items:center;justify-content:space-between}
     #battle-field{width:100%;aspect-ratio:3/4;border:2px solid #202020;background:#fff;position:relative;overflow:hidden;contain:layout paint style}
     #player,.enemy{position:absolute;left:0;top:0;will-change:transform;transform:translate3d(0,0,0)}
     #player{width:30px;height:30px;border-radius:50%;background:#202020;z-index:3}
@@ -39,10 +38,19 @@
     .float-text{position:absolute;font-size:14px;font-weight:900;white-space:nowrap;color:#202020;text-shadow:0 1px 0 #fff;animation:floatText .72s ease-out forwards}
     #field-flash{position:absolute;inset:0;background:rgba(32,32,32,.09);opacity:0;pointer-events:none;z-index:4}
     #field-flash.active{animation:fieldFlash .18s ease-out}
-    #skills{display:grid;gap:7px}
-    .skill{display:grid;grid-template-columns:1fr auto;gap:8px;align-items:center;min-height:44px;border:1px solid #aaa;border-radius:9px;background:#fff;padding:7px 10px;font-size:13px}
-    .skill-name{font-weight:900}.skill-meta{color:#666;font-size:11px;margin-top:2px}.skill-state{min-width:72px;text-align:right;font-weight:800}
-    #message{min-height:22px;font-size:12px;font-weight:700;color:#555}
+
+    #loadout-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+    .slot{aspect-ratio:1/1;min-width:0;border:2px solid #202020;background:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:6px;position:relative;overflow:hidden}
+    .slot.empty{border-color:#aaa;background:#eeeae2}
+    .slot-name{font-size:13px;font-weight:900;line-height:1.15}
+    .slot-meta{margin-top:4px;font-size:9px;line-height:1.25;color:#666}
+    .slot-state{margin-top:5px;min-height:13px;font-size:9px;font-weight:800;line-height:1.15}
+    .slot-count{position:absolute;right:5px;bottom:3px;font-size:15px;font-weight:900}
+    .slot.waiting{opacity:.52}
+    .slot.no-ac{opacity:.7}
+    .slot.ready{box-shadow:inset 0 0 0 2px rgba(32,32,32,.16)}
+    #message{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+
     @keyframes slashFx{0%{opacity:0;transform:translate(-50%,-50%) scale(.35) rotate(var(--rot))}25%{opacity:1}100%{opacity:0;transform:translate(-50%,-50%) scale(1.45) rotate(var(--rot))}}
     @keyframes impactFx{0%{opacity:1;transform:translate(-50%,-50%) scale(.25)}100%{opacity:0;transform:translate(-50%,-50%) scale(1.8)}}
     @keyframes burstFx{0%{opacity:1;transform:translate(-50%,-50%) rotate(45deg) scale(.25)}100%{opacity:0;transform:translate(-50%,-50%) rotate(225deg) scale(2.2)}}
@@ -58,7 +66,6 @@
     <section id="status" aria-label="主人公の状態">
       <div class="status-card"><div class="status-head"><span>HP</span><span id="hpText">100 / 100</span></div><div class="bar"><div id="hpFill" class="fill"></div></div></div>
       <div class="status-card"><div class="status-head"><span>AC</span><span id="acText">100 / 100</span></div><div class="bar"><div id="acFill" class="fill"></div></div></div>
-      <div id="supplies" class="status-card"><span>補給品</span><span id="supplyText">5</span></div>
     </section>
 
     <section id="battle-field" aria-label="オートバトル画面">
@@ -67,7 +74,18 @@
       <div id="field-flash"></div><div id="fx-layer"></div><div id="player" aria-label="主人公"></div>
     </section>
 
-    <section id="skills" aria-label="自動発動スキル"></section>
+    <section id="loadout-grid" aria-label="補給品とスキルのマス目欄">
+      <div class="slot" id="supplySlot">
+        <div class="slot-name">補給品</div>
+        <div class="slot-meta">HP +40<br>HP45以下で自動</div>
+        <div class="slot-count" id="supplyText">×5</div>
+      </div>
+      <div class="slot skill-slot" data-skill="0"><div class="slot-name">強打</div><div class="slot-meta">威力3 / AC55<br>待機5.0秒</div><div class="slot-state"></div></div>
+      <div class="slot skill-slot" data-skill="1"><div class="slot-name">連撃</div><div class="slot-meta">威力2 / AC35<br>待機3.0秒</div><div class="slot-state"></div></div>
+      <div class="slot skill-slot" data-skill="2"><div class="slot-name">斬撃</div><div class="slot-meta">威力1 / AC15<br>待機1.2秒</div><div class="slot-state"></div></div>
+      <div class="slot empty"></div><div class="slot empty"></div><div class="slot empty"></div><div class="slot empty"></div>
+      <div class="slot empty"></div><div class="slot empty"></div><div class="slot empty"></div><div class="slot empty"></div>
+    </section>
     <div id="message" aria-live="polite"></div>
   </main>
 </div>
@@ -81,7 +99,9 @@
   const fieldFlash=document.getElementById('field-flash');
   const hpText=document.getElementById('hpText'),hpFill=document.getElementById('hpFill');
   const acText=document.getElementById('acText'),acFill=document.getElementById('acFill');
-  const supplyText=document.getElementById('supplyText'),skillsBox=document.getElementById('skills'),message=document.getElementById('message');
+  const supplyText=document.getElementById('supplyText'),supplySlot=document.getElementById('supplySlot'),message=document.getElementById('message');
+  const skillSlots=[...document.querySelectorAll('.skill-slot')];
+  const skillStates=skillSlots.map(el=>el.querySelector('.slot-state'));
 
   const PLAYER_SIZE=30,ENEMY_SIZE=28,MAX_FX=26;
   let fieldW=320,fieldH=426;
@@ -95,15 +115,6 @@
     {name:'連撃',cost:35,cooldown:3000,damage:2,range:115,readyAt:0},
     {name:'斬撃',cost:15,cooldown:1200,damage:1,range:85,readyAt:0}
   ];
-
-  const skillRows=skills.map(skill=>{
-    const row=document.createElement('div');row.className='skill';
-    const left=document.createElement('div');
-    const name=document.createElement('div');name.className='skill-name';name.textContent=skill.name;
-    const meta=document.createElement('div');meta.className='skill-meta';meta.textContent=`威力 ${skill.damage} / AC ${skill.cost} / 待機 ${(skill.cooldown/1000).toFixed(1)}秒`;
-    const status=document.createElement('div');status.className='skill-state';
-    left.append(name,meta);row.append(left,status);skillsBox.appendChild(row);return status;
-  });
 
   function refreshBounds(){
     fieldW=field.clientWidth;fieldH=field.clientHeight;
@@ -167,8 +178,15 @@
 
   function updateHud(now){
     hpText.textContent=`${Math.ceil(state.hp)} / ${state.maxHp}`;hpFill.style.width=`${Math.max(0,state.hp/state.maxHp*100)}%`;
-    acText.textContent=`${Math.floor(state.ac)} / ${state.maxAc}`;acFill.style.width=`${Math.max(0,state.ac/state.maxAc*100)}%`;supplyText.textContent=state.supplies;
-    skills.forEach((s,i)=>{const wait=Math.max(0,(s.readyAt-now)/1000);skillRows[i].textContent=wait>0?`待機 ${wait.toFixed(1)}秒`:state.ac>=s.cost?'発動可能':'AC不足';});
+    acText.textContent=`${Math.floor(state.ac)} / ${state.maxAc}`;acFill.style.width=`${Math.max(0,state.ac/state.maxAc*100)}%`;
+    supplyText.textContent=`×${state.supplies}`;supplySlot.classList.toggle('waiting',state.supplies<=0);
+    skills.forEach((s,i)=>{
+      const wait=Math.max(0,(s.readyAt-now)/1000),slot=skillSlots[i];
+      slot.classList.remove('waiting','no-ac','ready');
+      if(wait>0){skillStates[i].textContent=`待機 ${wait.toFixed(1)}秒`;slot.classList.add('waiting');}
+      else if(state.ac<s.cost){skillStates[i].textContent='AC不足';slot.classList.add('no-ac');}
+      else{skillStates[i].textContent='発動可能';slot.classList.add('ready');}
+    });
   }
 
   function init(){
