@@ -6,7 +6,7 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
   <meta http-equiv="Pragma" content="no-cache" />
   <meta http-equiv="Expires" content="0" />
-  <title>AD - 敵札 RABBIT</title>
+  <title>AD - 本の補修 RABBIT</title>
   <style>
     *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;user-select:none;-webkit-user-select:none}
     :root{--ink:#25231f;--paper:#f7f3e9;--line:#8b8377;--enemy:#a7473f;--stone:#ded6c8}
@@ -22,7 +22,7 @@
     #enemyType{font-size:10px;font-weight:900;opacity:.55;margin-top:2px}
     #hpBox{min-width:104px;text-align:right;font-weight:1000;font-size:11px}
     #hpBar{height:12px;border:1.5px solid var(--ink);border-radius:999px;background:#d8d1c5;overflow:hidden;margin-top:4px}
-    #hpFill{height:100%;width:100%;background:var(--enemy);transition:width .28s ease}
+    #hpFill{height:100%;width:0%;background:var(--enemy);transition:width .28s ease}
     #problem{margin:18px 0 8px;display:flex;justify-content:center;align-items:center;gap:5px;flex-wrap:nowrap}
     .char,.blank{width:43px;height:54px;border:1.5px solid var(--line);border-radius:8px;background:#fff;display:grid;place-items:center;font-family:Georgia,"Times New Roman",serif;font-size:29px;font-weight:800;line-height:1}
     .blank{border:2px dashed #554f47;background:#eee9df;cursor:pointer}
@@ -113,12 +113,12 @@
 <body>
 <div id="flash"></div>
 <div id="game">
-  <div id="top"><b>AD　敵札テスト</b><a class="back" href="AD_top.html">トップへ</a></div>
+  <div id="top"><b>AD　本の補修</b><a class="back" href="AD_top.html">トップへ</a></div>
 
   <section id="enemyCard">
     <div id="enemyHead">
-      <div><div id="enemyName">RABBIT</div><div id="enemyType">英単語・敵札</div></div>
-      <div id="hpBox">HP <span id="hpText">2 / 2</span><div id="hpBar"><div id="hpFill"></div></div></div>
+      <div><div id="enemyName">RABBIT</div><div id="enemyType">英単語・破損した本</div></div>
+      <div id="hpBox">補修 <span id="hpText">0 / 2</span><div id="hpBar"><div id="hpFill"></div></div></div>
     </div>
 
     <div id="problem" aria-label="RABBIT の穴埋め">
@@ -127,7 +127,7 @@
       <button class="blank" type="button" data-index="1" data-answer="T">○</button>
     </div>
     <div id="instruction">空欄を選び、対応する文字の石を当て嵌める</div>
-    <div id="message">RABBITを完成させる</div>
+    <div id="message">欠けた文字を本に戻す</div>
   </section>
 
   <section id="stonesPanel">
@@ -135,7 +135,7 @@
     <div id="stones"></div>
   </section>
 
-  <div id="win">RABBIT を倒した</div>
+  <div id="win">RABBIT の補修完了</div>
   <button id="retry" type="button">もう一度</button>
 </div>
 <script>
@@ -150,7 +150,7 @@
   const win = document.getElementById('win');
   const retry = document.getElementById('retry');
   let selectedBlank = document.querySelector('.blank.selected');
-  let hp = 2;
+  let hp = 0;
   let finished = false;
 
   function selectBlank(blank){
@@ -190,7 +190,7 @@
     if(next) selectBlank(next);
   }
 
-  function hit(letter, button){
+  function repair(letter, button){
     if (finished || !selectedBlank) return;
     if (selectedBlank.dataset.answer !== letter){
       message.textContent = `${letter}ではない`;
@@ -202,13 +202,13 @@
     selectedBlank.classList.remove('selected');
     button.classList.add('used');
     effectFrom(button);
-    hp = Math.max(0, hp - 1);
+    hp = Math.min(2, hp + 1);
     hpText.textContent = `${hp} / 2`;
     hpFill.style.width = `${hp * 50}%`;
-    message.textContent = `${letter} 正解　攻撃！`;
-    if(hp === 0){
+    message.textContent = `${letter} 正解　文字が戻った！`;
+    if(hp === 2){
       finished = true;
-      setTimeout(()=>{message.textContent='RABBIT 完成';win.classList.add('show');retry.classList.add('show');},520);
+      setTimeout(()=>{message.textContent='RABBIT 補修完了';win.classList.add('show');retry.classList.add('show');},520);
     } else {
       selectedBlank = null;
       setTimeout(nextBlank,420);
@@ -223,7 +223,7 @@
     b.textContent=letter;
     b.dataset.letter=letter;
     b.setAttribute('aria-label',`${letter}の石`);
-    b.addEventListener('click',()=>hit(letter,b));
+    b.addEventListener('click',()=>repair(letter,b));
     stones.appendChild(b);
   });
   retry.addEventListener('click',()=>location.reload());
