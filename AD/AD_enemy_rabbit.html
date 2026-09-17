@@ -1,0 +1,172 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no" />
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+  <meta http-equiv="Pragma" content="no-cache" />
+  <meta http-equiv="Expires" content="0" />
+  <title>AD - 敵札 RABBIT</title>
+  <style>
+    *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;user-select:none;-webkit-user-select:none}
+    :root{--ink:#25231f;--paper:#f7f3e9;--line:#8b8377;--enemy:#a7473f;--stone:#ded6c8}
+    html,body{margin:0;width:100%;min-height:100%;background:#e9e4da;color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+    body{min-height:100dvh;overflow-x:hidden}
+    button,a{font:inherit}
+    #game{width:min(100%,520px);min-height:100dvh;margin:0 auto;padding:max(10px,env(safe-area-inset-top)) 10px calc(12px + env(safe-area-inset-bottom));display:flex;flex-direction:column;gap:9px}
+    #top{display:flex;justify-content:space-between;align-items:center;min-height:42px}
+    #top b{font-size:19px}.back{font-size:12px;font-weight:900;color:inherit;text-decoration:none}
+    #enemyCard{position:relative;border:2px solid var(--ink);border-radius:14px;background:var(--paper);padding:12px;box-shadow:0 4px 0 rgba(0,0,0,.14);overflow:hidden}
+    #enemyHead{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}
+    #enemyName{font-size:25px;font-weight:1000;letter-spacing:.04em}
+    #enemyType{font-size:10px;font-weight:900;opacity:.55;margin-top:2px}
+    #hpBox{min-width:104px;text-align:right;font-weight:1000;font-size:11px}
+    #hpBar{height:12px;border:1.5px solid var(--ink);border-radius:999px;background:#d8d1c5;overflow:hidden;margin-top:4px}
+    #hpFill{height:100%;width:100%;background:var(--enemy);transition:width .28s ease}
+    #problem{margin:18px 0 8px;display:flex;justify-content:center;align-items:center;gap:5px;flex-wrap:nowrap}
+    .char,.blank{width:43px;height:54px;border:1.5px solid var(--line);border-radius:8px;background:#fff;display:grid;place-items:center;font-family:Georgia,"Times New Roman",serif;font-size:29px;font-weight:800;line-height:1}
+    .blank{border:2px dashed #554f47;background:#eee9df;cursor:pointer}
+    .blank.selected{outline:4px solid rgba(80,110,180,.28);background:#fff}
+    .blank.filled{border-style:solid;background:#fff}
+    #instruction{text-align:center;font-size:11px;font-weight:900;min-height:17px}
+    #message{text-align:center;font-size:12px;font-weight:1000;min-height:19px;margin-top:4px}
+    #stonesPanel{border:1.5px solid var(--line);border-radius:12px;background:#f5f1e8;padding:8px}
+    #stonesTitle{font-size:11px;font-weight:1000;margin:0 0 7px 2px}
+    #stones{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:5px}
+    .stone{height:43px;border:1.5px solid #5f584f;border-radius:9px;background:linear-gradient(#eee8dc,#cec5b6);box-shadow:inset 0 1px 0 #fff,0 2px 0 rgba(0,0,0,.15);font-family:Georgia,"Times New Roman",serif;font-size:20px;font-weight:1000;color:#282521;touch-action:manipulation}
+    .stone:active{transform:translateY(2px);box-shadow:inset 0 1px 0 #fff}
+    .stone.used{opacity:.32}
+    #enemyCard.hit{animation:hit .42s ease}
+    @keyframes hit{0%,100%{transform:none}20%{transform:translateX(-8px) rotate(-1deg)}45%{transform:translateX(8px) rotate(1deg)}70%{transform:translateX(-4px)}}
+    #enemyCard.wrong{animation:wrong .25s ease}
+    @keyframes wrong{0%,100%{transform:none}33%{transform:translateX(-4px)}66%{transform:translateX(4px)}}
+    #flash{position:fixed;inset:0;pointer-events:none;background:#fff;opacity:0;z-index:100}
+    #flash.go{animation:flash .36s ease}
+    @keyframes flash{0%{opacity:0}18%{opacity:.85}100%{opacity:0}}
+    .beam{position:fixed;z-index:120;pointer-events:none;font-size:31px;font-weight:1000;filter:drop-shadow(0 0 6px #fff);animation:beam .38s ease-out forwards}
+    @keyframes beam{0%{transform:translate(-50%,-50%) scale(.35);opacity:1}100%{transform:translate(var(--dx),var(--dy)) scale(1.7);opacity:0}}
+    .burst{position:fixed;z-index:121;pointer-events:none;font-size:20px;font-weight:1000;animation:burst .55s ease-out forwards}
+    @keyframes burst{0%{transform:translate(-50%,-50%) scale(.5);opacity:1}100%{transform:translate(calc(-50% + var(--x)),calc(-50% + var(--y))) scale(1.4);opacity:0}}
+    #win{display:none;border:2px solid var(--ink);border-radius:12px;background:#fff;padding:15px;text-align:center;font-size:23px;font-weight:1000}
+    #win.show{display:block;animation:win .45s ease}
+    @keyframes win{from{transform:scale(.8);opacity:0}to{transform:scale(1);opacity:1}}
+    #retry{margin-top:8px;width:100%;height:44px;border:2px solid var(--ink);border-radius:9px;background:#fff;font-weight:1000;display:none}
+    #retry.show{display:block}
+    @media(max-width:370px){.char,.blank{width:38px;height:50px;font-size:26px}#stones{grid-template-columns:repeat(7,minmax(0,1fr));gap:4px}.stone{height:40px;font-size:18px}}
+  </style>
+</head>
+<body>
+<div id="flash"></div>
+<div id="game">
+  <div id="top"><b>AD　敵札テスト</b><a class="back" href="AD_top.html">トップへ</a></div>
+
+  <section id="enemyCard">
+    <div id="enemyHead">
+      <div><div id="enemyName">RABBIT</div><div id="enemyType">英単語・敵札</div></div>
+      <div id="hpBox">HP <span id="hpText">2 / 2</span><div id="hpBar"><div id="hpFill"></div></div></div>
+    </div>
+
+    <div id="problem" aria-label="RABBIT の穴埋め">
+      <button class="blank selected" type="button" data-index="0" data-answer="R">○</button>
+      <div class="char">A</div><div class="char">B</div><div class="char">B</div><div class="char">I</div>
+      <button class="blank" type="button" data-index="1" data-answer="T">○</button>
+    </div>
+    <div id="instruction">空欄を選び、対応する文字の石を当て嵌める</div>
+    <div id="message">RABBITを完成させる</div>
+  </section>
+
+  <section id="stonesPanel">
+    <div id="stonesTitle">文字の石　A〜Z</div>
+    <div id="stones"></div>
+  </section>
+
+  <div id="win">RABBIT を倒した</div>
+  <button id="retry" type="button">もう一度</button>
+</div>
+<script>
+(() => {
+  const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
+  const stones = document.getElementById('stones');
+  const enemyCard = document.getElementById('enemyCard');
+  const hpFill = document.getElementById('hpFill');
+  const hpText = document.getElementById('hpText');
+  const message = document.getElementById('message');
+  const flash = document.getElementById('flash');
+  const win = document.getElementById('win');
+  const retry = document.getElementById('retry');
+  let selectedBlank = document.querySelector('.blank.selected');
+  let hp = 2;
+  let finished = false;
+
+  function selectBlank(blank){
+    if (finished || blank.classList.contains('filled')) return;
+    document.querySelectorAll('.blank').forEach(b => b.classList.remove('selected'));
+    blank.classList.add('selected');
+    selectedBlank = blank;
+  }
+
+  function effectFrom(source){
+    const s = source.getBoundingClientRect();
+    const t = enemyCard.getBoundingClientRect();
+    const sx = s.left + s.width / 2, sy = s.top + s.height / 2;
+    const tx = t.left + t.width / 2, ty = t.top + t.height / 2;
+    const beam = document.createElement('div');
+    beam.className = 'beam'; beam.textContent = '✦';
+    beam.style.left = sx + 'px'; beam.style.top = sy + 'px';
+    beam.style.setProperty('--dx', (tx - sx) + 'px');
+    beam.style.setProperty('--dy', (ty - sy) + 'px');
+    document.body.appendChild(beam);
+    setTimeout(() => beam.remove(), 420);
+    setTimeout(() => {
+      flash.classList.remove('go'); void flash.offsetWidth; flash.classList.add('go');
+      enemyCard.classList.remove('hit'); void enemyCard.offsetWidth; enemyCard.classList.add('hit');
+      for(let i=0;i<12;i++){
+        const p=document.createElement('div'); p.className='burst'; p.textContent=i%2?'✦':'✧';
+        p.style.left=tx+'px'; p.style.top=ty+'px';
+        const a=Math.PI*2*i/12, d=35+Math.random()*55;
+        p.style.setProperty('--x',(Math.cos(a)*d)+'px'); p.style.setProperty('--y',(Math.sin(a)*d)+'px');
+        document.body.appendChild(p); setTimeout(()=>p.remove(),600);
+      }
+    },250);
+  }
+
+  function nextBlank(){
+    const next=[...document.querySelectorAll('.blank')].find(b=>!b.classList.contains('filled'));
+    if(next) selectBlank(next);
+  }
+
+  function hit(letter, button){
+    if (finished || !selectedBlank) return;
+    if (selectedBlank.dataset.answer !== letter){
+      message.textContent = `${letter}ではない`;
+      enemyCard.classList.remove('wrong'); void enemyCard.offsetWidth; enemyCard.classList.add('wrong');
+      return;
+    }
+    selectedBlank.textContent = letter;
+    selectedBlank.classList.add('filled');
+    selectedBlank.classList.remove('selected');
+    button.classList.add('used');
+    effectFrom(button);
+    hp = Math.max(0, hp - 1);
+    hpText.textContent = `${hp} / 2`;
+    hpFill.style.width = `${hp * 50}%`;
+    message.textContent = `${letter} 正解　攻撃！`;
+    if(hp === 0){
+      finished = true;
+      setTimeout(()=>{message.textContent='RABBIT 完成';win.classList.add('show');retry.classList.add('show');},520);
+    } else {
+      selectedBlank = null;
+      setTimeout(nextBlank,420);
+    }
+  }
+
+  document.querySelectorAll('.blank').forEach(blank=>blank.addEventListener('click',()=>selectBlank(blank)));
+  alphabet.forEach(letter=>{
+    const b=document.createElement('button'); b.type='button'; b.className='stone'; b.textContent=letter;
+    b.addEventListener('click',()=>hit(letter,b)); stones.appendChild(b);
+  });
+  retry.addEventListener('click',()=>location.reload());
+})();
+</script>
+</body>
+</html>
