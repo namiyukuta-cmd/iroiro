@@ -43,7 +43,9 @@
     .enemy.hit{filter:brightness(1.8)}
     .enemy.dead{opacity:0;pointer-events:none}
 
-    #battle-message{position:absolute;left:6px;top:6px;z-index:6;max-width:75%;padding:3px 6px;border-radius:5px;background:rgba(255,255,255,.82);font-size:10px;font-weight:800;pointer-events:none}
+    #battle-message{position:absolute;left:6px;top:6px;z-index:6;max-width:62%;padding:3px 6px;border-radius:5px;background:rgba(255,255,255,.82);font-size:10px;font-weight:800;pointer-events:none}
+    #round-info{position:absolute;right:6px;top:6px;z-index:6;display:flex;gap:4px;pointer-events:none}
+    .round-box{min-width:58px;padding:3px 5px;border:1px solid #202020;border-radius:5px;background:rgba(255,255,255,.9);font-size:10px;font-weight:900;text-align:center;white-space:nowrap}
     #fx-layer{position:absolute;inset:0;pointer-events:none;z-index:5;overflow:hidden}
     #field-flash{position:absolute;inset:0;background:rgba(32,32,32,.09);opacity:0;pointer-events:none;z-index:4}
     #field-flash.active{animation:fieldFlash .18s ease-out}
@@ -116,6 +118,7 @@
       <div class="enemy" aria-label="敵4"></div><div class="enemy" aria-label="敵5"></div><div class="enemy" aria-label="敵6"></div>
       <div id="field-flash"></div><div id="fx-layer"></div><div id="player" aria-label="主人公"></div>
       <div id="battle-message">戦闘中</div>
+      <div id="round-info"><div class="round-box">残り <span id="timeText">60.0</span></div><div class="round-box">撃破 <span id="killText">0</span></div></div>
     </div>
   </section>
 
@@ -137,6 +140,7 @@
   const fxLayer=document.getElementById('fx-layer');
   const fieldFlash=document.getElementById('field-flash');
   const message=document.getElementById('battle-message');
+  const timeText=document.getElementById('timeText'),killText=document.getElementById('killText');
   const hpText=document.getElementById('hpText'),hpFill=document.getElementById('hpFill');
   const acText=document.getElementById('acText'),acFill=document.getElementById('acFill');
   const supplyCount=document.getElementById('supplyCount');
@@ -146,9 +150,9 @@
   const PLAYER_SIZE=28,ENEMY_SIZE=26,MAX_FX=24;
   let fieldW=320,fieldH=420,lastHud=0;
 
-  const state={maxHp:100,hp:100,maxAc:100,ac:100,acRegenPerSec:16,supplies:5,supplyHeal:40,autoSupplyThreshold:45,x:40,y:80,vx:155,vy:118,nextTurn:0,lastTime:performance.now(),dead:false,nextPlayerHit:0};
+  const state={maxHp:100,hp:100,maxAc:100,ac:100,acRegenPerSec:16,supplies:5,supplyHeal:40,autoSupplyThreshold:45,x:40,y:80,vx:155,vy:118,nextTurn:0,lastTime:performance.now(),dead:false,nextPlayerHit:0,roundDuration:60000,roundStart:0,roundEnd:0,kills:0,finished:false};
   const initial=[[.18,.18],[.76,.16],[.48,.38],[.20,.62],[.78,.68],[.50,.86]];
-  const enemies=enemyEls.map((el,i)=>({el,id:i+1,hp:4,maxHp:4,x:0,y:0,vx:0,vy:0,nextTurn:0,nextContactHit:0,dead:false}));
+  const enemies=enemyEls.map((el,i)=>({el,id:i+1,hp:4,maxHp:4,x:0,y:0,vx:0,vy:0,nextTurn:0,nextContactHit:0,dead:false,respawnAt:0}));
   const skills=[
     {name:'強打',cost:55,cooldown:5000,damage:3,range:150,readyAt:0},
     {name:'連撃',cost:35,cooldown:3000,damage:2,range:115,readyAt:0},
@@ -209,7 +213,7 @@
   function damageEnemy(e,amount,skill){
     if(e.dead)return;
     e.hp=Math.max(0,e.hp-amount);e.el.classList.add('hit');setTimeout(()=>e.el.classList.remove('hit'),90);skillFx(skill,e);
-    if(e.hp<=0){e.dead=true;e.el.classList.add('dead');const q=centerEnemy(e);floatText(q.x,q.y-18,'撃破');message.textContent=`${skill.name}で敵${e.id}撃破`;}
+    if(e.hp<=0){e.dead=true;e.respawnAt=performance.now()+650;e.el.classList.add('dead');state.kills++;const q=centerEnemy(e);floatText(q.x,q.y-18,'撃破');message.textContent=`${skill.name}で敵${e.id}撃破`;}
     else message.textContent=`${skill.name}：敵${e.id} -${amount}`;
   }
 
@@ -240,11 +244,29 @@
     hpText.textContent=`${Math.ceil(state.hp)} / ${state.maxHp}`;hpFill.style.width=`${Math.max(0,state.hp/state.maxHp*100)}%`;
     acText.textContent=`${Math.floor(state.ac)} / ${state.maxAc}`;acFill.style.width=`${Math.max(0,state.ac/state.maxAc*100)}%`;
     supplyCount.textContent=state.supplies;
+    const remain=Math.max(0,state.roundEnd-now);timeText.textContent=(remain/1000).toFixed(1);killText.textContent=state.kills;
     skills.forEach((s,i)=>{const wait=Math.max(0,(s.readyAt-now)/1000);skillSlots[i].classList.toggle('cooling',wait>0);skillSubs[i].textContent=wait>0?`${wait.toFixed(1)}秒`:state.ac>=s.cost?`AC${s.cost}`:'AC不足';});
+  }
+
+  function respawnEnemy(e,now){
+    e.hp=e.maxHp;e.dead=false;e.respawnAt=0;e.el.classList.remove('dead','hit');
+    e.x=Math.random()*Math.max(0,fieldW-ENEMY_SIZE);e.y=Math.random()*Math.max(0,fieldH-ENEMY_SIZE);
+    const p=centerPlayer(),q=centerEnemy(e);
+    if(Math.hypot(q.x-p.x,q.y-p.y)<90){e.x=Math.max(0,Math.min(fieldW-ENEMY_SIZE,fieldW-e.x-ENEMY_SIZE));e.y=Math.max(0,Math.min(fieldH-ENEMY_SIZE,fieldH-e.y-ENEMY_SIZE));}
+    setEnemyDirection(e,now);
+  }
+
+  function finishRound(){
+    if(state.finished)return;
+    state.finished=true;state.vx=0;state.vy=0;
+    for(const e of enemies){e.vx=0;e.vy=0;}
+    message.textContent=`終了：60秒で ${state.kills}体撃破`;
+    timeText.textContent='0.0';killText.textContent=state.kills;
   }
 
   function init(){
     refreshBounds();const now=performance.now();
+    state.roundStart=now;state.roundEnd=now+state.roundDuration;
     enemies.forEach((e,i)=>{e.x=Math.max(0,Math.min(fieldW-ENEMY_SIZE,fieldW*initial[i][0]-ENEMY_SIZE/2));e.y=Math.max(0,Math.min(fieldH-ENEMY_SIZE,fieldH*initial[i][1]-ENEMY_SIZE/2));setEnemyDirection(e,now);});
     setPlayerDirection(now);renderPositions();updateHud(now);
   }
@@ -253,9 +275,13 @@
 
   function frame(now){
     const dt=Math.min((now-state.lastTime)/1000,.035);state.lastTime=now;
-    if(!state.dead){state.ac=Math.min(state.maxAc,state.ac+state.acRegenPerSec*dt);if(now>=state.nextTurn)setPlayerDirection(now);moveEntity(state,PLAYER_SIZE,dt);}
-    for(const e of enemies){if(e.dead)continue;if(now>=e.nextTurn)setEnemyDirection(e,now);moveEntity(e,ENEMY_SIZE,dt);}
-    contactCheck(now);trySkills(now);renderPositions();
+    if(!state.finished&&now>=state.roundEnd)finishRound();
+    if(!state.finished){
+      if(!state.dead){state.ac=Math.min(state.maxAc,state.ac+state.acRegenPerSec*dt);if(now>=state.nextTurn)setPlayerDirection(now);moveEntity(state,PLAYER_SIZE,dt);}
+      for(const e of enemies){if(e.dead){if(now>=e.respawnAt)respawnEnemy(e,now);continue;}if(now>=e.nextTurn)setEnemyDirection(e,now);moveEntity(e,ENEMY_SIZE,dt);}
+      contactCheck(now);trySkills(now);
+    }
+    renderPositions();
     if(now-lastHud>=100){lastHud=now;updateHud(now);}
     requestAnimationFrame(frame);
   }
