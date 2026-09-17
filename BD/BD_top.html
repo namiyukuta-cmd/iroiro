@@ -118,7 +118,7 @@
       <div class="enemy" aria-label="敵4"></div><div class="enemy" aria-label="敵5"></div><div class="enemy" aria-label="敵6"></div>
       <div id="field-flash"></div><div id="fx-layer"></div><div id="player" aria-label="主人公"></div>
       <div id="battle-message">戦闘中</div>
-      <div id="round-info"><div class="round-box">残り <span id="timeText">60.0</span></div><div class="round-box">撃破 <span id="killText">0</span></div></div>
+      <div id="round-info"><div class="round-box">残り <span id="timeText">30.0</span></div><div class="round-box">撃破 <span id="killText">0</span></div></div>
     </div>
   </section>
 
@@ -150,7 +150,7 @@
   const PLAYER_SIZE=28,ENEMY_SIZE=26,MAX_FX=24;
   let fieldW=320,fieldH=420,lastHud=0;
 
-  const state={maxHp:100,hp:100,maxAc:100,ac:100,acRegenPerSec:16,supplies:5,supplyHeal:40,autoSupplyThreshold:45,x:40,y:80,vx:155,vy:118,nextTurn:0,lastTime:performance.now(),dead:false,nextPlayerHit:0,roundDuration:60000,roundStart:0,roundEnd:0,kills:0,finished:false};
+  const state={maxHp:100,hp:100,maxAc:100,ac:100,acRegenPerSec:16,supplies:5,supplyHeal:40,autoSupplyThreshold:45,x:40,y:80,vx:155,vy:118,nextTurn:0,lastTime:performance.now(),dead:false,nextPlayerHit:0,roundDuration:30000,roundStart:0,roundEnd:0,kills:0,finished:false};
   const initial=[[.18,.18],[.76,.16],[.48,.38],[.20,.62],[.78,.68],[.50,.86]];
   const enemies=enemyEls.map((el,i)=>({el,id:i+1,hp:4,maxHp:4,x:0,y:0,vx:0,vy:0,nextTurn:0,nextContactHit:0,dead:false,respawnAt:0}));
   const skills=[
@@ -260,7 +260,7 @@
     if(state.finished)return;
     state.finished=true;state.vx=0;state.vy=0;
     for(const e of enemies){e.vx=0;e.vy=0;}
-    message.textContent=`終了：60秒で ${state.kills}体撃破`;
+    message.textContent=`終了：30秒で ${state.kills}体撃破`;
     timeText.textContent='0.0';killText.textContent=state.kills;
   }
 
