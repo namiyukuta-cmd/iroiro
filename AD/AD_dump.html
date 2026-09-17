@@ -1,0 +1,187 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no" />
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+  <meta http-equiv="Pragma" content="no-cache" />
+  <meta http-equiv="Expires" content="0" />
+  <title>AD - ゴミ捨て場</title>
+  <style>
+    *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+    :root{
+      --ink:#26231f;
+      --paper:#f3ecdd;
+      --paper2:#e4dac7;
+      --line:#72695d;
+      --muted:#6d655a;
+      --dark:#433c34;
+    }
+    html,body{margin:0;width:100%;min-height:100%;background:#cfc8bc;color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+    body{min-height:100dvh}
+    button,a{font:inherit;color:inherit}
+    a{text-decoration:none}
+    #game{width:min(100%,520px);min-height:100dvh;margin:0 auto;padding:max(12px,env(safe-area-inset-top)) 12px calc(14px + env(safe-area-inset-bottom));display:flex;flex-direction:column;gap:10px}
+
+    header{display:flex;align-items:center;justify-content:space-between;gap:10px}
+    h1{margin:0;font-size:25px}
+    .back{border:1.5px solid var(--line);border-radius:9px;background:#eee7da;padding:7px 10px;font-size:12px;font-weight:900}
+
+    #status{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px}
+    .statusBox{border:1.5px solid var(--line);border-radius:10px;background:rgba(255,255,255,.42);padding:7px 5px;text-align:center}
+    .statusLabel{font-size:9px;font-weight:900;color:var(--muted)}
+    .statusValue{margin-top:2px;font-size:14px;font-weight:1000}
+
+    #place{border:2px solid var(--ink);border-radius:14px;background:linear-gradient(#ddd6c9,#c7bfb1);overflow:hidden}
+    #placeVisual{height:112px;display:flex;align-items:flex-end;justify-content:center;padding-bottom:10px;font-size:50px;letter-spacing:10px;background:linear-gradient(#d9d5cb 0 55%,#9e978c 55% 100%)}
+    #placeText{background:var(--paper);padding:10px 12px;border-top:1.5px solid var(--line)}
+    #placeText strong{display:block;font-size:16px}
+    #placeText span{display:block;margin-top:3px;font-size:10px;font-weight:800;color:var(--muted);line-height:1.45}
+
+    #guide{font-size:12px;font-weight:900;padding:0 2px}
+    #books{display:grid;gap:8px}
+    .book{border:2px solid var(--ink);border-radius:12px;background:var(--paper);padding:10px;box-shadow:0 3px 0 rgba(0,0,0,.12);display:grid;grid-template-columns:62px 1fr;gap:10px;align-items:center;cursor:pointer;text-align:left}
+    .book:active{transform:translateY(2px);box-shadow:0 1px 0 rgba(0,0,0,.12)}
+    .book.selected{outline:3px solid #5a5044;outline-offset:2px}
+    .cover{width:54px;height:70px;border:2px solid #51493f;border-radius:3px;background:#c8b79c;display:grid;place-items:center;font-size:26px;box-shadow:inset 0 0 0 3px rgba(255,255,255,.18)}
+    .book:nth-child(2) .cover{background:#b5b29f}
+    .book:nth-child(3) .cover{background:#9f8f7b}
+    .bookName{font-size:15px;font-weight:1000}
+    .meta{display:flex;flex-wrap:wrap;gap:5px;margin-top:6px}
+    .tag{border:1px solid #81786b;border-radius:999px;background:#ebe3d4;padding:3px 7px;font-size:9px;font-weight:900}
+    .desc{margin-top:5px;font-size:9px;line-height:1.35;color:var(--muted);font-weight:800}
+
+    #selection{border:1.5px dashed var(--line);border-radius:10px;background:rgba(255,255,255,.32);padding:9px 10px;min-height:44px;font-size:11px;font-weight:900;line-height:1.4}
+    #actions{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+    .action{min-height:49px;border:2px solid var(--ink);border-radius:11px;background:var(--paper);font-weight:1000}
+    .action.primary{background:var(--dark);color:#fff}
+    .action:disabled{opacity:.42}
+
+    @media(max-width:360px){
+      #game{padding-left:8px;padding-right:8px}
+      #placeVisual{height:100px;font-size:43px}
+      .book{grid-template-columns:56px 1fr}
+      .cover{width:50px;height:66px}
+    }
+  </style>
+</head>
+<body>
+  <main id="game">
+    <header>
+      <h1>ゴミ捨て場</h1>
+      <a class="back" href="AD_morning.html">朝の画面へ</a>
+    </header>
+
+    <section id="status" aria-label="今日の状態">
+      <div class="statusBox">
+        <div class="statusLabel">天気</div>
+        <div class="statusValue">☀️ 晴れ</div>
+      </div>
+      <div class="statusBox">
+        <div class="statusLabel">本の数</div>
+        <div class="statusValue">3冊</div>
+      </div>
+      <div class="statusBox">
+        <div class="statusLabel">残り時間</div>
+        <div class="statusValue">100</div>
+      </div>
+    </section>
+
+    <section id="place">
+      <div id="placeVisual" aria-hidden="true">🗑️ 📕 📖</div>
+      <div id="placeText">
+        <strong>捨てられた本を探す</strong>
+        <span>魔法のタイプライターが、本に残った文字と傷み具合を読み取っている。</span>
+      </div>
+    </section>
+
+    <div id="guide">今日は3冊ある。1冊選ぶ。</div>
+
+    <section id="books" aria-label="捨てられた本">
+      <button class="book" type="button" data-id="book_001" data-name="薄い絵本" data-difficulty="★" data-condition="良い">
+        <span class="cover" aria-hidden="true">📕</span>
+        <span>
+          <span class="bookName">薄い絵本</span>
+          <span class="meta">
+            <span class="tag">難易度 ★</span>
+            <span class="tag">状態：良い</span>
+            <span class="tag">欠損：1文字</span>
+          </span>
+          <span class="desc">ページ数が少ない。文字の欠けもわずか。</span>
+        </span>
+      </button>
+
+      <button class="book" type="button" data-id="book_002" data-name="古い読み物" data-difficulty="★★" data-condition="普通">
+        <span class="cover" aria-hidden="true">📗</span>
+        <span>
+          <span class="bookName">古い読み物</span>
+          <span class="meta">
+            <span class="tag">難易度 ★★</span>
+            <span class="tag">状態：普通</span>
+            <span class="tag">欠損：2文字</span>
+          </span>
+          <span class="desc">何文字か虫に食われている。</span>
+        </span>
+      </button>
+
+      <button class="book" type="button" data-id="book_003" data-name="題名の消えた本" data-difficulty="？" data-condition="不明">
+        <span class="cover" aria-hidden="true">📘</span>
+        <span>
+          <span class="bookName">題名の消えた本</span>
+          <span class="meta">
+            <span class="tag">難易度 ？</span>
+            <span class="tag">状態：不明</span>
+            <span class="tag">欠損：？</span>
+          </span>
+          <span class="desc">タイプライターでも詳しい状態を読み取れない。</span>
+        </span>
+      </button>
+    </section>
+
+    <div id="selection">まだ本を選んでいない。</div>
+
+    <div id="actions">
+      <button class="action" id="cancelButton" type="button">選択解除</button>
+      <button class="action primary" id="chooseButton" type="button" disabled>この本を選ぶ</button>
+    </div>
+  </main>
+
+  <script>
+    const books = [...document.querySelectorAll('.book')];
+    const selection = document.getElementById('selection');
+    const chooseButton = document.getElementById('chooseButton');
+    const cancelButton = document.getElementById('cancelButton');
+    let selected = null;
+
+    function clearSelection(){
+      selected = null;
+      books.forEach(book => book.classList.remove('selected'));
+      selection.textContent = 'まだ本を選んでいない。';
+      chooseButton.disabled = true;
+    }
+
+    books.forEach(book => {
+      book.addEventListener('click', () => {
+        books.forEach(item => item.classList.remove('selected'));
+        book.classList.add('selected');
+        selected = {
+          id: book.dataset.id,
+          name: book.dataset.name,
+          difficulty: book.dataset.difficulty,
+          condition: book.dataset.condition
+        };
+        selection.textContent = `${selected.name}を選択中。難易度 ${selected.difficulty} / 状態 ${selected.condition}`;
+        chooseButton.disabled = false;
+      });
+    });
+
+    cancelButton.addEventListener('click', clearSelection);
+
+    chooseButton.addEventListener('click', () => {
+      if(!selected) return;
+      localStorage.setItem('adSelectedDumpBook', JSON.stringify(selected));
+      selection.textContent = `${selected.name}を選んだ。`;
+    });
+  </script>
+</body>
+</html>
