@@ -1,0 +1,118 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no" />
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+  <meta http-equiv="Pragma" content="no-cache" />
+  <meta http-equiv="Expires" content="0" />
+  <title>AD - 朝</title>
+  <style>
+    *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+    :root{
+      --ink:#2a2823;
+      --paper:#f4efe3;
+      --paper2:#e8dfcd;
+      --line:#776f62;
+      --muted:#70695e;
+      --accent:#5b4937;
+    }
+    html,body{margin:0;width:100%;min-height:100%;background:#d9d1c2;color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+    body{min-height:100dvh}
+    a{color:inherit;text-decoration:none}
+    #game{width:min(100%,520px);min-height:100dvh;margin:0 auto;padding:max(12px,env(safe-area-inset-top)) 12px calc(14px + env(safe-area-inset-bottom));display:flex;flex-direction:column;gap:10px}
+
+    #morningCard{border:2px solid var(--ink);border-radius:15px;background:var(--paper);box-shadow:0 4px 0 rgba(0,0,0,.13);overflow:hidden}
+    #sky{height:126px;display:grid;place-items:center;background:linear-gradient(#ddd8ca,#f0eadc);border-bottom:1.5px solid var(--line)}
+    #rooster{font-size:54px;line-height:1}
+    #morningText{text-align:center;padding:12px 10px 13px}
+    #morningText strong{display:block;font-size:21px;letter-spacing:.05em}
+    #morningText span{display:block;margin-top:4px;font-size:11px;font-weight:800;color:var(--muted)}
+
+    #status{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px}
+    .statusBox{min-width:0;border:1.5px solid var(--line);border-radius:10px;background:rgba(255,255,255,.46);padding:8px 6px;text-align:center}
+    .statusLabel{font-size:9px;font-weight:900;color:var(--muted)}
+    .statusValue{margin-top:2px;font-size:16px;font-weight:1000;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    #weatherValue{font-size:15px}
+
+    #prompt{margin:4px 2px 0;font-size:13px;font-weight:1000}
+    #menu{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+    .menuButton{min-height:82px;border:2px solid var(--ink);border-radius:13px;background:var(--paper);box-shadow:0 3px 0 rgba(0,0,0,.12);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;padding:8px;text-align:center;touch-action:manipulation}
+    .menuButton:active{transform:translateY(2px);box-shadow:0 1px 0 rgba(0,0,0,.12)}
+    .menuIcon{font-size:30px;line-height:1}
+    .menuTitle{font-size:15px;font-weight:1000}
+    .menuSub{font-size:9px;font-weight:800;color:var(--muted);line-height:1.25}
+    #dumpButton,#rentalButton{background:#eee6d6}
+    #rentalButton[hidden]{display:none}
+
+    #dayRule{border:1.5px dashed var(--line);border-radius:10px;background:rgba(255,255,255,.26);padding:8px 10px;font-size:10px;font-weight:850;line-height:1.4;color:#5e574d}
+
+    @media(max-width:360px){
+      #game{padding-left:8px;padding-right:8px}
+      #sky{height:110px}
+      #rooster{font-size:48px}
+      .menuButton{min-height:76px}
+      .menuIcon{font-size:27px}
+      .menuTitle{font-size:14px}
+    }
+  </style>
+</head>
+<body>
+  <main id="game">
+    <section id="morningCard" aria-label="朝">
+      <div id="sky"><div id="rooster" aria-hidden="true">🐓</div></div>
+      <div id="morningText">
+        <strong>朝が来た</strong>
+        <span>鶏の声で一日が始まる。</span>
+      </div>
+    </section>
+
+    <section id="status" aria-label="今日の状態">
+      <div class="statusBox">
+        <div class="statusLabel">日</div>
+        <div class="statusValue" id="dayValue">1日目</div>
+      </div>
+      <div class="statusBox">
+        <div class="statusLabel">天気</div>
+        <div class="statusValue" id="weatherValue">☀️ 晴れ</div>
+      </div>
+      <div class="statusBox">
+        <div class="statusLabel">所持金</div>
+        <div class="statusValue" id="moneyValue">0</div>
+      </div>
+    </section>
+
+    <div id="prompt">今日はどうする？</div>
+
+    <nav id="menu" aria-label="朝の行動">
+      <a class="menuButton" id="shopButton" href="AD_shop.html">
+        <span class="menuIcon" aria-hidden="true">🛒</span>
+        <span class="menuTitle">買い物</span>
+        <span class="menuSub">文字キー・補修用品を買う</span>
+      </a>
+
+      <a class="menuButton" id="inventoryButton" href="AD_inventory.html">
+        <span class="menuIcon" aria-hidden="true">🎒</span>
+        <span class="menuTitle">持ち物確認</span>
+        <span class="menuSub">本・文字キー・材料を見る</span>
+      </a>
+
+      <a class="menuButton" id="dumpButton" href="AD_dump.html">
+        <span class="menuIcon" aria-hidden="true">📚</span>
+        <span class="menuTitle">ゴミ捨て場</span>
+        <span class="menuSub">捨てられた本を探す</span>
+      </a>
+
+      <a class="menuButton" id="rentalButton" href="AD_rental.html" hidden>
+        <span class="menuIcon" aria-hidden="true">📖</span>
+        <span class="menuTitle">貸本屋</span>
+        <span class="menuSub">直した本を路上で貸す</span>
+      </a>
+    </nav>
+
+    <div id="dayRule">
+      ゴミ捨て場と貸本屋は、1日にどちらか1つだけ選ぶ。貸本屋は、壊れた魔法のタイプライターと最初の本を手に入れた後に解放される。
+    </div>
+  </main>
+</body>
+</html>
