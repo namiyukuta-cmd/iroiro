@@ -181,7 +181,7 @@
   const PLAYER_SIZE=20,ENEMY_SIZE=18,MAX_FX=24;
   let fieldW=320,fieldH=420,lastHud=0;
 
-  const state={maxHp:100,hp:100,maxAc:100,ac:100,acRegenPerSec:16,supplies:5,supplyHeal:40,autoSupplyThreshold:45,x:40,y:80,vx:155,vy:118,nextTurn:0,lastTime:performance.now(),dead:false,nextPlayerHit:0,roundDuration:30000,roundStart:0,roundEnd:0,kills:0,finished:false};
+  const state={maxHp:100,hp:100,maxAc:100,ac:100,acRegenPerSec:16,supplies:5,supplyHeal:40,autoSupplyThreshold:30,x:40,y:80,vx:155,vy:118,nextTurn:0,lastTime:performance.now(),dead:false,nextPlayerHit:0,roundDuration:30000,roundStart:0,roundEnd:0,kills:0,finished:false};
   const initial=[[.18,.18],[.76,.16],[.48,.38],[.20,.62],[.78,.68],[.50,.86]];
   const enemies=enemyEls.map((el,i)=>({el,id:i+1,hp:4,maxHp:4,x:0,y:0,vx:0,vy:0,nextTurn:0,nextContactHit:0,dead:false,respawnAt:0}));
   const skills=[
