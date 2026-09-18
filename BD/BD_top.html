@@ -18,8 +18,8 @@
       margin:0 auto;
       padding:max(6px,env(safe-area-inset-top)) 8px max(6px,env(safe-area-inset-bottom));
       display:grid;
-      grid-template-rows:36px 46px minmax(0,1fr) auto;
-      gap:6px;
+      grid-template-rows:32px 42px minmax(0,1fr) auto;
+      gap:4px;
       overflow:hidden;
     }
 
@@ -34,7 +34,10 @@
     .fill{height:100%;width:100%;background:#202020}
 
     #battle-wrap{min-height:0;position:relative}
-    #battle-field{width:100%;height:100%;border:2px solid #202020;background:#fff;position:relative;overflow:hidden;contain:layout paint style}
+    #battle-field{width:100%;height:100%;border:2px solid #202020;background:
+linear-gradient(to bottom,rgba(239,68,68,.045) 0 28%,transparent 28% 72%,rgba(56,189,248,.045) 72% 100%),
+repeating-linear-gradient(to right,transparent 0 calc(20% - 1px),rgba(32,32,32,.045) calc(20% - 1px) 20%),
+#fff;position:relative;overflow:hidden;contain:layout paint style}
     #player,.enemy{position:absolute;left:0;top:0;will-change:transform;transform:translate3d(0,0,0)}
     #player{width:20px;height:20px;border-radius:50%;background:#202020;z-index:3}
     #player.hit{filter:brightness(2)}
@@ -72,8 +75,8 @@
 
     #loadout{
       display:grid;
-      grid-template-columns:repeat(5,48px);
-      grid-auto-rows:48px;
+      grid-template-columns:repeat(5,42px);
+      grid-auto-rows:42px;
       gap:3px;
       width:max-content;
       max-width:100%;
@@ -82,8 +85,8 @@
       margin:0 auto;
     }
     .slot{
-      width:48px;
-      height:48px;
+      width:42px;
+      height:42px;
       border:1.5px solid #202020;
       background:#fff;
       position:relative;
@@ -136,8 +139,8 @@
 
     @media (max-height:700px){
       #game-root{grid-template-rows:32px 42px minmax(0,1fr) auto;gap:4px;padding-top:max(4px,env(safe-area-inset-top));padding-bottom:max(4px,env(safe-area-inset-bottom))}
-      #loadout{gap:2px;grid-template-columns:repeat(5,44px);grid-auto-rows:44px}
-      .slot{width:44px;height:44px}
+      #loadout{gap:2px;grid-template-columns:repeat(5,38px);grid-auto-rows:38px}
+      .slot{width:38px;height:38px}
       .slot-time{font-size:14px}
     }
   </style>
@@ -214,8 +217,22 @@
   let fieldW=320,fieldH=420,lastHud=0;
 
   const state={maxHp:100,hp:100,maxAc:100,ac:100,acRegenPerSec:16,supplies:5,supplyHeal:40,autoSupplyThreshold:30,weaponBonus:1,armorDefense:3,normalAttackCooldown:900,normalAttackReadyAt:0,x:0,y:0,vx:0,vy:0,nextTurn:0,lastTime:performance.now(),dead:false,nextPlayerHit:0,roundDuration:30000,roundStart:0,roundEnd:0,kills:0,finished:false};
-  const enemyLanes=[-90,-54,-18,18,54,90];
-  const enemies=enemyEls.map((el,i)=>({el,id:i+1,hp:4,maxHp:4,x:0,y:0,vx:0,vy:0,speed:28+(i%3)*4,laneOffset:enemyLanes[i]||0,nextTurn:0,nextContactHit:0,dead:false,respawnAt:0}));
+  const enemyLayout=[
+    {spawnX:.14,spawnY:.08,attackX:-88},
+    {spawnX:.38,spawnY:.07,attackX:-52},
+    {spawnX:.63,spawnY:.08,attackX:-18},
+    {spawnX:.86,spawnY:.07,attackX:18},
+    {spawnX:.28,spawnY:.20,attackX:52},
+    {spawnX:.72,spawnY:.20,attackX:88}
+  ];
+  const enemies=enemyEls.map((el,i)=>({
+    el,id:i+1,hp:4,maxHp:4,x:0,y:0,vx:0,vy:0,
+    speed:26+(i%3)*3,
+    spawnX:enemyLayout[i].spawnX,
+    spawnY:enemyLayout[i].spawnY,
+    attackX:enemyLayout[i].attackX,
+    nextTurn:0,nextContactHit:0,dead:false,respawnAt:0
+  }));
   const skills=[
     {name:'強打',cost:5,cooldown:5000,damage:3,range:150,readyAt:0},
     {name:'連撃',cost:3,cooldown:3000,damage:2,range:115,readyAt:0},
@@ -231,7 +248,7 @@
 
   function placePlayer(){
     state.x=Math.max(0,(fieldW-PLAYER_SIZE)/2);
-    state.y=Math.max(0,fieldH*.78-PLAYER_SIZE/2);
+    state.y=Math.max(0,fieldH*.84-PLAYER_SIZE/2);
     state.vx=0;state.vy=0;
   }
 
@@ -249,16 +266,17 @@
 
   function setEnemyDirection(e,now){
     const p=centerPlayer(),q=centerEnemy(e);
-    const tx=p.x+e.laneOffset;
-    const ty=p.y-42;
+    const tx=p.x+e.attackX;
+    const ty=p.y-54;
     const dx=tx-q.x,dy=ty-q.y;
     const d=Math.hypot(dx,dy);
-    if(d<2){e.vx=0;e.vy=0;}
-    else{
-      e.vx=dx/d*Math.min(e.speed*.45,16);
+    if(d<2){
+      e.vx=0;e.vy=0;
+    }else{
+      e.vx=dx/d*Math.min(e.speed*.55,17);
       e.vy=dy/d*e.speed;
     }
-    e.nextTurn=now+160;
+    e.nextTurn=now+180;
   }
 
   function moveEnemyTowardPlayer(e,dt,now){
@@ -270,9 +288,8 @@
   }
 
   function spawnEnemyAtEdge(e,now){
-    const p=centerPlayer();
-    e.x=Math.max(0,Math.min(fieldW-ENEMY_SIZE,p.x+e.laneOffset-ENEMY_SIZE/2));
-    e.y=0;
+    e.x=Math.max(0,Math.min(fieldW-ENEMY_SIZE,fieldW*e.spawnX-ENEMY_SIZE/2));
+    e.y=Math.max(0,Math.min(fieldH*.28,fieldH*e.spawnY));
     setEnemyDirection(e,now);
   }
 
