@@ -325,9 +325,15 @@
 
   function damagePlayer(amount,now){
     if(state.dead||now<state.nextPlayerHit)return;
-    state.nextPlayerHit=now+360;state.hp=Math.max(0,state.hp-amount);
-    const p=centerPlayer();addFx('impact-fx',p.x,p.y);floatText(p.x,p.y-12,`-${amount}`);playerEl.classList.add('hit');setTimeout(()=>playerEl.classList.remove('hit'),110);useSupply();
-    if(state.hp<=0){gameOver();}
+    state.nextPlayerHit=now+360;
+    state.hp=Math.max(0,state.hp-amount);
+    const p=centerPlayer();
+    addFx('impact-fx',p.x,p.y);
+    floatText(p.x,p.y-12,`-${amount}`);
+    playerEl.classList.add('hit');
+    setTimeout(()=>playerEl.classList.remove('hit'),110);
+    if(state.hp<=0){gameOver();return;}
+    useSupply();
   }
 
   function trySkills(now){
