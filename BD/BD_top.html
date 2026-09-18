@@ -34,7 +34,7 @@
     .fill{height:100%;width:100%;background:#202020}
 
     #battle-wrap{min-height:0;position:relative}
-    #battle-field{width:100%;height:100%;border:2px solid #202020;background:#fff;position:relative;overflow:hidden;contain:layout paint style}
+    #battle-field{width:100%;height:100%;border:2px solid #202020;background:linear-gradient(to bottom,#f7f4ea 0%,#f2efe5 52%,#ebe7dc 100%);position:relative;overflow:hidden;contain:layout paint style}
     #player,.enemy{position:absolute;left:0;top:0;will-change:transform;transform:translate3d(0,0,0)}
     #player{width:20px;height:20px;border-radius:50%;background:#202020;z-index:3}
     #player.hit{filter:brightness(2)}
@@ -214,12 +214,13 @@
   let fieldW=320,fieldH=420,lastHud=0;
 
   const state={maxHp:100,hp:100,maxAc:100,ac:100,acRegenPerSec:16,supplies:5,supplyHeal:40,autoSupplyThreshold:30,weaponBonus:1,armorDefense:3,normalAttackCooldown:900,normalAttackReadyAt:0,x:0,y:0,vx:0,vy:0,nextTurn:0,lastTime:performance.now(),dead:false,nextPlayerHit:0,roundDuration:30000,roundStart:0,roundEnd:0,kills:0,finished:false};
-  const enemyLanes=[-90,-54,-18,18,54,90];
-  const enemies=enemyEls.map((el,i)=>({el,id:i+1,hp:4,maxHp:4,x:0,y:0,vx:0,vy:0,speed:28+(i%3)*4,laneOffset:enemyLanes[i]||0,nextTurn:0,nextContactHit:0,dead:false,respawnAt:0}));
+  const enemyColumns=[.14,.29,.44,.56,.71,.86];
+  const enemyRows=[0,34,10,44,18,52];
+  const enemies=enemyEls.map((el,i)=>({el,id:i+1,hp:4,maxHp:4,x:0,y:0,vx:0,vy:0,speed:25+(i%3)*3,column:enemyColumns[i]||.5,rowOffset:enemyRows[i]||0,nextTurn:0,nextContactHit:0,dead:false,respawnAt:0}));
   const skills=[
-    {name:'強打',cost:5,cooldown:5000,damage:3,range:150,readyAt:0},
-    {name:'連撃',cost:3,cooldown:3000,damage:2,range:115,readyAt:0},
-    {name:'斬撃',cost:1,cooldown:1000,damage:1,range:85,readyAt:0}
+    {name:'強打',cost:5,cooldown:5000,damage:3,range:230,readyAt:0},
+    {name:'連撃',cost:3,cooldown:3000,damage:2,range:205,readyAt:0},
+    {name:'斬撃',cost:1,cooldown:1000,damage:1,range:180,readyAt:0}
   ];
   const FX_COLORS={
     smash:{main:'#ef4444',soft:'rgba(239,68,68,.38)'},
@@ -231,7 +232,7 @@
 
   function placePlayer(){
     state.x=Math.max(0,(fieldW-PLAYER_SIZE)/2);
-    state.y=Math.max(0,fieldH*.78-PLAYER_SIZE/2);
+    state.y=Math.max(0,fieldH*.84-PLAYER_SIZE/2);
     state.vx=0;state.vy=0;
   }
 
@@ -249,16 +250,19 @@
 
   function setEnemyDirection(e,now){
     const p=centerPlayer(),q=centerEnemy(e);
-    const tx=p.x+e.laneOffset;
+    const laneX=Math.max(ENEMY_SIZE/2,Math.min(fieldW-ENEMY_SIZE/2,fieldW*e.column));
+    const nearFront=q.y>p.y-105;
+    const tx=nearFront ? p.x : laneX;
     const ty=p.y-42;
     const dx=tx-q.x,dy=ty-q.y;
     const d=Math.hypot(dx,dy);
     if(d<2){e.vx=0;e.vy=0;}
     else{
-      e.vx=dx/d*Math.min(e.speed*.45,16);
+      const xSpeed=nearFront?Math.min(e.speed*.7,20):Math.min(e.speed*.22,7);
+      e.vx=dx/d*xSpeed;
       e.vy=dy/d*e.speed;
     }
-    e.nextTurn=now+160;
+    e.nextTurn=now+170;
   }
 
   function moveEnemyTowardPlayer(e,dt,now){
@@ -270,9 +274,8 @@
   }
 
   function spawnEnemyAtEdge(e,now){
-    const p=centerPlayer();
-    e.x=Math.max(0,Math.min(fieldW-ENEMY_SIZE,p.x+e.laneOffset-ENEMY_SIZE/2));
-    e.y=0;
+    e.x=Math.max(0,Math.min(fieldW-ENEMY_SIZE,fieldW*e.column-ENEMY_SIZE/2));
+    e.y=Math.max(0,e.rowOffset);
     setEnemyDirection(e,now);
   }
 
@@ -375,11 +378,11 @@
 
   function normalAttack(now){
     if(state.dead||now<state.normalAttackReadyAt)return false;
-    const target=nearestEnemy(135);
+    const target=nearestEnemy(175);
     if(!target)return false;
     state.normalAttackReadyAt=now+state.normalAttackCooldown;
     const damage=1+state.weaponBonus;
-    damageEnemy(target,damage,{name:'通常攻撃',damage,range:135});
+    damageEnemy(target,damage,{name:'通常攻撃',damage,range:175});
     return true;
   }
 
