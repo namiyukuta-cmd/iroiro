@@ -379,9 +379,6 @@
     if(!target)return false;
     state.normalAttackReadyAt=now+state.normalAttackCooldown;
     const damage=1+state.weaponBonus;
-    const p=centerPlayer(),q=centerEnemy(target);
-    projectileFx(p.x,p.y,q.x,q.y,'light',220,FX_COLORS.slash);
-    setTimeout(()=>hitBurst(q.x,q.y,false,FX_COLORS.slash),205);
     damageEnemy(target,damage,{name:'通常攻撃',damage,range:135});
     return true;
   }
