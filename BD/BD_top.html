@@ -72,23 +72,32 @@
 
     #loadout{
       display:grid;
-      grid-template-columns:repeat(5,1fr);
+      grid-template-columns:repeat(5,48px);
+      grid-auto-rows:48px;
       gap:3px;
-      width:100%;
+      width:max-content;
+      max-width:100%;
       min-height:0;
+      justify-self:center;
+      margin:0 auto;
     }
     .slot{
-      aspect-ratio:1/1;
+      width:48px;
+      height:48px;
       border:1.5px solid #202020;
       background:#fff;
-      min-width:0;
-      min-height:0;
       position:relative;
       display:flex;
       align-items:center;
       justify-content:center;
       overflow:hidden;
     }
+    .slot.used{opacity:.16}
+    .weapon-icon{width:28px;height:28px;position:relative;transform:rotate(-45deg)}
+    .weapon-icon::before{content:"";position:absolute;left:12px;top:0;width:4px;height:21px;background:#202020;border-radius:3px 3px 1px 1px}
+    .weapon-icon::after{content:"";position:absolute;left:5px;top:19px;width:18px;height:4px;background:#202020;border-radius:2px;box-shadow:7px 7px 0 -1px #202020}
+    .armor-icon{width:27px;height:31px;border:3px solid #202020;border-radius:50% 50% 42% 42%;clip-path:polygon(50% 0,100% 18%,88% 72%,50% 100%,12% 72%,0 18%);background:#fff;position:relative}
+    .armor-icon::after{content:"";position:absolute;left:50%;top:4px;bottom:5px;width:3px;background:#202020;transform:translateX(-50%)}
     .slot.empty{background:repeating-linear-gradient(135deg,#fff 0 8px,#f3f1eb 8px 16px)}
     .slot-icon{position:absolute;inset:0;display:grid;place-items:center;z-index:1}
     .slot-count{position:absolute;right:3px;top:2px;font-size:11px;font-weight:1000;z-index:4;background:rgba(255,255,255,.88);padding:0 2px;border-radius:3px;line-height:1.1}
@@ -127,7 +136,8 @@
 
     @media (max-height:700px){
       #game-root{grid-template-rows:32px 42px minmax(0,1fr) auto;gap:4px;padding-top:max(4px,env(safe-area-inset-top));padding-bottom:max(4px,env(safe-area-inset-bottom))}
-      #loadout{gap:2px}
+      #loadout{gap:2px;grid-template-columns:repeat(5,44px);grid-auto-rows:44px}
+      .slot{width:44px;height:44px}
       .slot-time{font-size:14px}
     }
   </style>
@@ -157,11 +167,16 @@
     </div>
   </section>
 
-  <section id="loadout" aria-label="補給品とスキルのマス目">
-    <div class="slot" id="supplySlot">
-      <div class="slot-icon"><div class="supply-icon" aria-label="補給品"></div></div>
-      <div class="slot-count" id="supplyCount">5</div>
-    </div>
+  <section id="loadout" aria-label="装備と補給品とスキルのマス目">
+    <div class="slot supply-slot" id="supplySlot0"><div class="slot-icon"><div class="supply-icon" aria-label="補給品"></div></div></div>
+    <div class="slot supply-slot" id="supplySlot1"><div class="slot-icon"><div class="supply-icon" aria-label="補給品"></div></div></div>
+    <div class="slot supply-slot" id="supplySlot2"><div class="slot-icon"><div class="supply-icon" aria-label="補給品"></div></div></div>
+    <div class="slot supply-slot" id="supplySlot3"><div class="slot-icon"><div class="supply-icon" aria-label="補給品"></div></div></div>
+    <div class="slot supply-slot" id="supplySlot4"><div class="slot-icon"><div class="supply-icon" aria-label="補給品"></div></div></div>
+
+    <div class="slot" id="weaponSlot"><div class="slot-icon"><div class="weapon-icon" aria-label="武器"></div></div></div>
+    <div class="slot" id="armorSlot"><div class="slot-icon"><div class="armor-icon" aria-label="防具"></div></div></div>
+
     <div class="slot skill-slot" id="skillSlot0">
       <div class="slot-icon"><div class="smash-icon" aria-label="強打"><div class="smash-core"></div></div></div>
       <div class="cooldown-cover" id="skillCover0"></div>
@@ -177,8 +192,6 @@
       <div class="cooldown-cover" id="skillCover2"></div>
       <div class="slot-time" id="skillTime2"></div>
     </div>
-    <div class="slot empty"></div>
-    <div class="slot empty"></div><div class="slot empty"></div><div class="slot empty"></div><div class="slot empty"></div><div class="slot empty"></div>
   </section>
 </div>
 
@@ -193,15 +206,16 @@
   const timeText=document.getElementById('timeText'),killText=document.getElementById('killText');
   const hpText=document.getElementById('hpText'),hpFill=document.getElementById('hpFill');
   const acText=document.getElementById('acText'),acFill=document.getElementById('acFill');
-  const supplyCount=document.getElementById('supplyCount');
+  const supplySlots=[0,1,2,3,4].map(i=>document.getElementById('supplySlot'+i));
   const skillCovers=[document.getElementById('skillCover0'),document.getElementById('skillCover1'),document.getElementById('skillCover2')];
   const skillTimes=[document.getElementById('skillTime0'),document.getElementById('skillTime1'),document.getElementById('skillTime2')];
 
   const PLAYER_SIZE=20,ENEMY_SIZE=18,MAX_FX=40;
   let fieldW=320,fieldH=420,lastHud=0;
 
-  const state={maxHp:100,hp:100,maxAc:100,ac:100,acRegenPerSec:16,supplies:5,supplyHeal:40,autoSupplyThreshold:30,x:0,y:0,vx:0,vy:0,nextTurn:0,lastTime:performance.now(),dead:false,nextPlayerHit:0,roundDuration:30000,roundStart:0,roundEnd:0,kills:0,finished:false};
-  const enemies=enemyEls.map((el,i)=>({el,id:i+1,hp:4,maxHp:4,x:0,y:0,vx:0,vy:0,speed:30+(i%3)*4,slotAngle:-Math.PI/2+(i/enemyEls.length)*Math.PI*2,slotRadius:30+(i%2)*8,nextTurn:0,nextContactHit:0,dead:false,respawnAt:0}));
+  const state={maxHp:100,hp:100,maxAc:100,ac:100,acRegenPerSec:16,supplies:5,supplyHeal:40,autoSupplyThreshold:30,weaponBonus:1,armorDefense:3,normalAttackCooldown:900,normalAttackReadyAt:0,x:0,y:0,vx:0,vy:0,nextTurn:0,lastTime:performance.now(),dead:false,nextPlayerHit:0,roundDuration:30000,roundStart:0,roundEnd:0,kills:0,finished:false};
+  const enemyLanes=[-30,-18,-6,6,18,30];
+  const enemies=enemyEls.map((el,i)=>({el,id:i+1,hp:4,maxHp:4,x:0,y:0,vx:0,vy:0,speed:28+(i%3)*4,laneOffset:enemyLanes[i]||0,nextTurn:0,nextContactHit:0,dead:false,respawnAt:0}));
   const skills=[
     {name:'強打',cost:5,cooldown:5000,damage:3,range:150,readyAt:0},
     {name:'連撃',cost:3,cooldown:3000,damage:2,range:115,readyAt:0},
@@ -216,8 +230,8 @@
   };
 
   function placePlayer(){
-    state.x=Math.max(0,(fieldW-PLAYER_SIZE)/2);
-    state.y=Math.max(0,fieldH*.64-PLAYER_SIZE/2);
+    state.x=Math.max(14,fieldW*.12);
+    state.y=Math.max(0,(fieldH-PLAYER_SIZE)/2);
     state.vx=0;state.vy=0;
   }
 
@@ -235,13 +249,16 @@
 
   function setEnemyDirection(e,now){
     const p=centerPlayer(),q=centerEnemy(e);
-    const tx=p.x+Math.cos(e.slotAngle)*e.slotRadius;
-    const ty=p.y+Math.sin(e.slotAngle)*e.slotRadius;
+    const tx=p.x+38;
+    const ty=p.y+e.laneOffset;
     const dx=tx-q.x,dy=ty-q.y;
     const d=Math.hypot(dx,dy);
     if(d<2){e.vx=0;e.vy=0;}
-    else{e.vx=dx/d*e.speed;e.vy=dy/d*e.speed;}
-    e.nextTurn=now+140;
+    else{
+      e.vx=dx/d*e.speed;
+      e.vy=dy/d*Math.min(e.speed*.45,16);
+    }
+    e.nextTurn=now+160;
   }
 
   function moveEnemyTowardPlayer(e,dt,now){
@@ -253,11 +270,9 @@
   }
 
   function spawnEnemyAtEdge(e,now){
-    const side=Math.floor(Math.random()*4);
-    if(side===0){e.x=Math.random()*Math.max(0,fieldW-ENEMY_SIZE);e.y=0;}
-    else if(side===1){e.x=Math.max(0,fieldW-ENEMY_SIZE);e.y=Math.random()*Math.max(0,fieldH-ENEMY_SIZE);}
-    else if(side===2){e.x=Math.random()*Math.max(0,fieldW-ENEMY_SIZE);e.y=Math.max(0,fieldH-ENEMY_SIZE);}
-    else{e.x=0;e.y=Math.random()*Math.max(0,fieldH-ENEMY_SIZE);}
+    const p=centerPlayer();
+    e.x=Math.max(0,fieldW-ENEMY_SIZE);
+    e.y=Math.max(0,Math.min(fieldH-ENEMY_SIZE,p.y+e.laneOffset-ENEMY_SIZE/2));
     setEnemyDirection(e,now);
   }
 
@@ -346,31 +361,54 @@
   function damagePlayer(amount,now){
     if(state.dead||now<state.nextPlayerHit)return;
     state.nextPlayerHit=now+360;
-    state.hp=Math.max(0,state.hp-amount);
+    const finalDamage=Math.max(1,amount-state.armorDefense);
+    state.hp=Math.max(0,state.hp-finalDamage);
     const p=centerPlayer();
     addFx('impact-fx',p.x,p.y,undefined,FX_COLORS.hit);
     addFx('impact-star',p.x,p.y,undefined,FX_COLORS.hit);
-    floatText(p.x,p.y-12,`-${amount}`,FX_COLORS.hit);
+    floatText(p.x,p.y-12,`-${finalDamage}`,FX_COLORS.hit);
     playerEl.classList.add('hit');
     setTimeout(()=>playerEl.classList.remove('hit'),110);
     if(state.hp<=0){gameOver();return;}
     useSupply();
   }
 
+  function normalAttack(now){
+    if(state.dead||now<state.normalAttackReadyAt)return false;
+    const target=nearestEnemy(135);
+    if(!target)return false;
+    state.normalAttackReadyAt=now+state.normalAttackCooldown;
+    const damage=1+state.weaponBonus;
+    const p=centerPlayer(),q=centerEnemy(target);
+    projectileFx(p.x,p.y,q.x,q.y,'light',220,FX_COLORS.slash);
+    setTimeout(()=>hitBurst(q.x,q.y,false,FX_COLORS.slash),205);
+    damageEnemy(target,damage,{name:'通常攻撃',damage,range:135});
+    return true;
+  }
+
   function trySkills(now){
     if(state.dead)return;
-    for(const skill of skills){if(now<skill.readyAt||state.ac<skill.cost)continue;const target=nearestEnemy(skill.range);if(!target)continue;state.ac-=skill.cost;skill.readyAt=now+skill.cooldown;damageEnemy(target,skill.damage,skill);break;}
+    for(const skill of skills){
+      if(now<skill.readyAt||state.ac<skill.cost)continue;
+      const target=nearestEnemy(skill.range);
+      if(!target)continue;
+      state.ac-=skill.cost;
+      skill.readyAt=now+skill.cooldown;
+      damageEnemy(target,skill.damage+state.weaponBonus,skill);
+      return;
+    }
+    normalAttack(now);
   }
 
   function contactCheck(now){
     if(state.dead)return;
-    for(const e of enemies){if(e.dead||now<e.nextContactHit)continue;if(dist(e)<=42){e.nextContactHit=now+900;damagePlayer(10,now);}}
+    for(const e of enemies){if(e.dead||now<e.nextContactHit)continue;if(Math.abs((e.x+ENEMY_SIZE/2)-(state.x+PLAYER_SIZE/2))<=44&&Math.abs((e.y+ENEMY_SIZE/2)-(state.y+PLAYER_SIZE/2))<=38){e.nextContactHit=now+900;damagePlayer(10,now);}}
   }
 
   function updateHud(now){
     hpText.textContent=`${Math.ceil(state.hp)} / ${state.maxHp}`;hpFill.style.width=`${Math.max(0,state.hp/state.maxHp*100)}%`;
     acText.textContent=`${Math.floor(state.ac)} / ${state.maxAc}`;acFill.style.width=`${Math.max(0,state.ac/state.maxAc*100)}%`;
-    supplyCount.textContent=state.supplies;
+    supplySlots.forEach((slot,i)=>slot.classList.toggle('used',i>=state.supplies));
     const remain=Math.max(0,state.roundEnd-now);timeText.textContent=(remain/1000).toFixed(1);killText.textContent=state.kills;
     skills.forEach((s,i)=>{const remainMs=Math.max(0,s.readyAt-now);const ratio=Math.max(0,Math.min(1,remainMs/s.cooldown));skillCovers[i].style.height=(ratio*100)+'%';skillTimes[i].textContent=remainMs>0?(remainMs/1000).toFixed(1):'';});
   }
