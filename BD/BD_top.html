@@ -47,8 +47,8 @@
     #round-info{position:absolute;right:6px;top:6px;z-index:6;display:flex;gap:4px;pointer-events:none}
     .round-box{min-width:58px;padding:3px 5px;border:1px solid #202020;border-radius:5px;background:rgba(255,255,255,.9);font-size:10px;font-weight:900;text-align:center;white-space:nowrap}
     #fx-layer{position:absolute;inset:0;pointer-events:none;z-index:5;overflow:hidden}
-    #field-flash{position:absolute;inset:0;background:rgba(32,32,32,.09);opacity:0;pointer-events:none;z-index:4}
-    #field-flash.active{animation:fieldFlash .18s ease-out}
+    #field-flash{position:absolute;inset:0;background:rgba(32,32,32,.22);opacity:0;pointer-events:none;z-index:4}
+    #field-flash.active{animation:fieldFlash .28s ease-out}
     .slash-fx{position:absolute;width:54px;height:6px;border-radius:999px;background:#202020;transform-origin:center;animation:slashFx .22s ease-out forwards}
     .impact-fx{position:absolute;width:22px;height:22px;border:3px solid #202020;border-radius:50%;animation:impactFx .26s ease-out forwards}
     .burst-fx{position:absolute;width:18px;height:18px;border:3px solid #202020;animation:burstFx .3s ease-out forwards}
@@ -57,16 +57,16 @@
     .heal-fx::before{width:22px;height:7px}.heal-fx::after{width:7px;height:22px}
     .float-text{position:absolute;font-size:12px;font-weight:900;white-space:nowrap;color:#202020;text-shadow:0 1px 0 #fff;animation:floatText .68s ease-out forwards}
     .cast-ring{position:absolute;width:28px;height:28px;border:3px solid #202020;border-radius:50%;animation:castRing .22s ease-out forwards}
-    .projectile-fx{position:absolute;width:12px;height:12px;border-radius:50%;background:#202020;z-index:5;animation:projectileFly var(--dur) cubic-bezier(.18,.78,.28,1) forwards;box-shadow:0 0 0 3px rgba(32,32,32,.18)}
-    .projectile-fx::after{content:"";position:absolute;right:7px;top:50%;width:28px;height:4px;border-radius:999px;background:rgba(32,32,32,.28);transform:translateY(-50%) rotate(var(--rot));transform-origin:right center}
-    .projectile-fx.heavy{width:20px;height:20px;box-shadow:0 0 0 5px rgba(32,32,32,.18)}
-    .projectile-fx.heavy::after{width:42px;height:6px;right:12px}
-    .projectile-fx.light{width:9px;height:9px;box-shadow:0 0 0 2px rgba(32,32,32,.14)}
-    .projectile-fx.light::after{width:22px;height:3px;right:5px}
-    .impact-star{position:absolute;width:32px;height:32px;animation:impactStar .3s ease-out forwards}
+    .projectile-fx{position:absolute;width:18px;height:18px;border-radius:50%;background:#202020;z-index:5;animation:projectileFly var(--dur) cubic-bezier(.18,.78,.28,1) forwards;box-shadow:0 0 0 4px rgba(32,32,32,.20),0 0 0 8px rgba(32,32,32,.08)}
+    .projectile-fx::after{content:"";position:absolute;right:9px;top:50%;width:58px;height:7px;border-radius:999px;background:linear-gradient(90deg,rgba(32,32,32,0),rgba(32,32,32,.75));transform:translateY(-50%) rotate(var(--rot));transform-origin:right center}
+    .projectile-fx.heavy{width:32px;height:32px;box-shadow:0 0 0 7px rgba(32,32,32,.22),0 0 0 14px rgba(32,32,32,.08)}
+    .projectile-fx.heavy::after{width:92px;height:12px;right:17px}
+    .projectile-fx.light{width:14px;height:14px;box-shadow:0 0 0 3px rgba(32,32,32,.16)}
+    .projectile-fx.light::after{width:44px;height:5px;right:7px}
+    .impact-star{position:absolute;width:48px;height:48px;animation:impactStar .38s ease-out forwards}
     .impact-star::before,.impact-star::after{content:"";position:absolute;left:50%;top:50%;background:#202020;border-radius:2px;transform:translate(-50%,-50%)}
-    .impact-star::before{width:32px;height:5px}.impact-star::after{width:5px;height:32px}
-    .impact-ring{position:absolute;width:34px;height:34px;border:4px solid #202020;border-radius:50%;animation:impactRing .34s ease-out forwards}
+    .impact-star::before{width:48px;height:7px}.impact-star::after{width:7px;height:48px}
+    .impact-ring{position:absolute;width:52px;height:52px;border:6px solid #202020;border-radius:50%;animation:impactRing .42s ease-out forwards}
 
     #loadout{
       display:grid;
@@ -327,7 +327,7 @@
     if(state.dead||now<state.nextPlayerHit)return;
     state.nextPlayerHit=now+360;state.hp=Math.max(0,state.hp-amount);
     const p=centerPlayer();addFx('impact-fx',p.x,p.y);floatText(p.x,p.y-12,`-${amount}`);playerEl.classList.add('hit');setTimeout(()=>playerEl.classList.remove('hit'),110);useSupply();
-    if(state.hp<=0){state.dead=true;state.vx=0;state.vy=0;message.textContent='主人公は倒れた';}
+    if(state.hp<=0){gameOver();}
   }
 
   function trySkills(now){
@@ -351,6 +351,16 @@
   function respawnEnemy(e,now){
     e.hp=e.maxHp;e.dead=false;e.respawnAt=0;e.el.classList.remove('dead','hit');
     spawnEnemyAtEdge(e,now);
+  }
+
+  function gameOver(){
+    if(state.finished)return;
+    state.dead=true;state.finished=true;state.vx=0;state.vy=0;
+    for(const e of enemies){e.vx=0;e.vy=0;}
+    hpText.textContent='0 / '+state.maxHp;
+    hpFill.style.width='0%';
+    message.textContent='ゲームオーバー：'+state.kills+'体撃破';
+    killText.textContent=state.kills;
   }
 
   function finishRound(){
