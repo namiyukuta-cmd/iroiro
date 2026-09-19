@@ -139,24 +139,48 @@ canvas{display:block;width:100%;height:100%}
       const softness = 0.82 + Math.random() * 0.32;
       falling = {
         type:'cake', x, y:-30,
-        vx:(Math.random()*2-1)*(0.65 + finished*0.03),
+        vx:(Math.random()*2-1)*0.72,
         vy:1.0, tilt:(Math.random()*2-1)*0.06,
-        bounced:false, softness
+        bounced:false, softness,
+        wobble:Math.random()*Math.PI*2,
+        wobblePower:0.018+Math.random()*0.022,
+        nextJink:performance.now()+320+Math.random()*720
       };
     } else if (phase === 3) {
       falling = {
         type:'butter', x, y:-24,
-        vx:(Math.random()*2-1)*0.45,
+        vx:(Math.random()*2-1)*0.48,
         vy:1.0, tilt:(Math.random()*2-1)*0.08,
-        bounced:false
+        bounced:false,
+        wobble:Math.random()*Math.PI*2,
+        wobblePower:0.014+Math.random()*0.018,
+        nextJink:performance.now()+280+Math.random()*760
       };
     } else {
       falling = {
         type:'honey', x, y:-34,
-        vx:(Math.random()*2-1)*0.26,
-        vy:1.2
+        vx:(Math.random()*2-1)*0.28,
+        vy:1.2,
+        wobble:Math.random()*Math.PI*2,
+        wobblePower:0.010+Math.random()*0.012,
+        nextJink:performance.now()+420+Math.random()*850
       };
     }
+  }
+
+  function unpredictableMotion(obj, dtFactor, now) {
+    obj.wobble += (0.055 + Math.random()*0.012) * dtFactor;
+    obj.vx += Math.sin(obj.wobble) * obj.wobblePower * dtFactor;
+
+    if (now >= obj.nextJink) {
+      const kick = (Math.random()*2-1) * (obj.type === 'cake' ? 0.95 : obj.type === 'butter' ? 0.68 : 0.38);
+      if (Math.random() < 0.34) obj.vx *= -0.72;
+      obj.vx += kick;
+      obj.nextJink = now + 300 + Math.random()*900;
+    }
+
+    const maxVx = obj.type === 'cake' ? 1.85 : obj.type === 'butter' ? 1.35 : 0.82;
+    obj.vx = Math.max(-maxVx, Math.min(maxVx, obj.vx));
   }
 
   function startOrder(now) {
@@ -403,9 +427,10 @@ canvas{display:block;width:100%;height:100%}
 
     if (!falling.bounced) {
       falling.bounced=true;
-      falling.vy=-(3.0+falling.softness*1.9);
-      falling.vx += relative*.022;
-      falling.tilt += falling.vx*.016;
+      falling.vy=-(3.0+falling.softness*1.65+Math.random()*1.15);
+      falling.vx += relative*.018 + (Math.random()*2-1)*0.85;
+      if (Math.random()<0.28) falling.vx *= -0.8;
+      falling.tilt += falling.vx*.016 + (Math.random()*2-1)*0.05;
       msg.textContent='跳ねた！ 皿で追う';
       return true;
     }
@@ -447,9 +472,10 @@ canvas{display:block;width:100%;height:100%}
     falling.y=targetY;
     if (!falling.bounced) {
       falling.bounced=true;
-      falling.vy=-2.1;
-      falling.vx += (falling.x-center)*.018;
-      falling.tilt += falling.vx*.025;
+      falling.vy=-(1.7+Math.random()*1.25);
+      falling.vx += (falling.x-center)*.014 + (Math.random()*2-1)*0.62;
+      if (Math.random()<0.25) falling.vx *= -0.75;
+      falling.tilt += falling.vx*.025 + (Math.random()*2-1)*0.08;
       msg.textContent='バターが跳ねた！';
       return true;
     }
@@ -557,11 +583,13 @@ canvas{display:block;width:100%;height:100%}
     const f=dt/16.67;
 
     if(falling.type==='honey'){
+      unpredictableMotion(falling,f,now);
       falling.vy+=.15*f;
       falling.x+=falling.vx*f;
       falling.y+=falling.vy*f;
       if(state==='play')hitHoney(now);
     }else{
+      unpredictableMotion(falling,f,now);
       falling.vy+=.20*f;
       falling.x+=falling.vx*f;
       falling.y+=falling.vy*f;
