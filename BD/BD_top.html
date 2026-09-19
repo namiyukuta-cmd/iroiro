@@ -76,7 +76,7 @@
     #player{
       position:absolute;
       left:50%;
-      top:52%;
+      top:24%;
       width:66px;
       height:112px;
       transform:translate(-50%,-50%);
@@ -422,41 +422,80 @@
     const W=dungeonCanvas.width,H=dungeonCanvas.height;
     const cells=new Uint8Array(W*H);
     const idx=(x,y)=>y*W+x;
+    const rooms=[];
 
-    // 壁=0、通路=1。細かい1px級のマスで1面を生成。
-    let x=8+Math.floor(Math.random()*10);
-    let y=Math.floor(H*.45+Math.random()*H*.1);
-    const walkers=[];
-    for(let i=0;i<7;i++)walkers.push({x,y});
-
-    const carve=(cx,cy,r=1)=>{
-      for(let yy=Math.max(1,cy-r);yy<=Math.min(H-2,cy+r);yy++){
-        for(let xx=Math.max(1,cx-r);xx<=Math.min(W-2,cx+r);xx++)cells[idx(xx,yy)]=1;
+    function carveRect(x,y,w,h){
+      const x0=Math.max(1,Math.floor(x)),y0=Math.max(1,Math.floor(y));
+      const x1=Math.min(W-2,Math.floor(x+w)),y1=Math.min(H-2,Math.floor(y+h));
+      for(let yy=y0;yy<y1;yy++){
+        for(let xx=x0;xx<x1;xx++)cells[idx(xx,yy)]=1;
       }
-    };
-
-    carve(x,y,3);
-    for(let step=0;step<W*H*2.2;step++){
-      const w=walkers[step%walkers.length];
-      const dir=Math.floor(Math.random()*4);
-      if(dir===0)w.x++; else if(dir===1)w.x--; else if(dir===2)w.y++; else w.y--;
-      w.x=Math.max(2,Math.min(W-3,w.x));
-      w.y=Math.max(2,Math.min(H-3,w.y));
-      carve(w.x,w.y,Math.random()<.1?2:1);
-
-      if(Math.random()<.008){
-        const rw=4+Math.floor(Math.random()*11);
-        const rh=3+Math.floor(Math.random()*9);
-        for(let yy=Math.max(1,w.y-rh);yy<=Math.min(H-2,w.y+rh);yy++){
-          for(let xx=Math.max(1,w.x-rw);xx<=Math.min(W-2,w.x+rw);xx++)cells[idx(xx,yy)]=1;
-        }
-      }
-      if(Math.random()<.004&&walkers.length<12)walkers.push({x:w.x,y:w.y});
     }
 
-    // 左中央に探索の基点となる空間を確保。
-    for(let yy=Math.floor(H*.42);yy<Math.floor(H*.58);yy++){
-      for(let xx=2;xx<24;xx++)cells[idx(xx,yy)]=1;
+    function carveH(x1,x2,y,width=2){
+      const a=Math.max(1,Math.min(x1,x2)),b=Math.min(W-2,Math.max(x1,x2));
+      for(let yy=Math.max(1,y-width);yy<=Math.min(H-2,y+width);yy++){
+        for(let x=a;x<=b;x++)cells[idx(x,yy)]=1;
+      }
+    }
+
+    function carveV(y1,y2,x,width=2){
+      const a=Math.max(1,Math.min(y1,y2)),b=Math.min(H-2,Math.max(y1,y2));
+      for(let xx=Math.max(1,x-width);xx<=Math.min(W-2,x+width);xx++){
+        for(let y=a;y<=b;y++)cells[idx(xx,y)]=1;
+      }
+    }
+
+    // 小さな長方形の部屋を散らして、細い直角通路でつなぐ。
+    const targetRooms=12+Math.floor(Math.random()*7);
+    for(let tries=0;tries<180&&rooms.length<targetRooms;tries++){
+      const rw=10+Math.floor(Math.random()*24);
+      const rh=8+Math.floor(Math.random()*20);
+      const rx=3+Math.floor(Math.random()*Math.max(1,W-rw-6));
+      const ry=3+Math.floor(Math.random()*Math.max(1,H-rh-6));
+      const pad=5;
+      const overlaps=rooms.some(r=>
+        rx<r.x+r.w+pad && rx+rw+pad>r.x &&
+        ry<r.y+r.h+pad && ry+rh+pad>r.y
+      );
+      if(overlaps)continue;
+      rooms.push({x:rx,y:ry,w:rw,h:rh,cx:Math.floor(rx+rw/2),cy:Math.floor(ry+rh/2)});
+      carveRect(rx,ry,rw,rh);
+    }
+
+    rooms.sort((a,b)=>a.cx-b.cx);
+
+    for(let i=1;i<rooms.length;i++){
+      const a=rooms[i-1],b=rooms[i];
+      if(Math.random()<.5){
+        carveH(a.cx,b.cx,a.cy,1);
+        carveV(a.cy,b.cy,b.cx,1);
+      }else{
+        carveV(a.cy,b.cy,a.cx,1);
+        carveH(a.cx,b.cx,b.cy,1);
+      }
+    }
+
+    // 枝道を少し追加。
+    for(let i=0;i<Math.floor(rooms.length/3);i++){
+      const a=rooms[Math.floor(Math.random()*rooms.length)];
+      const b=rooms[Math.floor(Math.random()*rooms.length)];
+      if(!a||!b||a===b)continue;
+      if(Math.random()<.5){
+        carveH(a.cx,b.cx,a.cy,1);
+        carveV(a.cy,b.cy,b.cx,1);
+      }else{
+        carveV(a.cy,b.cy,a.cx,1);
+        carveH(a.cx,b.cx,b.cy,1);
+      }
+    }
+
+    // 左中央に接敵地点へつながる短い入口通路。
+    if(rooms.length){
+      const entranceY=Math.floor(H*.5);
+      carveH(2,rooms[0].cx,entranceY,1);
+      carveV(entranceY,rooms[0].cy,rooms[0].cx,1);
+      carveRect(2,entranceY-4,8,9);
     }
 
     dungeonMap={W,H,cells};
@@ -467,16 +506,41 @@
     if(!dungeonMap)return;
     const {W,H,cells}=dungeonMap;
     const image=dungeonCtx.createImageData(W,H);
-    for(let i=0;i<cells.length;i++){
-      const p=i*4;
-      if(cells[i]){
-        const n=235+Math.floor(Math.random()*12);
-        image.data[p]=n;image.data[p+1]=n;image.data[p+2]=n-5;image.data[p+3]=255;
-      }else{
-        const n=22+Math.floor(Math.random()*8);
-        image.data[p]=n;image.data[p+1]=n;image.data[p+2]=n;image.data[p+3]=255;
+
+    for(let y=0;y<H;y++){
+      for(let x=0;x<W;x++){
+        const i=y*W+x,p=i*4;
+        if(cells[i]){
+          const n=224+((x+y)%3)*5;
+          image.data[p]=n;
+          image.data[p+1]=n;
+          image.data[p+2]=n-4;
+          image.data[p+3]=255;
+        }else{
+          image.data[p]=18;
+          image.data[p+1]=18;
+          image.data[p+2]=18;
+          image.data[p+3]=255;
+        }
       }
     }
+
+    // 通路・部屋の境界を1pxの壁として少し明るく見せる。
+    for(let y=1;y<H-1;y++){
+      for(let x=1;x<W-1;x++){
+        const i=y*W+x;
+        if(cells[i])continue;
+        const near=
+          cells[i-1]||cells[i+1]||cells[i-W]||cells[i+W];
+        if(near){
+          const p=i*4;
+          image.data[p]=76;
+          image.data[p+1]=76;
+          image.data[p+2]=72;
+        }
+      }
+    }
+
     dungeonCtx.putImageData(image,0,0);
   }
 
@@ -499,6 +563,13 @@
   function refreshBounds(){
     dungeonW=dungeon.clientWidth;
     dungeonH=dungeon.clientHeight;
+    const nextW=Math.max(120,Math.round(dungeonW));
+    const nextH=Math.max(160,Math.round(dungeonH));
+    if(dungeonCanvas.width!==nextW||dungeonCanvas.height!==nextH){
+      dungeonCanvas.width=nextW;
+      dungeonCanvas.height=nextH;
+      generateDungeon();
+    }
     for(const e of enemies){
       e.x=Math.min(Math.max(0,e.x),Math.max(0,dungeonW-ENEMY_SIZE));
       e.y=Math.min(Math.max(0,e.y),Math.max(0,dungeonH-ENEMY_SIZE));
@@ -747,7 +818,6 @@
   }
 
   function init(){
-    generateDungeon();
     refreshBounds();
     const now=performance.now();
     state.roundStart=now;
