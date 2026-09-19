@@ -80,6 +80,8 @@ canvas{display:block;width:100%;height:100%}
   const ORDER_NOTICE_MS = 900;
 
   let plateX = W / 2;
+  let prevPlateX = plateX;
+  let plateDelta = 0;
   let stack = [];
   let butter = null;
   let honey = null;
@@ -112,7 +114,8 @@ canvas{display:block;width:100%;height:100%}
 
   function topCenter() {
     if (phase === 0 || !stack.length) return plateX;
-    return plateX + stack[stack.length - 1].offsetX;
+    const top = stack[stack.length - 1];
+    return plateX + top.offsetX + (top.lagX || 0);
   }
 
   function topY() {
@@ -136,8 +139,8 @@ canvas{display:block;width:100%;height:100%}
     const x = margin + Math.random() * (W - margin * 2);
 
     if (phase <= 2) {
-      const softness = 0.15 + Math.random() * 0.80;
-      const elasticity = 0.22 + (1 - softness) * 0.58 + Math.random() * 0.10;
+      const softness = 0.38 + Math.random() * 0.62;
+      const elasticity = 0.16 + (1 - softness) * 0.50 + Math.random() * 0.08;
       falling = {
         type:'cake', x, y:-30,
         vx:(Math.random()*2-1)*0.24,
@@ -198,8 +201,8 @@ canvas{display:block;width:100%;height:100%}
     ctx.translate(x,y);
     ctx.rotate(tilt);
 
-    const widthScale = 1 + squash * (0.24 + softness * 0.16);
-    const heightScale = 1 - squash * (0.42 + softness * 0.25);
+    const widthScale = 1 + squash * (0.32 + softness * 0.24);
+    const heightScale = Math.max(0.28, 1 - squash * (0.50 + softness * 0.34));
     const w = cakeW * widthScale;
     const h = cakeH * heightScale;
 
@@ -254,7 +257,7 @@ canvas{display:block;width:100%;height:100%}
   function drawHoneyOnStack() {
     if (!honey || !stack.length) return;
     const top = stack[stack.length-1];
-    const x = plateX + top.offsetX + honey.offsetX;
+    const x = plateX + top.offsetX + (top.lagX||0) + honey.offsetX;
     const y = plateY - 11 - (stack.length-1)*14 - 4;
 
     ctx.save();
@@ -271,10 +274,10 @@ canvas{display:block;width:100%;height:100%}
     const leftDrip = Math.max(-30, honey.offsetX - honey.spread*.24);
     const rightDrip = Math.min(30, honey.offsetX + honey.spread*.25);
     ctx.beginPath();
-    ctx.moveTo(plateX+top.offsetX+leftDrip,y+2);
-    ctx.quadraticCurveTo(plateX+top.offsetX+leftDrip-2,y+12,plateX+top.offsetX+leftDrip,y+22);
-    ctx.moveTo(plateX+top.offsetX+rightDrip,y+2);
-    ctx.quadraticCurveTo(plateX+top.offsetX+rightDrip+2,y+10,plateX+top.offsetX+rightDrip,y+18);
+    ctx.moveTo(plateX+top.offsetX+(top.lagX||0)+leftDrip,y+2);
+    ctx.quadraticCurveTo(plateX+top.offsetX+(top.lagX||0)+leftDrip-2,y+12,plateX+top.offsetX+(top.lagX||0)+leftDrip,y+22);
+    ctx.moveTo(plateX+top.offsetX+(top.lagX||0)+rightDrip,y+2);
+    ctx.quadraticCurveTo(plateX+top.offsetX+(top.lagX||0)+rightDrip+2,y+10,plateX+top.offsetX+(top.lagX||0)+rightDrip,y+18);
     ctx.stroke();
     ctx.restore();
   }
@@ -296,13 +299,23 @@ canvas{display:block;width:100%;height:100%}
     for (let i=0;i<stack.length;i++) {
       const s=stack[i];
       const load = stack.length - 1 - i;
-      const compression = Math.min(0.22, load * (0.035 + s.softness * 0.035));
-      drawPancake(plateX+s.offsetX,plateY-11-i*14,s.tilt,s.softness,compression);
+      const compression = Math.min(
+        0.42,
+        load * (0.055 + s.softness * 0.055) + (s.settleSquash || 0)
+      );
+      const softTilt = s.tilt + (s.lagX || 0) * 0.0035;
+      drawPancake(
+        plateX + s.offsetX + (s.lagX || 0),
+        plateY - 11 - i*14 + compression * 4,
+        softTilt,
+        s.softness,
+        compression
+      );
     }
 
     if (butter && stack.length) {
       const top=stack[stack.length-1];
-      drawButter(plateX+top.offsetX+butter.offsetX,plateY-11-(stack.length-1)*14-15+butter.sink,butter.tilt);
+      drawButter(plateX+top.offsetX+(top.lagX||0)+butter.offsetX,plateY-11-(stack.length-1)*14-15+butter.sink,butter.tilt);
     }
 
     drawHoneyOnStack();
@@ -391,10 +404,17 @@ canvas{display:block;width:100%;height:100%}
     const offset = stack.length ? prev + slide : slide * 0.80;
     const tilt = surfaceTilt * 0.55 + relative * (0.0018 + falling.softness * 0.0018);
 
+    for (const s of stack) {
+      s.settleSquash = Math.min(0.34, (s.settleSquash || 0) + 0.10 + falling.softness * 0.08);
+    }
+
     stack.push({
       offsetX:Math.max(-38,Math.min(38,offset)),
       tilt:Math.max(-.13,Math.min(.13,tilt)),
-      softness:falling.softness
+      softness:falling.softness,
+      settleSquash:0.20 + falling.softness * 0.18,
+      lagX:0,
+      lagVX:0
     });
 
     dishScores[phase]=scoreFromDiff(diff,supportHalf);
@@ -416,8 +436,8 @@ canvas{display:block;width:100%;height:100%}
       falling.bounced=true;
       falling.impactRelative=relative;
       falling.vy=0;
-      falling.squash=0.72;
-      falling.squashUntil=now + 90 + falling.softness * 110;
+      falling.squash=0.88 + falling.softness * 0.10;
+      falling.squashUntil=now + 135 + falling.softness * 175;
       state='squash';
       msg.textContent=falling.softness>0.68 ? 'むにっ…' : 'ぽふっ';
       return true;
@@ -429,7 +449,7 @@ canvas{display:block;width:100%;height:100%}
 
   function settleButter(now) {
     const top=stack[stack.length-1];
-    const center=plateX+top.offsetX;
+    const center=plateX+top.offsetX+(top.lagX||0);
     const relative=falling.x-center;
     const diff=Math.abs(relative);
 
@@ -455,7 +475,7 @@ canvas{display:block;width:100%;height:100%}
 
   function hitButter(now) {
     const top=stack[stack.length-1];
-    const center=plateX+top.offsetX;
+    const center=plateX+top.offsetX+(top.lagX||0);
     const targetY=plateY-11-(stack.length-1)*14-18;
     if (Math.abs(falling.x-center)>48) return false;
 
@@ -475,7 +495,7 @@ canvas{display:block;width:100%;height:100%}
 
   function settleHoney(now) {
     const top=stack[stack.length-1];
-    const center=plateX+top.offsetX;
+    const center=plateX+top.offsetX+(top.lagX||0);
     const relative=falling.x-center;
     const diff=Math.abs(relative);
 
@@ -512,6 +532,25 @@ canvas{display:block;width:100%;height:100%}
     falling=null;
     nextAt=now+550;
     msg.textContent=phaseName()+'をもう一度　時間ロス';
+  }
+
+  function updateStackSoftness(dt) {
+    if (!stack.length) return;
+    const f = dt / 16.67;
+
+    for (let i=0;i<stack.length;i++) {
+      const s = stack[i];
+      const layer = i + 1;
+      const softness = s.softness || 0.5;
+
+      s.lagVX = (s.lagVX || 0) - plateDelta * (0.055 + softness * 0.065) * layer;
+      s.lagVX += -(s.lagX || 0) * (0.030 + (1-softness)*0.018) * f;
+      s.lagVX *= Math.pow(0.82 + softness * 0.08, f);
+      s.lagX = (s.lagX || 0) + s.lagVX * f;
+      s.lagX = Math.max(-14, Math.min(14, s.lagX));
+
+      s.settleSquash = Math.max(0, (s.settleSquash || 0) - (0.010 + (1-softness)*0.008) * f);
+    }
   }
 
   function updateHoneyFlow(dt) {
@@ -551,9 +590,12 @@ canvas{display:block;width:100%;height:100%}
     if (state !== 'complete') updateOrderLine(now);
 
     const moveSpeed=.31*dt;
+    prevPlateX = plateX;
     if(leftHeld)plateX-=moveSpeed;
     if(rightHeld)plateX+=moveSpeed;
     plateX=Math.max(plateW/2,Math.min(W-plateW/2,plateX));
+    plateDelta = plateX - prevPlateX;
+    updateStackSoftness(dt);
 
     if(state==='order'){
       if(now>=orderPlayAt){
@@ -577,13 +619,13 @@ canvas{display:block;width:100%;height:100%}
       if(now>=falling.squashUntil){
         const surfaceTilt=stack.length ? stack[stack.length-1].tilt : 0;
         const edge=falling.impactRelative;
-        const bouncePower=0.75 + falling.elasticity*2.35;
+        const bouncePower=0.42 + falling.elasticity*1.85;
         falling.squash=0;
         falling.vy=-bouncePower;
         falling.vx += edge*(0.016+falling.elasticity*0.012) + surfaceTilt*2.2;
         falling.tilt += edge*0.0018 + surfaceTilt*0.65;
         state='play';
-        msg.textContent=bouncePower<1.45 ? 'やわらかく戻った' : 'ぽよん！';
+        msg.textContent=falling.softness>0.72 ? 'むにゅっと戻る' : (bouncePower<1.25 ? 'ふわっ' : 'ぽよん！');
       }
       return;
     }
@@ -679,7 +721,15 @@ canvas{display:block;width:100%;height:100%}
   function pointerToPlate(e){
     const r=canvas.getBoundingClientRect();
     const x=(e.clientX-r.left)*(W/r.width);
+    const oldX=plateX;
     plateX=Math.max(plateW/2,Math.min(W-plateW/2,x));
+    plateDelta=plateX-oldX;
+    if(stack.length){
+      for(let i=0;i<stack.length;i++){
+        const s=stack[i];
+        s.lagVX=(s.lagVX||0)-plateDelta*(0.08+(s.softness||0.5)*0.08)*(i+1);
+      }
+    }
   }
 
   box.addEventListener('pointerdown',e=>{
