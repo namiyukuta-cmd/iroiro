@@ -15,6 +15,7 @@ body{display:flex;justify-content:center;padding:12px}
 .top{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:8px}
 .score{font-weight:800;font-size:17px;line-height:1.45}
 .sub{font-size:13px;color:#765f50}
+.orderline{font-size:14px;font-weight:800;color:#70401f;margin-top:2px}
 button{font:inherit}
 #reset{border:1px solid #cbb8a4;background:#fff;border-radius:10px;padding:9px 13px;min-height:44px;color:#3b2a20}
 .gamebox{position:relative;width:100%;aspect-ratio:3/5;max-height:72vh;border:2px solid #d8c4ad;border-radius:18px;overflow:hidden;background:#fffdf8;touch-action:none}
@@ -31,18 +32,19 @@ canvas{display:block;width:100%;height:100%}
 <div class="wrap">
   <div class="top">
     <div>
-      <div class="score">合計 <span id="totalScore">0</span>点　完成 <span id="finished">0</span>皿</div>
-      <div class="sub">3枚 → バター → 蜂蜜</div>
+      <div class="score">所持金 ¥<span id="money">0</span>　完成 <span id="finished">0</span>皿</div>
+      <div id="orderLine" class="orderline">注文 #1　現在 ¥500</div>
+      <div class="sub">ホットケーキ3枚 → バター → 蜂蜜</div>
     </div>
     <button id="reset" type="button">やり直す</button>
   </div>
 
-  <div id="gamebox" class="gamebox" aria-label="ホットケーキ、バター、蜂蜜を皿で受け止めるゲーム">
+  <div id="gamebox" class="gamebox" aria-label="注文されたホットケーキを作るゲーム">
     <canvas id="game" width="360" height="600"></canvas>
   </div>
 
-  <div id="msg" class="msg" aria-live="polite">1枚目を受け止める</div>
-  <div id="quality" class="quality">中央にきれいに重ねるほど高得点</div>
+  <div id="msg" class="msg" aria-live="polite">注文が入りました</div>
+  <div id="quality" class="quality">早く、きれいに作る</div>
   <div class="help">画面を左右になぞる / ← → 長押しでも皿を移動</div>
 
   <div class="controls">
@@ -56,8 +58,9 @@ canvas{display:block;width:100%;height:100%}
   const canvas = document.getElementById('game');
   const ctx = canvas.getContext('2d');
   const box = document.getElementById('gamebox');
-  const totalScoreEl = document.getElementById('totalScore');
+  const moneyEl = document.getElementById('money');
   const finishedEl = document.getElementById('finished');
+  const orderLineEl = document.getElementById('orderLine');
   const msg = document.getElementById('msg');
   const qualityEl = document.getElementById('quality');
   const resetBtn = document.getElementById('reset');
@@ -71,20 +74,29 @@ canvas{display:block;width:100%;height:100%}
   const cakeW = 82;
   const cakeH = 24;
 
+  const BASE_PAY = 500;
+  const MIN_PAY = 100;
+  const PAY_LOSS_PER_SECOND = 10;
+  const ORDER_NOTICE_MS = 900;
+
   let plateX = W / 2;
   let stack = [];
   let butter = null;
   let honey = null;
   let falling = null;
 
-  let phase = 0; // 0-2 cake, 3 butter, 4 honey
-  let state = 'play';
+  let phase = 0;
+  let state = 'order';
   let nextAt = 0;
   let completeAt = 0;
   let last = performance.now();
 
-  let totalScore = 0;
+  let money = 0;
   let finished = 0;
+  let orderNo = 0;
+  let orderStartAt = 0;
+  let orderPlayAt = 0;
+  let currentPay = BASE_PAY;
   let dishScores = [0,0,0,0,0];
   let resultInfo = null;
 
@@ -105,6 +117,18 @@ canvas{display:block;width:100%;height:100%}
 
   function topY() {
     return plateY - 10 - stack.length * 14;
+  }
+
+  function calcPay(now) {
+    if (!orderStartAt) return BASE_PAY;
+    const sec = Math.max(0, (now - orderStartAt) / 1000);
+    return Math.max(MIN_PAY, BASE_PAY - Math.floor(sec) * PAY_LOSS_PER_SECOND);
+  }
+
+  function updateOrderLine(now) {
+    if (!orderNo) return;
+    currentPay = calcPay(now);
+    orderLineEl.textContent = '注文 #' + orderNo + '　現在 ¥' + currentPay;
   }
 
   function spawn() {
@@ -135,25 +159,36 @@ canvas{display:block;width:100%;height:100%}
     }
   }
 
-  function restart() {
-    plateX = W/2;
+  function startOrder(now) {
     stack = [];
     butter = null;
     honey = null;
     falling = null;
     phase = 0;
-    state = 'play';
-    nextAt = 0;
-    completeAt = 0;
-    totalScore = 0;
-    finished = 0;
     dishScores = [0,0,0,0,0];
     resultInfo = null;
-    totalScoreEl.textContent = '0';
+
+    orderNo++;
+    orderStartAt = now;
+    orderPlayAt = now + ORDER_NOTICE_MS;
+    currentPay = BASE_PAY;
+    state = 'order';
+
+    msg.textContent = '注文が入りました';
+    qualityEl.textContent = 'ホットケーキ3段・バター・蜂蜜';
+    updateOrderLine(now);
+  }
+
+  function restart() {
+    plateX = W/2;
+    money = 0;
+    finished = 0;
+    orderNo = 0;
+    orderStartAt = 0;
+    currentPay = BASE_PAY;
+    moneyEl.textContent = '0';
     finishedEl.textContent = '0';
-    msg.textContent = '1枚目を受け止める';
-    qualityEl.textContent = '中央にきれいに重ねるほど高得点';
-    spawn();
+    startOrder(performance.now());
   }
 
   function drawPancake(x,y,tilt=0,softness=1) {
@@ -239,7 +274,6 @@ canvas{display:block;width:100%;height:100%}
   }
 
   function drawPlateAndFood() {
-    ctx.save();
     ctx.fillStyle='#d8e8ef';
     ctx.strokeStyle='#657d8a';
     ctx.lineWidth=3;
@@ -258,19 +292,19 @@ canvas{display:block;width:100%;height:100%}
       drawPancake(plateX+s.offsetX,plateY-11-i*14,s.tilt,s.softness);
     }
 
-    if (butter) {
+    if (butter && stack.length) {
       const top=stack[stack.length-1];
       drawButter(plateX+top.offsetX+butter.offsetX,plateY-11-(stack.length-1)*14-15,butter.tilt);
     }
 
     drawHoneyOnStack();
-    ctx.restore();
   }
 
   function drawBackground() {
     ctx.clearRect(0,0,W,H);
     ctx.fillStyle='#fffdf8';
     ctx.fillRect(0,0,W,H);
+
     ctx.fillStyle='#fff5df';
     ctx.fillRect(0,0,W,92);
 
@@ -288,6 +322,29 @@ canvas{display:block;width:100%;height:100%}
     ctx.moveTo(0,455);
     ctx.lineTo(W,455);
     ctx.stroke();
+  }
+
+  function drawOrderCard() {
+    if (state !== 'order') return;
+    ctx.save();
+    ctx.fillStyle='rgba(255,255,255,.94)';
+    ctx.strokeStyle='#70401f';
+    ctx.lineWidth=2;
+    ctx.beginPath();
+    ctx.roundRect(48,120,264,150,16);
+    ctx.fill();
+    ctx.stroke();
+
+    ctx.fillStyle='#3b2a20';
+    ctx.textAlign='center';
+    ctx.font='800 27px sans-serif';
+    ctx.fillText('注文 #' + orderNo, W/2,158);
+    ctx.font='700 18px sans-serif';
+    ctx.fillText('ホットケーキ 3段', W/2,194);
+    ctx.fillText('バター ＋ 蜂蜜', W/2,222);
+    ctx.font='800 21px sans-serif';
+    ctx.fillText('¥' + BASE_PAY + ' から開始', W/2,253);
+    ctx.restore();
   }
 
   function advance(now) {
@@ -315,7 +372,7 @@ canvas{display:block;width:100%;height:100%}
       falling.vy=2.7;
       falling.vx += Math.sign(falling.x-center || 1)*0.9;
       state='fallingOff';
-      msg.textContent='跳ねて落ちた！';
+      msg.textContent='跳ねて落ちた！ 時間ロス';
       return;
     }
 
@@ -346,8 +403,7 @@ canvas{display:block;width:100%;height:100%}
 
     if (!falling.bounced) {
       falling.bounced=true;
-      const softness=falling.softness;
-      falling.vy=-(3.0+softness*1.9);
+      falling.vy=-(3.0+falling.softness*1.9);
       falling.vx += relative*.022;
       falling.tilt += falling.vx*.016;
       msg.textContent='跳ねた！ 皿で追う';
@@ -368,7 +424,7 @@ canvas{display:block;width:100%;height:100%}
       falling.vy=2.8;
       falling.vx += Math.sign(relative||1)*.8;
       state='fallingOff';
-      msg.textContent='バターが滑り落ちた！';
+      msg.textContent='バターが落ちた！ 時間ロス';
       return;
     }
 
@@ -411,14 +467,13 @@ canvas{display:block;width:100%;height:100%}
     if (diff>49) {
       state='fallingOff';
       falling.vy=3.4;
-      msg.textContent='蜂蜜が外れた！';
+      msg.textContent='蜂蜜が外れた！ 時間ロス';
       return;
     }
 
-    const spread=Math.max(26,74-diff*.8);
     honey={
       offsetX:Math.max(-36,Math.min(36,relative*.72)),
-      spread
+      spread:Math.max(26,74-diff*.8)
     };
 
     dishScores[4]=scoreFromDiff(diff,49);
@@ -429,7 +484,6 @@ canvas{display:block;width:100%;height:100%}
 
   function hitHoney(now) {
     const top=stack[stack.length-1];
-    const center=plateX+top.offsetX;
     const targetY=plateY-11-(stack.length-1)*14-16;
     if (falling.y+14<targetY) return false;
     settleHoney(now);
@@ -440,51 +494,53 @@ canvas{display:block;width:100%;height:100%}
     state='wait';
     falling=null;
     nextAt=now+550;
-    msg.textContent=phaseName()+'をもう一度';
+    msg.textContent=phaseName()+'をもう一度　時間ロス';
   }
 
   function finishDish(now) {
     const points=dishScores.reduce((a,b)=>a+b,0);
     const percent=Math.round(points/5);
+    const earned=calcPay(now);
+
     let rank='くずれ気味';
     if(percent>=95)rank='完璧';
     else if(percent>=85)rank='かなり上手';
     else if(percent>=70)rank='きれい';
     else if(percent>=50)rank='まあまあ';
 
-    totalScore+=points;
+    money+=earned;
     finished++;
-    totalScoreEl.textContent=String(totalScore);
+    moneyEl.textContent=String(money);
     finishedEl.textContent=String(finished);
-    resultInfo={points,percent,rank};
+
+    resultInfo={points,percent,rank,earned};
     state='complete';
     completeAt=now+2200;
-    msg.textContent='完成！';
-    qualityEl.textContent='出来度 '+percent+'%　+'+points+'点　'+rank;
-  }
-
-  function newDish() {
-    stack=[];
-    butter=null;
-    honey=null;
-    falling=null;
-    dishScores=[0,0,0,0,0];
-    phase=0;
-    state='play';
-    resultInfo=null;
-    msg.textContent='1枚目を受け止める';
-    qualityEl.textContent='中央にきれいに重ねるほど高得点';
-    spawn();
+    msg.textContent='注文完成！ ¥'+earned;
+    qualityEl.textContent='出来度 '+percent+'%　'+rank;
+    orderLineEl.textContent='注文 #'+orderNo+'　売上 ¥'+earned;
   }
 
   function update(dt,now) {
+    if (state !== 'complete') updateOrderLine(now);
+
     const moveSpeed=.31*dt;
     if(leftHeld)plateX-=moveSpeed;
     if(rightHeld)plateX+=moveSpeed;
     plateX=Math.max(plateW/2,Math.min(W-plateW/2,plateX));
 
+    if(state==='order'){
+      if(now>=orderPlayAt){
+        state='play';
+        msg.textContent='1枚目を受け止める';
+        qualityEl.textContent='中央にきれいに重ねるほど高得点';
+        spawn();
+      }
+      return;
+    }
+
     if(state==='complete'){
-      if(now>=completeAt)newDish();
+      if(now>=completeAt)startOrder(now);
       return;
     }
 
@@ -536,21 +592,26 @@ canvas{display:block;width:100%;height:100%}
       else drawHoneyBlob(falling.x,falling.y);
     }
 
+    drawOrderCard();
+
     if(state==='complete' && resultInfo){
       ctx.save();
-      ctx.fillStyle='rgba(255,255,255,.90)';
+      ctx.fillStyle='rgba(255,255,255,.92)';
       ctx.strokeStyle='#7b5a3f';
       ctx.lineWidth=2;
       ctx.beginPath();
-      ctx.roundRect(62,112,236,90,14);
+      ctx.roundRect(54,108,252,118,14);
       ctx.fill();
       ctx.stroke();
+
       ctx.fillStyle='#3b2a20';
       ctx.textAlign='center';
       ctx.font='800 25px sans-serif';
-      ctx.fillText('出来度 '+resultInfo.percent+'%',W/2,149);
-      ctx.font='700 18px sans-serif';
-      ctx.fillText('+'+resultInfo.points+'点　'+resultInfo.rank,W/2,180);
+      ctx.fillText('出来度 '+resultInfo.percent+'%',W/2,145);
+      ctx.font='700 17px sans-serif';
+      ctx.fillText(resultInfo.rank+'　'+resultInfo.points+'/500点',W/2,176);
+      ctx.font='800 22px sans-serif';
+      ctx.fillText('売上 ¥'+resultInfo.earned,W/2,207);
       ctx.restore();
     }
   }
