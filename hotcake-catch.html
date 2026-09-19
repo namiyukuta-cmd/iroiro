@@ -3,6 +3,9 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
 <title>ホットケーキキャッチ</title>
 <style>
   *{box-sizing:border-box}
@@ -10,14 +13,15 @@
   body{display:flex;justify-content:center;padding:12px}
   .wrap{width:min(100%,430px)}
   .top{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:8px}
-  .score{font-weight:800;font-size:18px}
+  .score{font-weight:800;font-size:17px;line-height:1.5}
   .sub{font-size:13px;color:#765f50}
   button{font:inherit}
   #reset{border:1px solid #cbb8a4;background:#fff;border-radius:10px;padding:9px 13px;min-height:44px;color:#3b2a20}
-  .gamebox{position:relative;width:100%;aspect-ratio:3/5;max-height:72vh;border:2px solid #d8c4ad;border-radius:18px;overflow:hidden;background:linear-gradient(#fffdf8 0%,#fff7e8 72%,#efe1ca 72%,#efe1ca 100%);touch-action:none}
+  .gamebox{position:relative;width:100%;aspect-ratio:3/5;max-height:72vh;border:2px solid #d8c4ad;border-radius:18px;overflow:hidden;background:#fffdf8;touch-action:none}
   canvas{display:block;width:100%;height:100%}
-  .msg{min-height:24px;text-align:center;font-weight:700;margin:8px 0 4px}
-  .help{text-align:center;font-size:13px;color:#765f50;margin-bottom:8px}
+  .msg{min-height:27px;text-align:center;font-weight:800;margin:8px 0 2px}
+  .quality{min-height:22px;text-align:center;font-size:14px;color:#765f50;margin-bottom:5px}
+  .help{text-align:center;font-size:12px;color:#765f50;margin-bottom:8px}
   .controls{display:grid;grid-template-columns:1fr 1fr;gap:10px}
   .move{min-height:54px;border:1px solid #cbb8a4;background:#fff;border-radius:14px;font-size:24px;font-weight:800;color:#3b2a20}
   .move:active,#reset:active{transform:translateY(1px)}
@@ -27,18 +31,19 @@
 <div class="wrap">
   <div class="top">
     <div>
-      <div class="score">成功 <span id="score">0</span>枚　失敗 <span id="miss">0</span>回</div>
-      <div class="sub">落ちてくるホットケーキを皿で受け止める</div>
+      <div class="score">合計 <span id="totalScore">0</span>点　完成 <span id="finished">0</span>皿</div>
+      <div class="sub">3段＋バター＋蜂蜜で完成</div>
     </div>
     <button id="reset" type="button">やり直す</button>
   </div>
 
-  <div id="gamebox" class="gamebox" aria-label="ホットケーキを皿で受け止めるゲーム">
+  <div id="gamebox" class="gamebox" aria-label="落ちて跳ねるホットケーキを皿で受け止めるゲーム">
     <canvas id="game" width="360" height="600"></canvas>
   </div>
 
-  <div id="msg" class="msg" aria-live="polite">皿を動かしてください</div>
-  <div class="help">画面を左右になぞる / 下のボタンで皿を移動</div>
+  <div id="msg" class="msg" aria-live="polite">1枚目を受け止める</div>
+  <div id="quality" class="quality">きれいに中央へ積むほど高得点</div>
+  <div class="help">画面を左右になぞる / ← → 長押しでも皿を移動</div>
 
   <div class="controls">
     <button id="left" class="move" type="button" aria-label="皿を左へ">←</button>
@@ -51,88 +56,101 @@
   const canvas = document.getElementById('game');
   const ctx = canvas.getContext('2d');
   const box = document.getElementById('gamebox');
-  const scoreEl = document.getElementById('score');
-  const missEl = document.getElementById('miss');
+  const totalScoreEl = document.getElementById('totalScore');
+  const finishedEl = document.getElementById('finished');
   const msg = document.getElementById('msg');
+  const qualityEl = document.getElementById('quality');
   const resetBtn = document.getElementById('reset');
   const leftBtn = document.getElementById('left');
   const rightBtn = document.getElementById('right');
 
   const W = canvas.width;
   const H = canvas.height;
+  const plateY = 535;
+  const plateW = 126;
+  const plateH = 26;
+  const cakeW = 82;
+  const cakeH = 24;
 
   let plateX = W / 2;
-  const plateY = 535;
-  const plateW = 128;
-  const plateH = 26;
-
   let cake = null;
-  let score = 0;
-  let misses = 0;
   let stack = [];
-  let speed = 2.7;
+  let totalScore = 0;
+  let finished = 0;
+  let misses = 0;
   let last = performance.now();
-  let pausedUntil = 0;
   let pointerDown = false;
   let leftHeld = false;
   let rightHeld = false;
+  let state = 'play';
+  let nextAt = 0;
+  let completeAt = 0;
+  let finishInfo = null;
 
-  function resetCake() {
-    const margin = 46;
+  function randomCake() {
+    const margin = 52;
     cake = {
       x: margin + Math.random() * (W - margin * 2),
-      y: -30,
-      w: 78,
-      h: 24,
-      vy: speed
+      y: -28,
+      vx: (Math.random() * 2 - 1) * (0.55 + finished * 0.04),
+      vy: 0.9,
+      bounce: 0,
+      tilt: (Math.random() * 2 - 1) * 0.05
     };
   }
 
   function restart() {
-    score = 0;
-    misses = 0;
-    speed = 2.7;
     plateX = W / 2;
     stack = [];
-    pausedUntil = 0;
-    scoreEl.textContent = '0';
-    missEl.textContent = '0';
-    msg.textContent = '皿を動かしてください';
-    resetCake();
+    totalScore = 0;
+    finished = 0;
+    misses = 0;
+    state = 'play';
+    nextAt = 0;
+    completeAt = 0;
+    finishInfo = null;
+    totalScoreEl.textContent = '0';
+    finishedEl.textContent = '0';
+    msg.textContent = '1枚目を受け止める';
+    qualityEl.textContent = 'きれいに中央へ積むほど高得点';
+    randomCake();
   }
 
-  function stackTopY() {
-    return plateY - 10 - stack.length * 11;
+  function supportCenter() {
+    if (!stack.length) return plateX;
+    return plateX + stack[stack.length - 1].offsetX;
   }
 
-  function drawPancake(x, y, w, h, localTilt = 0) {
+  function supportY() {
+    return plateY - 9 - stack.length * 14;
+  }
+
+  function drawPancake(x, y, tilt = 0) {
     ctx.save();
     ctx.translate(x, y);
-    ctx.rotate(localTilt);
-    ctx.fillStyle = '#b87333';
-    ctx.strokeStyle = '#70401f';
+    ctx.rotate(tilt);
+
+    ctx.fillStyle = '#9f5e2c';
+    ctx.strokeStyle = '#69401f';
     ctx.lineWidth = 2;
     ctx.beginPath();
-    ctx.ellipse(0, 2, w/2, h/2, 0, 0, Math.PI * 2);
+    ctx.ellipse(0, 3, cakeW/2, cakeH/2, 0, 0, Math.PI * 2);
     ctx.fill();
     ctx.stroke();
 
-    ctx.fillStyle = '#e9b760';
+    ctx.fillStyle = '#e7ae55';
     ctx.beginPath();
-    ctx.ellipse(0, -3, w/2 - 4, h/2 - 4, 0, 0, Math.PI * 2);
+    ctx.ellipse(0, -2, cakeW/2 - 4, cakeH/2 - 4, 0, 0, Math.PI * 2);
     ctx.fill();
 
-    ctx.fillStyle = '#f4d58d';
+    ctx.fillStyle = 'rgba(255,235,183,.7)';
     ctx.beginPath();
-    ctx.ellipse(-12, -7, 16, 4, -0.12, 0, Math.PI * 2);
+    ctx.ellipse(-13, -5, 14, 3.5, -.12, 0, Math.PI*2);
     ctx.fill();
-
-    ctx.fillStyle = '#f0cf58';
-    ctx.fillRect(-7, -10, 14, 9);
     ctx.restore();
   }
 
-  function drawPlate() {
+  function drawPlateAndStack() {
     ctx.save();
     ctx.translate(plateX, plateY);
 
@@ -151,28 +169,60 @@
 
     for (let i = 0; i < stack.length; i++) {
       const s = stack[i];
-      drawPancake(s.offsetX, -10 - i * 11, 76, 23, s.tilt);
+      drawPancake(s.offsetX, -11 - i * 14, s.tilt);
     }
+
+    if (state === 'complete' && stack.length === 3) {
+      const top = stack[2];
+      const topY = -11 - 2 * 14;
+
+      ctx.save();
+      ctx.translate(top.offsetX, topY);
+
+      ctx.strokeStyle = '#d89718';
+      ctx.lineWidth = 5;
+      ctx.lineCap = 'round';
+      ctx.beginPath();
+      ctx.moveTo(-27, -6);
+      ctx.quadraticCurveTo(-12, 1, 0, -5);
+      ctx.quadraticCurveTo(16, -12, 30, -3);
+      ctx.stroke();
+
+      ctx.strokeStyle = '#e5a62b';
+      ctx.lineWidth = 3;
+      ctx.beginPath();
+      ctx.moveTo(-30, -1);
+      ctx.quadraticCurveTo(-21, 7, -25, 16);
+      ctx.moveTo(27, -1);
+      ctx.quadraticCurveTo(21, 8, 24, 16);
+      ctx.stroke();
+
+      ctx.fillStyle = '#f3d75c';
+      ctx.strokeStyle = '#c7a53a';
+      ctx.lineWidth = 1.5;
+      ctx.fillRect(-12, -18, 24, 15);
+      ctx.strokeRect(-12, -18, 24, 15);
+      ctx.restore();
+    }
+
     ctx.restore();
   }
 
   function drawBackground() {
     ctx.clearRect(0,0,W,H);
-
     ctx.fillStyle = '#fffdf8';
     ctx.fillRect(0,0,W,H);
 
     ctx.fillStyle = '#fff5df';
-    ctx.fillRect(0,0,W,95);
+    ctx.fillRect(0,0,W,92);
 
     ctx.fillStyle = '#9f7d61';
-    ctx.font = '700 18px sans-serif';
+    ctx.font = '700 17px sans-serif';
     ctx.textAlign = 'center';
-    ctx.fillText('HOTCAKE CATCH', W/2, 42);
+    ctx.fillText('HOTCAKE  ' + Math.min(stack.length + 1, 3) + ' / 3', W/2, 38);
 
     ctx.fillStyle = '#eadcc7';
     ctx.fillRect(0,455,W,145);
-
     ctx.strokeStyle = '#d4c0a8';
     ctx.lineWidth = 2;
     ctx.beginPath();
@@ -181,53 +231,188 @@
     ctx.stroke();
   }
 
-  function catchCake() {
-    const relative = cake.x - plateX;
-    const safe = plateW/2 - cake.w/2 + 20;
-    if (Math.abs(relative) <= safe) {
-      const clampedOffset = Math.max(-24, Math.min(24, relative * 0.42));
-      stack.push({
-        offsetX: clampedOffset,
-        tilt: clampedOffset * 0.0025
-      });
-      score++;
-      scoreEl.textContent = String(score);
-      msg.textContent = Math.abs(relative) < 9 ? 'ど真ん中！' : '乗った！';
-
-      if (score % 5 === 0) speed += 0.35;
-      if (stack.length >= 12) {
-        msg.textContent = '12枚成功！ お皿を空にして続行';
-        stack = [];
-      }
-    } else {
-      misses++;
-      missEl.textContent = String(misses);
-      msg.textContent = '落ちた！';
+  function currentDishScore() {
+    if (!stack.length) return 0;
+    let sum = 0;
+    for (let i = 0; i < stack.length; i++) {
+      const target = i === 0 ? 0 : stack[i - 1].offsetX;
+      const diff = Math.abs(stack[i].offsetX - target);
+      sum += Math.max(0, 100 - diff * 3.2);
     }
-    pausedUntil = performance.now() + 380;
-    resetCake();
+    return Math.round(sum);
+  }
+
+  function finishDish(now) {
+    const base = currentDishScore();
+    const centerPenalty = Math.abs(stack[0].offsetX) * 1.4;
+    const finishBonus = Math.max(0, Math.round(100 - centerPenalty));
+    const points = Math.max(0, Math.round(base + finishBonus));
+    const percent = Math.round(points / 4);
+
+    let rank = 'くずれ気味';
+    if (percent >= 95) rank = '完璧';
+    else if (percent >= 85) rank = 'かなり上手';
+    else if (percent >= 70) rank = 'きれい';
+    else if (percent >= 50) rank = 'まあまあ';
+
+    totalScore += points;
+    finished++;
+    totalScoreEl.textContent = String(totalScore);
+    finishedEl.textContent = String(finished);
+
+    finishInfo = { points, percent, rank };
+    state = 'complete';
+    cake = null;
+    completeAt = now + 1800;
+    msg.textContent = '完成！ バター＋蜂蜜';
+    qualityEl.textContent = '出来度 ' + percent + '%　+' + points + '点　' + rank;
+  }
+
+  function settleCake(now) {
+    const center = supportCenter();
+    const relative = cake.x - center;
+    const supportHalf = stack.length ? 34 : 48;
+
+    if (Math.abs(relative) > supportHalf) {
+      cake.vy = 2.5;
+      cake.vx += Math.sign(relative || 1) * 0.7;
+      state = 'fallingOff';
+      msg.textContent = '跳ねて落ちた！';
+      return;
+    }
+
+    const previousOffset = stack.length ? stack[stack.length - 1].offsetX : 0;
+    const offsetX = stack.length
+      ? previousOffset + relative * 0.60
+      : relative * 0.55;
+
+    stack.push({
+      offsetX: Math.max(-38, Math.min(38, offsetX)),
+      tilt: Math.max(-0.08, Math.min(0.08, cake.tilt + relative * 0.0015))
+    });
+
+    const partial = currentDishScore();
+    qualityEl.textContent = stack.length < 3
+      ? '途中出来度 ' + Math.round(partial / stack.length) + '%'
+      : qualityEl.textContent;
+
+    if (stack.length >= 3) {
+      finishDish(now);
+      return;
+    }
+
+    state = 'wait';
+    cake = null;
+    nextAt = now + 450;
+    msg.textContent = (stack.length + 1) + '枚目を受け止める';
+  }
+
+  function collision(now) {
+    const center = supportCenter();
+    const relative = cake.x - center;
+    const supportHalf = stack.length ? 36 : 50;
+
+    if (Math.abs(relative) > supportHalf + cakeW * 0.18) return false;
+
+    cake.y = supportY() - cakeH/2;
+
+    if (cake.bounce === 0) {
+      cake.bounce = 1;
+      cake.vy = -(3.9 + Math.min(1.4, Math.abs(cake.vx) * 0.7));
+      cake.vx += relative * 0.018;
+      cake.tilt += cake.vx * 0.012;
+      msg.textContent = '跳ねた！ 皿で追う';
+      return true;
+    }
+
+    settleCake(now);
+    return true;
+  }
+
+  function miss(now) {
+    misses++;
+    state = 'wait';
+    cake = null;
+    nextAt = now + 520;
+    msg.textContent = '落とした！ ' + (stack.length + 1) + '枚目をもう一度';
+    qualityEl.textContent = stack.length
+      ? '今の途中出来度 ' + Math.round(currentDishScore()/stack.length) + '%'
+      : 'きれいに中央へ積むほど高得点';
   }
 
   function update(dt, now) {
-    const moveSpeed = 0.30 * dt;
+    const moveSpeed = 0.31 * dt;
     if (leftHeld) plateX -= moveSpeed;
     if (rightHeld) plateX += moveSpeed;
     plateX = Math.max(plateW/2, Math.min(W - plateW/2, plateX));
 
-    if (now < pausedUntil) return;
-
-    cake.y += cake.vy * (dt / 16.67);
-
-    const targetY = stackTopY();
-    if (cake.y + cake.h/2 >= targetY) {
-      catchCake();
+    if (state === 'complete') {
+      if (now >= completeAt) {
+        stack = [];
+        finishInfo = null;
+        state = 'play';
+        msg.textContent = '1枚目を受け止める';
+        qualityEl.textContent = 'きれいに中央へ積むほど高得点';
+        randomCake();
+      }
+      return;
     }
+
+    if (state === 'wait') {
+      if (now >= nextAt) {
+        state = 'play';
+        randomCake();
+      }
+      return;
+    }
+
+    if (!cake) return;
+
+    const factor = dt / 16.67;
+    cake.vy += 0.19 * factor;
+    cake.x += cake.vx * factor;
+    cake.y += cake.vy * factor;
+    cake.tilt += cake.vx * 0.0016 * factor;
+
+    if (cake.x < cakeW/2) {
+      cake.x = cakeW/2;
+      cake.vx = Math.abs(cake.vx) * 0.8;
+    } else if (cake.x > W - cakeW/2) {
+      cake.x = W - cakeW/2;
+      cake.vx = -Math.abs(cake.vx) * 0.8;
+    }
+
+    if (state === 'play' && cake.vy > 0 && cake.y + cakeH/2 >= supportY()) {
+      collision(now);
+    }
+
+    if (cake && cake.y > H + 45) miss(now);
   }
 
   function render() {
     drawBackground();
-    drawPlate();
-    if (cake) drawPancake(cake.x, cake.y, cake.w, cake.h, 0);
+    drawPlateAndStack();
+
+    if (cake) drawPancake(cake.x, cake.y, cake.tilt);
+
+    if (state === 'complete' && finishInfo) {
+      ctx.save();
+      ctx.fillStyle = 'rgba(255,255,255,.88)';
+      ctx.strokeStyle = '#7b5a3f';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.roundRect(67, 112, 226, 82, 14);
+      ctx.fill();
+      ctx.stroke();
+
+      ctx.fillStyle = '#3b2a20';
+      ctx.textAlign = 'center';
+      ctx.font = '800 25px sans-serif';
+      ctx.fillText('出来度 ' + finishInfo.percent + '%', W/2, 147);
+      ctx.font = '700 18px sans-serif';
+      ctx.fillText('+' + finishInfo.points + '点', W/2, 177);
+      ctx.restore();
+    }
   }
 
   function loop(now) {
@@ -259,9 +444,7 @@
     box.releasePointerCapture?.(e.pointerId);
   });
 
-  box.addEventListener('pointercancel', () => {
-    pointerDown = false;
-  });
+  box.addEventListener('pointercancel', () => { pointerDown = false; });
 
   function bindHold(btn, side) {
     btn.addEventListener('pointerdown', e => {
