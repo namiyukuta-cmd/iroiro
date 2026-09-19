@@ -153,13 +153,17 @@ canvas{display:block;width:100%;height:100%}
         type:'butter', x, y:-24,
         vx:(Math.random()*2-1)*0.18,
         vy:1.0, tilt:(Math.random()*2-1)*0.04,
-        bounced:false, contactUntil:0
+        bounced:false, contactUntil:0,
+        softness:0.62+Math.random()*0.30,
+        squash:0
       };
     } else {
       falling = {
         type:'honey', x, y:-34,
         vx:(Math.random()*2-1)*0.10,
-        vy:1.2
+        vy:1.2,
+        stretch:0,
+        trail:0
       };
     }
   }
@@ -226,30 +230,62 @@ canvas{display:block;width:100%;height:100%}
     ctx.restore();
   }
 
-  function drawButter(x,y,tilt=0) {
+  function drawButter(x,y,tilt=0,squash=0,smear=0) {
     ctx.save();
     ctx.translate(x,y);
     ctx.rotate(tilt);
+
+    const w=26*(1+squash*0.45+smear*0.16);
+    const h=Math.max(7,16*(1-squash*0.48));
+    const r=Math.min(5,2+squash*3);
+
     ctx.fillStyle='#f2d357';
     ctx.strokeStyle='#b99828';
     ctx.lineWidth=1.5;
-    ctx.fillRect(-13,-8,26,16);
-    ctx.strokeRect(-13,-8,26,16);
-    ctx.fillStyle='rgba(255,248,184,.75)';
-    ctx.fillRect(-10,-6,20,4);
+    ctx.beginPath();
+    ctx.roundRect(-w/2,-h/2,w,h,r);
+    ctx.fill();
+    ctx.stroke();
+
+    ctx.fillStyle='rgba(255,248,184,.78)';
+    ctx.beginPath();
+    ctx.roundRect(-w*.36,-h*.34,w*.60,Math.max(2,h*.24),2);
+    ctx.fill();
+
+    if(smear>0.04){
+      ctx.fillStyle='rgba(232,190,54,.55)';
+      ctx.beginPath();
+      ctx.ellipse(smear>0 ? w*.36 : -w*.36,h*.20,5+Math.abs(smear)*8,2.5,0,0,Math.PI*2);
+      ctx.fill();
+    }
     ctx.restore();
   }
 
-  function drawHoneyBlob(x,y) {
+  function drawHoneyBlob(x,y,stretch=0,trail=0) {
     ctx.save();
     ctx.translate(x,y);
+
+    const long=15+stretch*18;
+    const narrow=Math.max(5.5,10-stretch*3);
+
+    if(trail>0.02){
+      ctx.strokeStyle='rgba(215,151,24,.72)';
+      ctx.lineWidth=Math.max(2,5-stretch*1.5);
+      ctx.lineCap='round';
+      ctx.beginPath();
+      ctx.moveTo(0,-long*.65);
+      ctx.quadraticCurveTo(-1,-long-trail*15,1,-long-trail*26);
+      ctx.stroke();
+    }
+
     ctx.fillStyle='#d79718';
     ctx.beginPath();
-    ctx.ellipse(0,0,10,15,0,0,Math.PI*2);
+    ctx.ellipse(0,0,narrow,long,0,0,Math.PI*2);
     ctx.fill();
+
     ctx.fillStyle='#efbd45';
     ctx.beginPath();
-    ctx.ellipse(-3,-4,3,6,0,0,Math.PI*2);
+    ctx.ellipse(-2,-long*.18,Math.max(2,narrow*.32),Math.max(4,long*.28),0,0,Math.PI*2);
     ctx.fill();
     ctx.restore();
   }
@@ -262,15 +298,20 @@ canvas{display:block;width:100%;height:100%}
 
     ctx.save();
     ctx.strokeStyle='#d79718';
-    ctx.lineWidth=6;
+    ctx.lineWidth=6+honey.splat*5;
     ctx.lineCap='round';
     ctx.beginPath();
     ctx.moveTo(x-honey.spread/2,y);
-    ctx.quadraticCurveTo(x,y+5,x+honey.spread/2,y);
+    ctx.quadraticCurveTo(x,y+4+honey.splat*6,x+honey.spread/2,y);
     ctx.stroke();
 
+    ctx.fillStyle='rgba(239,189,69,.62)';
+    ctx.beginPath();
+    ctx.ellipse(x,y+2,honey.spread*.22,3+honey.splat*4,0,0,Math.PI*2);
+    ctx.fill();
+
     ctx.strokeStyle='#e1a221';
-    ctx.lineWidth=3;
+    ctx.lineWidth=3+honey.drip*1.5;
     const leftDrip = Math.max(-30, honey.offsetX - honey.spread*.24);
     const rightDrip = Math.min(30, honey.offsetX + honey.spread*.25);
     ctx.beginPath();
@@ -315,7 +356,13 @@ canvas{display:block;width:100%;height:100%}
 
     if (butter && stack.length) {
       const top=stack[stack.length-1];
-      drawButter(plateX+top.offsetX+(top.lagX||0)+butter.offsetX,plateY-11-(stack.length-1)*14-15+butter.sink,butter.tilt);
+      drawButter(
+        plateX+top.offsetX+(top.lagX||0)+butter.offsetX+(butter.lagX||0),
+        plateY-11-(stack.length-1)*14-15+butter.sink,
+        butter.tilt+(butter.lagX||0)*0.006,
+        butter.squash||0,
+        butter.smear||0
+      );
     }
 
     drawHoneyOnStack();
@@ -466,7 +513,12 @@ canvas{display:block;width:100%;height:100%}
     butter={
       offsetX:Math.max(-31,Math.min(31,slide)),
       tilt:Math.max(-.16,Math.min(.16,surfaceTilt*.75+falling.tilt*.35)),
-      sink:2 + top.softness*3
+      sink:2 + top.softness*3,
+      softness:falling.softness||0.78,
+      squash:0.55+(falling.softness||0.78)*0.26,
+      smear:0,
+      lagX:0,
+      lagVX:0
     };
     dishScores[3]=scoreFromDiff(Math.abs(butter.offsetX),31);
     qualityEl.textContent='バター '+dishScores[3]+'点';
@@ -483,9 +535,10 @@ canvas{display:block;width:100%;height:100%}
     if (!falling.bounced) {
       falling.bounced=true;
       falling.vy=0;
-      falling.contactUntil=now+110;
+      falling.squash=0.75+(falling.softness||0.75)*0.18;
+      falling.contactUntil=now+150+(falling.softness||0.75)*110;
       state='butterContact';
-      msg.textContent='バターが少し沈む';
+      msg.textContent='バターがむにっ…';
       return true;
     }
 
@@ -509,8 +562,12 @@ canvas{display:block;width:100%;height:100%}
     const surfaceTilt=top.tilt||0;
     honey={
       offsetX:Math.max(-36,Math.min(36,relative*.66)),
-      spread:Math.max(26,74-diff*.8),
-      flow:surfaceTilt*0.42
+      spread:Math.max(22,60-diff*.55),
+      targetSpread:Math.max(42,82-diff*.62),
+      flow:surfaceTilt*0.28,
+      viscosity:0.72+Math.random()*0.20,
+      splat:1,
+      drip:0
     };
 
     dishScores[4]=scoreFromDiff(diff,49);
@@ -553,13 +610,39 @@ canvas{display:block;width:100%;height:100%}
     }
   }
 
+  function updateButterSoftness(dt) {
+    if(!butter || !stack.length) return;
+    const f=dt/16.67;
+    const top=stack[stack.length-1];
+    const soft=butter.softness||0.78;
+
+    butter.lagVX=(butter.lagVX||0)-plateDelta*(0.055+soft*0.055);
+    butter.lagVX+=-(butter.lagX||0)*(0.028+(1-soft)*0.016)*f;
+    butter.lagVX*=Math.pow(0.86+soft*0.06,f);
+    butter.lagX=(butter.lagX||0)+butter.lagVX*f;
+    butter.lagX=Math.max(-10,Math.min(10,butter.lagX));
+
+    butter.squash=Math.max(0.16,(butter.squash||0)-0.008*f);
+    const slope=(top.tilt||0)+(top.lagX||0)*0.002;
+    butter.offsetX+=slope*(0.20+soft*0.16)*f;
+    butter.smear=Math.max(-1,Math.min(1,(butter.smear||0)+slope*0.08*f+(butter.lagX||0)*0.002));
+    butter.offsetX=Math.max(-33,Math.min(33,butter.offsetX));
+  }
+
   function updateHoneyFlow(dt) {
     if (!honey || !stack.length) return;
     const top=stack[stack.length-1];
-    const slope=(top.tilt||0);
-    honey.offsetX += (honey.flow + slope*0.14) * (dt/16.67);
-    honey.offsetX=Math.max(-38,Math.min(38,honey.offsetX));
-    honey.spread=Math.min(82,honey.spread+0.035*dt);
+    const f=dt/16.67;
+    const slope=(top.tilt||0)+(top.lagX||0)*0.0025;
+    const visc=honey.viscosity||0.8;
+
+    honey.offsetX += (honey.flow + slope*(0.11+0.12*(1-visc))) * f;
+    honey.offsetX += -plateDelta * 0.018 * (1-visc) * f;
+    honey.offsetX=Math.max(-40,Math.min(40,honey.offsetX));
+
+    honey.spread += (honey.targetSpread-honey.spread)*(0.025+0.025*(1-visc))*f;
+    honey.splat=Math.max(0,honey.splat-0.045*f);
+    honey.drip=Math.min(1,(honey.drip||0)+0.012*f+Math.abs(slope)*0.025*f);
   }
 
   function finishDish(now) {
@@ -596,6 +679,8 @@ canvas{display:block;width:100%;height:100%}
     plateX=Math.max(plateW/2,Math.min(W-plateW/2,plateX));
     plateDelta = plateX - prevPlateX;
     updateStackSoftness(dt);
+    updateButterSoftness(dt);
+    updateHoneyFlow(dt);
 
     if(state==='order'){
       if(now>=orderPlayAt){
@@ -608,7 +693,6 @@ canvas{display:block;width:100%;height:100%}
     }
 
     if(state==='complete'){
-      updateHoneyFlow(dt);
       if(now>=completeAt)startOrder(now);
       return;
     }
@@ -631,6 +715,9 @@ canvas{display:block;width:100%;height:100%}
     }
 
     if(state==='butterContact'){
+      if(!falling)return;
+      const remain=Math.max(0,falling.contactUntil-now);
+      falling.squash=Math.max(0.35,remain/260);
       if(now>=falling.contactUntil){
         state='play';
         settleButter(now);
@@ -654,6 +741,8 @@ canvas{display:block;width:100%;height:100%}
       falling.vy+=.15*f;
       falling.x+=falling.vx*f;
       falling.y+=falling.vy*f;
+      falling.stretch=Math.min(1,Math.max(0,(falling.vy-1.2)/4.2));
+      falling.trail=Math.min(1,(falling.trail||0)+0.018*f);
       if(state==='play')hitHoney(now);
     }else{
       falling.vy+=.20*f;
@@ -682,8 +771,8 @@ canvas{display:block;width:100%;height:100%}
 
     if(falling){
       if(falling.type==='cake')drawPancake(falling.x,falling.y,falling.tilt,falling.softness,falling.squash||0);
-      else if(falling.type==='butter')drawButter(falling.x,falling.y,falling.tilt);
-      else drawHoneyBlob(falling.x,falling.y);
+      else if(falling.type==='butter')drawButter(falling.x,falling.y,falling.tilt,falling.squash||0,0);
+      else drawHoneyBlob(falling.x,falling.y,falling.stretch||0,falling.trail||0);
     }
 
     drawOrderCard();
@@ -729,6 +818,9 @@ canvas{display:block;width:100%;height:100%}
         const s=stack[i];
         s.lagVX=(s.lagVX||0)-plateDelta*(0.08+(s.softness||0.5)*0.08)*(i+1);
       }
+    }
+    if(butter){
+      butter.lagVX=(butter.lagVX||0)-plateDelta*(0.10+(butter.softness||0.78)*0.08);
     }
   }
 
