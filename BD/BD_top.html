@@ -34,44 +34,192 @@
     .fill{height:100%;width:100%;background:#202020}
 
     #battle-wrap{min-height:0;position:relative}
-    #battle-field{width:100%;height:100%;border:2px solid #202020;background:
-linear-gradient(to bottom,rgba(239,68,68,.045) 0 28%,transparent 28% 72%,rgba(56,189,248,.045) 72% 100%),
-repeating-linear-gradient(to right,transparent 0 calc(20% - 1px),rgba(32,32,32,.045) calc(20% - 1px) 20%),
-#fff;position:relative;overflow:hidden;contain:layout paint style}
-    #player,.enemy{position:absolute;left:0;top:0;will-change:transform;transform:translate3d(0,0,0)}
-    #player{width:20px;height:20px;border-radius:50%;background:#202020;z-index:3}
+    #battle-field{
+      width:100%;
+      height:100%;
+      border:2px solid #202020;
+      background:#fff;
+      position:relative;
+      overflow:hidden;
+      display:grid;
+      grid-template-columns:29% 1fr;
+      contain:layout paint style;
+    }
+
+    #player-stage{
+      position:relative;
+      min-width:0;
+      border-right:1px solid #b9b9b9;
+      background:linear-gradient(180deg,#f7f6f1,#ece9e1);
+      overflow:hidden;
+    }
+    #player-stage::after{
+      content:"";
+      position:absolute;
+      left:14%;
+      right:14%;
+      bottom:11%;
+      height:1px;
+      background:#b9b7af;
+    }
+    #player-caption{
+      position:absolute;
+      left:50%;
+      top:9%;
+      transform:translateX(-50%);
+      font-size:9px;
+      font-weight:900;
+      letter-spacing:.08em;
+      white-space:nowrap;
+      opacity:.55;
+    }
+    #player{
+      position:absolute;
+      left:50%;
+      top:52%;
+      width:66px;
+      height:112px;
+      transform:translate(-50%,-50%);
+      z-index:3;
+      transform-origin:50% 88%;
+      animation:playerWalk 1s steps(2,end) infinite;
+      will-change:transform;
+    }
+    #player .head{
+      position:absolute;
+      left:50%;
+      top:0;
+      width:25px;
+      height:28px;
+      transform:translateX(-50%);
+      border-radius:48% 48% 44% 44%;
+      background:#202020;
+    }
+    #player .body{
+      position:absolute;
+      left:50%;
+      top:25px;
+      width:35px;
+      height:50px;
+      transform:translateX(-50%);
+      background:#202020;
+      clip-path:polygon(20% 0,80% 0,100% 22%,86% 100%,14% 100%,0 22%);
+    }
+    #player .arm{
+      position:absolute;
+      top:29px;
+      width:11px;
+      height:48px;
+      border-radius:8px;
+      background:#202020;
+      transform-origin:50% 8%;
+    }
+    #player .arm.left{left:8px;transform:rotate(7deg)}
+    #player .arm.right{right:8px;transform:rotate(-7deg)}
+    #player .leg{
+      position:absolute;
+      top:70px;
+      width:13px;
+      height:42px;
+      border-radius:0 0 7px 7px;
+      background:#202020;
+      transform-origin:50% 0;
+    }
+    #player .leg.left{left:18px;transform:rotate(2deg)}
+    #player .leg.right{right:18px;transform:rotate(-2deg)}
+    #player.attack{animation:playerAttack .22s ease-out}
     #player.hit{filter:brightness(2)}
-    #player.heal{box-shadow:0 0 0 6px rgba(32,32,32,.18)}
-    .enemy{width:18px;height:18px;border-radius:50%;background:#b3261e;border:2px solid #68120d;z-index:2;transition:opacity .16s ease,filter .07s linear}
-    .enemy.hit{filter:brightness(1.8)}
+    #player.heal{filter:drop-shadow(0 0 9px rgba(34,197,94,.65))}
+
+    #dungeon{
+      position:relative;
+      min-width:0;
+      overflow:hidden;
+      background:#151515;
+    }
+    #dungeon-canvas{
+      position:absolute;
+      inset:0;
+      width:100%;
+      height:100%;
+      image-rendering:pixelated;
+      image-rendering:crisp-edges;
+    }
+    #dungeon-shade{
+      position:absolute;
+      inset:0;
+      pointer-events:none;
+      background:radial-gradient(circle at 16% 52%,rgba(255,255,255,.08),transparent 32%);
+      z-index:1;
+    }
+    #encounter-mark{
+      position:absolute;
+      left:8%;
+      top:50%;
+      width:8px;
+      height:8px;
+      transform:translate(-50%,-50%);
+      border:1px solid rgba(255,255,255,.7);
+      border-radius:50%;
+      z-index:2;
+      opacity:.55;
+    }
+    .enemy{
+      position:absolute;
+      left:0;
+      top:0;
+      width:8px;
+      height:8px;
+      border-radius:50%;
+      background:#d13c32;
+      border:1px solid #60100c;
+      z-index:3;
+      will-change:transform;
+      transition:opacity .15s ease,filter .07s linear;
+      box-shadow:0 0 0 1px rgba(255,255,255,.25);
+    }
+    .enemy.hit{filter:brightness(2.2)}
     .enemy.dead{opacity:0;pointer-events:none}
 
-    #battle-message{position:absolute;left:6px;top:6px;z-index:6;max-width:62%;padding:3px 6px;border-radius:5px;background:rgba(255,255,255,.82);font-size:10px;font-weight:800;pointer-events:none}
-    #round-info{position:absolute;right:6px;top:6px;z-index:6;display:flex;gap:4px;pointer-events:none}
+    #battle-message{
+      position:absolute;
+      left:6px;
+      top:6px;
+      z-index:10;
+      max-width:58%;
+      padding:3px 6px;
+      border-radius:5px;
+      background:rgba(255,255,255,.88);
+      font-size:10px;
+      font-weight:800;
+      pointer-events:none;
+    }
+    #round-info{position:absolute;right:6px;top:6px;z-index:10;display:flex;gap:4px;pointer-events:none}
     .round-box{min-width:58px;padding:3px 5px;border:1px solid #202020;border-radius:5px;background:rgba(255,255,255,.9);font-size:10px;font-weight:900;text-align:center;white-space:nowrap}
-    #fx-layer{position:absolute;inset:0;pointer-events:none;z-index:5;overflow:hidden}
-    #field-flash{position:absolute;inset:0;background:rgba(32,32,32,.22);opacity:0;pointer-events:none;z-index:4}
+
+    #fx-layer{position:absolute;inset:0;pointer-events:none;z-index:9;overflow:hidden}
+    #field-flash{position:absolute;inset:0;background:rgba(255,255,255,.26);opacity:0;pointer-events:none;z-index:8}
     #field-flash.active{animation:fieldFlash .28s ease-out}
-    .slash-fx{position:absolute;width:92px;height:10px;border-radius:999px;background:var(--fx,#38bdf8);box-shadow:0 0 12px var(--fx,#38bdf8),0 0 0 4px var(--fx-soft,rgba(56,189,248,.16));transform-origin:center;animation:slashFx .28s ease-out forwards}
-    .impact-fx{position:absolute;width:36px;height:36px;border:5px solid var(--fx,#38bdf8);border-radius:50%;box-shadow:0 0 14px var(--fx-soft,rgba(56,189,248,.35));animation:impactFx .34s ease-out forwards}
-    .burst-fx{position:absolute;width:34px;height:34px;border:5px solid var(--fx,#ef4444);box-shadow:0 0 18px var(--fx-soft,rgba(239,68,68,.38));animation:burstFx .42s ease-out forwards}
+    .slash-fx{position:absolute;width:70px;height:8px;border-radius:999px;background:var(--fx,#38bdf8);box-shadow:0 0 10px var(--fx,#38bdf8),0 0 0 3px var(--fx-soft,rgba(56,189,248,.16));transform-origin:center;animation:slashFx .28s ease-out forwards}
+    .impact-fx{position:absolute;width:28px;height:28px;border:4px solid var(--fx,#38bdf8);border-radius:50%;box-shadow:0 0 12px var(--fx-soft,rgba(56,189,248,.35));animation:impactFx .34s ease-out forwards}
+    .burst-fx{position:absolute;width:30px;height:30px;border:4px solid var(--fx,#ef4444);box-shadow:0 0 14px var(--fx-soft,rgba(239,68,68,.38));animation:burstFx .42s ease-out forwards}
     .heal-fx{position:absolute;width:22px;height:22px;animation:healFx .62s ease-out forwards}
     .heal-fx::before,.heal-fx::after{content:"";position:absolute;left:50%;top:50%;background:#22c55e;box-shadow:0 0 12px rgba(34,197,94,.45);border-radius:3px;transform:translate(-50%,-50%)}
     .heal-fx::before{width:22px;height:7px}.heal-fx::after{width:7px;height:22px}
-    .float-text{position:absolute;font-size:12px;font-weight:900;white-space:nowrap;color:var(--fx,#202020);text-shadow:0 0 8px rgba(255,255,255,.95);animation:floatText .68s ease-out forwards}
-    .cast-ring{position:absolute;width:46px;height:46px;border:5px solid var(--fx,#38bdf8);border-radius:50%;box-shadow:0 0 18px var(--fx-soft,rgba(56,189,248,.35));animation:castRing .3s ease-out forwards}
-    .projectile-fx{position:absolute;width:18px;height:18px;border-radius:50%;background:var(--fx,#38bdf8);z-index:5;animation:projectileFly var(--dur) cubic-bezier(.18,.78,.28,1) forwards;box-shadow:0 0 0 4px var(--fx-soft,rgba(56,189,248,.20)),0 0 18px var(--fx,#38bdf8)}
-    .projectile-fx::after{content:"";position:absolute;right:9px;top:50%;width:58px;height:7px;border-radius:999px;background:linear-gradient(90deg,transparent,var(--fx,#38bdf8));filter:drop-shadow(0 0 5px var(--fx,#38bdf8));transform:translateY(-50%) rotate(var(--rot));transform-origin:right center}
-    .projectile-fx.heavy{width:32px;height:32px;box-shadow:0 0 0 7px var(--fx-soft,rgba(239,68,68,.24)),0 0 24px var(--fx,#ef4444)}
-    .projectile-fx.heavy::after{width:92px;height:12px;right:17px}
-    .projectile-fx.light{width:14px;height:14px;box-shadow:0 0 0 3px var(--fx-soft,rgba(56,189,248,.18)),0 0 14px var(--fx,#38bdf8)}
-    .projectile-fx.light::after{width:44px;height:5px;right:7px}
-    .impact-star{position:absolute;width:48px;height:48px;animation:impactStar .38s ease-out forwards}
-    .impact-star::before,.impact-star::after{content:"";position:absolute;left:50%;top:50%;background:var(--fx,#38bdf8);box-shadow:0 0 12px var(--fx-soft,rgba(56,189,248,.35));border-radius:2px;transform:translate(-50%,-50%)}
-    .impact-star::before{width:48px;height:7px}.impact-star::after{width:7px;height:48px}
-    .impact-ring{position:absolute;width:52px;height:52px;border:6px solid var(--fx,#ef4444);border-radius:50%;box-shadow:0 0 18px var(--fx-soft,rgba(239,68,68,.35));animation:impactRing .42s ease-out forwards}
-    .ray-fx{position:absolute;width:54px;height:7px;border-radius:999px;background:var(--fx,#38bdf8);box-shadow:0 0 10px var(--fx-soft,rgba(56,189,248,.35));transform-origin:left center;animation:rayBurst .34s ease-out forwards}
-    .shock-ring{position:absolute;width:78px;height:78px;border:5px solid var(--fx,#ef4444);box-shadow:0 0 18px var(--fx-soft,rgba(239,68,68,.32));border-radius:50%;animation:shockRing .5s ease-out forwards}
+    .float-text{position:absolute;font-size:11px;font-weight:900;white-space:nowrap;color:var(--fx,#202020);text-shadow:0 0 8px rgba(255,255,255,.95);animation:floatText .68s ease-out forwards}
+    .cast-ring{position:absolute;width:38px;height:38px;border:4px solid var(--fx,#38bdf8);border-radius:50%;box-shadow:0 0 16px var(--fx-soft,rgba(56,189,248,.35));animation:castRing .3s ease-out forwards}
+    .projectile-fx{position:absolute;width:14px;height:14px;border-radius:50%;background:var(--fx,#38bdf8);z-index:5;animation:projectileFly var(--dur) cubic-bezier(.18,.78,.28,1) forwards;box-shadow:0 0 0 3px var(--fx-soft,rgba(56,189,248,.20)),0 0 16px var(--fx,#38bdf8)}
+    .projectile-fx::after{content:"";position:absolute;right:7px;top:50%;width:42px;height:5px;border-radius:999px;background:linear-gradient(90deg,transparent,var(--fx,#38bdf8));transform:translateY(-50%) rotate(var(--rot));transform-origin:right center}
+    .projectile-fx.heavy{width:22px;height:22px;box-shadow:0 0 0 5px var(--fx-soft,rgba(239,68,68,.24)),0 0 22px var(--fx,#ef4444)}
+    .projectile-fx.heavy::after{width:62px;height:8px;right:12px}
+    .projectile-fx.light{width:11px;height:11px}
+    .projectile-fx.light::after{width:34px;height:4px;right:6px}
+    .impact-star{position:absolute;width:38px;height:38px;animation:impactStar .38s ease-out forwards}
+    .impact-star::before,.impact-star::after{content:"";position:absolute;left:50%;top:50%;background:var(--fx,#38bdf8);border-radius:2px;transform:translate(-50%,-50%)}
+    .impact-star::before{width:38px;height:5px}.impact-star::after{width:5px;height:38px}
+    .impact-ring{position:absolute;width:42px;height:42px;border:5px solid var(--fx,#ef4444);border-radius:50%;animation:impactRing .42s ease-out forwards}
+    .ray-fx{position:absolute;width:42px;height:5px;border-radius:999px;background:var(--fx,#38bdf8);transform-origin:left center;animation:rayBurst .34s ease-out forwards}
+    .shock-ring{position:absolute;width:62px;height:62px;border:4px solid var(--fx,#ef4444);border-radius:50%;animation:shockRing .5s ease-out forwards}
 
     #loadout{
       display:grid;
@@ -101,9 +249,7 @@ repeating-linear-gradient(to right,transparent 0 calc(20% - 1px),rgba(32,32,32,.
     .weapon-icon::after{content:"";position:absolute;left:5px;top:19px;width:18px;height:4px;background:#202020;border-radius:2px;box-shadow:7px 7px 0 -1px #202020}
     .armor-icon{width:27px;height:31px;border:3px solid #202020;border-radius:50% 50% 42% 42%;clip-path:polygon(50% 0,100% 18%,88% 72%,50% 100%,12% 72%,0 18%);background:#fff;position:relative}
     .armor-icon::after{content:"";position:absolute;left:50%;top:4px;bottom:5px;width:3px;background:#202020;transform:translateX(-50%)}
-    .slot.empty{background:repeating-linear-gradient(135deg,#fff 0 8px,#f3f1eb 8px 16px)}
     .slot-icon{position:absolute;inset:0;display:grid;place-items:center;z-index:1}
-    .slot-count{position:absolute;right:3px;top:2px;font-size:11px;font-weight:1000;z-index:4;background:rgba(255,255,255,.88);padding:0 2px;border-radius:3px;line-height:1.1}
     .slot-time{position:absolute;inset:0;display:grid;place-items:center;font-size:16px;font-weight:1000;text-align:center;line-height:1;z-index:4;color:#fff;mix-blend-mode:difference;pointer-events:none}
     .slot-time:empty{display:none}
     .cooldown-cover{position:absolute;left:0;right:0;bottom:0;height:0;background:#202020;z-index:3;pointer-events:none}
@@ -117,13 +263,21 @@ repeating-linear-gradient(to right,transparent 0 calc(20% - 1px),rgba(32,32,32,.
     .smash-icon::before{width:25px;height:4px;transform:translate(-50%,-50%) rotate(45deg)}
     .smash-icon::after{width:25px;height:4px;transform:translate(-50%,-50%) rotate(-45deg)}
     .smash-core{width:11px;height:11px;border:3px solid #202020;transform:rotate(45deg);background:#fff;z-index:1}
-
     .double-icon,.slash-icon{width:30px;height:30px;position:relative}
     .double-icon::before,.double-icon::after,.slash-icon::before{content:"";position:absolute;width:25px;height:4px;border-radius:999px;background:#202020;left:50%;top:50%}
     .double-icon::before{transform:translate(-50%,-75%) rotate(-35deg)}
     .double-icon::after{transform:translate(-50%,75%) rotate(-35deg)}
     .slash-icon::before{transform:translate(-50%,-50%) rotate(-35deg)}
 
+    @keyframes playerWalk{
+      0%,100%{transform:translate(-50%,-50%) translateY(0) rotate(-1deg)}
+      50%{transform:translate(-50%,-50%) translateY(-3px) rotate(1deg)}
+    }
+    @keyframes playerAttack{
+      0%{transform:translate(-50%,-50%) translateX(0) rotate(0)}
+      45%{transform:translate(-50%,-50%) translateX(11px) rotate(5deg)}
+      100%{transform:translate(-50%,-50%) translateX(0) rotate(0)}
+    }
     @keyframes slashFx{0%{opacity:0;transform:translate(-50%,-50%) scale(.35) rotate(var(--rot))}25%{opacity:1}100%{opacity:0;transform:translate(-50%,-50%) scale(1.45) rotate(var(--rot))}}
     @keyframes impactFx{0%{opacity:1;transform:translate(-50%,-50%) scale(.25)}100%{opacity:0;transform:translate(-50%,-50%) scale(1.8)}}
     @keyframes burstFx{0%{opacity:1;transform:translate(-50%,-50%) rotate(45deg) scale(.25)}100%{opacity:0;transform:translate(-50%,-50%) rotate(225deg) scale(2.2)}}
@@ -142,6 +296,7 @@ repeating-linear-gradient(to right,transparent 0 calc(20% - 1px),rgba(32,32,32,.
       #loadout{gap:2px;grid-template-columns:repeat(5,38px);grid-auto-rows:38px}
       .slot{width:38px;height:38px}
       .slot-time{font-size:14px}
+      #player{width:56px;height:96px}
     }
   </style>
 </head>
@@ -161,11 +316,30 @@ repeating-linear-gradient(to right,transparent 0 calc(20% - 1px),rgba(32,32,32,.
   </section>
 
   <section id="battle-wrap">
-    <div id="battle-field" aria-label="オートバトル画面">
-      <div class="enemy" aria-label="敵1"></div><div class="enemy" aria-label="敵2"></div><div class="enemy" aria-label="敵3"></div>
-      <div class="enemy" aria-label="敵4"></div><div class="enemy" aria-label="敵5"></div><div class="enemy" aria-label="敵6"></div>
-      <div id="field-flash"></div><div id="fx-layer"></div><div id="player" aria-label="主人公"></div>
-      <div id="battle-message">戦闘中</div>
+    <div id="battle-field" aria-label="自動探索画面">
+      <div id="player-stage" aria-label="主人公">
+        <div id="player-caption">探索中</div>
+        <div id="player">
+          <div class="head"></div>
+          <div class="body"></div>
+          <div class="arm left"></div>
+          <div class="arm right"></div>
+          <div class="leg left"></div>
+          <div class="leg right"></div>
+        </div>
+      </div>
+
+      <div id="dungeon" aria-label="自動生成ダンジョン">
+        <canvas id="dungeon-canvas" width="160" height="220"></canvas>
+        <div id="dungeon-shade"></div>
+        <div id="encounter-mark" aria-hidden="true"></div>
+        <div class="enemy" aria-label="敵1"></div><div class="enemy" aria-label="敵2"></div><div class="enemy" aria-label="敵3"></div>
+        <div class="enemy" aria-label="敵4"></div><div class="enemy" aria-label="敵5"></div><div class="enemy" aria-label="敵6"></div>
+      </div>
+
+      <div id="field-flash"></div>
+      <div id="fx-layer"></div>
+      <div id="battle-message">探索中</div>
       <div id="round-info"><div class="round-box">残り <span id="timeText">30.0</span></div><div class="round-box">撃破 <span id="killText">0</span></div></div>
     </div>
   </section>
@@ -201,6 +375,9 @@ repeating-linear-gradient(to right,transparent 0 calc(20% - 1px),rgba(32,32,32,.
 <script>
 (() => {
   const field=document.getElementById('battle-field');
+  const dungeon=document.getElementById('dungeon');
+  const dungeonCanvas=document.getElementById('dungeon-canvas');
+  const dungeonCtx=dungeonCanvas.getContext('2d');
   const playerEl=document.getElementById('player');
   const enemyEls=[...document.querySelectorAll('.enemy')];
   const fxLayer=document.getElementById('fx-layer');
@@ -213,31 +390,24 @@ repeating-linear-gradient(to right,transparent 0 calc(20% - 1px),rgba(32,32,32,.
   const skillCovers=[document.getElementById('skillCover0'),document.getElementById('skillCover1'),document.getElementById('skillCover2')];
   const skillTimes=[document.getElementById('skillTime0'),document.getElementById('skillTime1'),document.getElementById('skillTime2')];
 
-  const PLAYER_SIZE=20,ENEMY_SIZE=18,MAX_FX=40;
-  let fieldW=320,fieldH=420,lastHud=0;
+  const ENEMY_SIZE=8,MAX_FX=40;
+  let dungeonW=280,dungeonH=420,lastHud=0;
 
-  const state={maxHp:100,hp:100,maxAc:100,ac:100,acRegenPerSec:16,supplies:5,supplyHeal:40,autoSupplyThreshold:30,weaponBonus:1,armorDefense:3,normalAttackCooldown:900,normalAttackReadyAt:0,x:0,y:0,vx:0,vy:0,nextTurn:0,lastTime:performance.now(),dead:false,nextPlayerHit:0,roundDuration:30000,roundStart:0,roundEnd:0,kills:0,finished:false};
-  const enemyLayout=[
-    {spawnX:.14,spawnY:.08,attackX:-88},
-    {spawnX:.38,spawnY:.07,attackX:-52},
-    {spawnX:.63,spawnY:.08,attackX:-18},
-    {spawnX:.86,spawnY:.07,attackX:18},
-    {spawnX:.28,spawnY:.20,attackX:52},
-    {spawnX:.72,spawnY:.20,attackX:88}
-  ];
-  const enemies=enemyEls.map((el,i)=>({
-    el,id:i+1,hp:4,maxHp:4,x:0,y:0,vx:0,vy:0,
-    speed:26+(i%3)*3,
-    spawnX:enemyLayout[i].spawnX,
-    spawnY:enemyLayout[i].spawnY,
-    attackX:enemyLayout[i].attackX,
-    nextTurn:0,nextContactHit:0,dead:false,respawnAt:0
-  }));
+  const state={
+    maxHp:100,hp:100,maxAc:100,ac:100,acRegenPerSec:16,
+    supplies:5,supplyHeal:40,autoSupplyThreshold:30,
+    weaponBonus:1,armorDefense:3,
+    normalAttackCooldown:900,normalAttackReadyAt:0,
+    lastTime:performance.now(),dead:false,nextPlayerHit:0,
+    roundDuration:30000,roundStart:0,roundEnd:0,kills:0,finished:false
+  };
+
   const skills=[
-    {name:'強打',cost:5,cooldown:5000,damage:3,range:150,readyAt:0},
-    {name:'連撃',cost:3,cooldown:3000,damage:2,range:115,readyAt:0},
-    {name:'斬撃',cost:1,cooldown:1000,damage:1,range:85,readyAt:0}
+    {name:'強打',cost:5,cooldown:5000,damage:3,range:170,readyAt:0},
+    {name:'連撃',cost:3,cooldown:3000,damage:2,range:135,readyAt:0},
+    {name:'斬撃',cost:1,cooldown:1000,damage:1,range:105,readyAt:0}
   ];
+
   const FX_COLORS={
     smash:{main:'#ef4444',soft:'rgba(239,68,68,.38)'},
     combo:{main:'#f59e0b',soft:'rgba(245,158,11,.35)'},
@@ -246,157 +416,268 @@ repeating-linear-gradient(to right,transparent 0 calc(20% - 1px),rgba(32,32,32,.
     hit:{main:'#fb7185',soft:'rgba(251,113,133,.35)'}
   };
 
-  function placePlayer(){
-    state.x=Math.max(0,(fieldW-PLAYER_SIZE)/2);
-    state.y=Math.max(0,fieldH*.84-PLAYER_SIZE/2);
-    state.vx=0;state.vy=0;
+  let dungeonMap=null;
+
+  function generateDungeon(){
+    const W=dungeonCanvas.width,H=dungeonCanvas.height;
+    const cells=new Uint8Array(W*H);
+    const idx=(x,y)=>y*W+x;
+
+    // 壁=0、通路=1。細かい1px級のマスで1面を生成。
+    let x=8+Math.floor(Math.random()*10);
+    let y=Math.floor(H*.45+Math.random()*H*.1);
+    const walkers=[];
+    for(let i=0;i<7;i++)walkers.push({x,y});
+
+    const carve=(cx,cy,r=1)=>{
+      for(let yy=Math.max(1,cy-r);yy<=Math.min(H-2,cy+r);yy++){
+        for(let xx=Math.max(1,cx-r);xx<=Math.min(W-2,cx+r);xx++)cells[idx(xx,yy)]=1;
+      }
+    };
+
+    carve(x,y,3);
+    for(let step=0;step<W*H*2.2;step++){
+      const w=walkers[step%walkers.length];
+      const dir=Math.floor(Math.random()*4);
+      if(dir===0)w.x++; else if(dir===1)w.x--; else if(dir===2)w.y++; else w.y--;
+      w.x=Math.max(2,Math.min(W-3,w.x));
+      w.y=Math.max(2,Math.min(H-3,w.y));
+      carve(w.x,w.y,Math.random()<.1?2:1);
+
+      if(Math.random()<.008){
+        const rw=4+Math.floor(Math.random()*11);
+        const rh=3+Math.floor(Math.random()*9);
+        for(let yy=Math.max(1,w.y-rh);yy<=Math.min(H-2,w.y+rh);yy++){
+          for(let xx=Math.max(1,w.x-rw);xx<=Math.min(W-2,w.x+rw);xx++)cells[idx(xx,yy)]=1;
+        }
+      }
+      if(Math.random()<.004&&walkers.length<12)walkers.push({x:w.x,y:w.y});
+    }
+
+    // 左中央に探索の基点となる空間を確保。
+    for(let yy=Math.floor(H*.42);yy<Math.floor(H*.58);yy++){
+      for(let xx=2;xx<24;xx++)cells[idx(xx,yy)]=1;
+    }
+
+    dungeonMap={W,H,cells};
+    drawDungeon();
   }
+
+  function drawDungeon(){
+    if(!dungeonMap)return;
+    const {W,H,cells}=dungeonMap;
+    const image=dungeonCtx.createImageData(W,H);
+    for(let i=0;i<cells.length;i++){
+      const p=i*4;
+      if(cells[i]){
+        const n=235+Math.floor(Math.random()*12);
+        image.data[p]=n;image.data[p+1]=n;image.data[p+2]=n-5;image.data[p+3]=255;
+      }else{
+        const n=22+Math.floor(Math.random()*8);
+        image.data[p]=n;image.data[p+1]=n;image.data[p+2]=n;image.data[p+3]=255;
+      }
+    }
+    dungeonCtx.putImageData(image,0,0);
+  }
+
+  function fieldPoint(el){
+    const fr=field.getBoundingClientRect(),r=el.getBoundingClientRect();
+    return{x:r.left-fr.left+r.width/2,y:r.top-fr.top+r.height/2};
+  }
+  function playerPoint(){return fieldPoint(playerEl)}
+  function enemyPoint(e){return fieldPoint(e.el)}
+
+  function dungeonEncounterPoint(){
+    return{x:dungeonW*.08,y:dungeonH*.50};
+  }
+
+  const enemies=enemyEls.map((el,i)=>({
+    el,id:i+1,hp:4,maxHp:4,x:0,y:0,vx:0,vy:0,
+    speed:15+(i%3)*2,nextTurn:0,nextContactHit:0,dead:false,respawnAt:0
+  }));
 
   function refreshBounds(){
-    fieldW=field.clientWidth;fieldH=field.clientHeight;
-    placePlayer();
-    for(const e of enemies){e.x=Math.min(Math.max(0,e.x),Math.max(0,fieldW-ENEMY_SIZE));e.y=Math.min(Math.max(0,e.y),Math.max(0,fieldH-ENEMY_SIZE));}
+    dungeonW=dungeon.clientWidth;
+    dungeonH=dungeon.clientHeight;
+    for(const e of enemies){
+      e.x=Math.min(Math.max(0,e.x),Math.max(0,dungeonW-ENEMY_SIZE));
+      e.y=Math.min(Math.max(0,e.y),Math.max(0,dungeonH-ENEMY_SIZE));
+    }
   }
 
-  function randomVelocity(min,max){const speed=min+Math.random()*(max-min),a=Math.random()*Math.PI*2;return{vx:Math.cos(a)*speed,vy:Math.sin(a)*speed};}
-  function centerPlayer(){return{x:state.x+PLAYER_SIZE/2,y:state.y+PLAYER_SIZE/2};}
-  function centerEnemy(e){return{x:e.x+ENEMY_SIZE/2,y:e.y+ENEMY_SIZE/2};}
-  function dist(e){const p=centerPlayer(),q=centerEnemy(e);return Math.hypot(q.x-p.x,q.y-p.y);}
-  function nearestEnemy(maxRange){let best=null,bestD=maxRange;for(const e of enemies){if(e.dead)continue;const d=dist(e);if(d<=bestD){best=e;bestD=d;}}return best;}
+  function encounterDistance(e){
+    const p=dungeonEncounterPoint();
+    return Math.hypot((e.x+ENEMY_SIZE/2)-p.x,(e.y+ENEMY_SIZE/2)-p.y);
+  }
+
+  function nearestEnemy(maxRange){
+    let best=null,bestD=maxRange;
+    for(const e of enemies){
+      if(e.dead)continue;
+      const d=encounterDistance(e);
+      if(d<=bestD){best=e;bestD=d;}
+    }
+    return best;
+  }
 
   function setEnemyDirection(e,now){
-    const p=centerPlayer(),q=centerEnemy(e);
-    const tx=p.x+e.attackX;
-    const ty=p.y-54;
-    const dx=tx-q.x,dy=ty-q.y;
-    const d=Math.hypot(dx,dy);
-    if(d<2){
-      e.vx=0;e.vy=0;
-    }else{
-      e.vx=dx/d*Math.min(e.speed*.55,17);
-      e.vy=dy/d*e.speed;
-    }
-    e.nextTurn=now+180;
+    const p=dungeonEncounterPoint();
+    const ex=e.x+ENEMY_SIZE/2,ey=e.y+ENEMY_SIZE/2;
+    const dx=p.x-ex,dy=p.y-ey;
+    const d=Math.hypot(dx,dy)||1;
+    const wander=(Math.random()-.5)*.45;
+    const a=Math.atan2(dy,dx)+wander;
+    e.vx=Math.cos(a)*e.speed;
+    e.vy=Math.sin(a)*e.speed;
+    e.nextTurn=now+500+Math.random()*900;
   }
 
-  function moveEnemyTowardPlayer(e,dt,now){
+  function moveEnemyTowardEncounter(e,dt,now){
     if(now>=e.nextTurn)setEnemyDirection(e,now);
     e.x+=e.vx*dt;
     e.y+=e.vy*dt;
-    e.x=Math.min(Math.max(0,e.x),Math.max(0,fieldW-ENEMY_SIZE));
-    e.y=Math.min(Math.max(0,e.y),Math.max(0,fieldH-ENEMY_SIZE));
+    if(e.x<2||e.x>dungeonW-ENEMY_SIZE-2||e.y<2||e.y>dungeonH-ENEMY_SIZE-2)setEnemyDirection(e,0);
+    e.x=Math.min(Math.max(2,e.x),Math.max(2,dungeonW-ENEMY_SIZE-2));
+    e.y=Math.min(Math.max(2,e.y),Math.max(2,dungeonH-ENEMY_SIZE-2));
   }
 
-  function spawnEnemyAtEdge(e,now){
-    e.x=Math.max(0,Math.min(fieldW-ENEMY_SIZE,fieldW*e.spawnX-ENEMY_SIZE/2));
-    e.y=Math.max(0,Math.min(fieldH*.28,fieldH*e.spawnY));
+  function spawnEnemy(e,now){
+    e.x=dungeonW*(.45+Math.random()*.48);
+    e.y=dungeonH*(.08+Math.random()*.84);
+    e.hp=e.maxHp;
+    e.dead=false;
+    e.el.classList.remove('dead','hit');
     setEnemyDirection(e,now);
   }
 
   function renderPositions(){
-    playerEl.style.transform=`translate3d(${state.x.toFixed(1)}px,${state.y.toFixed(1)}px,0)`;
-    for(const e of enemies){if(!e.dead)e.el.style.transform=`translate3d(${e.x.toFixed(1)}px,${e.y.toFixed(1)}px,0)`;}
+    for(const e of enemies){
+      if(!e.dead)e.el.style.transform=`translate3d(${e.x.toFixed(1)}px,${e.y.toFixed(1)}px,0)`;
+    }
   }
 
-  function limitFx(){while(fxLayer.childElementCount>=MAX_FX)fxLayer.firstElementChild?.remove();}
-  function addFx(cls,x,y,rot,color){limitFx();const el=document.createElement('div');el.className=cls;el.style.left=`${x}px`;el.style.top=`${y}px`;if(rot!==undefined)el.style.setProperty('--rot',`${rot}deg`);if(color){el.style.setProperty('--fx',color.main);el.style.setProperty('--fx-soft',color.soft);}fxLayer.appendChild(el);el.addEventListener('animationend',()=>el.remove(),{once:true});}
-  function floatText(x,y,text,color){limitFx();const el=document.createElement('div');el.className='float-text';el.textContent=text;el.style.left=`${x}px`;el.style.top=`${y}px`;if(color){el.style.setProperty('--fx',color.main);el.style.setProperty('--fx-soft',color.soft);}fxLayer.appendChild(el);el.addEventListener('animationend',()=>el.remove(),{once:true});}
-  function flash(){fieldFlash.classList.remove('active');void fieldFlash.offsetWidth;fieldFlash.classList.add('active');}
+  function animatePlayerAttack(){
+    playerEl.classList.remove('attack');
+    void playerEl.offsetWidth;
+    playerEl.classList.add('attack');
+  }
+
+  function limitFx(){while(fxLayer.childElementCount>=MAX_FX)fxLayer.firstElementChild?.remove()}
+  function addFx(cls,x,y,rot,color){
+    limitFx();
+    const el=document.createElement('div');
+    el.className=cls;el.style.left=x+'px';el.style.top=y+'px';
+    if(rot!==undefined)el.style.setProperty('--rot',rot+'deg');
+    if(color){el.style.setProperty('--fx',color.main);el.style.setProperty('--fx-soft',color.soft)}
+    fxLayer.appendChild(el);el.addEventListener('animationend',()=>el.remove(),{once:true});
+  }
+  function floatText(x,y,text,color){
+    limitFx();
+    const el=document.createElement('div');el.className='float-text';el.textContent=text;
+    el.style.left=x+'px';el.style.top=y+'px';
+    if(color)el.style.setProperty('--fx',color.main);
+    fxLayer.appendChild(el);el.addEventListener('animationend',()=>el.remove(),{once:true});
+  }
+  function flash(){fieldFlash.classList.remove('active');void fieldFlash.offsetWidth;fieldFlash.classList.add('active')}
 
   function projectileFx(x1,y1,x2,y2,type='normal',duration=150,color){
     limitFx();
     const el=document.createElement('div');
-    const dx=x2-x1,dy=y2-y1;
-    const rot=Math.atan2(dy,dx)*180/Math.PI;
+    const dx=x2-x1,dy=y2-y1,rot=Math.atan2(dy,dx)*180/Math.PI;
     el.className='projectile-fx '+type;
-    el.style.left=x1+'px';
-    el.style.top=y1+'px';
-    el.style.setProperty('--dx',dx+'px');
-    el.style.setProperty('--dy',dy+'px');
-    el.style.setProperty('--rot',rot+'deg');
-    el.style.setProperty('--dur',duration+'ms');
-    if(color){el.style.setProperty('--fx',color.main);el.style.setProperty('--fx-soft',color.soft);}
-    fxLayer.appendChild(el);
-    el.addEventListener('animationend',()=>el.remove(),{once:true});
+    el.style.left=x1+'px';el.style.top=y1+'px';
+    el.style.setProperty('--dx',dx+'px');el.style.setProperty('--dy',dy+'px');
+    el.style.setProperty('--rot',rot+'deg');el.style.setProperty('--dur',duration+'ms');
+    if(color){el.style.setProperty('--fx',color.main);el.style.setProperty('--fx-soft',color.soft)}
+    fxLayer.appendChild(el);el.addEventListener('animationend',()=>el.remove(),{once:true});
   }
 
-  function hitBurst(x,y,strong=false,color){
+  function hitBurst(x,y,strong,color){
     addFx('impact-fx',x,y,undefined,color);
     addFx('impact-star',x,y,undefined,color);
-    const rays=strong?12:8;
+    const rays=strong?10:6;
     for(let i=0;i<rays;i++)addFx('ray-fx',x,y,(360/rays)*i,color);
-    if(strong){
-      addFx('impact-ring',x,y,undefined,color);
-      addFx('shock-ring',x,y,undefined,color);
-      setTimeout(()=>addFx('impact-ring',x,y,undefined,color),70);
-    }
+    if(strong){addFx('impact-ring',x,y,undefined,color);addFx('shock-ring',x,y,undefined,color);flash()}
   }
 
   function skillFx(skill,e){
-    const p=centerPlayer(),q=centerEnemy(e),a=Math.atan2(q.y-p.y,q.x-p.x)*180/Math.PI;
+    const p=playerPoint(),q=enemyPoint(e),a=Math.atan2(q.y-p.y,q.x-p.x)*180/Math.PI;
+    animatePlayerAttack();
+
     if(skill.name==='強打'){
       const color=FX_COLORS.smash;
       addFx('cast-ring',p.x,p.y,undefined,color);
-      const dx=(q.x-p.x),dy=(q.y-p.y),len=Math.hypot(dx,dy)||1;
-      const base=`translate3d(${state.x.toFixed(1)}px,${state.y.toFixed(1)}px,0)`;
-      const step=`translate3d(${(state.x+dx/len*10).toFixed(1)}px,${(state.y+dy/len*10).toFixed(1)}px,0)`;
-      playerEl.animate([{transform:base},{transform:step},{transform:base}],{duration:180,easing:'ease-out'});
-      projectileFx(p.x,p.y,q.x,q.y,'heavy',360,color);
-      setTimeout(()=>projectileFx(p.x,p.y,q.x,q.y,'heavy',290,color),55);
-      setTimeout(()=>{addFx('burst-fx',q.x,q.y,undefined,color);hitBurst(q.x,q.y,true,color);flash();},345);
-      floatText(q.x,q.y-14,skill.name,color);
+      projectileFx(p.x,p.y,q.x,q.y,'heavy',330,color);
+      setTimeout(()=>{addFx('burst-fx',q.x,q.y,undefined,color);hitBurst(q.x,q.y,true,color)},310);
+      floatText(q.x,q.y-12,skill.name,color);
     }else if(skill.name==='連撃'){
       const color=FX_COLORS.combo;
       addFx('cast-ring',p.x,p.y,undefined,color);
-      projectileFx(p.x,p.y,q.x-6,q.y-4,'normal',300,color);
-      setTimeout(()=>projectileFx(p.x,p.y,q.x+6,q.y+4,'normal',300,color),110);
-      setTimeout(()=>{addFx('slash-fx',q.x-6,q.y-4,a-24,color);hitBurst(q.x-6,q.y-4,false,color);},285);
-      setTimeout(()=>{addFx('slash-fx',q.x+6,q.y+4,a+24,color);hitBurst(q.x+6,q.y+4,false,color);},395);
-      floatText(q.x,q.y-14,skill.name,color);
+      projectileFx(p.x,p.y,q.x-5,q.y-3,'normal',270,color);
+      setTimeout(()=>projectileFx(p.x,p.y,q.x+5,q.y+3,'normal',270,color),90);
+      setTimeout(()=>{addFx('slash-fx',q.x,q.y,a,color);hitBurst(q.x,q.y,false,color)},280);
+      floatText(q.x,q.y-12,skill.name,color);
     }else{
       const color=FX_COLORS.slash;
-      addFx('cast-ring',p.x,p.y,undefined,color);
-      projectileFx(p.x,p.y,q.x,q.y,'light',260,color);
-      setTimeout(()=>{addFx('slash-fx',q.x,q.y,a,color);hitBurst(q.x,q.y,false,color);},245);
-      floatText(q.x,q.y-14,skill.name,color);
+      projectileFx(p.x,p.y,q.x,q.y,'light',230,color);
+      setTimeout(()=>{addFx('slash-fx',q.x,q.y,a,color);hitBurst(q.x,q.y,false,color)},220);
+      floatText(q.x,q.y-12,skill.name,color);
     }
   }
 
   function damageEnemy(e,amount,skill){
     if(e.dead)return;
-    e.hp=Math.max(0,e.hp-amount);e.el.classList.add('hit');setTimeout(()=>e.el.classList.remove('hit'),90);skillFx(skill,e);
-    if(e.hp<=0){e.dead=true;e.respawnAt=performance.now()+650;e.el.classList.add('dead');state.kills++;const q=centerEnemy(e);floatText(q.x,q.y-18,'撃破');message.textContent=`${skill.name}で敵${e.id}撃破`;}
-    else message.textContent=`${skill.name}：敵${e.id} -${amount}`;
+    e.hp=Math.max(0,e.hp-amount);
+    e.el.classList.add('hit');
+    setTimeout(()=>e.el.classList.remove('hit'),90);
+    skillFx(skill,e);
+
+    if(e.hp<=0){
+      e.dead=true;
+      e.respawnAt=performance.now()+900;
+      e.el.classList.add('dead');
+      state.kills++;
+      const q=enemyPoint(e);
+      floatText(q.x,q.y-16,'撃破');
+      message.textContent=skill.name+'で敵'+e.id+'撃破';
+    }else{
+      message.textContent=skill.name+'：敵'+e.id+' -'+amount;
+    }
   }
 
   function useSupply(){
     if(state.dead||state.hp>state.autoSupplyThreshold||state.supplies<=0||state.hp>=state.maxHp)return;
-    state.supplies--;state.hp=Math.min(state.maxHp,state.hp+state.supplyHeal);
-    const p=centerPlayer();addFx('heal-fx',p.x,p.y,undefined,FX_COLORS.heal);floatText(p.x,p.y-12,`HP +${state.supplyHeal}`,FX_COLORS.heal);playerEl.classList.add('heal');setTimeout(()=>playerEl.classList.remove('heal'),280);message.textContent='補給品を自動使用';
+    state.supplies--;
+    state.hp=Math.min(state.maxHp,state.hp+state.supplyHeal);
+    const p=playerPoint();
+    addFx('heal-fx',p.x,p.y,undefined,FX_COLORS.heal);
+    floatText(p.x,p.y-18,'HP +'+state.supplyHeal,FX_COLORS.heal);
+    playerEl.classList.add('heal');
+    setTimeout(()=>playerEl.classList.remove('heal'),300);
+    message.textContent='補給品を自動使用';
   }
 
   function damagePlayer(amount,now){
     if(state.dead||now<state.nextPlayerHit)return;
-    state.nextPlayerHit=now+360;
+    state.nextPlayerHit=now+420;
     const finalDamage=Math.max(1,amount-state.armorDefense);
     state.hp=Math.max(0,state.hp-finalDamage);
-    const p=centerPlayer();
+    const p=playerPoint();
     addFx('impact-fx',p.x,p.y,undefined,FX_COLORS.hit);
-    addFx('impact-star',p.x,p.y,undefined,FX_COLORS.hit);
-    floatText(p.x,p.y-12,`-${finalDamage}`,FX_COLORS.hit);
+    floatText(p.x,p.y-18,'-'+finalDamage,FX_COLORS.hit);
     playerEl.classList.add('hit');
-    setTimeout(()=>playerEl.classList.remove('hit'),110);
-    if(state.hp<=0){gameOver();return;}
+    setTimeout(()=>playerEl.classList.remove('hit'),120);
+    if(state.hp<=0){gameOver();return}
     useSupply();
   }
 
   function normalAttack(now){
     if(state.dead||now<state.normalAttackReadyAt)return false;
-    const target=nearestEnemy(135);
+    const target=nearestEnemy(145);
     if(!target)return false;
     state.normalAttackReadyAt=now+state.normalAttackCooldown;
     const damage=1+state.weaponBonus;
-    damageEnemy(target,damage,{name:'通常攻撃',damage,range:135});
+    damageEnemy(target,damage,{name:'通常攻撃',damage,range:145});
     return true;
   }
 
@@ -416,63 +697,94 @@ repeating-linear-gradient(to right,transparent 0 calc(20% - 1px),rgba(32,32,32,.
 
   function contactCheck(now){
     if(state.dead)return;
-    for(const e of enemies){if(e.dead||now<e.nextContactHit)continue;if(Math.abs((e.x+ENEMY_SIZE/2)-(state.x+PLAYER_SIZE/2))<=40&&Math.abs((e.y+ENEMY_SIZE/2)-(state.y+PLAYER_SIZE/2))<=46){e.nextContactHit=now+900;damagePlayer(10,now);}}
+    for(const e of enemies){
+      if(e.dead||now<e.nextContactHit)continue;
+      if(encounterDistance(e)<=16){
+        e.nextContactHit=now+950;
+        damagePlayer(10,now);
+        e.x+=35+Math.random()*25;
+        e.y+=(-20+Math.random()*40);
+        setEnemyDirection(e,now);
+      }
+    }
   }
 
   function updateHud(now){
-    hpText.textContent=`${Math.ceil(state.hp)} / ${state.maxHp}`;hpFill.style.width=`${Math.max(0,state.hp/state.maxHp*100)}%`;
-    acText.textContent=`${Math.floor(state.ac)} / ${state.maxAc}`;acFill.style.width=`${Math.max(0,state.ac/state.maxAc*100)}%`;
+    hpText.textContent=Math.ceil(state.hp)+' / '+state.maxHp;
+    hpFill.style.width=Math.max(0,state.hp/state.maxHp*100)+'%';
+    acText.textContent=Math.floor(state.ac)+' / '+state.maxAc;
+    acFill.style.width=Math.max(0,state.ac/state.maxAc*100)+'%';
     supplySlots.forEach((slot,i)=>slot.classList.toggle('used',i>=state.supplies));
-    const remain=Math.max(0,state.roundEnd-now);timeText.textContent=(remain/1000).toFixed(1);killText.textContent=state.kills;
-    skills.forEach((s,i)=>{const remainMs=Math.max(0,s.readyAt-now);const ratio=Math.max(0,Math.min(1,remainMs/s.cooldown));skillCovers[i].style.height=(ratio*100)+'%';skillTimes[i].textContent=remainMs>0?(remainMs/1000).toFixed(1):'';});
+    const remain=Math.max(0,state.roundEnd-now);
+    timeText.textContent=(remain/1000).toFixed(1);
+    killText.textContent=state.kills;
+    skills.forEach((s,i)=>{
+      const remainMs=Math.max(0,s.readyAt-now);
+      const ratio=Math.max(0,Math.min(1,remainMs/s.cooldown));
+      skillCovers[i].style.height=(ratio*100)+'%';
+      skillTimes[i].textContent=remainMs>0?(remainMs/1000).toFixed(1):'';
+    });
   }
 
-  function respawnEnemy(e,now){
-    e.hp=e.maxHp;e.dead=false;e.respawnAt=0;e.el.classList.remove('dead','hit');
-    spawnEnemyAtEdge(e,now);
-  }
+  function respawnEnemy(e,now){spawnEnemy(e,now)}
 
   function gameOver(){
     if(state.finished)return;
-    state.dead=true;state.finished=true;state.vx=0;state.vy=0;
-    for(const e of enemies){e.vx=0;e.vy=0;}
+    state.dead=true;state.finished=true;
+    for(const e of enemies){e.vx=0;e.vy=0}
     hpText.textContent='0 / '+state.maxHp;
     hpFill.style.width='0%';
     message.textContent='ゲームオーバー：'+state.kills+'体撃破';
-    killText.textContent=state.kills;
   }
 
   function finishRound(){
     if(state.finished)return;
-    state.finished=true;state.vx=0;state.vy=0;
-    for(const e of enemies){e.vx=0;e.vy=0;}
-    message.textContent=`終了：30秒で ${state.kills}体撃破`;
-    timeText.textContent='0.0';killText.textContent=state.kills;
+    state.finished=true;
+    for(const e of enemies){e.vx=0;e.vy=0}
+    message.textContent='探索終了：30秒で '+state.kills+'体撃破';
+    timeText.textContent='0.0';
   }
 
   function init(){
-    refreshBounds();const now=performance.now();
-    state.roundStart=now;state.roundEnd=now+state.roundDuration;
-    enemies.forEach(e=>spawnEnemyAtEdge(e,now));
-    renderPositions();updateHud(now);
+    generateDungeon();
+    refreshBounds();
+    const now=performance.now();
+    state.roundStart=now;
+    state.roundEnd=now+state.roundDuration;
+    enemies.forEach(e=>spawnEnemy(e,now));
+    renderPositions();
+    updateHud(now);
   }
 
-  const ro=window.ResizeObserver?new ResizeObserver(refreshBounds):null;if(ro)ro.observe(field);else window.addEventListener('resize',refreshBounds,{passive:true});
+  const ro=window.ResizeObserver?new ResizeObserver(refreshBounds):null;
+  if(ro)ro.observe(dungeon);else window.addEventListener('resize',refreshBounds,{passive:true});
 
   function frame(now){
-    const dt=Math.min((now-state.lastTime)/1000,.035);state.lastTime=now;
+    const dt=Math.min((now-state.lastTime)/1000,.035);
+    state.lastTime=now;
+
     if(!state.finished&&now>=state.roundEnd)finishRound();
+
     if(!state.finished){
-      if(!state.dead){state.ac=Math.min(state.maxAc,state.ac+state.acRegenPerSec*dt);}
-      for(const e of enemies){if(e.dead){if(now>=e.respawnAt)respawnEnemy(e,now);continue;}moveEnemyTowardPlayer(e,dt,now);}
-      contactCheck(now);trySkills(now);
+      if(!state.dead)state.ac=Math.min(state.maxAc,state.ac+state.acRegenPerSec*dt);
+      for(const e of enemies){
+        if(e.dead){
+          if(now>=e.respawnAt)respawnEnemy(e,now);
+          continue;
+        }
+        moveEnemyTowardEncounter(e,dt,now);
+      }
+      contactCheck(now);
+      trySkills(now);
     }
+
     renderPositions();
-    if(now-lastHud>=100){lastHud=now;updateHud(now);}
+    if(now-lastHud>=100){lastHud=now;updateHud(now)}
     requestAnimationFrame(frame);
   }
 
-  init();requestAnimationFrame(frame);
+  init();
+  requestAnimationFrame(frame);
 })();
 </script>
 </body>
