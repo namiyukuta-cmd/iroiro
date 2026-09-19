@@ -560,6 +560,7 @@
     playerEl.classList.remove('attack');
     void playerEl.offsetWidth;
     playerEl.classList.add('attack');
+    setTimeout(()=>playerEl.classList.remove('attack'),240);
   }
 
   function limitFx(){while(fxLayer.childElementCount>=MAX_FX)fxLayer.firstElementChild?.remove()}
