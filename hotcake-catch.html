@@ -69,7 +69,7 @@ canvas{display:block;width:100%;height:100%}
 
   const W = canvas.width;
   const H = canvas.height;
-  const plateY = 510;
+  const plateY = 480;
   const plateW = 126;
   const cakeW = 82;
   const cakeH = 24;
@@ -139,8 +139,8 @@ canvas{display:block;width:100%;height:100%}
     const x = margin + Math.random() * (W - margin * 2);
 
     if (phase <= 2) {
-      const softness = 0.38 + Math.random() * 0.62;
-      const elasticity = 0.16 + (1 - softness) * 0.50 + Math.random() * 0.08;
+      const softness = 0.58 + Math.random() * 0.42;
+      const elasticity = 0.08 + (1 - softness) * 0.34 + Math.random() * 0.05;
       falling = {
         type:'cake', x, y:-30,
         vx:(Math.random()*2-1)*0.24,
@@ -205,8 +205,8 @@ canvas{display:block;width:100%;height:100%}
     ctx.translate(x,y);
     ctx.rotate(tilt);
 
-    const widthScale = 1 + squash * (0.32 + softness * 0.24);
-    const heightScale = Math.max(0.28, 1 - squash * (0.50 + softness * 0.34));
+    const widthScale = 1 + squash * (0.38 + softness * 0.30);
+    const heightScale = Math.max(0.24, 1 - squash * (0.56 + softness * 0.36));
     const w = cakeW * widthScale;
     const h = cakeH * heightScale;
 
@@ -227,6 +227,12 @@ canvas{display:block;width:100%;height:100%}
     ctx.beginPath();
     ctx.ellipse(-13,-5,14,3.5,-.12,0,Math.PI*2);
     ctx.fill();
+
+    ctx.strokeStyle='rgba(255,244,207,.58)';
+    ctx.lineWidth=1.5;
+    ctx.beginPath();
+    ctx.ellipse(-3,-4,w*.27,Math.max(2,h*.12),-.08,Math.PI*.12,Math.PI*.82);
+    ctx.stroke();
     ctx.restore();
   }
 
@@ -265,16 +271,16 @@ canvas{display:block;width:100%;height:100%}
     ctx.save();
     ctx.translate(x,y);
 
-    const long=15+stretch*18;
-    const narrow=Math.max(5.5,10-stretch*3);
+    const long=17+stretch*30;
+    const narrow=Math.max(4.2,9-stretch*3.8);
 
     if(trail>0.02){
       ctx.strokeStyle='rgba(215,151,24,.72)';
-      ctx.lineWidth=Math.max(2,5-stretch*1.5);
+      ctx.lineWidth=Math.max(1.6,4.5-stretch*1.8);
       ctx.lineCap='round';
       ctx.beginPath();
       ctx.moveTo(0,-long*.65);
-      ctx.quadraticCurveTo(-1,-long-trail*15,1,-long-trail*26);
+      ctx.quadraticCurveTo(-1,-long-trail*26,1,-long-trail*48);
       ctx.stroke();
     }
 
@@ -341,8 +347,8 @@ canvas{display:block;width:100%;height:100%}
       const s=stack[i];
       const load = stack.length - 1 - i;
       const compression = Math.min(
-        0.42,
-        load * (0.055 + s.softness * 0.055) + (s.settleSquash || 0)
+        0.54,
+        load * (0.070 + s.softness * 0.070) + (s.settleSquash || 0)
       );
       const softTilt = s.tilt + (s.lagX || 0) * 0.0035;
       drawPancake(
@@ -452,14 +458,14 @@ canvas{display:block;width:100%;height:100%}
     const tilt = surfaceTilt * 0.55 + relative * (0.0018 + falling.softness * 0.0018);
 
     for (const s of stack) {
-      s.settleSquash = Math.min(0.34, (s.settleSquash || 0) + 0.10 + falling.softness * 0.08);
+      s.settleSquash = Math.min(0.46, (s.settleSquash || 0) + 0.14 + falling.softness * 0.11);
     }
 
     stack.push({
       offsetX:Math.max(-38,Math.min(38,offset)),
       tilt:Math.max(-.13,Math.min(.13,tilt)),
       softness:falling.softness,
-      settleSquash:0.20 + falling.softness * 0.18,
+      settleSquash:0.28 + falling.softness * 0.22,
       lagX:0,
       lagVX:0
     });
@@ -483,8 +489,8 @@ canvas{display:block;width:100%;height:100%}
       falling.bounced=true;
       falling.impactRelative=relative;
       falling.vy=0;
-      falling.squash=0.88 + falling.softness * 0.10;
-      falling.squashUntil=now + 135 + falling.softness * 175;
+      falling.squash=0.96 + falling.softness * 0.16;
+      falling.squashUntil=now + 190 + falling.softness * 240;
       state='squash';
       msg.textContent=falling.softness>0.68 ? 'むにっ…' : 'ぽふっ';
       return true;
@@ -562,10 +568,10 @@ canvas{display:block;width:100%;height:100%}
     const surfaceTilt=top.tilt||0;
     honey={
       offsetX:Math.max(-36,Math.min(36,relative*.66)),
-      spread:Math.max(22,60-diff*.55),
-      targetSpread:Math.max(42,82-diff*.62),
-      flow:surfaceTilt*0.28,
-      viscosity:0.72+Math.random()*0.20,
+      spread:Math.max(18,48-diff*.38),
+      targetSpread:Math.max(36,70-diff*.48),
+      flow:surfaceTilt*0.12,
+      viscosity:0.92+Math.random()*0.07,
       splat:1,
       drip:0
     };
@@ -601,12 +607,12 @@ canvas{display:block;width:100%;height:100%}
       const softness = s.softness || 0.5;
 
       s.lagVX = (s.lagVX || 0) - plateDelta * (0.055 + softness * 0.065) * layer;
-      s.lagVX += -(s.lagX || 0) * (0.030 + (1-softness)*0.018) * f;
-      s.lagVX *= Math.pow(0.82 + softness * 0.08, f);
+      s.lagVX += -(s.lagX || 0) * (0.022 + (1-softness)*0.012) * f;
+      s.lagVX *= Math.pow(0.88 + softness * 0.055, f);
       s.lagX = (s.lagX || 0) + s.lagVX * f;
       s.lagX = Math.max(-14, Math.min(14, s.lagX));
 
-      s.settleSquash = Math.max(0, (s.settleSquash || 0) - (0.010 + (1-softness)*0.008) * f);
+      s.settleSquash = Math.max(0, (s.settleSquash || 0) - (0.0045 + (1-softness)*0.004) * f);
     }
   }
 
@@ -636,13 +642,13 @@ canvas{display:block;width:100%;height:100%}
     const slope=(top.tilt||0)+(top.lagX||0)*0.0025;
     const visc=honey.viscosity||0.8;
 
-    honey.offsetX += (honey.flow + slope*(0.11+0.12*(1-visc))) * f;
-    honey.offsetX += -plateDelta * 0.018 * (1-visc) * f;
+    honey.offsetX += (honey.flow + slope*(0.045+0.055*(1-visc))) * f;
+    honey.offsetX += -plateDelta * 0.006 * (1-visc) * f;
     honey.offsetX=Math.max(-40,Math.min(40,honey.offsetX));
 
-    honey.spread += (honey.targetSpread-honey.spread)*(0.025+0.025*(1-visc))*f;
-    honey.splat=Math.max(0,honey.splat-0.045*f);
-    honey.drip=Math.min(1,(honey.drip||0)+0.012*f+Math.abs(slope)*0.025*f);
+    honey.spread += (honey.targetSpread-honey.spread)*(0.008+0.010*(1-visc))*f;
+    honey.splat=Math.max(0,honey.splat-0.018*f);
+    honey.drip=Math.min(1,(honey.drip||0)+0.004*f+Math.abs(slope)*0.010*f);
   }
 
   function finishDish(now) {
@@ -703,13 +709,13 @@ canvas{display:block;width:100%;height:100%}
       if(now>=falling.squashUntil){
         const surfaceTilt=stack.length ? stack[stack.length-1].tilt : 0;
         const edge=falling.impactRelative;
-        const bouncePower=0.42 + falling.elasticity*1.85;
+        const bouncePower=0.24 + falling.elasticity*1.28;
         falling.squash=0;
         falling.vy=-bouncePower;
         falling.vx += edge*(0.016+falling.elasticity*0.012) + surfaceTilt*2.2;
         falling.tilt += edge*0.0018 + surfaceTilt*0.65;
         state='play';
-        msg.textContent=falling.softness>0.72 ? 'むにゅっと戻る' : (bouncePower<1.25 ? 'ふわっ' : 'ぽよん！');
+        msg.textContent=falling.softness>0.78 ? 'しっとり、むにゅ…' : (bouncePower<0.9 ? 'ふわっ' : 'ぽよん');
       }
       return;
     }
@@ -741,8 +747,8 @@ canvas{display:block;width:100%;height:100%}
       falling.vy+=.15*f;
       falling.x+=falling.vx*f;
       falling.y+=falling.vy*f;
-      falling.stretch=Math.min(1,Math.max(0,(falling.vy-1.2)/4.2));
-      falling.trail=Math.min(1,(falling.trail||0)+0.018*f);
+      falling.stretch=Math.min(1,Math.max(0,(falling.vy-1.0)/3.0));
+      falling.trail=Math.min(1,(falling.trail||0)+0.030*f);
       if(state==='play')hitHoney(now);
     }else{
       falling.vy+=.20*f;
