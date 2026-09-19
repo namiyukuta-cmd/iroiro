@@ -1,5 +1,5 @@
 (() => {
-  const SESSION_KEY='ad_session_map_location_v1';
+  const SESSION_KEY='dd_session_map_location_v2';
   const OLD_SESSION_KEY='dd_session_map_position_v1';
   const LEGACY_LOCAL_KEY='dd_map_position_v1';
 
@@ -84,7 +84,7 @@
   function enterCurrent(){
     const info=places[currentLocation];
     if(currentLocation==='cabin'){location.href='DD_top.html';return}
-    location.href=`AD_deck.html?zone=${encodeURIComponent(info.zone)}&place=${encodeURIComponent(currentLocation)}&v=${Date.now()}`;
+    location.href=`DD_point.html?zone=${encodeURIComponent(info.zone)}&place=${encodeURIComponent(currentLocation)}&v=${Date.now()}`;
   }
   function completeMove(placeId){
     const from=currentLocation;
