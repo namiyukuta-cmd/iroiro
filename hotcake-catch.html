@@ -353,10 +353,10 @@ canvas{display:block;width:100%;height:100%}
       finishDish(now);
       return;
     }
-    state='wait';
     falling=null;
-    nextAt=now+500;
+    state='play';
     msg.textContent=phaseName()+'を受け止める';
+    spawn();
   }
 
   function scoreFromDiff(diff, maxDiff) {
