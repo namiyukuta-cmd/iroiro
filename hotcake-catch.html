@@ -8,23 +8,23 @@
 <meta http-equiv="Expires" content="0">
 <title>ホットケーキキャッチ</title>
 <style>
-  *{box-sizing:border-box}
-  html,body{margin:0;min-height:100%;background:#fff8ea;color:#3b2a20;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Hiragino Kaku Gothic ProN","Yu Gothic",sans-serif;touch-action:manipulation}
-  body{display:flex;justify-content:center;padding:12px}
-  .wrap{width:min(100%,430px)}
-  .top{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:8px}
-  .score{font-weight:800;font-size:17px;line-height:1.5}
-  .sub{font-size:13px;color:#765f50}
-  button{font:inherit}
-  #reset{border:1px solid #cbb8a4;background:#fff;border-radius:10px;padding:9px 13px;min-height:44px;color:#3b2a20}
-  .gamebox{position:relative;width:100%;aspect-ratio:3/5;max-height:72vh;border:2px solid #d8c4ad;border-radius:18px;overflow:hidden;background:#fffdf8;touch-action:none}
-  canvas{display:block;width:100%;height:100%}
-  .msg{min-height:27px;text-align:center;font-weight:800;margin:8px 0 2px}
-  .quality{min-height:22px;text-align:center;font-size:14px;color:#765f50;margin-bottom:5px}
-  .help{text-align:center;font-size:12px;color:#765f50;margin-bottom:8px}
-  .controls{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-  .move{min-height:54px;border:1px solid #cbb8a4;background:#fff;border-radius:14px;font-size:24px;font-weight:800;color:#3b2a20}
-  .move:active,#reset:active{transform:translateY(1px)}
+*{box-sizing:border-box}
+html,body{margin:0;min-height:100%;background:#fff8ea;color:#3b2a20;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Hiragino Kaku Gothic ProN","Yu Gothic",sans-serif}
+body{display:flex;justify-content:center;padding:12px}
+.wrap{width:min(100%,430px)}
+.top{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:8px}
+.score{font-weight:800;font-size:17px;line-height:1.45}
+.sub{font-size:13px;color:#765f50}
+button{font:inherit}
+#reset{border:1px solid #cbb8a4;background:#fff;border-radius:10px;padding:9px 13px;min-height:44px;color:#3b2a20}
+.gamebox{position:relative;width:100%;aspect-ratio:3/5;max-height:72vh;border:2px solid #d8c4ad;border-radius:18px;overflow:hidden;background:#fffdf8;touch-action:none}
+canvas{display:block;width:100%;height:100%}
+.msg{min-height:27px;text-align:center;font-weight:800;margin:8px 0 2px}
+.quality{min-height:22px;text-align:center;font-size:14px;color:#765f50;margin-bottom:5px}
+.help{text-align:center;font-size:12px;color:#765f50;margin-bottom:8px}
+.controls{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.move{min-height:54px;border:1px solid #cbb8a4;background:#fff;border-radius:14px;font-size:24px;font-weight:800;color:#3b2a20}
+.move:active,#reset:active{transform:translateY(1px)}
 </style>
 </head>
 <body>
@@ -32,17 +32,17 @@
   <div class="top">
     <div>
       <div class="score">合計 <span id="totalScore">0</span>点　完成 <span id="finished">0</span>皿</div>
-      <div class="sub">3段＋バター＋蜂蜜で完成</div>
+      <div class="sub">3枚 → バター → 蜂蜜</div>
     </div>
     <button id="reset" type="button">やり直す</button>
   </div>
 
-  <div id="gamebox" class="gamebox" aria-label="落ちて跳ねるホットケーキを皿で受け止めるゲーム">
+  <div id="gamebox" class="gamebox" aria-label="ホットケーキ、バター、蜂蜜を皿で受け止めるゲーム">
     <canvas id="game" width="360" height="600"></canvas>
   </div>
 
   <div id="msg" class="msg" aria-live="polite">1枚目を受け止める</div>
-  <div id="quality" class="quality">きれいに中央へ積むほど高得点</div>
+  <div id="quality" class="quality">中央にきれいに重ねるほど高得点</div>
   <div class="help">画面を左右になぞる / ← → 長押しでも皿を移動</div>
 
   <div class="controls">
@@ -68,260 +68,289 @@
   const H = canvas.height;
   const plateY = 535;
   const plateW = 126;
-  const plateH = 26;
   const cakeW = 82;
   const cakeH = 24;
 
   let plateX = W / 2;
-  let cake = null;
   let stack = [];
-  let totalScore = 0;
-  let finished = 0;
-  let misses = 0;
-  let last = performance.now();
-  let pointerDown = false;
-  let leftHeld = false;
-  let rightHeld = false;
+  let butter = null;
+  let honey = null;
+  let falling = null;
+
+  let phase = 0; // 0-2 cake, 3 butter, 4 honey
   let state = 'play';
   let nextAt = 0;
   let completeAt = 0;
-  let finishInfo = null;
+  let last = performance.now();
 
-  function randomCake() {
-    const margin = 52;
-    cake = {
-      x: margin + Math.random() * (W - margin * 2),
-      y: -28,
-      vx: (Math.random() * 2 - 1) * (0.55 + finished * 0.04),
-      vy: 0.9,
-      bounce: 0,
-      tilt: (Math.random() * 2 - 1) * 0.05
-    };
+  let totalScore = 0;
+  let finished = 0;
+  let dishScores = [0,0,0,0,0];
+  let resultInfo = null;
+
+  let pointerDown = false;
+  let leftHeld = false;
+  let rightHeld = false;
+
+  function phaseName() {
+    if (phase <= 2) return (phase + 1) + '枚目';
+    if (phase === 3) return 'バター';
+    return '蜂蜜';
   }
 
-  function restart() {
-    plateX = W / 2;
-    stack = [];
-    totalScore = 0;
-    finished = 0;
-    misses = 0;
-    state = 'play';
-    nextAt = 0;
-    completeAt = 0;
-    finishInfo = null;
-    totalScoreEl.textContent = '0';
-    finishedEl.textContent = '0';
-    msg.textContent = '1枚目を受け止める';
-    qualityEl.textContent = 'きれいに中央へ積むほど高得点';
-    randomCake();
-  }
-
-  function supportCenter() {
-    if (!stack.length) return plateX;
+  function topCenter() {
+    if (phase === 0 || !stack.length) return plateX;
     return plateX + stack[stack.length - 1].offsetX;
   }
 
-  function supportY() {
-    return plateY - 9 - stack.length * 14;
+  function topY() {
+    return plateY - 10 - stack.length * 14;
   }
 
-  function drawPancake(x, y, tilt = 0) {
+  function spawn() {
+    const margin = 50;
+    const x = margin + Math.random() * (W - margin * 2);
+
+    if (phase <= 2) {
+      const softness = 0.82 + Math.random() * 0.32;
+      falling = {
+        type:'cake', x, y:-30,
+        vx:(Math.random()*2-1)*(0.65 + finished*0.03),
+        vy:1.0, tilt:(Math.random()*2-1)*0.06,
+        bounced:false, softness
+      };
+    } else if (phase === 3) {
+      falling = {
+        type:'butter', x, y:-24,
+        vx:(Math.random()*2-1)*0.45,
+        vy:1.0, tilt:(Math.random()*2-1)*0.08,
+        bounced:false
+      };
+    } else {
+      falling = {
+        type:'honey', x, y:-34,
+        vx:(Math.random()*2-1)*0.26,
+        vy:1.2
+      };
+    }
+  }
+
+  function restart() {
+    plateX = W/2;
+    stack = [];
+    butter = null;
+    honey = null;
+    falling = null;
+    phase = 0;
+    state = 'play';
+    nextAt = 0;
+    completeAt = 0;
+    totalScore = 0;
+    finished = 0;
+    dishScores = [0,0,0,0,0];
+    resultInfo = null;
+    totalScoreEl.textContent = '0';
+    finishedEl.textContent = '0';
+    msg.textContent = '1枚目を受け止める';
+    qualityEl.textContent = '中央にきれいに重ねるほど高得点';
+    spawn();
+  }
+
+  function drawPancake(x,y,tilt=0,softness=1) {
     ctx.save();
-    ctx.translate(x, y);
+    ctx.translate(x,y);
     ctx.rotate(tilt);
 
+    const h = cakeH * softness;
     ctx.fillStyle = '#9f5e2c';
     ctx.strokeStyle = '#69401f';
     ctx.lineWidth = 2;
     ctx.beginPath();
-    ctx.ellipse(0, 3, cakeW/2, cakeH/2, 0, 0, Math.PI * 2);
+    ctx.ellipse(0,3,cakeW/2,h/2,0,0,Math.PI*2);
     ctx.fill();
     ctx.stroke();
 
     ctx.fillStyle = '#e7ae55';
     ctx.beginPath();
-    ctx.ellipse(0, -2, cakeW/2 - 4, cakeH/2 - 4, 0, 0, Math.PI * 2);
+    ctx.ellipse(0,-2,cakeW/2-4,h/2-4,0,0,Math.PI*2);
     ctx.fill();
 
-    ctx.fillStyle = 'rgba(255,235,183,.7)';
+    ctx.fillStyle = 'rgba(255,235,183,.72)';
     ctx.beginPath();
-    ctx.ellipse(-13, -5, 14, 3.5, -.12, 0, Math.PI*2);
+    ctx.ellipse(-13,-5,14,3.5,-.12,0,Math.PI*2);
     ctx.fill();
     ctx.restore();
   }
 
-  function drawPlateAndStack() {
+  function drawButter(x,y,tilt=0) {
     ctx.save();
-    ctx.translate(plateX, plateY);
+    ctx.translate(x,y);
+    ctx.rotate(tilt);
+    ctx.fillStyle='#f2d357';
+    ctx.strokeStyle='#b99828';
+    ctx.lineWidth=1.5;
+    ctx.fillRect(-13,-8,26,16);
+    ctx.strokeRect(-13,-8,26,16);
+    ctx.fillStyle='rgba(255,248,184,.75)';
+    ctx.fillRect(-10,-6,20,4);
+    ctx.restore();
+  }
 
-    ctx.fillStyle = '#d8e8ef';
-    ctx.strokeStyle = '#657d8a';
-    ctx.lineWidth = 3;
+  function drawHoneyBlob(x,y) {
+    ctx.save();
+    ctx.translate(x,y);
+    ctx.fillStyle='#d79718';
     ctx.beginPath();
-    ctx.ellipse(0, 5, plateW/2, plateH/2, 0, 0, Math.PI * 2);
+    ctx.ellipse(0,0,10,15,0,0,Math.PI*2);
+    ctx.fill();
+    ctx.fillStyle='#efbd45';
+    ctx.beginPath();
+    ctx.ellipse(-3,-4,3,6,0,0,Math.PI*2);
+    ctx.fill();
+    ctx.restore();
+  }
+
+  function drawHoneyOnStack() {
+    if (!honey || !stack.length) return;
+    const top = stack[stack.length-1];
+    const x = plateX + top.offsetX + honey.offsetX;
+    const y = plateY - 11 - (stack.length-1)*14 - 4;
+
+    ctx.save();
+    ctx.strokeStyle='#d79718';
+    ctx.lineWidth=6;
+    ctx.lineCap='round';
+    ctx.beginPath();
+    ctx.moveTo(x-honey.spread/2,y);
+    ctx.quadraticCurveTo(x,y+5,x+honey.spread/2,y);
+    ctx.stroke();
+
+    ctx.strokeStyle='#e1a221';
+    ctx.lineWidth=3;
+    const leftDrip = Math.max(-30, honey.offsetX - honey.spread*.24);
+    const rightDrip = Math.min(30, honey.offsetX + honey.spread*.25);
+    ctx.beginPath();
+    ctx.moveTo(plateX+top.offsetX+leftDrip,y+2);
+    ctx.quadraticCurveTo(plateX+top.offsetX+leftDrip-2,y+12,plateX+top.offsetX+leftDrip,y+22);
+    ctx.moveTo(plateX+top.offsetX+rightDrip,y+2);
+    ctx.quadraticCurveTo(plateX+top.offsetX+rightDrip+2,y+10,plateX+top.offsetX+rightDrip,y+18);
+    ctx.stroke();
+    ctx.restore();
+  }
+
+  function drawPlateAndFood() {
+    ctx.save();
+    ctx.fillStyle='#d8e8ef';
+    ctx.strokeStyle='#657d8a';
+    ctx.lineWidth=3;
+    ctx.beginPath();
+    ctx.ellipse(plateX,plateY+5,plateW/2,13,0,0,Math.PI*2);
     ctx.fill();
     ctx.stroke();
 
-    ctx.fillStyle = '#f8fcff';
+    ctx.fillStyle='#f8fcff';
     ctx.beginPath();
-    ctx.ellipse(0, 1, plateW/2 - 10, plateH/2 - 5, 0, 0, Math.PI * 2);
+    ctx.ellipse(plateX,plateY+1,plateW/2-10,8,0,0,Math.PI*2);
     ctx.fill();
 
-    for (let i = 0; i < stack.length; i++) {
-      const s = stack[i];
-      drawPancake(s.offsetX, -11 - i * 14, s.tilt);
+    for (let i=0;i<stack.length;i++) {
+      const s=stack[i];
+      drawPancake(plateX+s.offsetX,plateY-11-i*14,s.tilt,s.softness);
     }
 
-    if (state === 'complete' && stack.length === 3) {
-      const top = stack[2];
-      const topY = -11 - 2 * 14;
-
-      ctx.save();
-      ctx.translate(top.offsetX, topY);
-
-      ctx.strokeStyle = '#d89718';
-      ctx.lineWidth = 5;
-      ctx.lineCap = 'round';
-      ctx.beginPath();
-      ctx.moveTo(-27, -6);
-      ctx.quadraticCurveTo(-12, 1, 0, -5);
-      ctx.quadraticCurveTo(16, -12, 30, -3);
-      ctx.stroke();
-
-      ctx.strokeStyle = '#e5a62b';
-      ctx.lineWidth = 3;
-      ctx.beginPath();
-      ctx.moveTo(-30, -1);
-      ctx.quadraticCurveTo(-21, 7, -25, 16);
-      ctx.moveTo(27, -1);
-      ctx.quadraticCurveTo(21, 8, 24, 16);
-      ctx.stroke();
-
-      ctx.fillStyle = '#f3d75c';
-      ctx.strokeStyle = '#c7a53a';
-      ctx.lineWidth = 1.5;
-      ctx.fillRect(-12, -18, 24, 15);
-      ctx.strokeRect(-12, -18, 24, 15);
-      ctx.restore();
+    if (butter) {
+      const top=stack[stack.length-1];
+      drawButter(plateX+top.offsetX+butter.offsetX,plateY-11-(stack.length-1)*14-15,butter.tilt);
     }
 
+    drawHoneyOnStack();
     ctx.restore();
   }
 
   function drawBackground() {
     ctx.clearRect(0,0,W,H);
-    ctx.fillStyle = '#fffdf8';
+    ctx.fillStyle='#fffdf8';
     ctx.fillRect(0,0,W,H);
-
-    ctx.fillStyle = '#fff5df';
+    ctx.fillStyle='#fff5df';
     ctx.fillRect(0,0,W,92);
 
-    ctx.fillStyle = '#9f7d61';
-    ctx.font = '700 17px sans-serif';
-    ctx.textAlign = 'center';
-    ctx.fillText('HOTCAKE  ' + Math.min(stack.length + 1, 3) + ' / 3', W/2, 38);
+    ctx.fillStyle='#9f7d61';
+    ctx.textAlign='center';
+    ctx.font='700 17px sans-serif';
+    const labels=['HOTCAKE 1 / 3','HOTCAKE 2 / 3','HOTCAKE 3 / 3','BUTTER','HONEY'];
+    ctx.fillText(labels[Math.min(phase,4)],W/2,38);
 
-    ctx.fillStyle = '#eadcc7';
+    ctx.fillStyle='#eadcc7';
     ctx.fillRect(0,455,W,145);
-    ctx.strokeStyle = '#d4c0a8';
-    ctx.lineWidth = 2;
+    ctx.strokeStyle='#d4c0a8';
+    ctx.lineWidth=2;
     ctx.beginPath();
     ctx.moveTo(0,455);
     ctx.lineTo(W,455);
     ctx.stroke();
   }
 
-  function currentDishScore() {
-    if (!stack.length) return 0;
-    let sum = 0;
-    for (let i = 0; i < stack.length; i++) {
-      const target = i === 0 ? 0 : stack[i - 1].offsetX;
-      const diff = Math.abs(stack[i].offsetX - target);
-      sum += Math.max(0, 100 - diff * 3.2);
-    }
-    return Math.round(sum);
-  }
-
-  function finishDish(now) {
-    const base = currentDishScore();
-    const centerPenalty = Math.abs(stack[0].offsetX) * 1.4;
-    const finishBonus = Math.max(0, Math.round(100 - centerPenalty));
-    const points = Math.max(0, Math.round(base + finishBonus));
-    const percent = Math.round(points / 4);
-
-    let rank = 'くずれ気味';
-    if (percent >= 95) rank = '完璧';
-    else if (percent >= 85) rank = 'かなり上手';
-    else if (percent >= 70) rank = 'きれい';
-    else if (percent >= 50) rank = 'まあまあ';
-
-    totalScore += points;
-    finished++;
-    totalScoreEl.textContent = String(totalScore);
-    finishedEl.textContent = String(finished);
-
-    finishInfo = { points, percent, rank };
-    state = 'complete';
-    cake = null;
-    completeAt = now + 1800;
-    msg.textContent = '完成！ バター＋蜂蜜';
-    qualityEl.textContent = '出来度 ' + percent + '%　+' + points + '点　' + rank;
-  }
-
-  function settleCake(now) {
-    const center = supportCenter();
-    const relative = cake.x - center;
-    const supportHalf = stack.length ? 34 : 48;
-
-    if (Math.abs(relative) > supportHalf) {
-      cake.vy = 2.5;
-      cake.vx += Math.sign(relative || 1) * 0.7;
-      state = 'fallingOff';
-      msg.textContent = '跳ねて落ちた！';
-      return;
-    }
-
-    const previousOffset = stack.length ? stack[stack.length - 1].offsetX : 0;
-    const offsetX = stack.length
-      ? previousOffset + relative * 0.60
-      : relative * 0.55;
-
-    stack.push({
-      offsetX: Math.max(-38, Math.min(38, offsetX)),
-      tilt: Math.max(-0.08, Math.min(0.08, cake.tilt + relative * 0.0015))
-    });
-
-    const partial = currentDishScore();
-    qualityEl.textContent = stack.length < 3
-      ? '途中出来度 ' + Math.round(partial / stack.length) + '%'
-      : qualityEl.textContent;
-
-    if (stack.length >= 3) {
+  function advance(now) {
+    phase++;
+    if (phase > 4) {
       finishDish(now);
       return;
     }
-
-    state = 'wait';
-    cake = null;
-    nextAt = now + 450;
-    msg.textContent = (stack.length + 1) + '枚目を受け止める';
+    state='wait';
+    falling=null;
+    nextAt=now+500;
+    msg.textContent=phaseName()+'を受け止める';
   }
 
-  function collision(now) {
-    const center = supportCenter();
-    const relative = cake.x - center;
-    const supportHalf = stack.length ? 36 : 50;
+  function scoreFromDiff(diff, maxDiff) {
+    return Math.max(0, Math.round(100*(1-Math.min(diff,maxDiff)/maxDiff)));
+  }
 
-    if (Math.abs(relative) > supportHalf + cakeW * 0.18) return false;
+  function settleCake(now) {
+    const center = topCenter();
+    const diff = Math.abs(falling.x-center);
+    const supportHalf = phase===0 ? 48 : 34;
 
-    cake.y = supportY() - cakeH/2;
+    if (diff>supportHalf) {
+      falling.vy=2.7;
+      falling.vx += Math.sign(falling.x-center || 1)*0.9;
+      state='fallingOff';
+      msg.textContent='跳ねて落ちた！';
+      return;
+    }
 
-    if (cake.bounce === 0) {
-      cake.bounce = 1;
-      cake.vy = -(3.9 + Math.min(1.4, Math.abs(cake.vx) * 0.7));
-      cake.vx += relative * 0.018;
-      cake.tilt += cake.vx * 0.012;
-      msg.textContent = '跳ねた！ 皿で追う';
+    const prev = stack.length ? stack[stack.length-1].offsetX : 0;
+    const relative = falling.x-center;
+    const offset = stack.length ? prev + relative*.62 : relative*.56;
+
+    stack.push({
+      offsetX:Math.max(-38,Math.min(38,offset)),
+      tilt:Math.max(-.10,Math.min(.10,falling.tilt+relative*.0018)),
+      softness:falling.softness
+    });
+
+    dishScores[phase]=scoreFromDiff(diff,supportHalf);
+    qualityEl.textContent='この1枚 '+dishScores[phase]+'点';
+    advance(now);
+  }
+
+  function hitCake(now) {
+    const center=topCenter();
+    const targetY=topY();
+    const relative=falling.x-center;
+    const hitHalf=phase===0?52:38;
+
+    if (Math.abs(relative)>hitHalf+12) return false;
+
+    falling.y=targetY-cakeH/2;
+
+    if (!falling.bounced) {
+      falling.bounced=true;
+      const softness=falling.softness;
+      falling.vy=-(3.0+softness*1.9);
+      falling.vx += relative*.022;
+      falling.tilt += falling.vx*.016;
+      msg.textContent='跳ねた！ 皿で追う';
       return true;
     }
 
@@ -329,142 +358,244 @@
     return true;
   }
 
-  function miss(now) {
-    misses++;
-    state = 'wait';
-    cake = null;
-    nextAt = now + 520;
-    msg.textContent = '落とした！ ' + (stack.length + 1) + '枚目をもう一度';
-    qualityEl.textContent = stack.length
-      ? '今の途中出来度 ' + Math.round(currentDishScore()/stack.length) + '%'
-      : 'きれいに中央へ積むほど高得点';
+  function settleButter(now) {
+    const top=stack[stack.length-1];
+    const center=plateX+top.offsetX;
+    const relative=falling.x-center;
+    const diff=Math.abs(relative);
+
+    if (diff>37) {
+      falling.vy=2.8;
+      falling.vx += Math.sign(relative||1)*.8;
+      state='fallingOff';
+      msg.textContent='バターが滑り落ちた！';
+      return;
+    }
+
+    const slide=relative*.72 + falling.vx*3.2;
+    butter={
+      offsetX:Math.max(-31,Math.min(31,slide)),
+      tilt:Math.max(-.16,Math.min(.16,falling.tilt))
+    };
+    dishScores[3]=scoreFromDiff(Math.abs(butter.offsetX),31);
+    qualityEl.textContent='バター '+dishScores[3]+'点';
+    advance(now);
   }
 
-  function update(dt, now) {
-    const moveSpeed = 0.31 * dt;
-    if (leftHeld) plateX -= moveSpeed;
-    if (rightHeld) plateX += moveSpeed;
-    plateX = Math.max(plateW/2, Math.min(W - plateW/2, plateX));
+  function hitButter(now) {
+    const top=stack[stack.length-1];
+    const center=plateX+top.offsetX;
+    const targetY=plateY-11-(stack.length-1)*14-18;
+    if (Math.abs(falling.x-center)>48) return false;
 
-    if (state === 'complete') {
-      if (now >= completeAt) {
-        stack = [];
-        finishInfo = null;
-        state = 'play';
-        msg.textContent = '1枚目を受け止める';
-        qualityEl.textContent = 'きれいに中央へ積むほど高得点';
-        randomCake();
+    falling.y=targetY;
+    if (!falling.bounced) {
+      falling.bounced=true;
+      falling.vy=-2.1;
+      falling.vx += (falling.x-center)*.018;
+      falling.tilt += falling.vx*.025;
+      msg.textContent='バターが跳ねた！';
+      return true;
+    }
+
+    settleButter(now);
+    return true;
+  }
+
+  function settleHoney(now) {
+    const top=stack[stack.length-1];
+    const center=plateX+top.offsetX;
+    const relative=falling.x-center;
+    const diff=Math.abs(relative);
+
+    if (diff>49) {
+      state='fallingOff';
+      falling.vy=3.4;
+      msg.textContent='蜂蜜が外れた！';
+      return;
+    }
+
+    const spread=Math.max(26,74-diff*.8);
+    honey={
+      offsetX:Math.max(-36,Math.min(36,relative*.72)),
+      spread
+    };
+
+    dishScores[4]=scoreFromDiff(diff,49);
+    qualityEl.textContent='蜂蜜 '+dishScores[4]+'点';
+    falling=null;
+    finishDish(now);
+  }
+
+  function hitHoney(now) {
+    const top=stack[stack.length-1];
+    const center=plateX+top.offsetX;
+    const targetY=plateY-11-(stack.length-1)*14-16;
+    if (falling.y+14<targetY) return false;
+    settleHoney(now);
+    return true;
+  }
+
+  function miss(now) {
+    state='wait';
+    falling=null;
+    nextAt=now+550;
+    msg.textContent=phaseName()+'をもう一度';
+  }
+
+  function finishDish(now) {
+    const points=dishScores.reduce((a,b)=>a+b,0);
+    const percent=Math.round(points/5);
+    let rank='くずれ気味';
+    if(percent>=95)rank='完璧';
+    else if(percent>=85)rank='かなり上手';
+    else if(percent>=70)rank='きれい';
+    else if(percent>=50)rank='まあまあ';
+
+    totalScore+=points;
+    finished++;
+    totalScoreEl.textContent=String(totalScore);
+    finishedEl.textContent=String(finished);
+    resultInfo={points,percent,rank};
+    state='complete';
+    completeAt=now+2200;
+    msg.textContent='完成！';
+    qualityEl.textContent='出来度 '+percent+'%　+'+points+'点　'+rank;
+  }
+
+  function newDish() {
+    stack=[];
+    butter=null;
+    honey=null;
+    falling=null;
+    dishScores=[0,0,0,0,0];
+    phase=0;
+    state='play';
+    resultInfo=null;
+    msg.textContent='1枚目を受け止める';
+    qualityEl.textContent='中央にきれいに重ねるほど高得点';
+    spawn();
+  }
+
+  function update(dt,now) {
+    const moveSpeed=.31*dt;
+    if(leftHeld)plateX-=moveSpeed;
+    if(rightHeld)plateX+=moveSpeed;
+    plateX=Math.max(plateW/2,Math.min(W-plateW/2,plateX));
+
+    if(state==='complete'){
+      if(now>=completeAt)newDish();
+      return;
+    }
+
+    if(state==='wait'){
+      if(now>=nextAt){
+        state='play';
+        spawn();
       }
       return;
     }
 
-    if (state === 'wait') {
-      if (now >= nextAt) {
-        state = 'play';
-        randomCake();
+    if(!falling)return;
+
+    const f=dt/16.67;
+
+    if(falling.type==='honey'){
+      falling.vy+=.15*f;
+      falling.x+=falling.vx*f;
+      falling.y+=falling.vy*f;
+      if(state==='play')hitHoney(now);
+    }else{
+      falling.vy+=.20*f;
+      falling.x+=falling.vx*f;
+      falling.y+=falling.vy*f;
+      falling.tilt+=falling.vx*.0018*f;
+
+      if(falling.x<22){falling.x=22;falling.vx=Math.abs(falling.vx)*.8}
+      if(falling.x>W-22){falling.x=W-22;falling.vx=-Math.abs(falling.vx)*.8}
+
+      if(state==='play' && falling.vy>0){
+        if(falling.type==='cake' && falling.y+cakeH/2>=topY()) hitCake(now);
+        if(falling.type==='butter'){
+          const targetY=plateY-11-(stack.length-1)*14-18;
+          if(falling.y+9>=targetY) hitButter(now);
+        }
       }
-      return;
     }
 
-    if (!cake) return;
-
-    const factor = dt / 16.67;
-    cake.vy += 0.19 * factor;
-    cake.x += cake.vx * factor;
-    cake.y += cake.vy * factor;
-    cake.tilt += cake.vx * 0.0016 * factor;
-
-    if (cake.x < cakeW/2) {
-      cake.x = cakeW/2;
-      cake.vx = Math.abs(cake.vx) * 0.8;
-    } else if (cake.x > W - cakeW/2) {
-      cake.x = W - cakeW/2;
-      cake.vx = -Math.abs(cake.vx) * 0.8;
-    }
-
-    if (state === 'play' && cake.vy > 0 && cake.y + cakeH/2 >= supportY()) {
-      collision(now);
-    }
-
-    if (cake && cake.y > H + 45) miss(now);
+    if(falling && falling.y>H+50)miss(now);
   }
 
   function render() {
     drawBackground();
-    drawPlateAndStack();
+    drawPlateAndFood();
 
-    if (cake) drawPancake(cake.x, cake.y, cake.tilt);
+    if(falling){
+      if(falling.type==='cake')drawPancake(falling.x,falling.y,falling.tilt,falling.softness);
+      else if(falling.type==='butter')drawButter(falling.x,falling.y,falling.tilt);
+      else drawHoneyBlob(falling.x,falling.y);
+    }
 
-    if (state === 'complete' && finishInfo) {
+    if(state==='complete' && resultInfo){
       ctx.save();
-      ctx.fillStyle = 'rgba(255,255,255,.88)';
-      ctx.strokeStyle = '#7b5a3f';
-      ctx.lineWidth = 2;
+      ctx.fillStyle='rgba(255,255,255,.90)';
+      ctx.strokeStyle='#7b5a3f';
+      ctx.lineWidth=2;
       ctx.beginPath();
-      ctx.roundRect(67, 112, 226, 82, 14);
+      ctx.roundRect(62,112,236,90,14);
       ctx.fill();
       ctx.stroke();
-
-      ctx.fillStyle = '#3b2a20';
-      ctx.textAlign = 'center';
-      ctx.font = '800 25px sans-serif';
-      ctx.fillText('出来度 ' + finishInfo.percent + '%', W/2, 147);
-      ctx.font = '700 18px sans-serif';
-      ctx.fillText('+' + finishInfo.points + '点', W/2, 177);
+      ctx.fillStyle='#3b2a20';
+      ctx.textAlign='center';
+      ctx.font='800 25px sans-serif';
+      ctx.fillText('出来度 '+resultInfo.percent+'%',W/2,149);
+      ctx.font='700 18px sans-serif';
+      ctx.fillText('+'+resultInfo.points+'点　'+resultInfo.rank,W/2,180);
       ctx.restore();
     }
   }
 
-  function loop(now) {
-    const dt = Math.min(34, now - last);
-    last = now;
-    update(dt, now);
+  function loop(now){
+    const dt=Math.min(34,now-last);
+    last=now;
+    update(dt,now);
     render();
     requestAnimationFrame(loop);
   }
 
-  function pointerToPlate(e) {
-    const r = canvas.getBoundingClientRect();
-    const x = (e.clientX - r.left) * (W / r.width);
-    plateX = Math.max(plateW/2, Math.min(W - plateW/2, x));
+  function pointerToPlate(e){
+    const r=canvas.getBoundingClientRect();
+    const x=(e.clientX-r.left)*(W/r.width);
+    plateX=Math.max(plateW/2,Math.min(W-plateW/2,x));
   }
 
-  box.addEventListener('pointerdown', e => {
-    pointerDown = true;
+  box.addEventListener('pointerdown',e=>{
+    pointerDown=true;
     box.setPointerCapture?.(e.pointerId);
     pointerToPlate(e);
   });
-
-  box.addEventListener('pointermove', e => {
-    if (pointerDown) pointerToPlate(e);
-  });
-
-  box.addEventListener('pointerup', e => {
-    pointerDown = false;
+  box.addEventListener('pointermove',e=>{if(pointerDown)pointerToPlate(e)});
+  box.addEventListener('pointerup',e=>{
+    pointerDown=false;
     box.releasePointerCapture?.(e.pointerId);
   });
+  box.addEventListener('pointercancel',()=>{pointerDown=false});
 
-  box.addEventListener('pointercancel', () => { pointerDown = false; });
-
-  function bindHold(btn, side) {
-    btn.addEventListener('pointerdown', e => {
+  function bindHold(btn,side){
+    btn.addEventListener('pointerdown',e=>{
       e.preventDefault();
-      if (side === 'left') leftHeld = true;
-      else rightHeld = true;
+      if(side==='left')leftHeld=true;else rightHeld=true;
       btn.setPointerCapture?.(e.pointerId);
     });
-    const stop = () => {
-      if (side === 'left') leftHeld = false;
-      else rightHeld = false;
-    };
-    btn.addEventListener('pointerup', stop);
-    btn.addEventListener('pointercancel', stop);
-    btn.addEventListener('lostpointercapture', stop);
+    const stop=()=>{if(side==='left')leftHeld=false;else rightHeld=false};
+    btn.addEventListener('pointerup',stop);
+    btn.addEventListener('pointercancel',stop);
+    btn.addEventListener('lostpointercapture',stop);
   }
 
-  bindHold(leftBtn, 'left');
-  bindHold(rightBtn, 'right');
-  resetBtn.addEventListener('click', restart);
+  bindHold(leftBtn,'left');
+  bindHold(rightBtn,'right');
+  resetBtn.addEventListener('click',restart);
 
   restart();
   requestAnimationFrame(loop);
