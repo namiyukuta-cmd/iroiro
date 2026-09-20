@@ -61,16 +61,15 @@
       button.innerHTML=`${p.name}${here?'<span class="here">現在地</span>':''}<span class="cost">${here?'':`${cost}分`}</span>`;
       button.addEventListener('click',()=>{
         selectedIndex=i;
-        const id=order[i];
-        if(id===currentLocation) enterCurrent();
-        else moveTo(id);
+        message.textContent=`${p.name}を選択。`;
+        render();
       });
       placeMenu.appendChild(button);
     });
     const info=places[selected];
     const here=selected===currentLocation;
     selectedInfo.textContent=here?info.description:`${info.description}　移動 ${costFromHere(selected)}分`;
-    confirmMove.textContent=here?(selected==='cabin'?'小屋に入る':'この地点に入る'):`ここへ移動する　${costFromHere(selected)}分`;
+    confirmMove.textContent=here?(selected==='cabin'?'小屋に入る':'この地点に入る'):(selected==='cabin'?`小屋に入る　${costFromHere(selected)}分`:`この地点に入る　${costFromHere(selected)}分`);
   }
 
   function render(){
@@ -86,29 +85,32 @@
     message.textContent='場所を選ぶとピンが移動する。';
     render();
   }
-  function enterCurrent(){
-    const info=places[currentLocation];
-    if(currentLocation==='cabin'){location.href='DD_top.html';return}
-    location.href=`DD_point.html?zone=${encodeURIComponent(info.zone)}&place=${encodeURIComponent(currentLocation)}&v=${Date.now()}`;
+  function openPlace(placeId){
+    const info=places[placeId];
+    if(placeId==='cabin'){location.href='DD_top.html';return}
+    location.href=`DD_point.html?zone=${encodeURIComponent(info.zone)}&place=${encodeURIComponent(placeId)}&v=${Date.now()}`;
   }
-  function completeMove(placeId){
+  function completeTravelAndEnter(placeId){
     const from=currentLocation;
     const minutes=Number(travelMinutes[from]?.[placeId]??0);
-    if(minutes>0&&window.DDTime)window.DDTime.advance(minutes,`move:${from}->${placeId}`);
     currentLocation=placeId;
     syncLocation();
     selectedIndex=order.indexOf(placeId);
-    message.textContent=`${places[placeId].name}へ移動した。${minutes}分経過。`;
-    render();
+    if(minutes>0&&window.DDTime)window.DDTime.advance(minutes,`move:${from}->${placeId}`);
+    openPlace(placeId);
   }
-  function moveTo(placeId){
-    if(!places[placeId]||placeId===currentLocation)return;
+  function travelAndEnter(placeId){
+    if(!places[placeId]||placeId===currentLocation){openPlace(currentLocation);return}
     const from=currentLocation;
     const event=window.DDEvents?.find?.({type:'beforeTravel',from,to:placeId});
-    if(event){window.DDEvents.run(event,{onComplete:()=>completeMove(placeId)});return}
-    completeMove(placeId);
+    if(event){window.DDEvents.run(event,{onComplete:()=>completeTravelAndEnter(placeId)});return}
+    completeTravelAndEnter(placeId);
   }
-  function confirm(){const id=selectedId();if(id===currentLocation)enterCurrent();else moveTo(id)}
+  function confirm(){
+    const id=selectedId();
+    if(id===currentLocation)openPlace(id);
+    else travelAndEnter(id);
+  }
 
   clearOldPersistence();
   let currentLocation=loadLocation();
@@ -120,8 +122,8 @@
       const i=order.indexOf(id);
       if(i<0)return;
       selectedIndex=i;
-      if(id===currentLocation) enterCurrent();
-      else moveTo(id);
+      message.textContent=`${places[id].name}を選択。`;
+      render();
     });
   });
   confirmMove.addEventListener('click',confirm);
