@@ -6,7 +6,7 @@
   <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0" />
   <meta http-equiv="Pragma" content="no-cache" />
   <meta http-equiv="Expires" content="0" />
-  <meta name="dd-build" content="20260920clockrestore1" />
+  <meta name="dd-build" content="20260920headertime1" />
   <title>DD - マップ</title>
   <style>
     *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
@@ -21,8 +21,6 @@
 
     .mapPlace{position:absolute;z-index:4;touch-action:manipulation;transform:translate(-50%,-50%);min-width:76px;padding:4px 6px;border:1px solid rgba(255,255,255,.7);border-radius:7px;background:rgba(24,29,23,.72);color:#fff;font-size:11px;font-weight:900;text-align:center;line-height:1.15;pointer-events:auto}
     .mapPlace.current{border-color:#ffe36b}
-    .placeClock{display:none;position:absolute;left:50%;bottom:-28px;transform:translateX(-50%);min-width:64px;padding:3px 7px;border:2px solid #fff;border-radius:8px;background:#17191f;color:#fff;font-size:14px;font-weight:900;white-space:nowrap;box-shadow:0 2px 5px rgba(0,0,0,.6);pointer-events:none}
-    .mapPlace.current .placeClock{display:block}
     .mapPlace.selected{outline:2px solid rgba(255,255,255,.9);outline-offset:2px}
     #place-deepForest{left:14%;top:15%}#place-northForest{left:31%;top:29%}#place-cabin{left:39%;top:58%}#place-plain{left:67%;top:40%}#place-river{left:84%;top:72%}
 
@@ -44,11 +42,11 @@
   <div id="message">場所を選ぶとピンが移動する。</div>
   <div id="mapWrap">
     <div id="mapScene"></div>
-    <button id="place-deepForest" class="mapPlace" type="button" data-place="deepForest">深い森<span class="placeClock"></span></button>
-    <button id="place-northForest" class="mapPlace" type="button" data-place="northForest">北の森<span class="placeClock"></span></button>
-    <button id="place-cabin" class="mapPlace" type="button" data-place="cabin">小屋<span class="placeClock"></span></button>
-    <button id="place-plain" class="mapPlace" type="button" data-place="plain">開けた平原<span class="placeClock"></span></button>
-    <button id="place-river" class="mapPlace" type="button" data-place="river">川辺<span class="placeClock"></span></button>
+    <button id="place-deepForest" class="mapPlace" type="button" data-place="deepForest">深い森</button>
+    <button id="place-northForest" class="mapPlace" type="button" data-place="northForest">北の森</button>
+    <button id="place-cabin" class="mapPlace" type="button" data-place="cabin">小屋</button>
+    <button id="place-plain" class="mapPlace" type="button" data-place="plain">開けた平原</button>
+    <button id="place-river" class="mapPlace" type="button" data-place="river">川辺</button>
     <div id="mapPin" aria-hidden="true"></div>
     <div id="shade"></div>
   </div>
@@ -62,6 +60,6 @@
 <script src="DD_items.js?v=20260916cursor2"></script>
 <script src="DD_wolf.js?v=20260916cursor2"></script>
 <script src="DD_event.js?v=20260916cursor2"></script>
-<script src="DD_map.js?v=20260920clockrestore1"></script>
+<script src="DD_map.js?v=20260920headertime1"></script>
 </body>
 </html>
