@@ -60,8 +60,9 @@
       button.innerHTML=`${p.name}${here?'<span class="here">現在地</span>':''}<span class="cost">${here?'':`${cost}分`}</span>`;
       button.addEventListener('click',()=>{
         selectedIndex=i;
-        message.textContent=`${p.name}を選択。`;
-        render();
+        const id=order[i];
+        if(id===currentLocation) enterCurrent();
+        else moveTo(id);
       });
       placeMenu.appendChild(button);
     });
@@ -114,11 +115,12 @@
 
   mapPlaces.forEach(button=>{
     button.addEventListener('click',()=>{
-      const i=order.indexOf(button.dataset.place);
+      const id=button.dataset.place;
+      const i=order.indexOf(id);
       if(i<0)return;
       selectedIndex=i;
-      message.textContent=`${places[button.dataset.place].name}を選択。`;
-      render();
+      if(id===currentLocation) enterCurrent();
+      else moveTo(id);
     });
   });
   confirmMove.addEventListener('click',confirm);
