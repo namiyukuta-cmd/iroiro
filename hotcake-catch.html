@@ -34,7 +34,7 @@ canvas{display:block;width:100%;height:100%}
     <div>
       <div class="score">所持金 ¥<span id="money">0</span>　完成 <span id="finished">0</span>皿</div>
       <div id="orderLine" class="orderline">注文 #1　現在 ¥500</div>
-      <div class="sub">ホットケーキ3枚 → バター → 蜂蜜</div>
+      <div class="sub">注文ごとにトッピングが変わります</div>
     </div>
     <button id="reset" type="button">やり直す</button>
   </div>
@@ -79,6 +79,24 @@ canvas{display:block;width:100%;height:100%}
   const PAY_LOSS_PER_SECOND = 10;
   const ORDER_NOTICE_MS = 900;
 
+  const ORDER_RECIPES = [
+    {name:'バター＆蜂蜜', toppings:['butter','honey'], text:'バターと蜂蜜でお願いします'},
+    {name:'アイス＆チョコ', toppings:['icecream','chocolate'], text:'アイスとチョコをのせてください'},
+    {name:'アイス＆さくらんぼ', toppings:['icecream','cherry'], text:'アイスとさくらんぼでお願いします'},
+    {name:'チョコ＆さくらんぼ', toppings:['chocolate','cherry'], text:'チョコとさくらんぼをのせてください'},
+    {name:'蜂蜜アイス', toppings:['honey','icecream','cherry'], text:'蜂蜜とアイス、さくらんぼもお願いします'},
+    {name:'全部のせ', toppings:['butter','honey','icecream','chocolate','cherry'], text:'今日は全部のせでお願いします'}
+  ];
+
+  const STEP_LABELS = {
+    cake:'ホットケーキ',
+    butter:'バター',
+    honey:'蜂蜜',
+    icecream:'アイス',
+    chocolate:'チョコ',
+    cherry:'さくらんぼ'
+  };
+
   const CUSTOMERS = [
     {name:'葵', line:'「ホットケーキ、お願いします」', skin:'#f2c9a5', hair:'#3a2a23', shirt:'#b45f5f'},
     {name:'蓮', line:'「3段のやつをひとつ」', skin:'#e6b98e', hair:'#2b2522', shirt:'#4f6f8f'},
@@ -100,6 +118,9 @@ canvas{display:block;width:100%;height:100%}
   let stack = [];
   let butter = null;
   let honey = null;
+  let icecream = null;
+  let chocolate = null;
+  let cherry = null;
   let falling = null;
 
   let phase = 0;
@@ -114,18 +135,35 @@ canvas{display:block;width:100%;height:100%}
   let orderStartAt = 0;
   let orderPlayAt = 0;
   let currentPay = BASE_PAY;
-  let dishScores = [0,0,0,0,0];
+  let dishScores = [];
   let resultInfo = null;
   let currentCustomer = null;
+  let currentOrder = ORDER_RECIPES[0];
+  let currentSteps = ['cake','cake','cake','butter','honey'];
 
   let pointerDown = false;
   let leftHeld = false;
   let rightHeld = false;
 
   function phaseName() {
-    if (phase <= 2) return (phase + 1) + '枚目';
-    if (phase === 3) return 'バター';
-    return '蜂蜜';
+    const step = currentSteps[phase] || 'cake';
+    if (step === 'cake') return (phase + 1) + '枚目';
+    return STEP_LABELS[step] || step;
+  }
+
+  function phaseLabel() {
+    const step = currentSteps[phase] || 'cake';
+    if (step === 'cake') return 'HOTCAKE ' + (phase + 1) + ' / 3';
+    return (STEP_LABELS[step] || step).toUpperCase();
+  }
+
+  function pickOrder() {
+    let next = currentOrder;
+    while (ORDER_RECIPES.length > 1 && next === currentOrder) {
+      next = ORDER_RECIPES[Math.floor(Math.random() * ORDER_RECIPES.length)];
+    }
+    currentOrder = next || ORDER_RECIPES[0];
+    currentSteps = ['cake','cake','cake', ...currentOrder.toppings];
   }
 
   function pickCustomer() {
@@ -199,8 +237,9 @@ canvas{display:block;width:100%;height:100%}
   function spawn() {
     const margin = 50;
     const x = margin + Math.random() * (W - margin * 2);
+    const step = currentSteps[phase] || 'cake';
 
-    if (phase <= 2) {
+    if (step === 'cake') {
       const softness = 0.58 + Math.random() * 0.42;
       const elasticity = 0.08 + (1 - softness) * 0.34 + Math.random() * 0.05;
       falling = {
@@ -210,7 +249,7 @@ canvas{display:block;width:100%;height:100%}
         bounced:false, softness, elasticity,
         squash:0, squashUntil:0, impactRelative:0
       };
-    } else if (phase === 3) {
+    } else if (step === 'butter') {
       falling = {
         type:'butter', x, y:-24,
         vx:(Math.random()*2-1)*0.18,
@@ -219,13 +258,19 @@ canvas{display:block;width:100%;height:100%}
         softness:0.62+Math.random()*0.30,
         squash:0
       };
-    } else {
+    } else if (step === 'honey') {
       falling = {
         type:'honey', x, y:-34,
         vx:(Math.random()*2-1)*0.10,
         vy:1.2,
         stretch:0,
         trail:0
+      };
+    } else {
+      falling = {
+        type:step, x, y:-28,
+        vx:(Math.random()*2-1)*0.18,
+        vy:1.0, tilt:(Math.random()*2-1)*0.05
       };
     }
   }
@@ -234,20 +279,24 @@ canvas{display:block;width:100%;height:100%}
     stack = [];
     butter = null;
     honey = null;
+    icecream = null;
+    chocolate = null;
+    cherry = null;
     falling = null;
     phase = 0;
-    dishScores = [0,0,0,0,0];
     resultInfo = null;
 
     orderNo++;
     pickCustomer();
+    pickOrder();
+    dishScores = new Array(currentSteps.length).fill(0);
     orderStartAt = now;
     orderPlayAt = now + ORDER_NOTICE_MS;
     currentPay = BASE_PAY;
     state = 'order';
 
     msg.textContent = '注文が入りました';
-    qualityEl.textContent = 'ホットケーキ3段・バター・蜂蜜';
+    qualityEl.textContent = 'ホットケーキ3段・' + currentOrder.name;
     updateOrderLine(now);
   }
 
@@ -327,6 +376,63 @@ canvas{display:block;width:100%;height:100%}
       ctx.ellipse(smear>0 ? w*.36 : -w*.36,h*.20,5+Math.abs(smear)*8,2.5,0,0,Math.PI*2);
       ctx.fill();
     }
+    ctx.restore();
+  }
+
+  function drawIcecream(x,y,tilt=0) {
+    ctx.save();
+    ctx.translate(x,y);
+    ctx.rotate(tilt);
+    ctx.fillStyle='#fff4d8';
+    ctx.strokeStyle='#c9a879';
+    ctx.lineWidth=2;
+    ctx.beginPath();
+    ctx.arc(0,0,15,0,Math.PI*2);
+    ctx.fill();
+    ctx.stroke();
+    ctx.fillStyle='rgba(255,255,255,.75)';
+    ctx.beginPath();
+    ctx.arc(-5,-5,5,0,Math.PI*2);
+    ctx.fill();
+    ctx.restore();
+  }
+
+  function drawChocolate(x,y,tilt=0) {
+    ctx.save();
+    ctx.translate(x,y);
+    ctx.rotate(tilt);
+    ctx.fillStyle='#5f321f';
+    ctx.strokeStyle='#3d2116';
+    ctx.lineWidth=1.5;
+    ctx.beginPath();
+    ctx.roundRect(-15,-9,30,18,3);
+    ctx.fill();
+    ctx.stroke();
+    ctx.strokeStyle='#8a5133';
+    ctx.beginPath();
+    ctx.moveTo(-5,-8); ctx.lineTo(-5,8);
+    ctx.moveTo(5,-8); ctx.lineTo(5,8);
+    ctx.stroke();
+    ctx.restore();
+  }
+
+  function drawCherry(x,y,tilt=0) {
+    ctx.save();
+    ctx.translate(x,y);
+    ctx.rotate(tilt);
+    ctx.strokeStyle='#5f7f3d';
+    ctx.lineWidth=2;
+    ctx.beginPath();
+    ctx.moveTo(0,-3);
+    ctx.quadraticCurveTo(2,-14,9,-17);
+    ctx.stroke();
+    ctx.fillStyle='#c9343a';
+    ctx.strokeStyle='#8c2026';
+    ctx.lineWidth=1.5;
+    ctx.beginPath();
+    ctx.arc(0,3,8,0,Math.PI*2);
+    ctx.fill();
+    ctx.stroke();
     ctx.restore();
   }
 
@@ -435,6 +541,16 @@ canvas{display:block;width:100%;height:100%}
     }
 
     drawHoneyOnStack();
+
+    if (stack.length) {
+      const top=stack[stack.length-1];
+      const baseX=plateX+top.offsetX+(top.lagX||0);
+      const baseY=plateY-11-(stack.length-1)*14;
+
+      if (icecream) drawIcecream(baseX+icecream.offsetX,baseY-24,icecream.tilt||0);
+      if (chocolate) drawChocolate(baseX+chocolate.offsetX,baseY-(icecream?34:18),chocolate.tilt||0);
+      if (cherry) drawCherry(baseX+cherry.offsetX,baseY-(icecream?46:24),cherry.tilt||0);
+    }
   }
 
   function drawBackground() {
@@ -448,8 +564,7 @@ canvas{display:block;width:100%;height:100%}
     ctx.fillStyle='#9f7d61';
     ctx.textAlign='center';
     ctx.font='700 17px sans-serif';
-    const labels=['HOTCAKE 1 / 3','HOTCAKE 2 / 3','HOTCAKE 3 / 3','BUTTER','HONEY'];
-    ctx.fillText(labels[Math.min(phase,4)],W/2,38);
+    ctx.fillText(phaseLabel(),W/2,38);
 
     ctx.fillStyle='#eadcc7';
     ctx.fillRect(0,455,W,145);
@@ -483,17 +598,19 @@ canvas{display:block;width:100%;height:100%}
 
     ctx.textAlign='center';
     ctx.font='700 15px sans-serif';
-    ctx.fillText(currentCustomer ? currentCustomer.line : '「お願いします」',W/2,220);
-    ctx.font='700 17px sans-serif';
-    ctx.fillText('ホットケーキ 3段　バター ＋ 蜂蜜',W/2,253);
+    ctx.fillText(currentCustomer ? currentCustomer.line : '「お願いします」',W/2,215);
+    ctx.font='700 15px sans-serif';
+    ctx.fillText('「' + currentOrder.text + '」',W/2,241);
+    ctx.font='800 17px sans-serif';
+    ctx.fillText('3段 ＋ ' + currentOrder.name,W/2,267);
     ctx.font='800 20px sans-serif';
-    ctx.fillText('¥' + BASE_PAY + ' から開始', W/2,289);
+    ctx.fillText('¥' + BASE_PAY + ' から開始', W/2,295);
     ctx.restore();
   }
 
   function advance(now) {
     phase++;
-    if (phase > 4) {
+    if (phase >= currentSteps.length) {
       finishDish(now);
       return;
     }
@@ -596,8 +713,8 @@ canvas{display:block;width:100%;height:100%}
       lagX:0,
       lagVX:0
     };
-    dishScores[3]=scoreFromDiff(Math.abs(butter.offsetX),31);
-    qualityEl.textContent='バター '+dishScores[3]+'点';
+    dishScores[phase]=scoreFromDiff(Math.abs(butter.offsetX),31);
+    qualityEl.textContent='バター '+dishScores[phase]+'点';
     advance(now);
   }
 
@@ -646,10 +763,10 @@ canvas{display:block;width:100%;height:100%}
       drip:0
     };
 
-    dishScores[4]=scoreFromDiff(diff,49);
-    qualityEl.textContent='蜂蜜 '+dishScores[4]+'点';
+    dishScores[phase]=scoreFromDiff(diff,49);
+    qualityEl.textContent='蜂蜜 '+dishScores[phase]+'点';
     falling=null;
-    finishDish(now);
+    advance(now);
   }
 
   function hitHoney(now) {
@@ -657,6 +774,50 @@ canvas{display:block;width:100%;height:100%}
     const targetY=plateY-11-(stack.length-1)*14-16;
     if (falling.y+14<targetY) return false;
     settleHoney(now);
+    return true;
+  }
+
+  function simpleToppingTargetY(type) {
+    if (!stack.length) return plateY-20;
+    const base=plateY-11-(stack.length-1)*14;
+    if (type==='cherry') return base-(icecream?46:24);
+    if (type==='chocolate') return base-(icecream?34:18);
+    return base-24;
+  }
+
+  function settleSimpleTopping(now) {
+    const top=stack[stack.length-1];
+    const center=plateX+top.offsetX+(top.lagX||0);
+    const relative=falling.x-center;
+    const diff=Math.abs(relative);
+    const maxDiff=44;
+
+    if (diff>maxDiff) {
+      falling.vy=3.0;
+      falling.vx += Math.sign(relative||1)*0.7;
+      state='fallingOff';
+      msg.textContent=STEP_LABELS[falling.type]+'が落ちた！ 時間ロス';
+      return;
+    }
+
+    const item={
+      offsetX:Math.max(-34,Math.min(34,relative*.68)),
+      tilt:Math.max(-.18,Math.min(.18,falling.tilt||0))
+    };
+    if (falling.type==='icecream') icecream=item;
+    if (falling.type==='chocolate') chocolate=item;
+    if (falling.type==='cherry') cherry=item;
+
+    dishScores[phase]=scoreFromDiff(diff,maxDiff);
+    qualityEl.textContent=STEP_LABELS[falling.type]+' '+dishScores[phase]+'点';
+    falling=null;
+    advance(now);
+  }
+
+  function hitSimpleTopping(now) {
+    const targetY=simpleToppingTargetY(falling.type);
+    if (falling.y+14<targetY) return false;
+    settleSimpleTopping(now);
     return true;
   }
 
@@ -723,7 +884,7 @@ canvas{display:block;width:100%;height:100%}
 
   function finishDish(now) {
     const points=dishScores.reduce((a,b)=>a+b,0);
-    const percent=Math.round(points/5);
+    const percent=Math.round(points/Math.max(1,dishScores.length));
     const earned=calcPay(now);
 
     let rank='くずれ気味';
@@ -761,7 +922,7 @@ canvas{display:block;width:100%;height:100%}
     if(state==='order'){
       if(now>=orderPlayAt){
         state='play';
-        msg.textContent='1枚目を受け止める';
+        msg.textContent=phaseName()+'を受け止める';
         qualityEl.textContent='中央にきれいに重ねるほど高得点';
         spawn();
       }
@@ -835,6 +996,9 @@ canvas{display:block;width:100%;height:100%}
           const targetY=plateY-11-(stack.length-1)*14-18;
           if(falling.y+9>=targetY) hitButter(now);
         }
+        if(falling.type==='icecream' || falling.type==='chocolate' || falling.type==='cherry'){
+          hitSimpleTopping(now);
+        }
       }
     }
 
@@ -848,7 +1012,10 @@ canvas{display:block;width:100%;height:100%}
     if(falling){
       if(falling.type==='cake')drawPancake(falling.x,falling.y,falling.tilt,falling.softness,falling.squash||0);
       else if(falling.type==='butter')drawButter(falling.x,falling.y,falling.tilt,falling.squash||0,0);
-      else drawHoneyBlob(falling.x,falling.y,falling.stretch||0,falling.trail||0);
+      else if(falling.type==='honey')drawHoneyBlob(falling.x,falling.y,falling.stretch||0,falling.trail||0);
+      else if(falling.type==='icecream')drawIcecream(falling.x,falling.y,falling.tilt||0);
+      else if(falling.type==='chocolate')drawChocolate(falling.x,falling.y,falling.tilt||0);
+      else if(falling.type==='cherry')drawCherry(falling.x,falling.y,falling.tilt||0);
     }
 
     drawOrderCard();
@@ -868,7 +1035,7 @@ canvas{display:block;width:100%;height:100%}
       ctx.font='800 25px sans-serif';
       ctx.fillText('出来度 '+resultInfo.percent+'%',W/2,145);
       ctx.font='700 17px sans-serif';
-      ctx.fillText(resultInfo.rank+'　'+resultInfo.points+'/500点',W/2,176);
+      ctx.fillText(resultInfo.rank+'　'+resultInfo.points+'/'+(dishScores.length*100)+'点',W/2,176);
       ctx.font='800 22px sans-serif';
       ctx.fillText('売上 ¥'+resultInfo.earned,W/2,207);
       ctx.restore();
