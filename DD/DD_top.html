@@ -6,7 +6,7 @@
   <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate" />
   <meta http-equiv="Pragma" content="no-cache" />
   <meta http-equiv="Expires" content="0" />
-  <meta name="dd-build" content="20260916cursor2" />
+  <meta name="dd-build" content="20260920topfix1" />
   <title>DD - Game</title>
   <style>
     *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
@@ -20,7 +20,7 @@
 
     #menuBox{background:#fff;border:2px solid #202020;border-radius:12px;padding:7px 10px}
     #menuList{display:grid}
-    .menuItem{position:relative;width:100%;min-height:42px;border:0;border-bottom:1px solid #ddd8cf;background:transparent;color:#202020;text-align:left;padding:8px 10px 8px 38px;font:inherit;font-size:18px;font-weight:900;cursor:pointer}
+    .menuItem{position:relative;width:100%;min-height:42px;touch-action:manipulation;border:0;border-bottom:1px solid #ddd8cf;background:transparent;color:#202020;text-align:left;padding:8px 10px 8px 38px;font:inherit;font-size:18px;font-weight:900;cursor:pointer}
     .menuItem:last-child{border-bottom:0}
     .menuItem::before{content:"";position:absolute;left:10px;top:50%;transform:translateY(-50%);font-size:18px}
     .menuItem.selected{background:#f2efe7}
@@ -44,10 +44,10 @@
     </section>
   </main>
 </div>
-<script src="DD_time.js?v=20260916cursor2"></script>
-<script src="DD_items.js?v=20260916cursor2"></script>
-<script src="DD_wolf.js?v=20260916cursor2"></script>
-<script src="DD_needs.js?v=20260916cursor2"></script>
+<script src="DD_time.js?v=20260920topfix1"></script>
+<script src="DD_items.js?v=20260920topfix1"></script>
+<script src="DD_wolf.js?v=20260920topfix1"></script>
+<script src="DD_needs.js?v=20260920topfix1"></script>
 <script>
 (() => {
   const playerText=document.getElementById('playerHungerText'),playerFill=document.getElementById('playerHungerFill');
@@ -79,8 +79,11 @@
       button.className=`menuItem${i===index?' selected':''}`;
       button.textContent=item.label;
       button.disabled=!!item.disabled;
-      button.addEventListener('pointerdown',()=>{index=i;renderMenu()});
-      button.addEventListener('click',()=>{if(!item.disabled)location.href=item.href});
+      button.addEventListener('click',()=>{
+        if(item.disabled)return;
+        index=i;
+        location.href=item.href;
+      });
       menuList.appendChild(button);
     });
   }
