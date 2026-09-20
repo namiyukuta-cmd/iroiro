@@ -31,8 +31,7 @@
   function loadLocation(){try{const saved=sessionStorage.getItem(SESSION_KEY);if(saved&&places[saved])return saved}catch(_){}return'cabin'}
   function syncLocation(){try{sessionStorage.setItem(SESSION_KEY,currentLocation)}catch(_){}}
   function timeParts(){return window.DDTime?.getState?.()||{day:1,hour:7,minute:0,phase:'朝'}}
-  function compactTime(){const state=timeParts();return `${String(state.hour).padStart(2,'0')}:${String(state.minute).padStart(2,'0')}`}
-  function refreshDayPhase(){const state=timeParts();dayPhase.textContent=`${state.day}日目　${state.phase}`}
+  function refreshDayPhase(){const state=timeParts();dayPhase.textContent=`${state.day}日目 ${String(state.hour).padStart(2,'0')}:${String(state.minute).padStart(2,'0')}　${state.phase}`}
   function costFromHere(placeId){return Number(travelMinutes[currentLocation]?.[placeId]??0)}
   function selectedId(){return order[selectedIndex]||currentLocation}
 
@@ -46,8 +45,6 @@
       button.classList.toggle('current',here);
       button.classList.toggle('selected',id===selected);
       button.setAttribute('aria-pressed',id===selected?'true':'false');
-      const clock=button.querySelector('.placeClock');
-      if(clock) clock.textContent=here?compactTime():'';
     });
   }
 
