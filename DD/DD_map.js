@@ -58,8 +58,11 @@
       button.className=`placeMenuItem${i===selectedIndex?' selected':''}`;
       const cost=costFromHere(id);
       button.innerHTML=`${p.name}${here?'<span class="here">現在地</span>':''}<span class="cost">${here?'':`${cost}分`}</span>`;
-      button.addEventListener('pointerdown',()=>{selectedIndex=i;render()});
-      button.addEventListener('click',()=>{selectedIndex=i;render()});
+      button.addEventListener('click',()=>{
+        selectedIndex=i;
+        message.textContent=`${p.name}を選択。`;
+        render();
+      });
       placeMenu.appendChild(button);
     });
     const info=places[selected];
@@ -89,7 +92,7 @@
   function completeMove(placeId){
     const from=currentLocation;
     const minutes=Number(travelMinutes[from]?.[placeId]??0);
-    if(minutes>0&&window.DDTime)DDTime.advance(minutes,`move:${from}->${placeId}`);
+    if(minutes>0&&window.DDTime)window.DDTime.advance(minutes,`move:${from}->${placeId}`);
     currentLocation=placeId;
     syncLocation();
     selectedIndex=order.indexOf(placeId);
@@ -100,7 +103,7 @@
     if(!places[placeId]||placeId===currentLocation)return;
     const from=currentLocation;
     const event=window.DDEvents?.find?.({type:'beforeTravel',from,to:placeId});
-    if(event){DDEvents.run(event,{onComplete:()=>completeMove(placeId)});return}
+    if(event){window.DDEvents.run(event,{onComplete:()=>completeMove(placeId)});return}
     completeMove(placeId);
   }
   function confirm(){const id=selectedId();if(id===currentLocation)enterCurrent();else moveTo(id)}
