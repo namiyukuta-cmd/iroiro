@@ -79,6 +79,21 @@ canvas{display:block;width:100%;height:100%}
   const PAY_LOSS_PER_SECOND = 10;
   const ORDER_NOTICE_MS = 900;
 
+  const CUSTOMERS = [
+    {name:'葵', line:'「ホットケーキ、お願いします」', skin:'#f2c9a5', hair:'#3a2a23', shirt:'#b45f5f'},
+    {name:'蓮', line:'「3段のやつをひとつ」', skin:'#e6b98e', hair:'#2b2522', shirt:'#4f6f8f'},
+    {name:'美咲', line:'「バターも蜂蜜もお願いします」', skin:'#f0c6a2', hair:'#5a3826', shirt:'#8a668f'},
+    {name:'悠斗', line:'「焼きたてでお願いします」', skin:'#dcae85', hair:'#241f1c', shirt:'#627c55'},
+    {name:'真琴', line:'「今日は甘いのが食べたいです」', skin:'#efc29c', hair:'#40312b', shirt:'#b17b45'},
+    {name:'直樹', line:'「いつものをお願いします」', skin:'#d9a87f', hair:'#312821', shirt:'#5f6978'},
+    {name:'結衣', line:'「きれいに重ねてくださいね」', skin:'#f3c9a8', hair:'#6a4938', shirt:'#b85f78'},
+    {name:'航', line:'「急ぎじゃないので丁寧に」', skin:'#e1b48d', hair:'#1f1d1c', shirt:'#4f7f78'},
+    {name:'沙耶', line:'「蜂蜜たっぷりが好きです」', skin:'#edbf98', hair:'#4a3027', shirt:'#9070ad'},
+    {name:'健太', line:'「お腹ぺこぺこです」', skin:'#ddb087', hair:'#30271f', shirt:'#687b98'},
+    {name:'千尋', line:'「いい匂い。ひとつください」', skin:'#f1c7a3', hair:'#57382d', shirt:'#9b7753'},
+    {name:'亮', line:'「ホットケーキを1皿」', skin:'#dba77d', hair:'#29231f', shirt:'#6d8660'}
+  ];
+
   let plateX = W / 2;
   let prevPlateX = plateX;
   let plateDelta = 0;
@@ -101,6 +116,7 @@ canvas{display:block;width:100%;height:100%}
   let currentPay = BASE_PAY;
   let dishScores = [0,0,0,0,0];
   let resultInfo = null;
+  let currentCustomer = null;
 
   let pointerDown = false;
   let leftHeld = false;
@@ -110,6 +126,52 @@ canvas{display:block;width:100%;height:100%}
     if (phase <= 2) return (phase + 1) + '枚目';
     if (phase === 3) return 'バター';
     return '蜂蜜';
+  }
+
+  function pickCustomer() {
+    let next = currentCustomer;
+    while (CUSTOMERS.length > 1 && next === currentCustomer) {
+      next = CUSTOMERS[Math.floor(Math.random() * CUSTOMERS.length)];
+    }
+    currentCustomer = next || CUSTOMERS[0];
+  }
+
+  function drawCustomerPortrait(customer, x, y) {
+    if (!customer) return;
+    ctx.save();
+    ctx.translate(x,y);
+
+    ctx.fillStyle=customer.shirt;
+    ctx.beginPath();
+    ctx.roundRect(-27,22,54,42,15);
+    ctx.fill();
+
+    ctx.fillStyle=customer.skin;
+    ctx.beginPath();
+    ctx.arc(0,0,24,0,Math.PI*2);
+    ctx.fill();
+
+    ctx.fillStyle=customer.hair;
+    ctx.beginPath();
+    ctx.arc(0,-5,25,Math.PI,Math.PI*2);
+    ctx.lineTo(24,2);
+    ctx.quadraticCurveTo(18,-17,0,-22);
+    ctx.quadraticCurveTo(-18,-17,-24,2);
+    ctx.closePath();
+    ctx.fill();
+
+    ctx.fillStyle='#3b2a20';
+    ctx.beginPath();
+    ctx.arc(-8,3,2,0,Math.PI*2);
+    ctx.arc(8,3,2,0,Math.PI*2);
+    ctx.fill();
+
+    ctx.strokeStyle='#7a4e3b';
+    ctx.lineWidth=1.6;
+    ctx.beginPath();
+    ctx.arc(0,8,7,0.15*Math.PI,0.85*Math.PI);
+    ctx.stroke();
+    ctx.restore();
   }
 
   function topCenter() {
@@ -131,7 +193,7 @@ canvas{display:block;width:100%;height:100%}
   function updateOrderLine(now) {
     if (!orderNo) return;
     currentPay = calcPay(now);
-    orderLineEl.textContent = '注文 #' + orderNo + '　現在 ¥' + currentPay;
+    orderLineEl.textContent = (currentCustomer ? currentCustomer.name + '　' : '') + '注文 #' + orderNo + '　現在 ¥' + currentPay;
   }
 
   function spawn() {
@@ -178,6 +240,7 @@ canvas{display:block;width:100%;height:100%}
     resultInfo = null;
 
     orderNo++;
+    pickCustomer();
     orderStartAt = now;
     orderPlayAt = now + ORDER_NOTICE_MS;
     currentPay = BASE_PAY;
@@ -401,23 +464,30 @@ canvas{display:block;width:100%;height:100%}
   function drawOrderCard() {
     if (state !== 'order') return;
     ctx.save();
-    ctx.fillStyle='rgba(255,255,255,.94)';
+    ctx.fillStyle='rgba(255,255,255,.95)';
     ctx.strokeStyle='#70401f';
     ctx.lineWidth=2;
     ctx.beginPath();
-    ctx.roundRect(48,120,264,150,16);
+    ctx.roundRect(30,105,300,210,16);
     ctx.fill();
     ctx.stroke();
 
+    drawCustomerPortrait(currentCustomer,82,168);
+
     ctx.fillStyle='#3b2a20';
+    ctx.textAlign='left';
+    ctx.font='800 24px sans-serif';
+    ctx.fillText(currentCustomer ? currentCustomer.name : 'お客さん',126,145);
+    ctx.font='700 14px sans-serif';
+    ctx.fillText('注文 #' + orderNo,126,169);
+
     ctx.textAlign='center';
-    ctx.font='800 27px sans-serif';
-    ctx.fillText('注文 #' + orderNo, W/2,158);
-    ctx.font='700 18px sans-serif';
-    ctx.fillText('ホットケーキ 3段', W/2,194);
-    ctx.fillText('バター ＋ 蜂蜜', W/2,222);
-    ctx.font='800 21px sans-serif';
-    ctx.fillText('¥' + BASE_PAY + ' から開始', W/2,253);
+    ctx.font='700 15px sans-serif';
+    ctx.fillText(currentCustomer ? currentCustomer.line : '「お願いします」',W/2,220);
+    ctx.font='700 17px sans-serif';
+    ctx.fillText('ホットケーキ 3段　バター ＋ 蜂蜜',W/2,253);
+    ctx.font='800 20px sans-serif';
+    ctx.fillText('¥' + BASE_PAY + ' から開始', W/2,289);
     ctx.restore();
   }
 
@@ -672,7 +742,7 @@ canvas{display:block;width:100%;height:100%}
     completeAt=now+2200;
     msg.textContent='注文完成！ ¥'+earned;
     qualityEl.textContent='出来度 '+percent+'%　'+rank;
-    orderLineEl.textContent='注文 #'+orderNo+'　売上 ¥'+earned;
+    orderLineEl.textContent=(currentCustomer ? currentCustomer.name+'　' : '')+'注文 #'+orderNo+'　売上 ¥'+earned;
   }
 
   function update(dt,now) {
