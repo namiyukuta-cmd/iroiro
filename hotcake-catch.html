@@ -98,18 +98,18 @@ canvas{display:block;width:100%;height:100%}
   };
 
   const CUSTOMERS = [
-    {name:'葵', line:'「ホットケーキ、お願いします」', skin:'#f2c9a5', hair:'#3a2a23', shirt:'#b45f5f'},
-    {name:'蓮', line:'「3段のやつをひとつ」', skin:'#e6b98e', hair:'#2b2522', shirt:'#4f6f8f'},
-    {name:'美咲', line:'「バターも蜂蜜もお願いします」', skin:'#f0c6a2', hair:'#5a3826', shirt:'#8a668f'},
+    {name:'葵', line:'「ひとつお願いします」', skin:'#f2c9a5', hair:'#3a2a23', shirt:'#b45f5f'},
+    {name:'蓮', line:'「これをお願いします」', skin:'#e6b98e', hair:'#2b2522', shirt:'#4f6f8f'},
+    {name:'美咲', line:'「甘いのが食べたいです」', skin:'#f0c6a2', hair:'#5a3826', shirt:'#8a668f'},
     {name:'悠斗', line:'「焼きたてでお願いします」', skin:'#dcae85', hair:'#241f1c', shirt:'#627c55'},
-    {name:'真琴', line:'「今日は甘いのが食べたいです」', skin:'#efc29c', hair:'#40312b', shirt:'#b17b45'},
-    {name:'直樹', line:'「いつものをお願いします」', skin:'#d9a87f', hair:'#312821', shirt:'#5f6978'},
-    {name:'結衣', line:'「きれいに重ねてくださいね」', skin:'#f3c9a8', hair:'#6a4938', shirt:'#b85f78'},
+    {name:'真琴', line:'「今日はこれにします」', skin:'#efc29c', hair:'#40312b', shirt:'#b17b45'},
+    {name:'直樹', line:'「ひと皿お願いします」', skin:'#d9a87f', hair:'#312821', shirt:'#5f6978'},
+    {name:'結衣', line:'「きれいにお願いしますね」', skin:'#f3c9a8', hair:'#6a4938', shirt:'#b85f78'},
     {name:'航', line:'「急ぎじゃないので丁寧に」', skin:'#e1b48d', hair:'#1f1d1c', shirt:'#4f7f78'},
-    {name:'沙耶', line:'「蜂蜜たっぷりが好きです」', skin:'#edbf98', hair:'#4a3027', shirt:'#9070ad'},
+    {name:'沙耶', line:'「今日は甘いものにします」', skin:'#edbf98', hair:'#4a3027', shirt:'#9070ad'},
     {name:'健太', line:'「お腹ぺこぺこです」', skin:'#ddb087', hair:'#30271f', shirt:'#687b98'},
     {name:'千尋', line:'「いい匂い。ひとつください」', skin:'#f1c7a3', hair:'#57382d', shirt:'#9b7753'},
-    {name:'亮', line:'「ホットケーキを1皿」', skin:'#dba77d', hair:'#29231f', shirt:'#6d8660'}
+    {name:'亮', line:'「これを1皿お願いします」', skin:'#dba77d', hair:'#29231f', shirt:'#6d8660'}
   ];
 
   let plateX = W / 2;
@@ -138,7 +138,7 @@ canvas{display:block;width:100%;height:100%}
   let dishScores = [];
   let resultInfo = null;
   let currentCustomer = null;
-  let currentOrder = ORDER_RECIPES[0];
+  let currentOrder = null;
   let currentSteps = ['cake','cake','cake','butter','honey'];
 
   let pointerDown = false;
