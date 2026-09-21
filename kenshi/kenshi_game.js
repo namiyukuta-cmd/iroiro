@@ -38,6 +38,13 @@ var ROADS=[
   ["farm","salt"],["salt","camp"]
 ];
 
+var SHOPS={
+  dust:{name:"雑貨店",food:12,med:28,sword:90,armor:120,sellOre:true,sellScrap:true},
+  cross:{name:"交易所",food:14,med:25,sword:95,armor:115,sellOre:true,sellScrap:true},
+  farm:{name:"売店",food:8,med:30,sword:null,armor:null,sellOre:false,sellScrap:true},
+  mine:{name:"補給所",food:16,med:24,sword:85,armor:null,sellOre:true,sellScrap:true}
+};
+
 var QUESTS={
   ore_delivery:{
     title:"鉄鉱石の納品",
@@ -689,6 +696,7 @@ function selfHeal(){
 
 var questBoardPlace=null;
 var tradeActorId=null;
+var tradePlaceKey=null;
 
 function questProgressValue(q){
   if(!q)return 0;
@@ -820,14 +828,44 @@ function talkActor(a){
 
 function openTrade(a){
   tradeActorId=a.id;
+  tradePlaceKey=null;
   activePanel="trade";
   renderPanel();
   panelOverlay.hidden=false;
 }
 
-function buySword(){
-  if(state.player.sword||state.player.money<90)return;
-  state.player.money-=90;
+function openPlaceShop(place){
+  if(!SHOPS[place]||nearbyPlace()!==place)return;
+  tradeActorId=null;
+  tradePlaceKey=place;
+  activePanel="trade";
+  renderPanel();
+  panelOverlay.hidden=false;
+}
+
+function buyFoodAt(price){
+  if(state.player.money<price)return;
+  state.player.money-=price;
+  state.player.food++;
+  log("保存食を買った。");
+  showResult("食料 +1");
+  hotbarSignature=null;
+  renderAll();
+}
+
+function buyMedAt(price){
+  if(state.player.money<price)return;
+  state.player.money-=price;
+  state.player.med++;
+  log("治療具を買った。");
+  showResult("治療具 +1");
+  hotbarSignature=null;
+  renderAll();
+}
+
+function buySwordAt(price){
+  if(state.player.sword||price==null||state.player.money<price)return;
+  state.player.money-=price;
   state.player.sword=true;
   state.player.attack+=4;
   log("簡易剣を買った。攻撃力が4上がった。");
@@ -835,9 +873,9 @@ function buySword(){
   renderAll();
 }
 
-function buyArmor(){
-  if(state.player.armor||state.player.money<120)return;
-  state.player.money-=120;
+function buyArmorAt(price){
+  if(state.player.armor||price==null||state.player.money<price)return;
+  state.player.money-=price;
   state.player.armor=true;
   state.player.defense+=3;
   log("革鎧を買った。防御力が3上がった。");
@@ -845,29 +883,68 @@ function buyArmor(){
   renderAll();
 }
 
+/* existing calls remain valid */
+function buyFood(){buyFoodAt(12)}
+function buyMed(){buyMedAt(28)}
+function buySword(){buySwordAt(90)}
+function buyArmor(){buyArmorAt(120)}
+
 function renderTradePanel(){
-  var a=getActor(tradeActorId);
-  if(!a||a.down||dist(a,state.player)>7){
-    panelContent.innerHTML="<div class='questEmpty'>商人が近くにいません。</div>";
-    return;
+  var profile=null;
+  var shopName="行商人";
+
+  if(tradePlaceKey){
+    if(nearbyPlace()!==tradePlaceKey||!SHOPS[tradePlaceKey]){
+      panelContent.innerHTML="<div class='questEmpty'>店から離れています。</div>";
+      return;
+    }
+    profile=SHOPS[tradePlaceKey];
+    shopName=PLACES[tradePlaceKey].name+"・"+profile.name;
+  }else{
+    var a=getActor(tradeActorId);
+    if(!a||a.down||dist(a,state.player)>7){
+      panelContent.innerHTML="<div class='questEmpty'>商人が近くにいません。</div>";
+      return;
+    }
+    profile={name:"行商人",food:12,med:28,sword:90,armor:120,sellOre:true,sellScrap:true};
+    shopName=a.name;
   }
 
+  var itemHtml=
+    "<button id='shopFood' type='button'><b>保存食</b><span>"+profile.food+"</span></button>"+
+    "<button id='shopMed' type='button'><b>治療具</b><span>"+profile.med+"</span></button>";
+
+  if(profile.sword!=null){
+    itemHtml+="<button id='shopSword' type='button' "+(state.player.sword?"disabled":"")+"><b>簡易剣</b><span>"+(state.player.sword?"装備済":profile.sword)+"</span></button>";
+  }
+  if(profile.armor!=null){
+    itemHtml+="<button id='shopArmor' type='button' "+(state.player.armor?"disabled":"")+"><b>革鎧</b><span>"+(state.player.armor?"装備済":profile.armor)+"</span></button>";
+  }
+
+  var sellHtml="";
+  if(profile.sellOre)sellHtml+="<button id='shopSellOre' type='button'>鉄鉱石を全部売る</button>";
+  if(profile.sellScrap)sellHtml+="<button id='shopSellScrap' type='button'>廃材を全部売る</button>";
+
   panelContent.innerHTML=
-    "<div class='shopGrid'>"+
-      "<button id='shopFood' type='button'><b>保存食</b><span>12</span></button>"+
-      "<button id='shopMed' type='button'><b>治療具</b><span>28</span></button>"+
-      "<button id='shopSword' type='button' "+(state.player.sword?"disabled":"")+"><b>簡易剣</b><span>"+(state.player.sword?"装備済":"90")+"</span></button>"+
-      "<button id='shopArmor' type='button' "+(state.player.armor?"disabled":"")+"><b>革鎧</b><span>"+(state.player.armor?"装備済":"120")+"</span></button>"+
-    "</div>"+
-    "<div class='panelActions'><button id='shopSellOre' type='button'>鉄鉱石を全部売る</button><button id='shopSellScrap' type='button'>廃材を全部売る</button></div>"+
+    "<div class='shopName'>"+shopName+"</div>"+
+    "<div class='shopGrid'>"+itemHtml+"</div>"+
+    (sellHtml?"<div class='panelActions'>"+sellHtml+"</div>":"")+
     "<div class='tradeStats'>攻撃 "+state.player.attack+"　防御 "+state.player.defense+"　所持金 "+state.player.money+"</div>";
 
-  document.getElementById("shopFood").addEventListener("click",function(){buyFood();renderPanel()});
-  document.getElementById("shopMed").addEventListener("click",function(){buyMed();renderPanel()});
-  document.getElementById("shopSword").addEventListener("click",function(){buySword();renderPanel()});
-  document.getElementById("shopArmor").addEventListener("click",function(){buyArmor();renderPanel()});
-  document.getElementById("shopSellOre").addEventListener("click",function(){sellOre();renderPanel()});
-  document.getElementById("shopSellScrap").addEventListener("click",function(){sellScrap();renderPanel()});
+  document.getElementById("shopFood").addEventListener("click",function(){buyFoodAt(profile.food);renderPanel()});
+  document.getElementById("shopMed").addEventListener("click",function(){buyMedAt(profile.med);renderPanel()});
+
+  var swordBtn=document.getElementById("shopSword");
+  if(swordBtn)swordBtn.addEventListener("click",function(){buySwordAt(profile.sword);renderPanel()});
+
+  var armorBtn=document.getElementById("shopArmor");
+  if(armorBtn)armorBtn.addEventListener("click",function(){buyArmorAt(profile.armor);renderPanel()});
+
+  var oreBtn=document.getElementById("shopSellOre");
+  if(oreBtn)oreBtn.addEventListener("click",function(){sellOre();renderPanel()});
+
+  var scrapBtn=document.getElementById("shopSellScrap");
+  if(scrapBtn)scrapBtn.addEventListener("click",function(){sellScrap();renderPanel()});
 }
 
 function campRest(withFire){
@@ -1049,15 +1126,18 @@ function rest(){
   renderAll();
 }
 
-function makeContextGroup(label,className){
+function makeActionRow(label,className){
   var wrap=document.createElement("div");
-  wrap.className="contextGroup "+className;
-  var title=document.createElement("span");
-  title.className="contextGroupTitle";
-  title.textContent=label;
+  wrap.className="actionRow "+className;
+
+  var target=document.createElement("span");
+  target.className="actionTarget";
+  target.textContent=label;
+
   var buttons=document.createElement("div");
-  buttons.className="contextGroupButtons";
-  wrap.appendChild(title);
+  buttons.className="actionButtons";
+
+  wrap.appendChild(target);
   wrap.appendChild(buttons);
   return {wrap:wrap,buttons:buttons};
 }
@@ -1088,26 +1168,26 @@ function renderContext(){
   contextSignature=sig;
   contextActions.innerHTML="";
 
-  var actorGroup=makeContextGroup("人物","actorGroup");
-  var placeGroup=makeContextGroup("場所","placeGroup");
+  var actorRow=a?makeActionRow(a.name,"actorRow"):null;
+  var placeName=place?PLACES[place].name:"荒野";
+  var placeRow=makeActionRow(placeName,"placeRow");
   var actorCount=0;
   var placeCount=0;
 
   function addActor(label,fn,disabled){
-    actorGroup.buttons.appendChild(actionButton(label,fn,disabled));
+    if(!actorRow)return;
+    actorRow.buttons.appendChild(actionButton(label,fn,disabled));
     actorCount++;
   }
 
   function addPlace(label,fn,disabled){
-    placeGroup.buttons.appendChild(actionButton(label,fn,disabled));
+    placeRow.buttons.appendChild(actionButton(label,fn,disabled));
     placeCount++;
   }
 
   if(state.player.down){
-    if(place==="dust"||place==="farm"){
-      addPlace("休息",rest,false);
-    }
-    if(placeCount)contextActions.appendChild(placeGroup.wrap);
+    if(place==="dust"||place==="farm")addPlace("休息",rest,false);
+    if(placeCount)contextActions.appendChild(placeRow.wrap);
     return;
   }
 
@@ -1137,24 +1217,26 @@ function renderContext(){
 
   if(state.activeQuest){
     var qdef=QUESTS[state.activeQuest.id];
-    if(place===qdef.turnPlace&&questReady()){
-      addPlace("依頼報告",completeQuest,false);
-    }
+    if(place===qdef.turnPlace&&questReady())addPlace("依頼報告",completeQuest,false);
   }
 
   if(place==="mine"){
     addPlace(autoWork.type==="mine"?"採掘中・停止":"採掘",function(){startAutoWork("mine")},false);
+    addPlace("補給所",function(){openPlaceShop("mine")},false);
     addPlace("依頼",function(){openQuestBoard("mine")},false);
   }else if(place==="ruins"||place==="salt"){
     addPlace(autoWork.type==="scavenge"?"漁り中・停止":"漁る",function(){startAutoWork("scavenge")},false);
   }else if(place==="cross"){
     addPlace(autoWork.type==="scavenge"?"漁り中・停止":"漁る",function(){startAutoWork("scavenge")},false);
+    addPlace("交易所",function(){openPlaceShop("cross")},false);
     addPlace("依頼",function(){openQuestBoard("cross")},false);
   }else if(place==="farm"){
     addPlace(autoWork.type==="farm"?"農作業中・停止":"農作業",function(){startAutoWork("farm")},false);
+    addPlace("売店",function(){openPlaceShop("farm")},false);
     addPlace("依頼",function(){openQuestBoard("farm")},false);
     addPlace("休息",rest,false);
   }else if(place==="dust"){
+    addPlace("雑貨店",function(){openPlaceShop("dust")},false);
     addPlace("依頼",function(){openQuestBoard("dust")},false);
     addPlace("休息",rest,false);
   }else{
@@ -1162,8 +1244,8 @@ function renderContext(){
     addPlace("焚き火",function(){campRest(true)},state.player.scrap<1||state.player.food<1);
   }
 
-  if(actorCount)contextActions.appendChild(actorGroup.wrap);
-  if(placeCount)contextActions.appendChild(placeGroup.wrap);
+  if(actorCount)contextActions.appendChild(actorRow.wrap);
+  if(placeCount)contextActions.appendChild(placeRow.wrap);
 }
 
 function renderHotbar(){
@@ -1474,6 +1556,7 @@ function load(){
     autoWork={type:null,nextAt:0};
     questBoardPlace=null;
     tradeActorId=null;
+    tradePlaceKey=null;
     contextSignature=null;
     hotbarSignature=null;
     manual.x=0;manual.y=0;
