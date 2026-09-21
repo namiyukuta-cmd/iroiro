@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no" />
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+  <title>Kenshi風・止め絵版</title>
+  <link rel="stylesheet" href="kenshi_still.css?v=20260921-1" />
+</head>
+<body>
+  <main class="gameShell">
+    <header class="skyBand">
+      <div class="timeBlock">
+        <b id="dayText">1日目</b>
+        <span id="clockText">08:00</span>
+      </div>
+      <div class="skyTrack" aria-label="太陽と月の位置">
+        <div id="sunMoon" class="sunMoon sun" aria-hidden="true"></div>
+      </div>
+      <button id="menuBtn" class="roundBtn" type="button">•••</button>
+    </header>
+
+    <section class="sceneSection">
+      <div id="sceneArt" class="sceneArt roadScene" role="img" aria-label="現在地の背景">
+        <div class="sceneLabel">
+          <b id="placeName">街道</b>
+          <span id="placeKind">移動中の道</span>
+        </div>
+      </div>
+
+      <div class="statusStrip">
+        <div class="meter hpMeter">
+          <span>HP</span>
+          <div class="meterTrack"><i id="hpFill"></i></div>
+          <b id="hpText">100/100</b>
+        </div>
+        <div class="meter hungerMeter">
+          <span>空腹</span>
+          <div class="meterTrack"><i id="hungerFill"></i></div>
+          <b id="hungerText">0/100</b>
+        </div>
+        <div class="moneyCoin">
+          <span>金</span>
+          <b id="moneyText">100</b>
+        </div>
+      </div>
+    </section>
+
+    <section class="yellowPanel">
+      <nav class="tabBar" aria-label="ゲームメニュー">
+        <button class="tab active" type="button" data-tab="place">場所</button>
+        <button class="tab" type="button" data-tab="items">持物</button>
+        <button class="tab" type="button" data-tab="party">部隊</button>
+        <button class="tab" type="button" data-tab="log">記録</button>
+      </nav>
+      <div id="panelContent" class="panelContent"></div>
+    </section>
+
+    <div id="toast" class="toast" aria-live="polite"></div>
+
+    <div id="quickMenu" class="quickMenu" hidden>
+      <button id="saveBtn" type="button">セーブ</button>
+      <button id="loadBtn" type="button">ロード</button>
+      <a href="kenshi_index.html">入口へ戻る</a>
+    </div>
+  </main>
+  <script src="kenshi_still.js?v=20260921-1"></script>
+</body>
+</html>
