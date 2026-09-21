@@ -259,28 +259,28 @@ button{cursor:pointer}
   z-index:16;
   left:50%;
   top:56%;
-  width:34px;
-  height:46px;
+  width:18px;
+  height:29px;
   transform:translate(-50%,-50%);
   pointer-events:none;
 }
 .fieldPlayer .head{
-  position:absolute;left:10px;top:0;
-  width:13px;height:13px;
-  border:3px solid #4b2d83;
+  position:absolute;left:5px;top:0;
+  width:8px;height:8px;
+  border:2px solid #4b2d83;
   border-radius:50%;
 }
 .fieldPlayer .body{
-  position:absolute;left:15px;top:13px;
-  width:4px;height:17px;background:#4b2d83;
+  position:absolute;left:8px;top:8px;
+  width:3px;height:12px;background:#4b2d83;
 }
 .fieldPlayer .arm,.fieldPlayer .leg{
-  position:absolute;width:4px;height:17px;background:#4b2d83;transform-origin:top;
+  position:absolute;width:2.5px;height:11px;background:#4b2d83;transform-origin:top;
 }
-.fieldPlayer .armL{left:15px;top:16px;transform:rotate(55deg)}
-.fieldPlayer .armR{left:16px;top:16px;transform:rotate(-55deg)}
-.fieldPlayer .legL{left:15px;top:29px;transform:rotate(28deg)}
-.fieldPlayer .legR{left:16px;top:29px;transform:rotate(-28deg)}
+.fieldPlayer .armL{left:8px;top:10px;transform:rotate(50deg)}
+.fieldPlayer .armR{left:9px;top:10px;transform:rotate(-50deg)}
+.fieldPlayer .legL{left:8px;top:19px;transform:rotate(24deg)}
+.fieldPlayer .legR{left:9px;top:19px;transform:rotate(-24deg)}
 .fieldPlayer.down{transform:translate(-50%,-50%) rotate(90deg);opacity:.7}
 
 .fieldInfo{
@@ -614,4 +614,19 @@ button{cursor:pointer}
   .footerBar{grid-template-columns:48px 48px minmax(0,1fr);gap:3px}
   .footerAction,.hotbarSlot{min-height:48px}
   .hotbar{gap:3px}
+}
+/* タップしたことが分かる押下反応 */
+button{
+  transition:transform .055s ease,filter .055s ease,box-shadow .055s ease;
+}
+button:active:not(:disabled){
+  transform:scale(.93);
+  filter:brightness(.72);
+}
+.contextActions button:active:not(:disabled),
+.footerAction:active:not(:disabled),
+.hotbarSlot:active:not(:disabled),
+.panelActions button:active:not(:disabled),
+.destinationList button:active:not(:disabled){
+  box-shadow:inset 0 0 0 2px rgba(255,255,255,.72),0 1px 2px rgba(0,0,0,.2);
 }
