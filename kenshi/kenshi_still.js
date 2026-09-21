@@ -2,6 +2,15 @@
 "use strict";
 
 var SAVE_KEY="iroiro_kenshi_still_save_v1";
+var MAP_POS={
+  road:{x:49,y:56},
+  dust:{x:18,y:24},
+  cross:{x:49,y:45},
+  mine:{x:79,y:25},
+  farm:{x:20,y:77},
+  ruins:{x:77,y:72}
+};
+
 var PLACES={
   road:{name:"街道",kind:"移動中の道",scene:"roadScene"},
   dust:{name:"砂塵街",kind:"町",scene:"townScene"},
@@ -38,6 +47,7 @@ function normalizeState(){
   if(!Array.isArray(state.party))state.party=["主人公"];
   if(!Array.isArray(state.log))state.log=[];
   if(!("travel" in state))state.travel=null;
+  if(state.travel&&!state.travel.from)state.travel.from="road";
   if(!Number.isFinite(state.hp))state.hp=100;
   if(!Number.isFinite(state.maxHp))state.maxHp=100;
   if(!Number.isFinite(state.hunger))state.hunger=0;
@@ -95,7 +105,7 @@ function startTravel(key){
     return;
   }
 
-  state.travel={to:key,remaining:75,total:75};
+  state.travel={from:state.place||"road",to:key,remaining:75,total:75};
   state.place="road";
   mapOpen=false;
   note(PLACES[key].name+"へ向かった。");
@@ -271,6 +281,48 @@ function renderCelestial(){
   celestial.style.top=y+"%";
 }
 
+function peopleForScene(){
+  if(state.travel)return [
+    {x:48,y:82,type:"trader"},
+    {x:61,y:76,type:"guard"}
+  ];
+  if(state.place==="dust")return [
+    {x:36,y:83,type:"trader"},
+    {x:54,y:78,type:"worker"},
+    {x:67,y:84,type:"guard"}
+  ];
+  if(state.place==="cross")return [
+    {x:43,y:81,type:"trader"},
+    {x:61,y:76,type:"worker"}
+  ];
+  if(state.place==="mine")return [
+    {x:42,y:82,type:"worker"},
+    {x:61,y:77,type:"worker"}
+  ];
+  if(state.place==="farm")return [
+    {x:40,y:82,type:"worker"},
+    {x:62,y:79,type:"worker"}
+  ];
+  if(state.place==="ruins")return [
+    {x:53,y:81,type:"worker"}
+  ];
+  return [{x:51,y:81,type:"trader"}];
+}
+
+function renderPeople(){
+  var layer=document.getElementById("scenePeople");
+  layer.innerHTML="";
+  if(mapOpen)return;
+  peopleForScene().forEach(function(p){
+    var d=document.createElement("div");
+    d.className="scenePerson "+p.type;
+    d.style.left=p.x+"%";
+    d.style.top=p.y+"%";
+    d.innerHTML="<i class='head'></i><i class='body'></i><i class='legs'></i>";
+    layer.appendChild(d);
+  });
+}
+
 function renderScene(){
   var place=PLACES[state.place];
   var art=document.getElementById("sceneArt");
@@ -290,15 +342,38 @@ function renderScene(){
 
 function renderMap(){
   var view=document.getElementById("mapView");
+  var win=document.getElementById("sceneWindow");
   view.hidden=!mapOpen;
+  win.classList.toggle("mapMode",mapOpen);
   document.getElementById("destinationBtn").classList.toggle("active",mapOpen);
   document.getElementById("destinationBtn").textContent=mapOpen?"景色":"行き先";
+
   document.querySelectorAll(".mapNode").forEach(function(b){
     var key=b.dataset.destination;
     b.classList.toggle("current",!state.travel&&key===state.place);
   });
+
+  var marker=document.getElementById("mapPlayerMarker");
+  var x,y;
+  if(state.travel){
+    var from=MAP_POS[state.travel.from]||MAP_POS.road;
+    var to=MAP_POS[state.travel.to]||MAP_POS.road;
+    var progress=clamp(1-(state.travel.remaining/state.travel.total),0,1);
+    x=from.x+(to.x-from.x)*progress;
+    y=from.y+(to.y-from.y)*progress;
+    marker.classList.add("traveling");
+    marker.querySelector("b").textContent="移動中";
+  }else{
+    var at=MAP_POS[state.place]||MAP_POS.road;
+    x=at.x;y=at.y;
+    marker.classList.remove("traveling");
+    marker.querySelector("b").textContent="現在地";
+  }
+  marker.style.left=x+"%";
+  marker.style.top=y+"%";
+
   var here=document.getElementById("mapHere");
-  here.textContent=state.travel?("移動中 → "+PLACES[state.travel.to].name):("現在地： "+PLACES[state.place].name);
+  here.textContent=state.travel?("現在地：移動中 → "+PLACES[state.travel.to].name):("現在地： "+PLACES[state.place].name);
 }
 
 function renderStatus(){
@@ -313,6 +388,7 @@ function renderAll(){
   renderCelestial();
   renderScene();
   renderMap();
+  renderPeople();
   renderStatus();
   setTabButtons();
   renderPanel();
@@ -321,6 +397,7 @@ function renderAll(){
 document.getElementById("destinationBtn").addEventListener("click",function(){
   mapOpen=!mapOpen;
   renderMap();
+  renderPeople();
 });
 
 document.querySelectorAll("[data-destination]").forEach(function(b){
