@@ -1,0 +1,258 @@
+*{box-sizing:border-box}
+html,body{margin:0;width:100%;height:100%;overflow:hidden}
+body{
+  background:#17140f;
+  color:#1c1914;
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+  touch-action:manipulation;
+}
+button,a{font:inherit}
+.gameShell{
+  position:relative;
+  width:100%;
+  height:100dvh;
+  display:grid;
+  grid-template-rows:96px minmax(0,1fr) 34%;
+  overflow:hidden;
+  background:#ece6d6;
+}
+.skyBand{
+  position:relative;
+  display:grid;
+  grid-template-columns:auto minmax(0,1fr) 46px;
+  align-items:center;
+  gap:10px;
+  padding:calc(8px + env(safe-area-inset-top)) 12px 8px;
+  background:#17140f;
+  color:#fff8e9;
+}
+.timeBlock{display:flex;align-items:baseline;gap:8px;white-space:nowrap}
+.timeBlock b{font-size:20px}
+.timeBlock span{font-size:13px;opacity:.9}
+.skyTrack{
+  position:relative;
+  height:44px;
+  overflow:hidden;
+}
+.skyTrack:after{
+  content:"";
+  position:absolute;
+  left:2%;right:2%;top:50%;
+  height:1px;
+  background:rgba(255,255,255,.14);
+}
+.sunMoon{
+  position:absolute;
+  top:50%;
+  width:30px;height:30px;
+  transform:translate(-50%,-50%);
+  border-radius:50%;
+  transition:left .35s linear,background .2s ease,box-shadow .2s ease;
+  z-index:1;
+}
+.sunMoon.sun{
+  background:#f5d764;
+  box-shadow:0 0 14px rgba(245,215,100,.55);
+}
+.sunMoon.moon{
+  background:#ece8da;
+  box-shadow:inset -7px 0 0 #9e9788,0 0 9px rgba(238,234,218,.35);
+}
+.roundBtn{
+  width:44px;height:44px;padding:0;
+  border:1px solid #786d58;border-radius:50%;
+  background:#292319;color:#fff7e6;font-size:20px;font-weight:900;
+}
+.sceneSection{
+  min-height:0;
+  display:grid;
+  grid-template-rows:minmax(0,1fr) 86px;
+  background:#d8d0bd;
+}
+.sceneArt{
+  position:relative;
+  min-height:0;
+  overflow:hidden;
+  border-bottom:1px solid #93876f;
+  background:#f5f3ec;
+}
+.roadScene{
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 900 900'%3E%3Crect width='900' height='900' fill='%23f7f5ef'/%3E%3Cg fill='none' stroke='%23665f55' stroke-width='3' opacity='.8'%3E%3Cpath d='M360 900 C395 700 420 510 445 320 C458 220 470 120 470 0'/%3E%3Cpath d='M575 900 C535 700 505 510 482 320 C470 220 465 120 470 0'/%3E%3Cpath d='M0 300 C180 250 270 260 370 285'/%3E%3Cpath d='M900 250 C700 220 610 245 535 280'/%3E%3C/g%3E%3Cg fill='%23d9d6cd' stroke='%23706a60' stroke-width='2'%3E%3Cellipse cx='130' cy='260' rx='115' ry='70'/%3E%3Cellipse cx='760' cy='245' rx='120' ry='75'/%3E%3Cellipse cx='170' cy='560' rx='70' ry='120'/%3E%3Cellipse cx='710' cy='500' rx='65' ry='110'/%3E%3C/g%3E%3Cg stroke='%23706a60' stroke-width='2' opacity='.55'%3E%3Cpath d='M0 410 H320 M590 390 H900 M0 680 H290 M620 650 H900'/%3E%3C/g%3E%3C/svg%3E");
+  background-size:cover;
+  background-position:center;
+}
+.sceneArt.townScene{filter:sepia(.08)}
+.sceneArt.mineScene{filter:contrast(1.06) brightness(.93)}
+.sceneArt.farmScene{filter:brightness(1.03)}
+.sceneArt.ruinsScene{filter:grayscale(.65) contrast(1.08)}
+.sceneLabel{
+  position:absolute;
+  left:12px;top:12px;
+  display:grid;
+  gap:2px;
+  padding:7px 9px;
+  border-radius:8px;
+  background:rgba(33,29,22,.72);
+  color:#fff8e7;
+  backdrop-filter:blur(2px);
+}
+.sceneLabel b{font-size:14px}
+.sceneLabel span{font-size:9px;opacity:.86}
+.statusStrip{
+  display:grid;
+  grid-template-columns:minmax(0,1fr) 78px;
+  grid-template-rows:1fr 1fr;
+  gap:6px 8px;
+  padding:7px 9px;
+  background:#fff1a8;
+  border-top:2px solid #b79c2d;
+}
+.meter{
+  min-width:0;
+  display:grid;
+  grid-template-columns:38px minmax(0,1fr) 58px;
+  align-items:center;
+  gap:6px;
+}
+.meter span,.meter b{font-size:11px;font-weight:950}
+.meter b{text-align:right}
+.meterTrack{
+  height:17px;
+  overflow:hidden;
+  border:2px solid #4b4423;
+  border-radius:10px;
+  background:#d7d0a0;
+}
+.meterTrack i{display:block;height:100%;width:0%;transition:width .2s linear}
+.hpMeter .meterTrack i{background:#ad4a3c}
+.hungerMeter .meterTrack i{background:#567fc9}
+.moneyCoin{
+  grid-column:2;
+  grid-row:1/3;
+  align-self:center;
+  justify-self:center;
+  width:66px;height:66px;
+  border:3px solid #9b8122;
+  border-radius:50%;
+  background:#f8df5f;
+  display:grid;
+  place-content:center;
+  text-align:center;
+  line-height:1;
+}
+.moneyCoin span{font-size:10px;font-weight:900}
+.moneyCoin b{margin-top:5px;font-size:21px}
+.yellowPanel{
+  min-height:0;
+  display:grid;
+  grid-template-rows:44px minmax(0,1fr);
+  border-top:2px solid #a78f29;
+  background:#f3e47f;
+}
+.tabBar{
+  display:grid;
+  grid-template-columns:repeat(4,minmax(0,1fr));
+}
+.tab{
+  border:0;
+  border-right:1px solid #9f892b;
+  border-bottom:1px solid #9f892b;
+  background:#e7d76f;
+  color:#241e13;
+  font-size:11px;
+  font-weight:950;
+}
+.tab:last-child{border-right:0}
+.tab.active{background:#766720;color:#fff8dc}
+.panelContent{
+  min-height:0;
+  overflow:auto;
+  -webkit-overflow-scrolling:touch;
+  padding:8px;
+}
+.placeHead{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:8px;
+  margin-bottom:7px;
+}
+.placeHead b{font-size:14px}
+.placeHead span{font-size:10px;color:#665823}
+.actionGrid,.travelGrid,.itemGrid{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:6px;
+}
+.actionGrid{margin-bottom:8px}
+.actionGrid button,.travelGrid button,.itemCard,.partyCard,.logRow{
+  min-height:42px;
+  border:1px solid #9a8430;
+  border-radius:7px;
+  background:#fff2a9;
+  color:#211c12;
+  font-size:10px;
+  font-weight:900;
+}
+.actionGrid button:active,.travelGrid button:active{transform:scale(.97)}
+.travelTitle{
+  margin:8px 0 5px;
+  font-size:9px;font-weight:950;color:#6c5d25;
+}
+.itemGrid{grid-template-columns:repeat(4,minmax(0,1fr))}
+.itemCard{
+  min-height:64px;
+  padding:6px;
+  display:grid;
+  place-content:center;
+  text-align:center;
+}
+.itemCard b{font-size:17px;margin-top:4px}
+.partyCard,.logRow{padding:9px;margin-bottom:6px}
+.partyCard{display:flex;justify-content:space-between;gap:10px}
+.logRow{min-height:34px;font-weight:700}
+.quickMenu{
+  position:absolute;
+  right:10px;
+  top:calc(68px + env(safe-area-inset-top));
+  z-index:30;
+  width:130px;
+  padding:6px;
+  display:grid;
+  gap:5px;
+  border:1px solid #70634d;
+  border-radius:9px;
+  background:#241f18;
+}
+.quickMenu[hidden]{display:none}
+.quickMenu button,.quickMenu a{
+  min-height:38px;
+  border:1px solid #72644d;
+  border-radius:6px;
+  background:#3b3226;
+  color:#fff3dc;
+  display:grid;place-items:center;
+  text-decoration:none;
+  font-size:11px;font-weight:900;
+}
+.toast{
+  position:absolute;
+  left:50%;
+  bottom:35%;
+  z-index:40;
+  transform:translate(-50%,10px);
+  padding:7px 10px;
+  border-radius:7px;
+  background:rgba(32,27,20,.86);
+  color:#fff7e8;
+  font-size:11px;font-weight:900;
+  opacity:0;pointer-events:none;
+  transition:.15s ease;
+}
+.toast.show{opacity:1;transform:translate(-50%,0)}
+@media(max-height:700px){
+  .gameShell{grid-template-rows:80px minmax(0,1fr) 36%}
+  .sceneSection{grid-template-rows:minmax(0,1fr) 74px}
+  .statusStrip{padding:5px 7px}
+  .moneyCoin{width:56px;height:56px}
+}
