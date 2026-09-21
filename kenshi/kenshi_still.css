@@ -46,12 +46,8 @@ button,a{font:inherit}
 .orbit{
   position:absolute;
   z-index:1;
-  left:6%;
-  right:6%;
-  top:7%;
-  height:58%;
-  border-top:1.5px solid rgba(74,65,51,.28);
-  border-radius:50% 50% 0 0 / 100% 100% 0 0;
+  inset:0;
+  pointer-events:none;
 }
 .sunMoon{
   position:absolute;
@@ -73,8 +69,8 @@ button,a{font:inherit}
   position:absolute;
   z-index:4;
   left:50%;
-  top:54%;
-  width:min(67vw,310px);
+  top:56%;
+  width:min(62vw,292px);
   aspect-ratio:1/1;
   transform:translate(-50%,-50%);
   overflow:hidden;
