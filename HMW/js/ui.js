@@ -144,7 +144,7 @@
       health: ["体力", s.health],
       hunger: ["空腹", s.hunger],
       hygiene: ["衛生", s.hygiene],
-      warmth: ["体温", s.warmth],
+      warmth: ["暖かさ", s.warmth],
       wetness: ["濡れ", s.wetness],
       fatigue: ["疲労", s.fatigue]
     };
@@ -271,7 +271,12 @@
   function openPeople() {
     const html = Object.entries(D.people).map(([id, person]) => {
       const r = G.rel(id);
-      return `<div class="person-row"><b>${esc(person.name)}</b> ${esc(person.role)}${person.romance ? "<br><span class=\"muted\">特別な関係に発展する可能性がある人物</span>" : ""}<br><span class="pill">面識 ${r.familiarity}</span><span class="pill">信頼 ${r.trust}</span><span class="pill">好意 ${r.goodwill}</span><span class="pill">苛立ち ${r.irritation}</span></div>`;
+      const relationHtml = person.romance
+        ? H.RELATIONSHIP_DISPLAY_KEYS
+            .map((key) => `<span class="pill">${esc(H.RELATIONSHIP_LABELS[key])} ${Number(r[key]) || 0}</span>`)
+            .join("")
+        : `<span class="pill">親密度 ${r.familiarity}</span><span class="pill">信頼 ${r.trust}</span><span class="pill">好意 ${r.goodwill}</span>`;
+      return `<div class="person-row"><b>${esc(person.name)}</b> ${esc(person.role)}${person.romance ? "<br><span class=\"muted\">特別な関係に発展する可能性がある人物</span>" : ""}<br>${relationHtml}</div>`;
     }).join("");
     openModal("人物", html, [], true);
   }
