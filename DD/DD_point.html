@@ -6,16 +6,16 @@
   <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0" />
   <meta http-equiv="Pragma" content="no-cache" />
   <meta http-equiv="Expires" content="0" />
-  <meta name="dd-build" content="20260916quickslots4" />
+  <meta name="dd-build" content="20260921touchfix1" />
   <title>DD - 地点探索</title>
   <style>
     *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
     :root{--ink:#282722;--paper:#f7f3eb;--purple:#62509d;--hero:#35b8df;--wolf:#c95a86;--danger:#b94c3e;--card:#e4c74c;--muted:#716d65}
     html,body{margin:0;width:100%;min-height:100%;background:#efebe3;color:#1c1b18;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
-    body{min-height:100dvh;overflow-x:hidden}
+    body{min-height:100svh;overflow-x:hidden}
     button,a{font:inherit}
     button{touch-action:manipulation}
-    #game{width:min(100%,520px);min-height:100dvh;margin:0 auto;padding:max(6px,env(safe-area-inset-top)) 8px calc(8px + env(safe-area-inset-bottom));display:flex;flex-direction:column;gap:6px}
+    #game{width:min(100%,520px);min-height:100svh;margin:0 auto;padding:max(6px,env(safe-area-inset-top)) 8px calc(84px + env(safe-area-inset-bottom));display:flex;flex-direction:column;gap:6px}
 
     #topPanel{min-height:86px;border:2px solid var(--purple);border-radius:13px;background:#faf8f3;padding:6px 8px;display:grid;grid-template-columns:auto 1fr;gap:8px;align-items:center}
     #clockArea{display:flex;align-items:center;gap:7px;min-width:0}
@@ -35,9 +35,9 @@
     #placeName{font-size:17px;font-weight:1000;line-height:1.1;text-align:right;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
     #placeType{font-size:10px;font-weight:900;opacity:.58;white-space:nowrap}
     #topLinks{grid-area:links;display:flex;justify-content:flex-end;gap:8px;min-width:0}
-    .headLink{color:#292725;text-decoration:none;font-size:10px;font-weight:1000;white-space:nowrap}
+    .headLink{color:#292725;text-decoration:none;font-size:12px;font-weight:1000;white-space:nowrap;min-height:40px;padding:0 8px;border:1.5px solid var(--ink);border-radius:7px;background:#fff;display:flex;align-items:center;justify-content:center}
     #autoControls{grid-area:controls;display:flex;justify-content:flex-end;gap:5px}
-    #autoButton,#autoSpeedButton{height:30px;border:1.5px solid var(--ink);border-radius:7px;background:#fff;color:#1d1d1b;font-size:10px;font-weight:1000;padding:0 7px;box-shadow:0 1px 0 rgba(0,0,0,.13);white-space:nowrap}
+    #autoButton,#autoSpeedButton{height:42px;border:1.5px solid var(--ink);border-radius:7px;background:#fff;color:#1d1d1b;font-size:11px;font-weight:1000;padding:0 10px;box-shadow:0 1px 0 rgba(0,0,0,.13);white-space:nowrap}
     #autoSpeedButton{background:#e9e4da}
     #autoButton.on{background:var(--ink);color:#fff}
 
@@ -66,7 +66,7 @@
     #enemyIntent{font-size:10px;font-weight:800;line-height:1.25;color:#5d5952;min-height:30px}
     #cardActions{display:none;gap:6px;margin-top:3px}
     #cardActions.show{display:flex}
-    #cardActions button{flex:1;height:35px;border:1.5px solid var(--ink);border-radius:8px;background:#fff;font-size:11px;font-weight:1000;box-shadow:0 2px 0 rgba(0,0,0,.11)}
+    #cardActions button{flex:1;height:46px;border:1.5px solid var(--ink);border-radius:8px;background:#fff;font-size:11px;font-weight:1000;box-shadow:0 2px 0 rgba(0,0,0,.11)}
     #discardAction{background:#e7e2d8!important}
     #cardHint{text-align:center;min-height:15px;margin-top:4px;font-size:10px;font-weight:900;color:#5d5952;line-height:1.25}
 
@@ -77,7 +77,7 @@
 
     #partyArea{position:relative;min-height:238px;margin-top:0}
     #partyTabs{height:38px;display:flex;align-items:flex-end;padding:0 6px;gap:0;position:relative;z-index:3}
-    .partyTab{min-width:108px;height:38px;border:2px solid var(--ink);border-bottom:0;border-radius:10px 10px 0 0;background:#fff;font-weight:1000;font-size:12px;padding:4px 9px;position:relative;top:2px;line-height:1.05}
+    .partyTab{min-width:108px;height:44px;border:2px solid var(--ink);border-bottom:0;border-radius:10px 10px 0 0;background:#fff;font-weight:1000;font-size:12px;padding:4px 9px;position:relative;top:2px;line-height:1.05}
     #heroTab{border-color:var(--hero);background:#eaf9fd}
     #wolfTab{border-color:var(--wolf);background:#fdebf2;display:none;margin-left:-9px}
     #heroTab.active{z-index:3;top:0;background:#d8f5fc}
@@ -87,7 +87,7 @@
     #partyPanel.wolfMode{border-color:var(--wolf)}
     #partyHead{display:flex;justify-content:space-between;align-items:center;gap:7px;margin-bottom:4px;min-height:25px}
     #turnLabel{font-size:12px;font-weight:1000;line-height:1.1}
-    #inventoryButton{width:30px;height:30px;display:grid;place-items:center;flex:0 0 30px;border:1.5px solid var(--ink);border-radius:8px;background:#fff;color:#1d1d1b;text-decoration:none;font-size:15px;font-weight:1000;padding:0}
+    #inventoryButton{width:42px;height:42px;display:grid;place-items:center;flex:0 0 30px;border:1.5px solid var(--ink);border-radius:8px;background:#fff;color:#1d1d1b;text-decoration:none;font-size:15px;font-weight:1000;padding:0}
     #allyStatus{display:flex;align-items:center;gap:6px;margin-bottom:5px}
     #allyStatusName{font-size:10px;font-weight:1000;min-width:46px}
     #allyHpBar{flex:1;height:10px;border:1.5px solid var(--ink);border-radius:999px;background:#ddd7cd;overflow:hidden}
