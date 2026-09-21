@@ -9,6 +9,9 @@ var routeSvg=document.getElementById("routeSvg");
 var drawer=document.getElementById("drawer");
 var selectedId="player";
 var openDrawer="";
+var moveCursor={x:18,y:24};
+var moveHoldTimer=null;
+var toastTimer=null;
 var lastTick=Date.now();
 var simTimer=null;
 
@@ -65,6 +68,14 @@ function freshState(){
 var state=freshState();
 
 function log(msg){state.log.unshift(msg);state.log=state.log.slice(0,50)}
+function showResult(msg){
+  var el=document.getElementById("resultToast");
+  if(!el)return;
+  el.textContent=msg;
+  el.classList.add("show");
+  clearTimeout(toastTimer);
+  toastTimer=setTimeout(function(){el.classList.remove("show")},1400);
+}
 
 function advance(minutes){
   state.minute+=minutes;
@@ -265,6 +276,9 @@ function renderActors(){
   p.addEventListener("click",function(e){e.stopPropagation();selectedId="player";openDrawer="";renderAll()});
   actorLayer.appendChild(p);
 
+  var cursor=document.getElementById("moveCursor");
+  if(cursor){cursor.style.left=moveCursor.x+"%";cursor.style.top=moveCursor.y+"%";}
+
   state.actors.forEach(function(a){
     var b=document.createElement("button");
     b.type="button";b.className=actorClass(a);b.style.left=a.x+"%";b.style.top=a.y+"%";
@@ -284,7 +298,7 @@ function renderHud(){
   document.getElementById("moneyText").textContent=state.player.money;
   document.getElementById("pauseBtn").textContent=state.paused?"再開":"一時停止";
   document.getElementById("speedBtn").textContent="×"+state.speed;
-  document.getElementById("hint").textContent="地面をタップして移動";
+  document.getElementById("hint").textContent="方向キーで行き先を選び、中央で決定";
 }
 
 function clearContext(){
@@ -304,12 +318,14 @@ function nearbyLandmark(){
 function healActor(a){
   if(state.player.med<=0||!a.down)return;
   state.player.med--;a.down=false;a.hp=Math.max(30,Math.round(a.maxHp*.35));
-  state.relations[a.faction]=(state.relations[a.faction]||0)+4;log(a.name+"を治療した。");renderAll();
+  state.relations[a.faction]=(state.relations[a.faction]||0)+4;log(a.name+"を治療した。");showResult(a.name+"を治療");renderAll();
 }
 function lootActor(a){
   if(!a.down||a.loot<=0)return;
   var gain=a.loot;a.loot=0;state.player.money+=gain;
-  if(Math.random()<.4)state.player.scrap++;log(a.name+"から"+gain+"を回収した。");renderAll();
+  if(Math.random()<.4){state.player.scrap++;log(a.name+"から"+gain+"と廃材1個を回収した。");showResult(gain+" + 廃材1");}
+  else{log(a.name+"から"+gain+"を回収した。");showResult("所持金 +"+gain);}
+  renderAll();
 }
 function recruitActor(a){
   if(a.down||a.faction!=="無所属"||state.player.money<50)return;
@@ -317,22 +333,25 @@ function recruitActor(a){
   if(a.id==="wanderer"){
     var dog=getActor("dog");if(dog&&!dog.down){dog.recruited=true;dog.faction="主人公";state.party.push("dog")}
   }
-  log(a.name+"が仲間になった。");renderAll();
+  log(a.name+"が仲間になった。");showResult(a.name+"が仲間になった");renderAll();
 }
-function buyFood(){if(state.player.money<12)return;state.player.money-=12;state.player.food++;log("保存食を買った。");renderAll()}
-function buyMed(){if(state.player.money<28)return;state.player.money-=28;state.player.med++;log("治療具を買った。");renderAll()}
-function sellOre(){if(state.player.ore<=0)return;var v=state.player.ore*13;state.player.money+=v;state.player.ore=0;log("鉄鉱石を"+v+"で売った。");renderAll()}
-function sellScrap(){if(state.player.scrap<=0)return;var v=state.player.scrap*9;state.player.money+=v;state.player.scrap=0;log("廃材を"+v+"で売った。");renderAll()}
-function eat(){if(state.player.food<=0)return;state.player.food--;state.player.hunger=clamp(state.player.hunger-38,0,100);log("保存食を食べた。");renderAll()}
-function selfHeal(){if(state.player.med<=0||state.player.hp>=state.player.maxHp)return;state.player.med--;state.player.hp=clamp(state.player.hp+35,0,state.player.maxHp);state.player.down=false;log("治療した。");renderAll()}
-function mine(){state.player.ore+=1+Math.floor(Math.random()*3);state.player.hunger=clamp(state.player.hunger+4,0,100);advance(40);log("鉄鉱石を採掘した。");renderAll()}
+function buyFood(){if(state.player.money<12)return;state.player.money-=12;state.player.food++;log("保存食を買った。");showResult("食料 +1");renderAll()}
+function buyMed(){if(state.player.money<28)return;state.player.money-=28;state.player.med++;log("治療具を買った。");showResult("治療具 +1");renderAll()}
+function sellOre(){if(state.player.ore<=0)return;var count=state.player.ore,v=count*13;state.player.money+=v;state.player.ore=0;log("鉄鉱石"+count+"個を"+v+"で売った。");showResult("所持金 +"+v);renderAll()}
+function sellScrap(){if(state.player.scrap<=0)return;var count=state.player.scrap,v=count*9;state.player.money+=v;state.player.scrap=0;log("廃材"+count+"個を"+v+"で売った。");showResult("所持金 +"+v);renderAll()}
+function eat(){if(state.player.food<=0)return;state.player.food--;state.player.hunger=clamp(state.player.hunger-38,0,100);log("保存食を食べた。");showResult("空腹 -38");renderAll()}
+function selfHeal(){if(state.player.med<=0||state.player.hp>=state.player.maxHp)return;var before=state.player.hp;state.player.med--;state.player.hp=clamp(state.player.hp+35,0,state.player.maxHp);state.player.down=false;log("治療した。");showResult("HP +"+Math.round(state.player.hp-before));renderAll()}
+function mine(){var got=1+Math.floor(Math.random()*3);state.player.ore+=got;state.player.hunger=clamp(state.player.hunger+4,0,100);advance(40);log("鉄鉱石を"+got+"個採掘した。");showResult("鉄鉱石 +"+got);renderAll()}
 function scavenge(){
-  var r=Math.random();if(r<.38){state.player.scrap++;log("廃材を見つけた。")}else if(r<.62){state.player.food++;log("保存食を見つけた。")}
-  else if(r<.78){state.player.med++;log("治療具を見つけた。")}else log("使える物はなかった。");
-  advance(30);renderAll();
+  var r=Math.random(),msg="";
+  if(r<.38){state.player.scrap++;msg="廃材 +1";log("廃材を見つけた。")}
+  else if(r<.62){state.player.food++;msg="食料 +1";log("保存食を見つけた。")}
+  else if(r<.78){state.player.med++;msg="治療具 +1";log("治療具を見つけた。")}
+  else{msg="何も見つからなかった";log("使える物はなかった。")}
+  advance(30);showResult(msg);renderAll();
 }
-function farm(){state.player.money+=10;state.player.food++;advance(50);state.relations["南農場"]++;log("農作業を手伝った。");renderAll()}
-function rest(){state.player.hp=clamp(state.player.hp+40,0,state.player.maxHp);state.player.down=false;advance(180);log("休息した。");renderAll()}
+function farm(){state.player.money+=10;state.player.food++;advance(50);state.relations["南農場"]++;log("農作業を手伝った。");showResult("所持金 +10 / 食料 +1");renderAll()}
+function rest(){var before=state.player.hp;state.player.hp=clamp(state.player.hp+40,0,state.player.maxHp);state.player.down=false;advance(180);log("休息した。");showResult("HP +"+Math.round(state.player.hp-before));renderAll()}
 
 function renderContext(){
   var box=document.getElementById("context"),txt=document.getElementById("contextText"),acts=document.getElementById("contextActions");
@@ -411,10 +430,37 @@ function renderAll(){renderActors();renderHud();renderContext();renderDrawer()}
 
 function worldTap(e){
   if(state.player.down)return;
+  if(e.target.closest(".actor")||e.target.closest(".movePad"))return;
   var rect=world.getBoundingClientRect();
-  var x=(e.clientX-rect.left)/rect.width*100,y=(e.clientY-rect.top)/rect.height*100;
-  state.player.target={x:clamp(x,2,98),y:clamp(y,3,97)};
-  state.player.attackTarget=null;selectedId="player";openDrawer="";renderAll();
+  moveCursor.x=clamp((e.clientX-rect.left)/rect.width*100,3,97);
+  moveCursor.y=clamp((e.clientY-rect.top)/rect.height*100,4,96);
+  selectedId="player";openDrawer="";renderAll();
+}
+function nudgeCursor(dir){
+  var step=4;
+  if(dir==="up")moveCursor.y-=step;
+  if(dir==="down")moveCursor.y+=step;
+  if(dir==="left")moveCursor.x-=step;
+  if(dir==="right")moveCursor.x+=step;
+  moveCursor.x=clamp(moveCursor.x,3,97);
+  moveCursor.y=clamp(moveCursor.y,4,96);
+  renderActors();
+}
+function confirmMove(){
+  if(state.player.down)return;
+  state.player.target={x:moveCursor.x,y:moveCursor.y};
+  state.player.attackTarget=null;
+  selectedId="player";openDrawer="";
+  showResult("移動開始");
+  renderAll();
+}
+function stopMoveHold(){
+  if(moveHoldTimer){clearInterval(moveHoldTimer);moveHoldTimer=null;}
+}
+function startMoveHold(dir){
+  stopMoveHold();
+  nudgeCursor(dir);
+  moveHoldTimer=setInterval(function(){nudgeCursor(dir)},110);
 }
 
 function save(show){
@@ -428,13 +474,21 @@ function load(){
     state=JSON.parse(raw);
     if(!Number.isFinite(state.player.speed)) state.player.speed=1.7;
     if(!Number.isFinite(state.player.x)||!Number.isFinite(state.player.y)){state.player.x=18;state.player.y=24;state.player.target=null;}
-    selectedId="player";openDrawer="";log("ロードした。");renderAll();
+    selectedId="player";openDrawer="";moveCursor={x:state.player.x,y:state.player.y};log("ロードした。");showResult("ロードした");renderAll();
   }catch(e){state=freshState();log("セーブデータを読み込めなかった。");renderAll()}
 }
 
 function init(){
   createLandmarks();
   world.addEventListener("click",worldTap);
+  document.querySelectorAll("[data-move]").forEach(function(b){
+    var dir=b.getAttribute("data-move");
+    b.addEventListener("pointerdown",function(e){e.preventDefault();e.stopPropagation();startMoveHold(dir)});
+    b.addEventListener("pointerup",stopMoveHold);
+    b.addEventListener("pointercancel",stopMoveHold);
+    b.addEventListener("pointerleave",stopMoveHold);
+  });
+  document.getElementById("moveConfirm").addEventListener("click",function(e){e.stopPropagation();confirmMove()});
   document.getElementById("pauseBtn").addEventListener("click",function(){state.paused=!state.paused;lastTick=Date.now();renderAll()});
   document.getElementById("speedBtn").addEventListener("click",function(){state.speed=state.speed===1?2:(state.speed===2?4:1);renderHud()});
   document.getElementById("saveBtn").addEventListener("click",function(){save(true)});
@@ -457,6 +511,7 @@ function init(){
     }catch(e){}
   }else localStorage.removeItem(SAVE_KEY);
 
+  moveCursor={x:state.player.x,y:state.player.y};
   renderAll();
   lastTick=Date.now();
   simTimer=setInterval(simulationTick,120);
