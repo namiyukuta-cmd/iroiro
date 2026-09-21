@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no" />
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
   <title>Kenshi風・止め絵版</title>
-  <link rel="stylesheet" href="kenshi_still.css?v=20260921-3" />
+  <link rel="stylesheet" href="kenshi_still.css?v=20260921-4" />
 </head>
 <body>
   <main class="gameShell">
@@ -23,6 +23,7 @@
 
       <div id="sceneWindow" class="sceneWindow">
         <div id="sceneArt" class="sceneArt roadScene" role="img" aria-label="現在地の景色"></div>
+        <div id="scenePeople" class="scenePeople" aria-hidden="true"></div>
 
         <div id="mapView" class="mapView" hidden>
           <div class="mapRoads" aria-hidden="true">
@@ -33,6 +34,7 @@
           <button class="mapNode mine" type="button" data-destination="mine">鉄鉱山</button>
           <button class="mapNode farm" type="button" data-destination="farm">南農場</button>
           <button class="mapNode ruins" type="button" data-destination="ruins">旧遺跡</button>
+          <div id="mapPlayerMarker" class="mapPlayerMarker"><i></i><b>現在地</b></div>
           <span id="mapHere" class="mapHere">現在地</span>
         </div>
 
@@ -81,6 +83,6 @@
       <a href="kenshi_index.html">入口へ戻る</a>
     </div>
   </main>
-  <script src="kenshi_still.js?v=20260921-3"></script>
+  <script src="kenshi_still.js?v=20260921-4"></script>
 </body>
 </html>
