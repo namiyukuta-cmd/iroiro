@@ -751,15 +751,15 @@ button{cursor:pointer}
   .fieldInfo{left:8px;top:8px}
     .contextActions{bottom:16px}
   .resultToast{bottom:62px}
-  .hotbarBand{grid-template-rows:66px 40px minmax(0,1fr);padding:4px 5px max(5px,env(safe-area-inset-bottom))}
-  .playerStatusBand{grid-template-columns:minmax(0,1fr) 76px;gap:6px;padding:5px 6px}
-  .vitalStack{gap:5px}
-  .statusMeter{grid-template-columns:32px minmax(0,1fr) 54px;gap:5px}
+  .hotbarBand{grid-template-rows:54px 40px minmax(0,1fr);padding:4px 5px max(5px,env(safe-area-inset-bottom))}
+  .playerStatusBand{grid-template-columns:minmax(0,1fr) 72px;gap:5px;padding:4px 6px}
+  .vitalStack{gap:1px;align-content:center}
+  .statusMeter{grid-template-columns:30px minmax(0,155px);justify-content:start;gap:4px}
   .statusName{font-size:10px}
-  .statusMeter>b{font-size:10px}
-  .statusTrack{height:16px;border-width:2px}
+  .statusTrack{width:155px;max-width:155px;height:15px;border-width:2px}
+  .statusValue{right:5px;font-size:9px}
   .moneyStatus span{font-size:9px}
-  .moneyStatus b{font-size:20px}
+  .moneyStatus b{margin-top:3px;font-size:19px}
   .bottomTabs button{min-height:40px;font-size:10px}
   .hotbar{gap:4px;padding:5px}
   .hotbarSlot{padding:6px 3px 3px}
