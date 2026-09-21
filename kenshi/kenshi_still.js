@@ -33,7 +33,7 @@ function freshState(){
 }
 
 var state=freshState();
-var activeTab="place";
+var activeTab="items";
 var toastTimer=null;
 var mapOpen=false;
 var travelTimer=null;
@@ -187,7 +187,7 @@ function sellAll(item,unit){
 }
 
 function openShop(){
-  activeTab="place";
+  activeTab="shop";
   setTabButtons();
   var p=document.getElementById("panelContent");
   p.innerHTML=
@@ -198,12 +198,16 @@ function openShop(){
       "<button id='sellOre'>鉄鉱石を売る</button>"+
       "<button id='sellScrap'>廃材を売る</button>"+
     "</div>"+
-    "<button id='backPlace' class='logRow' type='button'>戻る</button>";
+    "<button id='backItems' class='logRow' type='button'>持物へ戻る</button>";
   document.getElementById("buyFood").onclick=function(){shopBuy("food",12)};
   document.getElementById("buyMed").onclick=function(){shopBuy("med",28)};
   document.getElementById("sellOre").onclick=function(){sellAll("ore",13)};
   document.getElementById("sellScrap").onclick=function(){sellAll("scrap",9)};
-  document.getElementById("backPlace").onclick=renderPanel;
+  document.getElementById("backItems").onclick=function(){
+    activeTab="items";
+    setTabButtons();
+    renderPanel();
+  };
 }
 
 function placeActions(){
@@ -220,21 +224,6 @@ function placeActions(){
 
 function renderPanel(){
   var p=document.getElementById("panelContent");
-
-  if(activeTab==="place"){
-    var place=PLACES[state.place];
-    var html="<div class='placeHead'><b>"+(state.travel?"移動中":place.name)+"</b><span>"+(state.travel?(PLACES[state.travel.to].name+"へ向かっている"):place.kind)+"</span></div>";
-    if(state.travel){
-      html+="<div class='logRow'>到着まで "+state.travel.remaining+"分</div>";
-    }else{
-      html+="<div class='actionGrid'>";
-      placeActions().forEach(function(x){html+="<button type='button' data-action='"+x[1]+"'>"+x[0]+"</button>"});
-      html+="</div>";
-    }
-    p.innerHTML=html;
-    p.querySelectorAll("[data-action]").forEach(function(b){b.onclick=function(){doAction(b.dataset.action)}});
-    return;
-  }
 
   if(activeTab==="items"){
     p.innerHTML="<div class='itemGrid'>"+
@@ -284,45 +273,23 @@ function renderCelestial(){
   celestial.style.top=y+"%";
 }
 
-function peopleForScene(){
-  if(state.travel)return [
-    {x:48,y:82,type:"trader"},
-    {x:61,y:76,type:"guard"}
-  ];
-  if(state.place==="dust")return [
-    {x:36,y:83,type:"trader"},
-    {x:54,y:78,type:"worker"},
-    {x:67,y:84,type:"guard"}
-  ];
-  if(state.place==="cross")return [
-    {x:43,y:81,type:"trader"},
-    {x:61,y:76,type:"worker"}
-  ];
-  if(state.place==="mine")return [
-    {x:42,y:82,type:"worker"},
-    {x:61,y:77,type:"worker"}
-  ];
-  if(state.place==="farm")return [
-    {x:40,y:82,type:"worker"},
-    {x:62,y:79,type:"worker"}
-  ];
-  if(state.place==="ruins")return [
-    {x:53,y:81,type:"worker"}
-  ];
-  return [{x:51,y:81,type:"trader"}];
-}
+function renderSceneActions(){
+  var box=document.getElementById("sceneActions");
+  box.innerHTML="";
 
-function renderPeople(){
-  var layer=document.getElementById("scenePeople");
-  layer.innerHTML="";
-  if(mapOpen)return;
-  peopleForScene().forEach(function(p){
-    var d=document.createElement("div");
-    d.className="scenePerson "+p.type;
-    d.style.left=p.x+"%";
-    d.style.top=p.y+"%";
-    d.innerHTML="<i class='head'></i><i class='body'></i><i class='legs'></i>";
-    layer.appendChild(d);
+  if(mapOpen||state.travel){
+    box.hidden=true;
+    return;
+  }
+
+  var rows=placeActions();
+  box.hidden=rows.length===0;
+  rows.forEach(function(x){
+    var b=document.createElement("button");
+    b.type="button";
+    b.textContent=x[0];
+    b.addEventListener("click",function(){doAction(x[1])});
+    box.appendChild(b);
   });
 }
 
@@ -391,7 +358,7 @@ function renderAll(){
   renderCelestial();
   renderScene();
   renderMap();
-  renderPeople();
+  renderSceneActions();
   renderStatus();
   setTabButtons();
   renderPanel();
@@ -400,7 +367,7 @@ function renderAll(){
 document.getElementById("destinationBtn").addEventListener("click",function(){
   mapOpen=!mapOpen;
   renderMap();
-  renderPeople();
+  renderSceneActions();
 });
 
 document.querySelectorAll("[data-destination]").forEach(function(b){
