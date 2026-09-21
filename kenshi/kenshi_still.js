@@ -4,12 +4,6 @@
 var SAVE_KEY="iroiro_kenshi_still_save_v1";
 var INVENTORY_CAPACITY=20;
 var ITEMS=window.KENSHI_ITEMS||{};
-var ITEM_META=window.KENSHI_LEGACY_ITEM_META||{
-  food:{name:"食料",stack:5},
-  med:{name:"治療具",stack:5},
-  ore:{name:"鉄鉱石",stack:5},
-  scrap:{name:"廃材",stack:5}
-};
 var MAP_POS={
   road:{x:41,y:56},
   dust:{x:18,y:24},
@@ -33,7 +27,7 @@ function freshState(){
     day:1,hour:8,minute:0,
     place:"cross",
     hp:100,maxHp:100,hunger:0,money:100,
-    food:2,med:1,ore:0,scrap:0,
+    items:{bread:2,bandage:1},
     party:["主人公"],
     travel:null,
     log:["十字路から始まった。"]
@@ -49,34 +43,71 @@ var travelTimer=null;
 function clamp(v,min,max){return Math.max(min,Math.min(max,v))}
 function pad(n){return String(n).padStart(2,"0")}
 
-function itemSlots(item,count){
-  var meta=ITEM_META[item];
+function itemCount(key){
+  return state.items&&Number.isFinite(state.items[key])?state.items[key]:0;
+}
+
+function itemSlots(key,count){
+  var meta=ITEMS[key];
   if(!meta||count<=0)return 0;
-  return Math.ceil(count/meta.stack);
+  return Math.ceil(count/(meta.stack||1));
 }
 
 function inventorySlotsUsed(){
-  return Object.keys(ITEM_META).reduce(function(total,key){
-    return total+itemSlots(key,state[key]||0);
+  if(!state.items)return 0;
+  return Object.keys(state.items).reduce(function(total,key){
+    return total+itemSlots(key,itemCount(key));
   },0);
 }
 
-function inventorySlotsWith(item,newCount){
-  return Object.keys(ITEM_META).reduce(function(total,key){
-    var count=key===item?newCount:(state[key]||0);
-    return total+itemSlots(key,count);
+function inventorySlotsWith(key,newCount){
+  var keys=Object.keys(state.items||{});
+  if(keys.indexOf(key)<0)keys.push(key);
+  return keys.reduce(function(total,itemKey){
+    var count=itemKey===key?newCount:itemCount(itemKey);
+    return total+itemSlots(itemKey,count);
   },0);
 }
 
-function addItemLimited(item,qty){
-  if(!ITEM_META[item]||qty<=0)return 0;
+function addItemLimited(key,qty){
+  if(!ITEMS[key]||qty<=0)return 0;
   var added=qty;
-  while(added>0&&inventorySlotsWith(item,(state[item]||0)+added)>INVENTORY_CAPACITY){
+  while(added>0&&inventorySlotsWith(key,itemCount(key)+added)>INVENTORY_CAPACITY){
     added--;
   }
   if(added<=0)return 0;
-  state[item]=(state[item]||0)+added;
+  state.items[key]=itemCount(key)+added;
   return added;
+}
+
+function removeItem(key,qty){
+  if(!state.items||qty<=0)return 0;
+  var have=itemCount(key);
+  var removed=Math.min(have,qty);
+  state.items[key]=have-removed;
+  if(state.items[key]<=0)delete state.items[key];
+  return removed;
+}
+
+function useItem(key){
+  var meta=ITEMS[key];
+  if(!meta||itemCount(key)<=0)return;
+
+  if(meta.category==="food"){
+    if(state.hunger<=0){toast("空腹ではない");return}
+    removeItem(key,1);
+    state.hunger=clamp(state.hunger-(meta.hungerRecovery||0),0,100);
+    note(meta.name+"を食べた。");
+    toast("空腹 -"+(meta.hungerRecovery||0));
+  }else if(meta.category==="medical"){
+    if(state.hp>=state.maxHp){toast("治療できない");return}
+    removeItem(key,1);
+    var before=state.hp;
+    state.hp=clamp(state.hp+(meta.heal||0),0,state.maxHp);
+    note(meta.name+"を使った。");
+    toast("HP +"+Math.round(state.hp-before));
+  }
+  renderAll();
 }
 
 function normalizeState(){
@@ -91,7 +122,22 @@ function normalizeState(){
   if(!Number.isFinite(state.maxHp))state.maxHp=100;
   if(!Number.isFinite(state.hunger))state.hunger=0;
   if(!Number.isFinite(state.money))state.money=100;
-  ["food","med","ore","scrap"].forEach(function(k){if(!Number.isFinite(state[k]))state[k]=0});
+  if(!state.items||typeof state.items!=="object"||Array.isArray(state.items))state.items={};
+
+  var legacy={food:"bread",med:"bandage",ore:"iron_ore",scrap:"scrap_iron"};
+  Object.keys(legacy).forEach(function(oldKey){
+    if(Number.isFinite(state[oldKey])&&state[oldKey]>0){
+      var newKey=legacy[oldKey];
+      state.items[newKey]=(Number(state.items[newKey])||0)+state[oldKey];
+    }
+    delete state[oldKey];
+  });
+
+  Object.keys(state.items).forEach(function(key){
+    var count=Number(state.items[key]);
+    if(!ITEMS[key]||!Number.isFinite(count)||count<=0)delete state.items[key];
+    else state.items[key]=Math.floor(count);
+  });
 }
 
 function advance(mins){
@@ -182,51 +228,56 @@ function doAction(type){
 
   if(type==="mine"){
     var got=1+Math.floor(Math.random()*3);
-    var mined=addItemLimited("ore",got);
+    var mined=addItemLimited("iron_ore",got);
     if(mined<=0){toast("所持品がいっぱい");return}
     advance(45);
     note("鉄鉱石を"+mined+"個採掘した。");
     toast("鉄鉱石 +"+mined);
   }else if(type==="scavenge"){
-    var found=Math.random()<.55?"scrap":"food";
+    var found=Math.random()<.55?"scrap_iron":"dried_meat";
     if(addItemLimited(found,1)<=0){toast("所持品がいっぱい");return}
-    if(found==="scrap"){note("廃材を1個見つけた。");toast("廃材 +1")}
-    else{note("保存食を1個見つけた。");toast("食料 +1")}
+    note(ITEMS[found].name+"を1個見つけた。");
+    toast(ITEMS[found].name+" +1");
     advance(35);
   }else if(type==="farm"){
-    if(addItemLimited("food",1)<=0){toast("所持品がいっぱい");return}
-    state.money+=8;advance(50);note("農作業を手伝った。");toast("食料 +1 / 金 +8");
+    if(addItemLimited("bread",1)<=0){toast("所持品がいっぱい");return}
+    state.money+=8;
+    advance(50);
+    note("農作業を手伝った。");
+    toast("パン +1 / 金 +8");
   }else if(type==="rest"){
-    var before=state.hp;state.hp=clamp(state.hp+35,0,state.maxHp);advance(180);note("休息した。");toast("HP +"+(state.hp-before));
+    var before=state.hp;
+    state.hp=clamp(state.hp+35,0,state.maxHp);
+    advance(180);
+    note("休息した。");
+    toast("HP +"+(state.hp-before));
   }else if(type==="shop"){
-    openShop();return;
-  }else if(type==="eat"){
-    if(state.food<=0){toast("食料がない");return}
-    state.food--;state.hunger=clamp(state.hunger-35,0,100);note("保存食を食べた。");toast("空腹 -35");
-  }else if(type==="heal"){
-    if(state.med<=0||state.hp>=state.maxHp){toast("治療できない");return}
-    state.med--;state.hp=clamp(state.hp+30,0,state.maxHp);note("治療した。");toast("HP +30");
+    openShop();
+    return;
   }
   renderAll();
 }
 
-function shopBuy(item,price){
-  if(state.money<price){toast("金が足りない");return}
-  if(addItemLimited(item,1)<=0){toast("所持品がいっぱい");return}
-  state.money-=price;
-  note((item==="food"?"保存食":"治療具")+"を買った。");
-  toast((item==="food"?"食料":"治療具")+" +1");
+function shopBuy(key){
+  var meta=ITEMS[key];
+  if(!meta||!meta.buy){toast("買えない");return}
+  if(state.money<meta.buy){toast("金が足りない");return}
+  if(addItemLimited(key,1)<=0){toast("所持品がいっぱい");return}
+  state.money-=meta.buy;
+  note(meta.name+"を買った。");
+  toast(meta.name+" +1");
   renderAll();
   openShop();
 }
 
-function sellAll(item,unit){
-  var n=state[item]||0;
-  if(n<=0){toast("売る物がない");return}
-  state[item]=0;
-  state.money+=n*unit;
-  note((item==="ore"?"鉄鉱石":"廃材")+"を売った。");
-  toast("金 +"+(n*unit));
+function sellAll(key){
+  var meta=ITEMS[key];
+  var n=itemCount(key);
+  if(!meta||!meta.sell||n<=0){toast("売る物がない");return}
+  removeItem(key,n);
+  state.money+=n*meta.sell;
+  note(meta.name+"を"+n+"個売った。");
+  toast("金 +"+(n*meta.sell));
   renderAll();
   openShop();
 }
@@ -238,16 +289,16 @@ function openShop(){
   p.innerHTML=
     "<div class='placeHead'><b>店</b><span>"+PLACES[state.place].name+"</span></div>"+
     "<div class='actionGrid'>"+
-      "<button id='buyFood'>保存食 12</button>"+
-      "<button id='buyMed'>治療具 28</button>"+
-      "<button id='sellOre'>鉄鉱石を売る</button>"+
-      "<button id='sellScrap'>廃材を売る</button>"+
+      "<button id='buyBread'>パン "+ITEMS.bread.buy+"</button>"+
+      "<button id='buyBandage'>包帯 "+ITEMS.bandage.buy+"</button>"+
+      "<button id='sellIronOre'>鉄鉱石を売る</button>"+
+      "<button id='sellScrapIron'>鉄くずを売る</button>"+
     "</div>"+
     "<button id='backItems' class='logRow' type='button'>持物へ戻る</button>";
-  document.getElementById("buyFood").onclick=function(){shopBuy("food",12)};
-  document.getElementById("buyMed").onclick=function(){shopBuy("med",28)};
-  document.getElementById("sellOre").onclick=function(){sellAll("ore",13)};
-  document.getElementById("sellScrap").onclick=function(){sellAll("scrap",9)};
+  document.getElementById("buyBread").onclick=function(){shopBuy("bread")};
+  document.getElementById("buyBandage").onclick=function(){shopBuy("bandage")};
+  document.getElementById("sellIronOre").onclick=function(){sellAll("iron_ore")};
+  document.getElementById("sellScrapIron").onclick=function(){sellAll("scrap_iron")};
   document.getElementById("backItems").onclick=function(){
     activeTab="items";
     setTabButtons();
@@ -273,24 +324,28 @@ function renderPanel(){
   if(activeTab==="items"){
     var used=inventorySlotsUsed();
     var slots=[];
-    Object.keys(ITEM_META).forEach(function(key){
-      var meta=ITEM_META[key];
-      var remaining=state[key]||0;
+
+    Object.keys(ITEMS).forEach(function(key){
+      var meta=ITEMS[key];
+      var remaining=itemCount(key);
       while(remaining>0){
-        var count=Math.min(meta.stack,remaining);
-        slots.push({key:key,name:meta.name,count:count});
+        var count=Math.min(meta.stack||1,remaining);
+        slots.push({key:key,meta:meta,count:count});
         remaining-=count;
       }
     });
 
-    var totalSlots=Math.max(INVENTORY_CAPACITY,slots.length);
     var html="<div class='inventoryHead'><b>所持品</b><span>"+used+" / "+INVENTORY_CAPACITY+"枠</span></div><div class='itemGrid'>";
-    for(var i=0;i<totalSlots;i++){
+    for(var i=0;i<INVENTORY_CAPACITY;i++){
       var slot=slots[i];
       if(slot){
-        var tag=(slot.key==="food"||slot.key==="med")?"button":"div";
-        var id=(slot.key==="food"?"eatItem":slot.key==="med"?"healItem":"");
-        html+="<"+tag+" class='itemCard' "+(id?"id='"+id+"'":"")+"><span>"+slot.name+"</span><b>"+slot.count+"</b></"+tag+">";
+        var usable=slot.meta.category==="food"||slot.meta.category==="medical";
+        var tag=usable?"button":"div";
+        html+="<"+tag+" class='itemCard' "+(usable?"type='button' data-use-item='"+slot.key+"'":"")+">"+
+          "<img class='itemIcon' src='"+slot.meta.image+"' alt=''>"+
+          "<span class='itemName'>"+slot.meta.name+"</span>"+
+          "<b class='itemQty'>"+slot.count+"</b>"+
+        "</"+tag+">";
       }else{
         html+="<div class='itemCard emptySlot' aria-hidden='true'></div>";
       }
@@ -298,10 +353,9 @@ function renderPanel(){
     html+="</div>";
     p.innerHTML=html;
 
-    var eat=document.getElementById("eatItem");
-    if(eat)eat.onclick=function(){doAction("eat")};
-    var heal=document.getElementById("healItem");
-    if(heal)heal.onclick=function(){doAction("heal")};
+    p.querySelectorAll("[data-use-item]").forEach(function(button){
+      button.addEventListener("click",function(){useItem(button.dataset.useItem)});
+    });
     return;
   }
 
