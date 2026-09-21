@@ -747,6 +747,9 @@ function renderPanel(){
   document.querySelectorAll("[data-panel]").forEach(function(b){
     b.classList.toggle("active",b.getAttribute("data-panel")===activePanel);
   });
+  document.querySelectorAll("[data-bottom-panel]").forEach(function(b){
+    b.classList.toggle("active",b.getAttribute("data-bottom-panel")===activePanel);
+  });
 
   document.getElementById("panelTitle").textContent=
     activePanel==="inventory"?"持物":
@@ -1038,8 +1041,12 @@ function init(){
   });
   document.getElementById("closeMapBtn").addEventListener("click",function(){mapOverlay.hidden=true});
 
-  document.getElementById("inventoryBtn").addEventListener("click",function(){cancelFieldMove();openPanel("inventory")});
-  document.getElementById("partyBtn").addEventListener("click",function(){cancelFieldMove();openPanel("party")});
+  document.querySelectorAll("[data-bottom-panel]").forEach(function(b){
+    b.addEventListener("click",function(){
+      cancelFieldMove();
+      openPanel(b.getAttribute("data-bottom-panel"));
+    });
+  });
   document.getElementById("closePanelBtn").addEventListener("click",function(){panelOverlay.hidden=true});
 
   document.querySelectorAll("[data-panel]").forEach(function(b){
