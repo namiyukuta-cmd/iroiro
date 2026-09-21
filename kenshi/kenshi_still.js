@@ -272,9 +272,11 @@ function renderCelestial(){
   var isDay=t>=6&&t<18;
   var progress=isDay?(t-6)/12:((t<6?t+6:t-18)/12);
 
-  /* 右→中央上→左の半円軌道 */
-  var x=90-progress*80;
-  var y=63-Math.sin(progress*Math.PI)*50;
+  /* 右の地平線 → 中央上空 → 左の地平線。
+     一枚絵の外側の余白を通る大きな半円軌道。 */
+  var angle=progress*Math.PI;
+  var x=50+46*Math.cos(angle);
+  var y=68-58*Math.sin(angle);
 
   celestial.className="sunMoon "+(isDay?"sun":"moon");
   celestial.style.left=x+"%";
