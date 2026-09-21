@@ -311,15 +311,44 @@ button,a{font:inherit}
   font-weight:900;
 }
 .actionGrid button:active{transform:scale(.97)}
-.itemGrid{grid-template-columns:repeat(4,minmax(0,1fr))}
+.itemGrid{
+  grid-template-columns:repeat(5,minmax(0,1fr));
+  gap:4px;
+}
 .itemCard{
-  min-height:62px;
-  padding:6px;
+  min-width:0;
+  min-height:50px;
+  padding:4px 3px;
   display:grid;
   place-content:center;
   text-align:center;
+  overflow:hidden;
 }
-.itemCard b{font-size:17px;margin-top:4px}
+.itemCard span{
+  max-width:100%;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+  font-size:8px;
+}
+.itemCard b{font-size:14px;margin-top:2px}
+.itemCard.emptySlot{
+  background:rgba(244,239,223,.38);
+  border-style:dashed;
+  opacity:.55;
+}
+.inventoryHead{
+  min-height:28px;
+  margin-bottom:5px;
+  padding:0 3px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:8px;
+  color:#4c4638;
+}
+.inventoryHead b{font-size:11px}
+.inventoryHead span{font-size:9px;font-weight:900}
 .partyCard,.logRow{padding:8px;margin-bottom:5px}
 .partyCard{display:flex;justify-content:space-between;gap:10px}
 .logRow{min-height:32px;font-weight:700}
@@ -396,3 +425,5 @@ button,a{font:inherit}
 .sceneWindow.mapMode .sceneCaption,
 .sceneWindow.mapMode .travelState{display:none}
 .sceneWindow.mapMode .mapNode{font-size:10px}
+
+.itemGrid .itemCard{min-height:50px}
