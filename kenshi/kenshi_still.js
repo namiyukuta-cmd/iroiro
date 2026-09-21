@@ -2,6 +2,13 @@
 "use strict";
 
 var SAVE_KEY="iroiro_kenshi_still_save_v1";
+var INVENTORY_CAPACITY=20;
+var ITEM_META={
+  food:{name:"食料",stack:5},
+  med:{name:"治療具",stack:5},
+  ore:{name:"鉄鉱石",stack:5},
+  scrap:{name:"廃材",stack:5}
+};
 var MAP_POS={
   road:{x:41,y:56},
   dust:{x:18,y:24},
@@ -40,6 +47,36 @@ var travelTimer=null;
 
 function clamp(v,min,max){return Math.max(min,Math.min(max,v))}
 function pad(n){return String(n).padStart(2,"0")}
+
+function itemSlots(item,count){
+  var meta=ITEM_META[item];
+  if(!meta||count<=0)return 0;
+  return Math.ceil(count/meta.stack);
+}
+
+function inventorySlotsUsed(){
+  return Object.keys(ITEM_META).reduce(function(total,key){
+    return total+itemSlots(key,state[key]||0);
+  },0);
+}
+
+function inventorySlotsWith(item,newCount){
+  return Object.keys(ITEM_META).reduce(function(total,key){
+    var count=key===item?newCount:(state[key]||0);
+    return total+itemSlots(key,count);
+  },0);
+}
+
+function addItemLimited(item,qty){
+  if(!ITEM_META[item]||qty<=0)return 0;
+  var added=qty;
+  while(added>0&&inventorySlotsWith(item,(state[item]||0)+added)>INVENTORY_CAPACITY){
+    added--;
+  }
+  if(added<=0)return 0;
+  state[item]=(state[item]||0)+added;
+  return added;
+}
 
 function normalizeState(){
   if(!state||typeof state!=="object")state=freshState();
@@ -144,13 +181,20 @@ function doAction(type){
 
   if(type==="mine"){
     var got=1+Math.floor(Math.random()*3);
-    state.ore+=got;advance(45);note("鉄鉱石を"+got+"個採掘した。");toast("鉄鉱石 +"+got);
+    var mined=addItemLimited("ore",got);
+    if(mined<=0){toast("所持品がいっぱい");return}
+    advance(45);
+    note("鉄鉱石を"+mined+"個採掘した。");
+    toast("鉄鉱石 +"+mined);
   }else if(type==="scavenge"){
-    if(Math.random()<.55){state.scrap++;note("廃材を1個見つけた。");toast("廃材 +1")}
-    else{state.food++;note("保存食を1個見つけた。");toast("食料 +1")}
+    var found=Math.random()<.55?"scrap":"food";
+    if(addItemLimited(found,1)<=0){toast("所持品がいっぱい");return}
+    if(found==="scrap"){note("廃材を1個見つけた。");toast("廃材 +1")}
+    else{note("保存食を1個見つけた。");toast("食料 +1")}
     advance(35);
   }else if(type==="farm"){
-    state.food++;state.money+=8;advance(50);note("農作業を手伝った。");toast("食料 +1 / 金 +8");
+    if(addItemLimited("food",1)<=0){toast("所持品がいっぱい");return}
+    state.money+=8;advance(50);note("農作業を手伝った。");toast("食料 +1 / 金 +8");
   }else if(type==="rest"){
     var before=state.hp;state.hp=clamp(state.hp+35,0,state.maxHp);advance(180);note("休息した。");toast("HP +"+(state.hp-before));
   }else if(type==="shop"){
@@ -167,8 +211,8 @@ function doAction(type){
 
 function shopBuy(item,price){
   if(state.money<price){toast("金が足りない");return}
+  if(addItemLimited(item,1)<=0){toast("所持品がいっぱい");return}
   state.money-=price;
-  state[item]++;
   note((item==="food"?"保存食":"治療具")+"を買った。");
   toast((item==="food"?"食料":"治療具")+" +1");
   renderAll();
@@ -226,14 +270,37 @@ function renderPanel(){
   var p=document.getElementById("panelContent");
 
   if(activeTab==="items"){
-    p.innerHTML="<div class='itemGrid'>"+
-      "<button class='itemCard' id='eatItem'>食料<b>"+state.food+"</b></button>"+
-      "<button class='itemCard' id='healItem'>治療具<b>"+state.med+"</b></button>"+
-      "<div class='itemCard'>鉄鉱石<b>"+state.ore+"</b></div>"+
-      "<div class='itemCard'>廃材<b>"+state.scrap+"</b></div>"+
-    "</div>";
-    document.getElementById("eatItem").onclick=function(){doAction("eat")};
-    document.getElementById("healItem").onclick=function(){doAction("heal")};
+    var used=inventorySlotsUsed();
+    var slots=[];
+    Object.keys(ITEM_META).forEach(function(key){
+      var meta=ITEM_META[key];
+      var remaining=state[key]||0;
+      while(remaining>0){
+        var count=Math.min(meta.stack,remaining);
+        slots.push({key:key,name:meta.name,count:count});
+        remaining-=count;
+      }
+    });
+
+    var totalSlots=Math.max(INVENTORY_CAPACITY,slots.length);
+    var html="<div class='inventoryHead'><b>所持品</b><span>"+used+" / "+INVENTORY_CAPACITY+"枠</span></div><div class='itemGrid'>";
+    for(var i=0;i<totalSlots;i++){
+      var slot=slots[i];
+      if(slot){
+        var tag=(slot.key==="food"||slot.key==="med")?"button":"div";
+        var id=(slot.key==="food"?"eatItem":slot.key==="med"?"healItem":"");
+        html+="<"+tag+" class='itemCard' "+(id?"id='"+id+"'":"")+"><span>"+slot.name+"</span><b>"+slot.count+"</b></"+tag+">";
+      }else{
+        html+="<div class='itemCard emptySlot' aria-hidden='true'></div>";
+      }
+    }
+    html+="</div>";
+    p.innerHTML=html;
+
+    var eat=document.getElementById("eatItem");
+    if(eat)eat.onclick=function(){doAction("eat")};
+    var heal=document.getElementById("healItem");
+    if(heal)heal.onclick=function(){doAction("heal")};
     return;
   }
 
