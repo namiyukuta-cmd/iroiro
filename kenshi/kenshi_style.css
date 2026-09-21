@@ -331,58 +331,53 @@ button{cursor:pointer}
   transform:translateX(-50%);
   width:min(94%,450px);
   display:grid;
-  grid-template-columns:repeat(2,minmax(0,1fr));
-  gap:7px;
-  align-items:end;
+  gap:5px;
   pointer-events:auto;
 }
-.contextGroup{
+.actionRow{
   min-width:0;
   display:grid;
-  grid-template-rows:auto auto;
-  gap:4px;
-  padding:5px;
-  border:1px solid rgba(255,255,255,.4);
-  border-radius:11px;
-  background:rgba(28,24,18,.55);
+  grid-template-columns:74px minmax(0,1fr);
+  align-items:center;
+  gap:5px;
+  padding:4px 5px;
+  border-radius:10px;
+  background:rgba(28,24,18,.68);
+  box-shadow:0 2px 7px rgba(0,0,0,.13);
   backdrop-filter:blur(2px);
 }
-.contextGroup:only-child{grid-column:1/-1}
-.contextGroupTitle{
-  padding-left:4px;
-  color:#fff1cf;
-  font-size:8px;
-  font-weight:900;
-  opacity:.86;
+.actionTarget{
+  min-width:0;
+  padding:0 4px;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+  color:#fff0d0;
+  font-size:9px;
+  font-weight:950;
 }
-.contextGroupButtons{
+.actionButtons{
   min-width:0;
   display:flex;
+  justify-content:flex-end;
   flex-wrap:wrap;
-  gap:5px;
+  gap:4px;
 }
-.contextGroupButtons button{
-  flex:1 1 70px;
-  min-width:0;
-  min-height:38px;
-  padding:4px 10px;
-  border:2px solid rgba(255,255,255,.75);
-  border-radius:19px;
-  background:rgba(39,33,24,.88);
+.actionButtons button{
+  min-width:62px;
+  min-height:34px;
+  padding:3px 9px;
+  border:1.5px solid rgba(255,255,255,.72);
+  border-radius:17px;
+  background:rgba(39,33,24,.92);
   color:#fff7e5;
-  font-size:10px;
+  font-size:9px;
   font-weight:900;
-  box-shadow:0 2px 8px rgba(0,0,0,.18);
+  box-shadow:0 1px 4px rgba(0,0,0,.18);
 }
-.actorGroup{
-  border-color:rgba(187,172,230,.58);
-  background:rgba(45,36,65,.58);
-}
-.placeGroup{
-  border-color:rgba(226,205,117,.58);
-  background:rgba(66,56,26,.58);
-}
-.contextGroupButtons button:disabled{opacity:.38}
+.actorRow{border-left:3px solid rgba(171,148,220,.78)}
+.placeRow{border-left:3px solid rgba(220,194,86,.85)}
+.actionButtons button:disabled{opacity:.38}
 
 .resultToast{
   position:absolute;
@@ -864,3 +859,14 @@ button:active:not(:disabled){
   gap:4px;
 }
 .jobButtons button{flex:1 1 58px;min-height:31px;padding:3px 5px}
+
+.shopName{
+  margin-bottom:8px;
+  padding:7px 9px;
+  border:1px solid #78664b;
+  border-radius:7px;
+  background:#3b3024;
+  color:#fff0d5;
+  font-size:12px;
+  font-weight:950;
+}
