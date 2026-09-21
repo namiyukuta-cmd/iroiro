@@ -21,6 +21,18 @@
     .quickSlotRow .actionCount{font-size:8px}
     .skillSlotRow .actionTile{height:38px}
     #partyPanel.wolfMode .skillSlotRow{margin-top:1px}
+    #ownedInventory{margin-top:5px;display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:3px;align-content:start}
+    #ownedInventory:empty{display:none}
+    .ownedItem{position:relative;min-width:0;height:43px;border:1px solid #bdb8ae;border-radius:7px;background:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:2px 1px;overflow:hidden}
+    .ownedItemIcon{font-size:18px;line-height:1}
+    .ownedItemName{max-width:100%;margin-top:2px;font-size:7px;font-weight:900;line-height:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .ownedItemCount{position:absolute;right:2px;top:2px;min-width:16px;height:14px;padding:0 3px;border-radius:999px;background:#24231f;color:#fff;font-size:7px;font-weight:1000;display:grid;place-items:center}
+    @media (max-width:370px){
+      #ownedInventory{grid-template-columns:repeat(6,minmax(0,1fr));gap:2px}
+      .ownedItem{height:38px}
+      .ownedItemIcon{font-size:16px}
+      .ownedItemName{font-size:6px}
+    }
     @media (max-width:370px){
       .quickSlotRow{gap:3px}
       .skillSlotRow{gap:2px}
@@ -95,6 +107,61 @@
   function isWolfTile(id) { return id.startsWith('wolf:') || ['bite','claw','growl','guard'].includes(id); }
   function isHeroSkill(id) { return id.startsWith('hero:') || id === 'wait'; }
   function isSupportedTool(id) { return id.includes('pebble'); }
+  function ownedFallbackIcon(item) {
+    if (!item) return '□';
+    if (item.kind === 'companion') return '🐺';
+    if (item.id === 'nuts') return '🌰';
+    if (item.id === 'mushroom') return '🍄';
+    if (item.foodGroup === '魚') return '🐟';
+    if (item.category === 'food') return '🍖';
+    if (item.kind === 'arrow') return '➶';
+    if (item.kind === 'bow' || item.id === 'bow') return '🏹';
+    return '◆';
+  }
+
+  function renderOwnedInventory() {
+    const box = document.getElementById('ownedInventory');
+    if (!box) return;
+    const entries = window.DDItems?.getInventory?.() || [];
+    box.innerHTML = '';
+    entries.forEach(({item,count}) => {
+      const cell = document.createElement('div');
+      cell.className = 'ownedItem';
+      cell.title = item?.name || 'アイテム';
+
+      if (item?.image) {
+        const img = document.createElement('img');
+        img.className = 'ownedItemIcon';
+        img.src = item.image;
+        img.alt = item.name || '';
+        img.style.width = '22px';
+        img.style.height = '22px';
+        img.style.objectFit = 'contain';
+        img.onerror = () => {
+          img.replaceWith(Object.assign(document.createElement('span'), {className:'ownedItemIcon', textContent:ownedFallbackIcon(item)}));
+        };
+        cell.appendChild(img);
+      } else {
+        const icon = document.createElement('span');
+        icon.className = 'ownedItemIcon';
+        icon.textContent = ownedFallbackIcon(item);
+        cell.appendChild(icon);
+      }
+
+      const name = document.createElement('span');
+      name.className = 'ownedItemName';
+      name.textContent = item?.name || '不明';
+      cell.appendChild(name);
+
+      const badge = document.createElement('span');
+      badge.className = 'ownedItemCount';
+      badge.textContent = item?.unique ? '1' : String(Number(count || 0));
+      cell.appendChild(badge);
+
+      box.appendChild(cell);
+    });
+  }
+
   function skillPriority(tile) {
     const id = actionId(tile).replace('hero:', '').replace('wolf:', '');
     const order = { strike:0,bite:0,claw:1,guard:2,growl:3,flee:4,wait:9 };
@@ -142,6 +209,7 @@
     for(let i=visibleSkills.length;i<SKILL_LIMIT;i++)skillRow.appendChild(makeEmptySlot('skillSlot',''));
     actionGrid.appendChild(skillRow);
     if(partyNote) partyNote.textContent=wolfMode?'狼（？）の能力。戦闘中は使える能力だけ明るく表示する。':'武器1・防具1・道具2。下段は行動・スキル。';
+    renderOwnedInventory();
     observer.observe(actionGrid,{childList:true,subtree:true});
     arranging=false;
   }
