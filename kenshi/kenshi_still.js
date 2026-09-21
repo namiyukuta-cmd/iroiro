@@ -39,6 +39,7 @@ var activeTab="items";
 var toastTimer=null;
 var mapOpen=false;
 var travelTimer=null;
+var selectedItemKey=null;
 
 function clamp(v,min,max){return Math.max(min,Math.min(max,v))}
 function pad(n){return String(n).padStart(2,"0")}
@@ -87,6 +88,21 @@ function removeItem(key,qty){
   state.items[key]=have-removed;
   if(state.items[key]<=0)delete state.items[key];
   return removed;
+}
+
+function inspectItem(key){
+  var meta=ITEMS[key];
+  if(!meta)return;
+
+  var usable=meta.category==="food"||meta.category==="medical";
+  if(selectedItemKey===key&&usable){
+    selectedItemKey=null;
+    useItem(key);
+    return;
+  }
+
+  selectedItemKey=key;
+  toast(meta.name+(usable?"　もう一度タップで使用":""));
 }
 
 function useItem(key){
@@ -339,13 +355,10 @@ function renderPanel(){
     for(var i=0;i<INVENTORY_CAPACITY;i++){
       var slot=slots[i];
       if(slot){
-        var usable=slot.meta.category==="food"||slot.meta.category==="medical";
-        var tag=usable?"button":"div";
-        html+="<"+tag+" class='itemCard' "+(usable?"type='button' data-use-item='"+slot.key+"'":"")+">"+
+        html+="<button type='button' class='itemCard' data-item-key='"+slot.key+"' aria-label='"+slot.meta.name+"'>"+
           "<img class='itemIcon' src='"+slot.meta.image+"' alt=''>"+
-          "<span class='itemName'>"+slot.meta.name+"</span>"+
           "<b class='itemQty'>"+slot.count+"</b>"+
-        "</"+tag+">";
+        "</button>";
       }else{
         html+="<div class='itemCard emptySlot' aria-hidden='true'></div>";
       }
@@ -353,8 +366,8 @@ function renderPanel(){
     html+="</div>";
     p.innerHTML=html;
 
-    p.querySelectorAll("[data-use-item]").forEach(function(button){
-      button.addEventListener("click",function(){useItem(button.dataset.useItem)});
+    p.querySelectorAll("[data-item-key]").forEach(function(button){
+      button.addEventListener("click",function(){inspectItem(button.dataset.itemKey)});
     });
     return;
   }
@@ -499,6 +512,7 @@ document.querySelectorAll("[data-destination]").forEach(function(b){
 document.querySelectorAll(".tab").forEach(function(b){
   b.addEventListener("click",function(){
     activeTab=b.dataset.tab;
+    selectedItemKey=null;
     setTabButtons();
     renderPanel();
   });
