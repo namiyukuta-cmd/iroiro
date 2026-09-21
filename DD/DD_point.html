@@ -6,18 +6,18 @@
   <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0" />
   <meta http-equiv="Pragma" content="no-cache" />
   <meta http-equiv="Expires" content="0" />
-  <meta name="dd-build" content="20260921deckauto1" />
+  <meta name="dd-build" content="20260921noslide1" />
   <title>DD - 地点探索</title>
   <style>
     *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
     :root{--ink:#282722;--paper:#f7f3eb;--purple:#62509d;--hero:#35b8df;--wolf:#c95a86;--danger:#b94c3e;--card:#e4c74c;--muted:#716d65}
-    html,body{margin:0;width:100%;min-height:100%;background:#efebe3;color:#1c1b18;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
-    body{min-height:100svh;overflow-x:hidden}
+    html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#efebe3;color:#1c1b18;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+    body{height:100svh;overflow:hidden}
     button,a{font:inherit}
     button{touch-action:manipulation}
-    #game{width:min(100%,520px);min-height:100svh;margin:0 auto;padding:max(6px,env(safe-area-inset-top)) 8px calc(84px + env(safe-area-inset-bottom));display:flex;flex-direction:column;gap:6px}
+    #game{width:min(100%,520px);height:100svh;margin:0 auto;padding:max(6px,env(safe-area-inset-top)) 8px max(6px,env(safe-area-inset-bottom));display:flex;flex-direction:column;gap:5px;overflow:hidden}
 
-    #topPanel{min-height:78px;border:2px solid var(--purple);border-radius:13px;background:#faf8f3;padding:6px 8px;display:grid;grid-template-columns:auto 1fr;gap:8px;align-items:center}
+    #topPanel{flex:0 0 78px;min-height:78px;border:2px solid var(--purple);border-radius:13px;background:#faf8f3;padding:6px 8px;display:grid;grid-template-columns:auto 1fr;gap:8px;align-items:center}
     #clockArea{display:flex;align-items:center;gap:7px;min-width:0}
     #clockDial{position:relative;width:58px;height:58px;flex:0 0 58px;border:3px solid var(--purple);border-radius:50%;background:#fff}
     #clockDial::before{content:"12";position:absolute;left:50%;top:1px;transform:translateX(-50%);font-size:7px;font-weight:900}
@@ -41,10 +41,10 @@
     #autoSpeedButton{background:#e9e4da}
     #autoButton.on{background:var(--ink);color:#fff}
 
-    #encounterArea{position:relative;border:1.5px solid #aaa397;border-radius:12px;background:rgba(255,255,255,.25);padding:7px 7px 6px}
-    #encounterStage{position:relative;height:210px;display:grid;grid-template-columns:minmax(0,1fr) 100px;gap:6px;align-items:center}
+    #encounterArea{position:relative;flex:0 0 auto;border:1.5px solid #aaa397;border-radius:12px;background:rgba(255,255,255,.25);padding:6px 7px 5px}
+    #encounterStage{position:relative;height:188px;display:grid;grid-template-columns:minmax(0,1fr) 100px;gap:6px;align-items:center}
     #cardColumn{position:relative;height:100%;display:grid;place-items:center}
-    #cardSlot{position:relative;width:140px;height:190px;border:2px dashed #8b867c;border-radius:11px;background:rgba(255,255,255,.48);display:grid;place-items:center;cursor:pointer;transition:transform .12s ease,background .15s ease,border-color .15s ease}
+    #cardSlot{position:relative;width:136px;height:172px;border:2px dashed #8b867c;border-radius:11px;background:rgba(255,255,255,.48);display:grid;place-items:center;cursor:pointer;transition:transform .12s ease,background .15s ease,border-color .15s ease}
     #cardSlot.empty:active{transform:scale(.97);background:#fff}
     #cardSlot.busy{cursor:default;border-style:solid;border-color:#b8b1a6}
     #slotPrompt{padding:50px 11px 11px;text-align:center;font-size:12px;font-weight:1000;line-height:1.35;color:#625f58}
@@ -70,12 +70,12 @@
     #discardAction{background:#e7e2d8!important}
     #cardHint{text-align:center;min-height:15px;margin-top:4px;font-size:10px;font-weight:900;color:#5d5952;line-height:1.25}
 
-    #eventStrip{border:1.5px solid #3a3833;border-radius:8px;background:#faf8f2;padding:6px 8px;min-height:48px;max-height:62px;overflow:hidden}
+    #eventStrip{flex:0 0 48px;border:1.5px solid #3a3833;border-radius:8px;background:#faf8f2;padding:5px 8px;min-height:48px;max-height:48px;overflow:hidden}
     #eventText{font-size:12px;font-weight:1000;line-height:1.25;min-height:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
     #eventDetail{margin-top:2px;font-size:10px;font-weight:800;color:#5d5952;line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
     #result{margin-top:1px;font-size:10px;font-weight:1000;color:#514e47;line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 
-    #partyArea{position:relative;min-height:238px;margin-top:0}
+    #partyArea{position:relative;flex:1 1 auto;min-height:0;margin-top:0;overflow:hidden}
     #partyTabs{height:44px;display:flex;align-items:flex-end;padding:0 6px;gap:0;position:relative;z-index:3}
     .partyTab{min-width:108px;height:44px;border:2px solid var(--ink);border-bottom:0;border-radius:10px 10px 0 0;background:#fff;font-weight:1000;font-size:12px;padding:4px 9px;position:relative;top:2px;line-height:1.05}
     #heroTab{border-color:var(--hero);background:#eaf9fd}
@@ -83,7 +83,7 @@
     #heroTab.active{z-index:3;top:0;background:#d8f5fc}
     #wolfTab.active{z-index:3;top:0;background:#fbdde9}
     .miniHp{display:block;font-size:9px;font-weight:900;margin-top:1px}
-    #partyPanel{position:relative;z-index:2;min-height:198px;border:3px solid var(--hero);border-radius:11px;background:#fbfaf6;padding:6px 7px 7px;overflow:hidden}
+    #partyPanel{position:relative;z-index:2;height:calc(100% - 44px);min-height:0;border:3px solid var(--hero);border-radius:11px;background:#fbfaf6;padding:6px 7px 7px;overflow:hidden}
     #partyPanel.wolfMode{border-color:var(--wolf)}
     #partyHead{display:flex;justify-content:space-between;align-items:center;gap:7px;margin-bottom:4px;min-height:25px}
     #turnLabel{font-size:12px;font-weight:1000;line-height:1.1}
@@ -97,7 +97,7 @@
     #actionGrid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:4px;align-content:start}
     .quickUiLabel{grid-column:1/-1;height:14px;display:flex;align-items:center;font-size:9px;font-weight:1000;color:#66615a;letter-spacing:.02em}
     .quickUiLabel.skillLabel{margin-top:2px}
-    .actionTile{min-width:0;width:100%;height:54px;border:1.5px solid var(--ink);border-radius:8px;background:#fff;padding:4px 1px;font-size:9px;font-weight:1000;line-height:1.05;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;box-shadow:0 1px 0 rgba(0,0,0,.11);overflow:hidden}
+    .actionTile{min-width:0;width:100%;height:48px;border:1.5px solid var(--ink);border-radius:8px;background:#fff;padding:4px 1px;font-size:9px;font-weight:1000;line-height:1.05;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;box-shadow:0 1px 0 rgba(0,0,0,.11);overflow:hidden}
     .actionTile:disabled{opacity:.45;box-shadow:none}
     .actionTile.quickSlot{background:#fffdf7}
     .actionTile.skillSlot{background:#f2f7fb}
@@ -125,10 +125,10 @@
       #clockDial{width:54px;height:54px;flex-basis:54px}
       #timeText{font-size:24px}
       #autoButton,#autoSpeedButton{padding:0 5px;font-size:9px}
-      #encounterStage{grid-template-columns:minmax(0,1fr) 88px;height:198px}
-      #cardSlot{width:132px;height:180px}
+      #encounterStage{grid-template-columns:minmax(0,1fr) 88px;height:180px}
+      #cardSlot{width:128px;height:166px}
       .partyTab{min-width:100px}
-      .actionTile{height:50px;font-size:8px}
+      .actionTile{height:44px;font-size:8px}
       .actionIcon{font-size:20px}
       #partyPanel{padding-left:5px;padding-right:5px}
       #actionGrid{gap:3px}
