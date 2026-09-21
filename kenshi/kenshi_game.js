@@ -7,8 +7,7 @@ var actorLayer=document.getElementById("actors");
 var landmarkLayer=document.getElementById("landmarks");
 var routeSvg=document.getElementById("routeSvg");
 var drawer=document.getElementById("drawer");
-var selectedId=null;
-var moveMode=false;
+var selectedId="player";
 var openDrawer="";
 var lastTick=Date.now();
 var simTimer=null;
@@ -258,7 +257,7 @@ function renderActors(){
   p.type="button";p.className="actor player"+(selectedId==="player"?" selected":"")+(state.player.down?" down":"");
   p.style.left=state.player.x+"%";p.style.top=state.player.y+"%";
   p.innerHTML="<span class='head'></span><span class='body'></span><span class='leg1'></span><span class='leg2'></span>";
-  p.addEventListener("click",function(e){e.stopPropagation();selectedId="player";moveMode=!moveMode;openDrawer="";renderAll()});
+  p.addEventListener("click",function(e){e.stopPropagation();selectedId="player";openDrawer="";renderAll()});
   actorLayer.appendChild(p);
 
   state.actors.forEach(function(a){
@@ -266,7 +265,7 @@ function renderActors(){
     b.type="button";b.className=actorClass(a);b.style.left=a.x+"%";b.style.top=a.y+"%";
     var tag=actorTag(a);
     b.innerHTML=(tag?"<span class='tag'>"+tag+"</span>":"")+"<span class='head'></span><span class='body'></span><span class='leg1'></span><span class='leg2'></span>";
-    b.addEventListener("click",function(e){e.stopPropagation();selectedId=a.id;moveMode=false;openDrawer="";renderAll()});
+    b.addEventListener("click",function(e){e.stopPropagation();selectedId=a.id;openDrawer="";renderAll()});
     actorLayer.appendChild(b);
   });
 }
@@ -280,7 +279,7 @@ function renderHud(){
   document.getElementById("moneyText").textContent=state.player.money;
   document.getElementById("pauseBtn").textContent=state.paused?"再開":"一時停止";
   document.getElementById("speedBtn").textContent="×"+state.speed;
-  document.getElementById("hint").textContent=moveMode?"地面を押して移動先を指定":"主人公を押すと移動指定";
+  document.getElementById("hint").textContent="地面をタップして移動";
 }
 
 function clearContext(){
@@ -406,11 +405,11 @@ function renderDrawer(){
 function renderAll(){renderActors();renderHud();renderContext();renderDrawer()}
 
 function worldTap(e){
-  if(!moveMode||state.player.down)return;
+  if(state.player.down)return;
   var rect=world.getBoundingClientRect();
   var x=(e.clientX-rect.left)/rect.width*100,y=(e.clientY-rect.top)/rect.height*100;
   state.player.target={x:clamp(x,2,98),y:clamp(y,3,97)};
-  state.player.attackTarget=null;selectedId="player";moveMode=false;renderAll();
+  state.player.attackTarget=null;selectedId="player";openDrawer="";renderAll();
 }
 
 function save(show){
@@ -421,7 +420,7 @@ function load(){
   try{
     var raw=localStorage.getItem(SAVE_KEY);
     if(!raw){log("セーブデータがない。");renderAll();return}
-    state=JSON.parse(raw);selectedId=null;moveMode=false;openDrawer="";log("ロードした。");renderAll();
+    state=JSON.parse(raw);selectedId="player";openDrawer="";log("ロードした。");renderAll();
   }catch(e){state=freshState();log("セーブデータを読み込めなかった。");renderAll()}
 }
 
@@ -434,7 +433,7 @@ function init(){
   document.getElementById("loadBtn").addEventListener("click",load);
   document.querySelectorAll("[data-drawer]").forEach(function(b){
     b.addEventListener("click",function(){
-      var v=b.getAttribute("data-drawer");openDrawer=openDrawer===v?"":v;selectedId=null;moveMode=false;renderAll();
+      var v=b.getAttribute("data-drawer");openDrawer=openDrawer===v?"":v;selectedId="player";renderAll();
     });
   });
 
@@ -446,8 +445,6 @@ function init(){
   renderAll();
   lastTick=Date.now();
   simTimer=setInterval(simulationTick,120);
-  setInterval(function(){save(false)},10000);
-  window.addEventListener("beforeunload",function(){save(false)});
 }
 
 init();
