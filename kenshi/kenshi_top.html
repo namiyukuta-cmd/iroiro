@@ -9,142 +9,182 @@
   <title>荒野</title>
   <style>
     :root{
-      --bg:#cbc2aa;--paper:#e9e1cf;--panel:#d9ceb3;--ink:#211f1a;
-      --muted:#6a6252;--line:#3a352b;--danger:#7a3329;--ok:#536544;
+      --ink:#211f1a;--muted:#6e6656;--line:#3a352b;--paper:#e8dfc8;
+      --sand:#b9aa83;--sand2:#c7b894;--dark:#29261f;--danger:#7d342a;--ok:#4f6542;
     }
     *{box-sizing:border-box}
-    html,body{margin:0;width:100%;min-height:100%;background:var(--bg);color:var(--ink)}
+    html,body{margin:0;width:100%;min-height:100%;background:#cfc5aa;color:var(--ink)}
     body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
-    button{font:inherit;color:inherit}
+    button{font:inherit}
     #app{width:min(100%,560px);min-height:100dvh;margin:0 auto;background:var(--paper);display:flex;flex-direction:column}
     .topbar{
-      position:sticky;top:0;z-index:8;background:#29261f;color:#f2ead9;
+      display:flex;align-items:center;justify-content:space-between;gap:8px;
       padding:max(8px,env(safe-area-inset-top)) 10px 8px;
-      display:grid;grid-template-columns:1fr auto;gap:8px;align-items:center;
-      border-bottom:2px solid #171510;
+      background:var(--dark);color:#f6efdf;border-bottom:2px solid #171510;
+      position:sticky;top:0;z-index:20;
     }
-    .worldline{font-size:12px;line-height:1.35}
-    .worldline b{font-size:15px}
-    .pause{
-      min-height:40px;min-width:72px;border:1px solid #cfc2a4;border-radius:6px;
-      background:#4a4438;color:#fff;font-weight:800;
+    .timebox{font-size:12px;line-height:1.25}.timebox b{font-size:15px}
+    .topBtns{display:flex;gap:6px}
+    .topBtns button{
+      min-height:38px;border:1px solid #a99d83;border-radius:7px;background:#4a4438;color:#fff;
+      padding:0 10px;font-weight:800;font-size:12px;
     }
-    .status{
-      display:grid;grid-template-columns:repeat(5,1fr);gap:1px;background:var(--line);
-      border-bottom:1px solid var(--line);
+    .worldWrap{padding:8px 8px 0}
+    .world{
+      position:relative;height:560px;overflow:hidden;border:2px solid var(--line);border-radius:10px;
+      background:
+        radial-gradient(circle at 22% 20%,rgba(87,74,46,.16),transparent 23%),
+        radial-gradient(circle at 78% 65%,rgba(104,78,43,.14),transparent 28%),
+        linear-gradient(180deg,var(--sand2),var(--sand));
+      touch-action:manipulation;
     }
-    .stat{background:#e5dcc7;padding:6px 4px;text-align:center;min-width:0}
-    .stat small{display:block;color:var(--muted);font-size:10px}
-    .stat strong{display:block;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-    .mapWrap{padding:10px}
-    .map{
-      position:relative;height:330px;border:2px solid var(--line);border-radius:8px;
-      overflow:hidden;background:
-        radial-gradient(circle at 20% 20%,rgba(72,70,46,.16),transparent 24%),
-        radial-gradient(circle at 78% 70%,rgba(120,86,48,.18),transparent 30%),
-        #b9aa84;
+    .world:before{
+      content:"";position:absolute;inset:0;pointer-events:none;opacity:.18;
+      background:
+        repeating-linear-gradient(28deg,transparent 0 44px,rgba(70,61,44,.35) 45px 47px,transparent 48px 96px);
     }
-    .map:before{
-      content:"";position:absolute;inset:0;opacity:.25;
-      background-image:linear-gradient(28deg,transparent 49%,#71664f 50%,transparent 51%);
-      background-size:64px 64px;
+    .route{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:1}
+    .route line{stroke:#746a55;stroke-width:.7;opacity:.45}
+    .landmark{
+      position:absolute;z-index:2;transform:translate(-50%,-50%);
+      display:grid;place-items:center;gap:2px;pointer-events:none;
+      color:#39342a;text-align:center;font-size:9px;font-weight:800;white-space:nowrap;
     }
-    .road{position:absolute;height:3px;background:#685f4e;transform-origin:left center;opacity:.65;z-index:1}
-    .place{
-      position:absolute;z-index:3;transform:translate(-50%,-50%);
-      min-width:72px;min-height:46px;padding:5px 6px;border:2px solid #39352c;border-radius:7px;
-      background:#e8dec5;font-size:11px;font-weight:800;line-height:1.2;
-      box-shadow:0 2px 0 rgba(0,0,0,.18);
+    .landmark .icon{position:relative;width:34px;height:28px}
+    .lm-town .icon:before,.lm-town .icon:after{content:"";position:absolute;bottom:0;background:#5f5849;border:1px solid #302d26}
+    .lm-town .icon:before{left:2px;width:15px;height:18px}
+    .lm-town .icon:after{right:1px;width:14px;height:24px}
+    .lm-farm .icon{border:2px solid #6e634c;background:repeating-linear-gradient(90deg,#7d7258 0 3px,#b6a77e 3px 8px)}
+    .lm-mine .icon:before{content:"";position:absolute;left:2px;bottom:0;border-left:15px solid transparent;border-right:15px solid transparent;border-bottom:27px solid #6b6252}
+    .lm-ruins .icon:before,.lm-ruins .icon:after{content:"";position:absolute;bottom:0;width:7px;background:#706956;border:1px solid #403b31}
+    .lm-ruins .icon:before{left:7px;height:25px}.lm-ruins .icon:after{right:7px;height:18px}
+    .lm-salt .icon{border-radius:50%;background:radial-gradient(circle,#eee8d4 0 25%,#a79a78 27% 45%,transparent 47%);opacity:.8}
+    .lm-camp .icon:before,.lm-camp .icon:after{content:"";position:absolute;bottom:0;border-left:10px solid transparent;border-right:10px solid transparent;border-bottom:22px solid #655845}
+    .lm-camp .icon:before{left:0}.lm-camp .icon:after{right:0}
+    .lm-cross .icon:before,.lm-cross .icon:after{content:"";position:absolute;left:16px;top:1px;width:3px;height:26px;background:#5d5547}
+    .lm-cross .icon:after{transform:rotate(90deg)}
+    .actor{
+      position:absolute;z-index:8;width:28px;height:38px;padding:0;border:0;background:transparent;
+      transform:translate(-50%,-50%);cursor:pointer;-webkit-tap-highlight-color:transparent;
     }
-    .place.current{background:#2f2c25;color:#fff;border-color:#111}
-    .place.adjacent{outline:3px solid rgba(255,255,255,.55)}
-    .place .count{display:block;margin-top:3px;font-size:9px;font-weight:600;opacity:.72}
-    .place:disabled{opacity:.58}
-    .playerMark{
-      position:absolute;z-index:5;width:16px;height:16px;border-radius:50%;
-      background:#171510;border:3px solid #f6edda;transform:translate(-50%,-50%);
-      pointer-events:none;box-shadow:0 0 0 1px #171510;
+    .actor .head{position:absolute;left:10px;top:2px;width:8px;height:8px;border-radius:50%;background:#222}
+    .actor .body{position:absolute;left:9px;top:11px;width:10px;height:14px;border-radius:3px;background:#333}
+    .actor .leg1,.actor .leg2{position:absolute;top:24px;width:4px;height:11px;background:#333;transform-origin:top}
+    .actor .leg1{left:9px;transform:rotate(8deg)}.actor .leg2{right:7px;transform:rotate(-8deg)}
+    .actor.trader .body,.actor.guard .body{background:#665c43}
+    .actor.bandit .body{background:#6f3027}.actor.bandit .head{background:#281b19}
+    .actor.worker .body{background:#59604a}
+    .actor.wanderer .body{background:#4b5562}
+    .actor.party .body{background:#1f3557}
+    .actor.player .body{background:#111}.actor.player .head{background:#111}
+    .actor.selected:after{
+      content:"";position:absolute;left:4px;top:-4px;width:20px;height:20px;border:2px solid #fff;border-radius:50%;
+      box-shadow:0 0 0 1px #111;
     }
-    .panel{border-top:2px solid var(--line);background:var(--panel)}
-    .tabs{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--line)}
-    .tab{
-      min-height:44px;border:0;background:#c8bda1;font-weight:800;font-size:13px;
+    .actor.down{transform:translate(-50%,-50%) rotate(82deg);opacity:.75}
+    .actor .tag{
+      position:absolute;left:50%;top:-12px;transform:translateX(-50%);
+      font-size:8px;font-weight:800;white-space:nowrap;background:rgba(238,230,210,.8);padding:1px 3px;border-radius:3px;
     }
-    .tab.active{background:#2d2a23;color:white}
-    .pane{padding:10px;min-height:190px}
-    .actionGrid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
-    .action{
-      min-height:50px;border:1.5px solid var(--line);border-radius:7px;background:#f0e8d5;
-      font-weight:800;font-size:13px;
+    .animal{width:34px;height:24px}
+    .animal .head{left:23px;top:7px;width:7px;height:7px}
+    .animal .body{left:7px;top:9px;width:18px;height:8px;border-radius:6px}
+    .animal .leg1,.animal .leg2{top:16px;height:7px}
+    .animal .leg1{left:10px}.animal .leg2{right:8px}
+    .animal.dog .body,.animal.dog .head{background:#564536}
+    .animal.pack .body,.animal.pack .head{background:#6d604a}
+    .playerHud{
+      position:absolute;left:8px;top:8px;z-index:12;width:120px;padding:7px 8px;
+      background:rgba(41,38,31,.85);color:#fff;border:1px solid #c8bda1;border-radius:7px;
+      font-size:10px;line-height:1.35;pointer-events:none;
     }
-    .action:disabled{opacity:.35}
-    .cards{display:grid;gap:7px}
-    .card{
-      border:1px solid #746b58;border-radius:6px;background:#efe6d2;padding:8px;
-      display:flex;justify-content:space-between;gap:8px;align-items:center;font-size:12px
+    .bar{height:6px;background:#615b50;border-radius:9px;overflow:hidden;margin-top:3px}.bar i{display:block;height:100%;background:#e9e1cf}
+    .hint{
+      position:absolute;left:50%;bottom:8px;transform:translateX(-50%);z-index:12;
+      background:rgba(41,38,31,.88);color:#fff;padding:6px 9px;border-radius:999px;font-size:10px;white-space:nowrap;
+      pointer-events:none;
     }
-    .card b{font-size:13px}
-    .bad{color:var(--danger);font-weight:800}
-    .good{color:var(--ok);font-weight:800}
-    .log{display:grid;gap:5px;font-size:12px;line-height:1.45}
-    .log div{border-bottom:1px dashed #9b8e72;padding-bottom:4px}
-    .inventory{display:grid;grid-template-columns:repeat(4,1fr);gap:7px}
-    .item{border:1px solid #746b58;border-radius:6px;background:#efe6d2;padding:8px 5px;text-align:center;font-size:11px}
-    .item strong{display:block;font-size:15px}
-    .bottom{
-      margin-top:auto;padding:8px 10px max(8px,env(safe-area-inset-bottom));
-      background:#29261f;display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;
+    .context{
+      margin:8px;border:1.5px solid var(--line);border-radius:8px;background:#eee6d2;padding:8px;
+      display:none;gap:7px;align-items:center;justify-content:space-between;
     }
-    .bottom button,.bottom a{
-      min-height:42px;border:1px solid #a89c80;border-radius:6px;background:#4a4438;color:#fff;
-      text-decoration:none;display:grid;place-items:center;font-size:12px;font-weight:800;
+    .context.show{display:flex}.contextText{min-width:0;font-size:11px;line-height:1.25}
+    .contextText b{font-size:13px}
+    .contextActions{display:flex;gap:5px;flex-wrap:wrap;justify-content:flex-end}
+    .contextActions button{
+      min-height:38px;border:1px solid var(--line);border-radius:6px;background:#fbf5e7;padding:0 9px;font-size:11px;font-weight:800;
     }
-    .notice{font-size:11px;color:var(--muted);padding:0 10px 8px}
-    @media (max-width:380px){
-      .map{height:300px}.place{min-width:64px;font-size:10px}.actionGrid{grid-template-columns:repeat(2,1fr)}
+    .bottomTabs{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--line);margin-top:8px}
+    .bottomTabs button{
+      min-height:46px;border:0;background:#cbbf9f;color:var(--ink);font-weight:800;font-size:12px;
+    }
+    .drawer{display:none;border-top:1px solid var(--line);padding:9px;background:#ded3b7}
+    .drawer.show{display:block}
+    .drawerGrid{display:grid;grid-template-columns:repeat(4,1fr);gap:7px}
+    .cell{border:1px solid #776d59;border-radius:7px;background:#efe6d2;padding:7px 4px;text-align:center;font-size:10px}
+    .cell b{display:block;font-size:15px}
+    .drawerActions{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin-top:8px}
+    .drawerActions button{min-height:42px;border:1px solid var(--line);border-radius:7px;background:#f4ecda;font-weight:800;font-size:11px}
+    .log{display:grid;gap:5px;font-size:11px;line-height:1.35}.log div{border-bottom:1px dashed #a99b7c;padding-bottom:4px}
+    .footer{
+      margin-top:auto;display:grid;grid-template-columns:1fr 1fr 1fr;gap:7px;padding:8px 8px max(8px,env(safe-area-inset-bottom));
+      background:var(--dark)
+    }
+    .footer button,.footer a{
+      min-height:42px;border:1px solid #a99d83;border-radius:6px;background:#4a4438;color:#fff;
+      text-decoration:none;display:grid;place-items:center;font-weight:800;font-size:11px
+    }
+    @media(max-width:380px){
+      .world{height:510px}.drawerGrid{grid-template-columns:repeat(3,1fr)}
     }
   </style>
 </head>
 <body>
-  <div id="app">
-    <header class="topbar">
-      <div class="worldline">
-        <b id="locName">砂塵街</b><br>
-        <span id="clock">1日目 08:00</span> ／ <span id="weather">乾燥</span>
+<div id="app">
+  <header class="topbar">
+    <div class="timebox"><b id="clock">1日目 08:00</b><br><span id="weather">乾燥</span></div>
+    <div class="topBtns">
+      <button id="speedBtn" type="button">×1</button>
+      <button id="pauseBtn" type="button">一時停止</button>
+    </div>
+  </header>
+
+  <section class="worldWrap">
+    <div id="world" class="world" aria-label="荒野">
+      <svg id="routeSvg" class="route" viewBox="0 0 100 100" preserveAspectRatio="none"></svg>
+      <div id="landmarks"></div>
+      <div id="actors"></div>
+
+      <div class="playerHud">
+        HP <span id="hpText">100/100</span>
+        <div class="bar"><i id="hpBar" style="width:100%"></i></div>
+        空腹 <span id="hungerText">0</span> ／ 所持金 <span id="moneyText">100</span>
       </div>
-      <button id="pauseBtn" class="pause" type="button">一時停止</button>
-    </header>
+      <div id="hint" class="hint">主人公を押すと移動指定</div>
+    </div>
+  </section>
 
-    <section class="status">
-      <div class="stat"><small>HP</small><strong id="hp">100</strong></div>
-      <div class="stat"><small>空腹</small><strong id="hunger">0</strong></div>
-      <div class="stat"><small>所持金</small><strong id="money">100</strong></div>
-      <div class="stat"><small>仲間</small><strong id="party">1</strong></div>
-      <div class="stat"><small>状態</small><strong id="condition">正常</strong></div>
-    </section>
+  <section id="context" class="context">
+    <div id="contextText" class="contextText"></div>
+    <div id="contextActions" class="contextActions"></div>
+  </section>
 
-    <main class="mapWrap">
-      <div id="map" class="map" aria-label="荒野地図"></div>
-    </main>
+  <nav class="bottomTabs">
+    <button type="button" data-drawer="inventory">持物</button>
+    <button type="button" data-drawer="party">部隊</button>
+    <button type="button" data-drawer="world">周辺</button>
+    <button type="button" data-drawer="log">記録</button>
+  </nav>
 
-    <div id="notice" class="notice">隣接地点を押すと移動します。世界は停止しない限り自動で進みます。</div>
+  <section id="drawer" class="drawer"></section>
 
-    <section class="panel">
-      <nav class="tabs">
-        <button class="tab active" data-tab="actions" type="button">行動</button>
-        <button class="tab" data-tab="nearby" type="button">周辺</button>
-        <button class="tab" data-tab="party" type="button">部隊</button>
-        <button class="tab" data-tab="log" type="button">記録</button>
-      </nav>
-      <div id="pane" class="pane"></div>
-    </section>
+  <footer class="footer">
+    <button id="saveBtn" type="button">セーブ</button>
+    <button id="loadBtn" type="button">ロード</button>
+    <a href="kenshi_index.html">入口へ</a>
+  </footer>
+</div>
 
-    <footer class="bottom">
-      <button id="saveBtn" type="button">セーブ</button>
-      <button id="loadBtn" type="button">ロード</button>
-      <a href="kenshi_index.html">入口へ</a>
-    </footer>
-  </div>
-  <script src="kenshi_game.js?v=20260921-1"></script>
+<script src="kenshi_game.js?v=20260921-2"></script>
 </body>
 </html>
