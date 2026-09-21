@@ -316,22 +316,45 @@ button,a{font:inherit}
   gap:4px;
 }
 .itemCard{
+  position:relative;
   min-width:0;
   min-height:50px;
-  padding:4px 3px;
+  padding:2px;
   display:grid;
-  place-content:center;
+  grid-template-rows:32px 10px;
+  align-content:center;
+  justify-items:center;
   text-align:center;
   overflow:hidden;
 }
-.itemCard span{
-  max-width:100%;
+button.itemCard{width:100%;appearance:none}
+.itemIcon{
+  width:32px;
+  height:32px;
+  object-fit:contain;
+  image-rendering:pixelated;
+}
+.itemName{
+  width:100%;
   overflow:hidden;
   text-overflow:ellipsis;
   white-space:nowrap;
-  font-size:8px;
+  font-size:7px;
+  line-height:10px;
 }
-.itemCard b{font-size:14px;margin-top:2px}
+.itemQty{
+  position:absolute;
+  right:2px;
+  top:2px;
+  min-width:15px;
+  height:15px;
+  padding:0 3px;
+  border-radius:8px;
+  background:rgba(35,30,22,.84);
+  color:#fff8e9;
+  font-size:9px;
+  line-height:15px;
+}
 .itemCard.emptySlot{
   background:rgba(244,239,223,.38);
   border-style:dashed;
