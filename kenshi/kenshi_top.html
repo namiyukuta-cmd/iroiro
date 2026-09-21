@@ -14,7 +14,9 @@
     }
     *{box-sizing:border-box}
     html,body{
-      margin:0;width:100%;min-height:100%;background:#cfc5aa;color:var(--ink);
+      margin:0;width:100%;height:100%;min-height:0;background:#cfc5aa;color:var(--ink);
+      overflow:hidden;
+      overscroll-behavior:none;
       touch-action:manipulation;
       -webkit-text-size-adjust:100%;
     }
@@ -24,8 +26,19 @@
       touch-action:manipulation;
       -webkit-tap-highlight-color:transparent;
     }
-    #app{width:min(100%,560px);min-height:100dvh;margin:0 auto;background:var(--paper);display:flex;flex-direction:column}
+    #app{
+      position:relative;
+      width:min(100%,560px);
+      height:100dvh;
+      min-height:0;
+      margin:0 auto;
+      overflow:hidden;
+      background:var(--paper);
+      display:flex;
+      flex-direction:column;
+    }
     .topbar{
+      flex:0 0 auto;
       display:flex;align-items:center;justify-content:space-between;gap:8px;
       padding:max(8px,env(safe-area-inset-top)) 10px 8px;
       background:var(--dark);color:#f6efdf;border-bottom:2px solid #171510;
@@ -37,9 +50,14 @@
       min-height:38px;border:1px solid #a99d83;border-radius:7px;background:#4a4438;color:#fff;
       padding:0 10px;font-weight:800;font-size:12px;
     }
-    .worldWrap{padding:8px 8px 0}
+    .worldWrap{
+      flex:1 1 auto;
+      min-height:0;
+      padding:8px;
+      overflow:hidden;
+    }
     .world{
-      position:relative;height:560px;overflow:hidden;border:2px solid var(--line);border-radius:10px;
+      position:relative;height:100%;min-height:0;overflow:hidden;border:2px solid var(--line);border-radius:10px;
       background:
         radial-gradient(circle at 22% 20%,rgba(87,74,46,.16),transparent 23%),
         radial-gradient(circle at 78% 65%,rgba(104,78,43,.14),transparent 28%),
@@ -134,8 +152,21 @@
       pointer-events:none;
     }
     .context{
-      margin:8px;border:1.5px solid var(--line);border-radius:8px;background:#eee6d2;padding:8px;
-      display:none;gap:7px;align-items:center;justify-content:space-between;
+      position:absolute;
+      left:8px;
+      right:8px;
+      bottom:calc(112px + env(safe-area-inset-bottom));
+      z-index:30;
+      margin:0;
+      border:1.5px solid var(--line);
+      border-radius:8px;
+      background:#eee6d2;
+      padding:8px;
+      display:none;
+      gap:7px;
+      align-items:center;
+      justify-content:space-between;
+      box-shadow:0 2px 8px rgba(0,0,0,.2);
     }
     .context.show{display:flex}.contextText{min-width:0;font-size:11px;line-height:1.25}
     .contextText b{font-size:13px}
@@ -143,11 +174,33 @@
     .contextActions button{
       min-height:38px;border:1px solid var(--line);border-radius:6px;background:#fbf5e7;padding:0 9px;font-size:11px;font-weight:800;
     }
-    .bottomTabs{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--line);margin-top:8px}
+    .bottomTabs{
+      flex:0 0 auto;
+      display:grid;
+      grid-template-columns:repeat(4,1fr);
+      gap:1px;
+      background:var(--line);
+      margin-top:0;
+    }
     .bottomTabs button{
       min-height:46px;border:0;background:#cbbf9f;color:var(--ink);font-weight:800;font-size:12px;
     }
-    .drawer{display:none;border-top:1px solid var(--line);padding:9px;background:#ded3b7}
+    .drawer{
+      display:none;
+      position:absolute;
+      left:8px;
+      right:8px;
+      bottom:calc(112px + env(safe-area-inset-bottom));
+      z-index:29;
+      max-height:38%;
+      overflow-y:auto;
+      border:1px solid var(--line);
+      border-radius:8px;
+      padding:9px;
+      background:#ded3b7;
+      box-shadow:0 2px 8px rgba(0,0,0,.2);
+      overscroll-behavior:contain;
+    }
     .drawer.show{display:block}
     .drawerGrid{display:grid;grid-template-columns:repeat(4,1fr);gap:7px}
     .cell{border:1px solid #776d59;border-radius:7px;background:#efe6d2;padding:7px 4px;text-align:center;font-size:10px}
@@ -156,7 +209,8 @@
     .drawerActions button{min-height:42px;border:1px solid var(--line);border-radius:7px;background:#f4ecda;font-weight:800;font-size:11px}
     .log{display:grid;gap:5px;font-size:11px;line-height:1.35}.log div{border-bottom:1px dashed #a99b7c;padding-bottom:4px}
     .footer{
-      margin-top:auto;display:grid;grid-template-columns:1fr 1fr 1fr;gap:7px;padding:8px 8px max(8px,env(safe-area-inset-bottom));
+      flex:0 0 auto;
+      margin-top:0;display:grid;grid-template-columns:1fr 1fr 1fr;gap:7px;padding:8px 8px max(8px,env(safe-area-inset-bottom));
       background:var(--dark)
     }
     .footer button,.footer a{
@@ -164,7 +218,7 @@
       text-decoration:none;display:grid;place-items:center;font-weight:800;font-size:11px
     }
     @media(max-width:380px){
-      .world{height:510px}.drawerGrid{grid-template-columns:repeat(3,1fr)}
+      .drawerGrid{grid-template-columns:repeat(3,1fr)}
     }
   </style>
 </head>
@@ -189,7 +243,7 @@
         <div class="bar"><i id="hpBar" style="width:100%"></i></div>
         空腹 <span id="hungerText">0</span> ／ 所持金 <span id="moneyText">100</span>
       </div>
-      <div id="hint" class="hint">主人公を押すと移動指定</div>
+      <div id="hint" class="hint">地面をタップして移動</div>
     </div>
   </section>
 
@@ -214,6 +268,6 @@
   </footer>
 </div>
 
-<script src="kenshi_game.js?v=20260921-4"></script>
+<script src="kenshi_game.js?v=20260921-5"></script>
 </body>
 </html>
