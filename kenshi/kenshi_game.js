@@ -836,26 +836,112 @@ function startTravel(key){
   renderHud();
 }
 
-function stopMovement(){
+var fieldPointer=null;
+var FIELD_DRAG_DEADZONE=8;
+var FIELD_DRAG_RADIUS=64;
+var FIELD_TAP_MAX_MS=450;
+
+function stopMovement(show){
   manual.x=0;manual.y=0;
   state.player.target=null;
   state.player.attackTarget=null;
   state.travelDestination=null;
-  showResult("停止");
+  if(show)showResult("停止");
 }
 
-function setManual(dir,on){
-  if(!on){
-    manual.x=0;manual.y=0;
-    return;
-  }
+function isFieldUiTarget(target){
+  if(!(target instanceof Element))return false;
+  return Boolean(target.closest("button,a,.contextActions"));
+}
+
+function cancelAutoForManual(){
   state.travelDestination=null;
   state.player.target=null;
   state.player.attackTarget=null;
-  if(dir==="up"){manual.x=0;manual.y=-1}
-  if(dir==="down"){manual.x=0;manual.y=1}
-  if(dir==="left"){manual.x=-1;manual.y=0}
-  if(dir==="right"){manual.x=1;manual.y=0}
+}
+
+function beginFieldMove(e){
+  if(state.player.down||isFieldUiTarget(e.target))return;
+  if(e.pointerType==="mouse"&&e.button!==0)return;
+  e.preventDefault();
+  fieldStage.setPointerCapture(e.pointerId);
+  fieldPointer={
+    id:e.pointerId,
+    startX:e.clientX,
+    startY:e.clientY,
+    lastX:e.clientX,
+    lastY:e.clientY,
+    startedAt:performance.now(),
+    dragging:false
+  };
+}
+
+function moveFieldMove(e){
+  if(!fieldPointer||e.pointerId!==fieldPointer.id)return;
+  e.preventDefault();
+  fieldPointer.lastX=e.clientX;
+  fieldPointer.lastY=e.clientY;
+
+  var dx=e.clientX-fieldPointer.startX;
+  var dy=e.clientY-fieldPointer.startY;
+  var d=Math.hypot(dx,dy);
+
+  if(!fieldPointer.dragging&&d>=FIELD_DRAG_DEADZONE){
+    fieldPointer.dragging=true;
+    cancelAutoForManual();
+  }
+  if(!fieldPointer.dragging)return;
+
+  var scale=Math.max(FIELD_DRAG_RADIUS,d);
+  manual.x=clamp(dx/scale,-1,1);
+  manual.y=clamp(dy/scale,-1,1);
+}
+
+function screenToWorld(clientX,clientY){
+  var r=fieldStage.getBoundingClientRect();
+  var scale=Math.max(8.5,Math.min(r.width,r.height)/31);
+  return {
+    x:clamp(state.player.x+(clientX-r.left-r.width/2)/scale,2,98),
+    y:clamp(state.player.y+(clientY-r.top-r.height*.56)/scale,3,97)
+  };
+}
+
+function tapFieldMove(clientX,clientY){
+  if(state.player.down)return;
+  var target=screenToWorld(clientX,clientY);
+  manual.x=0;manual.y=0;
+  state.travelDestination=null;
+  state.player.attackTarget=null;
+  state.player.target=target;
+}
+
+function endFieldMove(e){
+  if(!fieldPointer||e.pointerId!==fieldPointer.id)return;
+  e.preventDefault();
+
+  var p=fieldPointer;
+  var dx=e.clientX-p.startX;
+  var dy=e.clientY-p.startY;
+  var d=Math.hypot(dx,dy);
+  var elapsed=performance.now()-p.startedAt;
+
+  fieldPointer=null;
+
+  if(p.dragging){
+    manual.x=0;manual.y=0;
+    return;
+  }
+
+  if(d<FIELD_DRAG_DEADZONE&&elapsed<=FIELD_TAP_MAX_MS){
+    tapFieldMove(e.clientX,e.clientY);
+  }
+}
+
+function cancelFieldMove(e){
+  if(fieldPointer&&(!e||e.pointerId===fieldPointer.id)){
+    fieldPointer=null;
+  }
+  manual.x=0;manual.y=0;
 }
 
 function save(show){
@@ -915,29 +1001,20 @@ function init(){
   }
   normalizeState();
 
-  document.querySelectorAll("[data-move]").forEach(function(b){
-    var dir=b.getAttribute("data-move");
-    b.addEventListener("pointerdown",function(e){
-      e.preventDefault();
-      b.setPointerCapture(e.pointerId);
-      setManual(dir,true);
-    });
-    b.addEventListener("pointerup",function(){setManual(dir,false)});
-    b.addEventListener("pointercancel",function(){setManual(dir,false)});
-    b.addEventListener("lostpointercapture",function(){setManual(dir,false)});
-  });
-
-  document.getElementById("stopMoveBtn").addEventListener("click",stopMovement);
+  fieldStage.addEventListener("pointerdown",beginFieldMove,{passive:false});
+  fieldStage.addEventListener("pointermove",moveFieldMove,{passive:false});
+  fieldStage.addEventListener("pointerup",endFieldMove,{passive:false});
+  fieldStage.addEventListener("pointercancel",cancelFieldMove);
 
   document.getElementById("mapBtn").addEventListener("click",function(){
-    manual.x=0;manual.y=0;
+    cancelFieldMove();
     renderWorldMap();
     mapOverlay.hidden=false;
   });
   document.getElementById("closeMapBtn").addEventListener("click",function(){mapOverlay.hidden=true});
 
-  document.getElementById("inventoryBtn").addEventListener("click",function(){openPanel("inventory")});
-  document.getElementById("partyBtn").addEventListener("click",function(){openPanel("party")});
+  document.getElementById("inventoryBtn").addEventListener("click",function(){cancelFieldMove();openPanel("inventory")});
+  document.getElementById("partyBtn").addEventListener("click",function(){cancelFieldMove();openPanel("party")});
   document.getElementById("closePanelBtn").addEventListener("click",function(){panelOverlay.hidden=true});
 
   document.querySelectorAll("[data-panel]").forEach(function(b){
@@ -971,7 +1048,8 @@ function init(){
     renderHud();
   });
 
-  window.addEventListener("resize",renderField);
+  window.addEventListener("blur",cancelFieldMove);
+  window.addEventListener("resize",function(){cancelFieldMove();renderField()});
 
   renderAll();
   lastTick=Date.now();
