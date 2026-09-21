@@ -38,6 +38,33 @@ var ROADS=[
   ["farm","salt"],["salt","camp"]
 ];
 
+var QUESTS={
+  ore_delivery:{
+    title:"鉄鉱石の納品",
+    desc:"鉄鉱石を8個集めて砂塵街へ届ける。",
+    acceptPlace:"dust",turnPlace:"dust",type:"resource",item:"ore",need:8,
+    reward:120,faction:"交易組合",relation:4
+  },
+  scrap_recovery:{
+    title:"廃材の回収",
+    desc:"廃材を6個集めて十字路へ持ち帰る。",
+    acceptPlace:"cross",turnPlace:"cross",type:"resource",item:"scrap",need:6,
+    reward:95,faction:"自由民",relation:3
+  },
+  bandit_bounty:{
+    title:"砂盗賊の賞金",
+    desc:"砂盗賊を2人倒して砂塵街へ報告する。",
+    acceptPlace:"dust",turnPlace:"dust",type:"kill",need:2,
+    reward:180,faction:"交易組合",relation:6
+  },
+  field_medic:{
+    title:"負傷者の救護",
+    desc:"砂盗賊以外の負傷者を2人治療し、南農場へ報告する。",
+    acceptPlace:"farm",turnPlace:"farm",type:"heal",need:2,
+    reward:110,faction:"南農場",relation:5
+  }
+};
+
 function clamp(v,a,b){return Math.max(a,Math.min(b,v))}
 function dist(a,b){var dx=a.x-b.x,dy=a.y-b.y;return Math.hypot(dx,dy)}
 function rnd(a,b){return a+Math.random()*(b-a)}
@@ -77,9 +104,12 @@ function freshState(){
     day:1,hour:8,minute:0,
     paused:false,speed:1,weather:"乾燥",tick:0,
     travelDestination:null,
+    activeQuest:null,
+    completedQuests:[],
     player:{
       x:18,y:24,hp:100,maxHp:100,hunger:0,money:100,
       food:2,med:1,ore:0,scrap:0,attack:16,defense:4,
+      sword:false,armor:false,
       speed:1.7,down:false,target:null,attackTarget:null,_attackCd:0
     },
     actors:actors,
@@ -97,6 +127,14 @@ function normalizeState(){
   if(!Array.isArray(state.party))state.party=["player"];
   if(!state.relations)state.relations={"交易組合":0,"南農場":0,"自由民":0,"無所属":0,"砂盗賊":-100};
   if(!Array.isArray(state.log))state.log=[];
+  if(!Array.isArray(state.completedQuests))state.completedQuests=[];
+  if(state.activeQuest&&(!state.activeQuest.id||!QUESTS[state.activeQuest.id]))state.activeQuest=null;
+  if(typeof state.player.sword!=="boolean")state.player.sword=false;
+  if(typeof state.player.armor!=="boolean")state.player.armor=false;
+  state.actors.forEach(function(a){
+    if(a.recruited&&!a.job)a.job="follow";
+    if(!Number.isFinite(a.workCd))a.workCd=0;
+  });
   if(!Number.isFinite(state.speed))state.speed=1;
   if(!Number.isFinite(state.day))state.day=1;
   if(!Number.isFinite(state.hour))state.hour=8;
@@ -245,6 +283,10 @@ function damageActor(a,amount,fromName){
     a.target=null;
     a.loot=a.money;
     a.money=0;
+    if(a.faction==="砂盗賊"&&fromName==="主人公"&&state.activeQuest&&state.activeQuest.id==="bandit_bounty"){
+      state.activeQuest.progress=(state.activeQuest.progress||0)+1;
+      contextSignature=null;
+    }
     log(a.name+"が倒れた。");
   }else if(fromName&&Math.random()<.12){
     log(fromName+"と"+a.name+"が戦っている。");
@@ -342,8 +384,7 @@ function worldAI(dt){
   state.actors.filter(function(a){
     return a.recruited&&!a.down;
   }).forEach(function(a){
-    setTarget(a,state.player.x-1.5+rnd(-.45,.45),state.player.y+1+rnd(-.45,.45));
-    moveTowards(a,dt);
+    partyJobStep(a,dt);
   });
 
   if(!applyManualMovement(dt)&&!state.player.down){
@@ -520,6 +561,10 @@ function healActor(a){
   a.down=false;
   a.hp=Math.max(30,Math.round(a.maxHp*.35));
   state.relations[a.faction]=(state.relations[a.faction]||0)+4;
+  if(state.activeQuest&&state.activeQuest.id==="field_medic"&&a.faction!=="砂盗賊"){
+    state.activeQuest.progress=(state.activeQuest.progress||0)+1;
+    contextSignature=null;
+  }
   log(a.name+"を治療した。");
   showResult(a.name+"を治療");
   renderAll();
@@ -548,6 +593,8 @@ function recruitActor(a){
   a.faction="主人公";
   a.follow=null;
   a.route=null;
+  a.job="follow";
+  a.workCd=0;
   if(state.party.indexOf(a.id)<0)state.party.push(a.id);
 
   if(a.id==="wanderer"){
@@ -555,6 +602,8 @@ function recruitActor(a){
     if(dog&&!dog.down){
       dog.recruited=true;
       dog.faction="主人公";
+      dog.job="follow";
+      dog.workCd=0;
       if(state.party.indexOf("dog")<0)state.party.push("dog");
     }
   }
@@ -636,6 +685,263 @@ function selfHeal(){
   log("治療した。");
   showResult("HP +"+Math.round(state.player.hp-before));
   renderAll();
+}
+
+var questBoardPlace=null;
+var tradeActorId=null;
+
+function questProgressValue(q){
+  if(!q)return 0;
+  var def=QUESTS[q.id];
+  if(!def)return 0;
+  if(def.type==="resource")return state.player[def.item]||0;
+  return q.progress||0;
+}
+
+function questReady(){
+  if(!state.activeQuest)return false;
+  var def=QUESTS[state.activeQuest.id];
+  if(!def)return false;
+  return questProgressValue(state.activeQuest)>=def.need;
+}
+
+function acceptQuest(id){
+  var def=QUESTS[id];
+  if(!def||state.activeQuest||state.completedQuests.indexOf(id)>=0)return;
+  state.activeQuest={id:id,progress:0};
+  contextSignature=null;
+  log("依頼「"+def.title+"」を受けた。");
+  showResult("依頼開始");
+  renderPanel();
+  renderContext();
+}
+
+function completeQuest(){
+  if(!state.activeQuest||!questReady())return;
+  var def=QUESTS[state.activeQuest.id];
+  if(nearbyPlace()!==def.turnPlace){
+    showResult(PLACES[def.turnPlace].name+"で報告");
+    return;
+  }
+
+  if(def.type==="resource"){
+    state.player[def.item]=Math.max(0,(state.player[def.item]||0)-def.need);
+    hotbarSignature=null;
+  }
+
+  state.player.money+=def.reward;
+  state.relations[def.faction]=(state.relations[def.faction]||0)+def.relation;
+  state.completedQuests.push(state.activeQuest.id);
+  log("依頼「"+def.title+"」を完了した。報酬 "+def.reward+"。");
+  showResult("報酬 +"+def.reward);
+  state.activeQuest=null;
+  contextSignature=null;
+  renderAll();
+}
+
+function openQuestBoard(place){
+  questBoardPlace=place||nearbyPlace();
+  activePanel="jobs";
+  renderPanel();
+  panelOverlay.hidden=false;
+}
+
+function questBoardHtml(){
+  var html="";
+  if(state.activeQuest){
+    var q=state.activeQuest,def=QUESTS[q.id],p=questProgressValue(q);
+    html+="<div class='questCard activeQuest'>"+
+      "<b>"+def.title+"</b><span>"+def.desc+"</span>"+
+      "<strong>"+Math.min(p,def.need)+" / "+def.need+"</strong>"+
+      "<small>報告先： "+PLACES[def.turnPlace].name+"　報酬： "+def.reward+"</small>";
+    if(questReady()&&nearbyPlace()===def.turnPlace){
+      html+="<button id='questCompleteBtn' type='button'>報告して報酬を受け取る</button>";
+    }
+    html+="</div>";
+  }else{
+    html+="<div class='questEmpty'>受注中の依頼はありません。</div>";
+  }
+
+  var available=Object.keys(QUESTS).filter(function(id){
+    var q=QUESTS[id];
+    return q.acceptPlace===questBoardPlace&&state.completedQuests.indexOf(id)<0&&(!state.activeQuest||state.activeQuest.id===id);
+  });
+
+  if(!state.activeQuest&&available.length){
+    html+="<div class='questSectionTitle'>受けられる依頼</div>";
+    available.forEach(function(id){
+      var q=QUESTS[id];
+      html+="<div class='questCard'>"+
+        "<b>"+q.title+"</b><span>"+q.desc+"</span>"+
+        "<small>報酬： "+q.reward+"</small>"+
+        "<button type='button' data-accept-quest='"+id+"'>受ける</button>"+
+        "</div>";
+    });
+  }else if(!state.activeQuest){
+    html+="<div class='questEmpty'>ここでは新しい依頼はありません。</div>";
+  }
+  return html;
+}
+
+function bindQuestPanel(){
+  var complete=document.getElementById("questCompleteBtn");
+  if(complete)complete.addEventListener("click",completeQuest);
+  document.querySelectorAll("[data-accept-quest]").forEach(function(b){
+    b.addEventListener("click",function(){acceptQuest(b.getAttribute("data-accept-quest"))});
+  });
+}
+
+function talkActor(a){
+  var lines={
+    trader:[
+      "商人「鉄鉱石は町でよく売れる。盗賊には気をつけろ。」",
+      "商人「荷獣がいると長旅がずいぶん楽になる。」"
+    ],
+    guard:[
+      "護衛「道から外れるなら、逃げ道だけは見ておけ。」",
+      "護衛「盗賊は倒れていても仲間が近くにいることがある。」"
+    ],
+    worker:[
+      "鉱夫「採掘は仲間に任せれば、自分は別のことができる。」",
+      "農民「南農場じゃ人手がいつも足りない。」"
+    ],
+    wanderer:[
+      "放浪者「金さえ払うなら、一緒に行ってもいい。」",
+      "放浪者「犬は俺より鼻が利く。」"
+    ],
+    dog:["犬は主人公の匂いを嗅いでいる。"],
+    pack:["荷獣は重そうな荷を背負っている。"]
+  };
+  var pool=lines[a.type]||["相手は周囲を警戒している。"];
+  var msg=choice(pool);
+  log(msg);
+  showResult("話した");
+}
+
+function openTrade(a){
+  tradeActorId=a.id;
+  activePanel="trade";
+  renderPanel();
+  panelOverlay.hidden=false;
+}
+
+function buySword(){
+  if(state.player.sword||state.player.money<90)return;
+  state.player.money-=90;
+  state.player.sword=true;
+  state.player.attack+=4;
+  log("簡易剣を買った。攻撃力が4上がった。");
+  showResult("簡易剣を装備");
+  renderAll();
+}
+
+function buyArmor(){
+  if(state.player.armor||state.player.money<120)return;
+  state.player.money-=120;
+  state.player.armor=true;
+  state.player.defense+=3;
+  log("革鎧を買った。防御力が3上がった。");
+  showResult("革鎧を装備");
+  renderAll();
+}
+
+function renderTradePanel(){
+  var a=getActor(tradeActorId);
+  if(!a||a.down||dist(a,state.player)>7){
+    panelContent.innerHTML="<div class='questEmpty'>商人が近くにいません。</div>";
+    return;
+  }
+
+  panelContent.innerHTML=
+    "<div class='shopGrid'>"+
+      "<button id='shopFood' type='button'><b>保存食</b><span>12</span></button>"+
+      "<button id='shopMed' type='button'><b>治療具</b><span>28</span></button>"+
+      "<button id='shopSword' type='button' "+(state.player.sword?"disabled":"")+"><b>簡易剣</b><span>"+(state.player.sword?"装備済":"90")+"</span></button>"+
+      "<button id='shopArmor' type='button' "+(state.player.armor?"disabled":"")+"><b>革鎧</b><span>"+(state.player.armor?"装備済":"120")+"</span></button>"+
+    "</div>"+
+    "<div class='panelActions'><button id='shopSellOre' type='button'>鉄鉱石を全部売る</button><button id='shopSellScrap' type='button'>廃材を全部売る</button></div>"+
+    "<div class='tradeStats'>攻撃 "+state.player.attack+"　防御 "+state.player.defense+"　所持金 "+state.player.money+"</div>";
+
+  document.getElementById("shopFood").addEventListener("click",function(){buyFood();renderPanel()});
+  document.getElementById("shopMed").addEventListener("click",function(){buyMed();renderPanel()});
+  document.getElementById("shopSword").addEventListener("click",function(){buySword();renderPanel()});
+  document.getElementById("shopArmor").addEventListener("click",function(){buyArmor();renderPanel()});
+  document.getElementById("shopSellOre").addEventListener("click",function(){sellOre();renderPanel()});
+  document.getElementById("shopSellScrap").addEventListener("click",function(){sellScrap();renderPanel()});
+}
+
+function campRest(withFire){
+  stopAutoWork(false);
+  if(withFire){
+    if(state.player.scrap<1||state.player.food<1){showResult("廃材1・食料1が必要");return}
+    state.player.scrap--;
+    state.player.food--;
+    state.player.hp=clamp(state.player.hp+45,0,state.player.maxHp);
+    state.player.hunger=clamp(state.player.hunger-22,0,100);
+    advance(360);
+    log("焚き火をして野営した。");
+    showResult("焚き火で休息");
+  }else{
+    state.player.hp=clamp(state.player.hp+20,0,state.player.maxHp);
+    state.player.hunger=clamp(state.player.hunger+14,0,100);
+    advance(300);
+    log("荒野で野営した。");
+    showResult("野営");
+  }
+  hotbarSignature=null;
+  renderAll();
+}
+
+function assignPartyJob(id,job){
+  var a=getActor(id);
+  if(!a||!a.recruited)return;
+  if(a.type==="dog"&&(job==="mine"||job==="farm"||job==="scavenge"))return;
+  a.job=job;
+  a.target=null;
+  a.workCd=0;
+  log(a.name+"の仕事を「"+({follow:"追従",mine:"採掘",farm:"農作業",scavenge:"漁り",wait:"待機"}[job]||job)+"」にした。");
+  showResult(a.name+"：仕事変更");
+  renderPanel();
+}
+
+function partyJobStep(a,dt){
+  var job=a.job||"follow";
+  if(job==="wait"){
+    a.target=null;
+    return;
+  }
+  if(job==="follow"||a.type==="dog"){
+    setTarget(a,state.player.x-1.5+rnd(-.35,.35),state.player.y+1+rnd(-.35,.35));
+    moveTowards(a,dt);
+    return;
+  }
+
+  var placeKey=job==="mine"?"mine":(job==="farm"?"farm":"ruins");
+  var p=PLACES[placeKey];
+  if(dist(a,p)>3){
+    setTarget(a,p.x+rnd(-1,1),p.y+rnd(-1,1));
+    moveTowards(a,dt);
+    return;
+  }
+
+  a.target=null;
+  a.workCd=Math.max(0,(a.workCd||0)-dt*state.speed);
+  if(a.workCd>0)return;
+
+  if(job==="mine"){
+    state.player.ore++;
+    log(a.name+"が鉄鉱石を1個採掘した。");
+  }else if(job==="farm"){
+    state.player.food++;
+    state.player.money+=3;
+    log(a.name+"が農作業をした。");
+  }else{
+    if(Math.random()<.6)state.player.scrap++;
+    else state.player.food++;
+    log(a.name+"が旧遺跡を漁った。");
+  }
+  a.workCd=8;
+  hotbarSignature=null;
 }
 
 function autoWorkLabel(type){
@@ -758,7 +1064,11 @@ function renderContext(){
     state.player.money,
     state.player.ore,
     state.player.scrap,
-    autoWork.type||""
+    autoWork.type||"",
+    state.activeQuest?state.activeQuest.id:"",
+    state.activeQuest?(state.activeQuest.progress||0):0,
+    state.player.sword?1:0,
+    state.player.armor?1:0
   ].join("|");
 
   if(sig===contextSignature)return;
@@ -792,28 +1102,48 @@ function renderContext(){
     }
 
     if(a.type==="trader"){
-      contextActions.appendChild(actionButton("食料 12",buyFood,state.player.money<12));
-      contextActions.appendChild(actionButton("治療具 28",buyMed,state.player.money<28));
-      contextActions.appendChild(actionButton("鉱石売却",sellOre,state.player.ore<=0));
-      contextActions.appendChild(actionButton("廃材売却",sellScrap,state.player.scrap<=0));
+      contextActions.appendChild(actionButton("話す",function(){talkActor(a)},false));
+      contextActions.appendChild(actionButton("取引",function(){openTrade(a)},false));
       return;
     }
 
     if(a.type==="wanderer"&&a.faction==="無所属"){
+      contextActions.appendChild(actionButton("話す",function(){talkActor(a)},false));
       contextActions.appendChild(actionButton("雇う 50",function(){recruitActor(a)},state.player.money<50));
       return;
+    }
+
+    if(a.type==="guard"||a.type==="worker"||a.type==="dog"||a.type==="pack"){
+      contextActions.appendChild(actionButton("話す",function(){talkActor(a)},false));
+      return;
+    }
+  }
+
+  if(state.activeQuest){
+    var qdef=QUESTS[state.activeQuest.id];
+    if(place===qdef.turnPlace&&questReady()){
+      contextActions.appendChild(actionButton("依頼報告",completeQuest,false));
     }
   }
 
   if(place==="mine"){
     contextActions.appendChild(actionButton(autoWork.type==="mine"?"採掘中・停止":"採掘",function(){startAutoWork("mine")},false));
-  }else if(place==="ruins"||place==="salt"||place==="cross"){
+    contextActions.appendChild(actionButton("依頼",function(){openQuestBoard("mine")},false));
+  }else if(place==="ruins"||place==="salt"){
     contextActions.appendChild(actionButton(autoWork.type==="scavenge"?"漁り中・停止":"漁る",function(){startAutoWork("scavenge")},false));
+  }else if(place==="cross"){
+    contextActions.appendChild(actionButton(autoWork.type==="scavenge"?"漁り中・停止":"漁る",function(){startAutoWork("scavenge")},false));
+    contextActions.appendChild(actionButton("依頼",function(){openQuestBoard("cross")},false));
   }else if(place==="farm"){
     contextActions.appendChild(actionButton(autoWork.type==="farm"?"農作業中・停止":"農作業",function(){startAutoWork("farm")},false));
+    contextActions.appendChild(actionButton("依頼",function(){openQuestBoard("farm")},false));
     contextActions.appendChild(actionButton("休息",rest,false));
   }else if(place==="dust"){
+    contextActions.appendChild(actionButton("依頼",function(){openQuestBoard("dust")},false));
     contextActions.appendChild(actionButton("休息",rest,false));
+  }else{
+    contextActions.appendChild(actionButton("野営",function(){campRest(false)},false));
+    contextActions.appendChild(actionButton("焚き火",function(){campRest(true)},state.player.scrap<1||state.player.food<1));
   }
 }
 
@@ -857,7 +1187,20 @@ function renderPanel(){
   document.getElementById("panelTitle").textContent=
     activePanel==="inventory"?"持物":
     activePanel==="party"?"部隊":
-    activePanel==="faction"?"勢力":"記録";
+    activePanel==="faction"?"勢力":
+    activePanel==="jobs"?"依頼":
+    activePanel==="trade"?"取引":"記録";
+
+  if(activePanel==="jobs"){
+    panelContent.innerHTML=questBoardHtml();
+    bindQuestPanel();
+    return;
+  }
+
+  if(activePanel==="trade"){
+    renderTradePanel();
+    return;
+  }
 
   if(activePanel==="inventory"){
     panelContent.innerHTML=
@@ -867,6 +1210,7 @@ function renderPanel(){
       "<div class='panelItem'><span>鉄鉱石</span><b>"+state.player.ore+"</b></div>"+
       "<div class='panelItem'><span>廃材</span><b>"+state.player.scrap+"</b></div>"+
       "</div>"+
+      "<div class='equipmentLine'>装備："+(state.player.sword?"簡易剣 ":"")+(state.player.armor?"革鎧":"")+(state.player.sword||state.player.armor?"":"なし")+"　攻撃 "+state.player.attack+"　防御 "+state.player.defense+"</div>"+
       "<div class='panelActions'><button id='panelEat'>食べる</button><button id='panelHeal'>治療</button></div>";
     document.getElementById("panelEat").addEventListener("click",eat);
     document.getElementById("panelHeal").addEventListener("click",selfHeal);
@@ -877,9 +1221,20 @@ function renderPanel(){
     var ph="<div class='panelList'><div class='panelRow'><span>主人公</span><b>HP "+Math.round(state.player.hp)+"/"+state.player.maxHp+"</b></div>";
     state.party.filter(function(id){return id!=="player"}).forEach(function(id){
       var a=getActor(id);
-      if(a)ph+="<div class='panelRow'><span>"+a.name+"</span><b>HP "+Math.round(a.hp)+"/"+a.maxHp+"</b></div>";
+      if(!a)return;
+      var job=a.job||"follow";
+      ph+="<div class='partyJobCard'><div class='panelRow'><span>"+a.name+"</span><b>HP "+Math.round(a.hp)+"/"+a.maxHp+"</b></div>"+
+        "<small>仕事："+({follow:"追従",mine:"採掘",farm:"農作業",scavenge:"漁り",wait:"待機"}[job]||job)+"</small>"+
+        "<div class='jobButtons'>"+
+          "<button data-job-id='"+a.id+"' data-job='follow'>追従</button>"+
+          (a.type==="dog"?"":"<button data-job-id='"+a.id+"' data-job='mine'>採掘</button><button data-job-id='"+a.id+"' data-job='farm'>農作業</button><button data-job-id='"+a.id+"' data-job='scavenge'>漁り</button>")+
+          "<button data-job-id='"+a.id+"' data-job='wait'>待機</button>"+
+        "</div></div>";
     });
     panelContent.innerHTML=ph+"</div>";
+    document.querySelectorAll("[data-job-id]").forEach(function(b){
+      b.addEventListener("click",function(){assignPartyJob(b.getAttribute("data-job-id"),b.getAttribute("data-job"))});
+    });
     return;
   }
 
@@ -1098,6 +1453,8 @@ function load(){
     normalizeState();
     tapMarker={x:0,y:0,active:false};
     autoWork={type:null,nextAt:0};
+    questBoardPlace=null;
+    tradeActorId=null;
     contextSignature=null;
     hotbarSignature=null;
     manual.x=0;manual.y=0;
