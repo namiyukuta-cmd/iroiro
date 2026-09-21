@@ -6,7 +6,7 @@
   <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0" />
   <meta http-equiv="Pragma" content="no-cache" />
   <meta http-equiv="Expires" content="0" />
-  <meta name="dd-build" content="20260921layoutfix2" />
+  <meta name="dd-build" content="20260921deckauto1" />
   <title>DD - 地点探索</title>
   <style>
     *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
@@ -36,8 +36,8 @@
     #placeType{font-size:10px;font-weight:900;opacity:.58;white-space:nowrap}
     #topLinks{grid-area:links;display:flex;justify-content:flex-end;gap:8px;min-width:0}
     .headLink{color:#292725;text-decoration:none;font-size:12px;font-weight:1000;white-space:nowrap;min-height:40px;padding:0 8px;border:1.5px solid var(--ink);border-radius:7px;background:#fff;display:flex;align-items:center;justify-content:center}
-    #autoControls{display:flex;justify-content:flex-end;gap:5px;margin-bottom:4px}
-    #autoButton,#autoSpeedButton{height:42px;border:1.5px solid var(--ink);border-radius:7px;background:#fff;color:#1d1d1b;font-size:11px;font-weight:1000;padding:0 10px;box-shadow:0 1px 0 rgba(0,0,0,.13);white-space:nowrap}
+    #autoControls{position:absolute;left:8px;right:8px;top:8px;z-index:5;display:grid;grid-template-columns:1fr 1fr;gap:5px}
+    #autoButton,#autoSpeedButton{height:34px;border:1.5px solid var(--ink);border-radius:7px;background:#fff;color:#1d1d1b;font-size:10px;font-weight:1000;padding:0 6px;box-shadow:0 1px 0 rgba(0,0,0,.13);white-space:nowrap}
     #autoSpeedButton{background:#e9e4da}
     #autoButton.on{background:var(--ink);color:#fff}
 
@@ -47,7 +47,7 @@
     #cardSlot{position:relative;width:140px;height:190px;border:2px dashed #8b867c;border-radius:11px;background:rgba(255,255,255,.48);display:grid;place-items:center;cursor:pointer;transition:transform .12s ease,background .15s ease,border-color .15s ease}
     #cardSlot.empty:active{transform:scale(.97);background:#fff}
     #cardSlot.busy{cursor:default;border-style:solid;border-color:#b8b1a6}
-    #slotPrompt{padding:11px;text-align:center;font-size:12px;font-weight:1000;line-height:1.35;color:#625f58}
+    #slotPrompt{padding:50px 11px 11px;text-align:center;font-size:12px;font-weight:1000;line-height:1.35;color:#625f58}
     #drawn{position:absolute;inset:7px;width:auto;height:auto;border:3px solid var(--card);border-radius:9px;background:#fff;box-shadow:0 4px 0 rgba(0,0,0,.13);display:none;flex-direction:column;align-items:center;justify-content:center;padding:7px;text-align:center;transform-origin:center;z-index:2}
     #drawn.dealIn{animation:dealIn .18s ease-out}
     #drawn.hitFlash{animation:cardHit .28s ease}
@@ -149,10 +149,10 @@
   </header>
 
   <section id="encounterArea" aria-label="出る札">
-    <div id="autoControls"><button id="autoButton" type="button" aria-pressed="false">オート：OFF</button><button id="autoSpeedButton" type="button">速度：ゆっくり</button></div>
     <div id="encounterStage">
       <div id="cardColumn">
         <div id="cardSlot" class="empty" role="button" tabindex="0" aria-label="札を出す">
+          <div id="autoControls"><button id="autoButton" type="button" aria-pressed="false">オート：OFF</button><button id="autoSpeedButton" type="button">速度：ゆっくり</button></div>
           <div id="slotPrompt">ここをタップして札を出す</div>
           <div id="drawn" role="button" tabindex="-1" aria-live="polite"><div id="cardIcon"></div><div id="cardTitle"></div><div id="cardSub"></div></div>
         </div>
