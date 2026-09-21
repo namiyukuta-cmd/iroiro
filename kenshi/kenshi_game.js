@@ -269,8 +269,45 @@ function chooseBanditTargets(){
   });
 }
 
+function markAttack(attacker,target){
+  var now=Date.now();
+  if(attacker){
+    attacker._attackUntil=now+260;
+    attacker._combatUntil=now+2600;
+  }
+  if(target)target._combatUntil=now+2600;
+}
+
+function markHit(target,amount){
+  var now=Date.now();
+  target._hitUntil=now+300;
+  target._damageAt=now;
+  target._damageUntil=now+760;
+  target._lastDamage=Math.max(1,Math.round(amount));
+  target._combatUntil=now+2600;
+}
+
+function appendDamagePop(amount,q,at,until){
+  if(!amount||!q||!at||!until)return;
+  var now=Date.now();
+  if(now>=until)return;
+  var life=Math.max(1,until-at);
+  var p=clamp((now-at)/life,0,1);
+  var d=document.createElement("div");
+  d.className="damagePop";
+  d.textContent="-"+Math.round(amount);
+  d.style.left=q.x+"px";
+  d.style.top=(q.y-24-p*18)+"px";
+  d.style.opacity=String(1-p);
+  fieldObjects.appendChild(d);
+}
+
 function damagePlayer(amount,from){
+  markHit(state.player,amount);
   state.player.hp=clamp(state.player.hp-amount,0,state.player.maxHp);
+  if(from&&from.id&&!state.player.attackTarget&&!state.player.target&&!state.travelDestination&&Math.hypot(manual.x,manual.y)<.05){
+    state.player.attackTarget=from.id;
+  }
   if(state.player.hp<=0&&!state.player.down){
     state.player.down=true;
     state.player.target=null;
@@ -284,6 +321,7 @@ function damagePlayer(amount,from){
 }
 
 function damageActor(a,amount,fromName){
+  markHit(a,amount);
   a.hp=clamp(a.hp-amount,0,a.maxHp);
   if(a.hp<=0&&!a.down){
     a.down=true;
@@ -311,10 +349,12 @@ function combatStep(dt){
       var a=alive[i],b=alive[j];
       if(!hostile(a,b.faction)||dist(a,b)>3.2)continue;
       if(a.attackCd<=0){
+        markAttack(a,b);
         damageActor(b,Math.floor(rnd(6,15)),a.name);
         a.attackCd=1.4;
       }
       if(b.attackCd<=0&&!b.down){
+        markAttack(b,a);
         damageActor(a,Math.floor(rnd(5,14)),b.name);
         b.attackCd=1.4;
       }
@@ -326,6 +366,7 @@ function combatStep(dt){
   }).forEach(function(b){
     if(state.player.down||dist(b,state.player)>3.4)return;
     if(b.attackCd<=0){
+      markAttack(b,state.player);
       damagePlayer(Math.max(1,Math.floor(rnd(7,15)-state.player.defense)),b);
       b.attackCd=1.35;
     }
@@ -342,6 +383,7 @@ function combatStep(dt){
       }else{
         state.player.target=null;
         if(state.player._attackCd<=0){
+          markAttack(state.player,t);
           damageActor(t,Math.floor(rnd(state.player.attack*.7,state.player.attack*1.25)),"主人公");
           state.player._attackCd=1.1;
         }
@@ -463,10 +505,13 @@ function roadElement(a,b){
 }
 
 function actorVisual(a){
+  var hpPct=clamp((a.hp/a.maxHp)*100,0,100);
+  var hp=(a._combatUntil||0)>Date.now()&&!a.down
+    ?"<div class='actorHp'><i style='width:"+hpPct+"%'></i></div>":"";
   if(a.type==="dog"||a.type==="pack"){
-    return "<div class='miniAnimal'></div><span class='actorLabel'>"+a.name+"</span>";
+    return hp+"<div class='miniAnimal'></div><span class='actorLabel'>"+a.name+"</span>";
   }
-  return "<div class='miniHuman'>"+
+  return hp+"<div class='miniHuman'>"+
     "<span class='h'></span><span class='b'></span>"+
     "<span class='a1'></span><span class='a2'></span>"+
     "<span class='l1'></span><span class='l2'></span>"+
@@ -496,11 +541,17 @@ function renderField(){
     var q=projection(a.x,a.y);
     if(q.x<-70||q.x>q.w+70||q.y<-70||q.y>q.h+70)return;
     var d=document.createElement("div");
-    d.className="fieldActor "+a.type+(a.down?" down":"")+(a.recruited?" party":"");
+    var now=Date.now();
+    d.className="fieldActor "+a.type+
+      (a.down?" down":"")+
+      (a.recruited?" party":"")+
+      ((a._attackUntil||0)>now?" attacking":"")+
+      ((a._hitUntil||0)>now?" hit":"");
     d.style.left=q.x+"px";
     d.style.top=q.y+"px";
     d.innerHTML=actorVisual(a);
     fieldObjects.appendChild(d);
+    appendDamagePop(a._lastDamage,q,a._damageAt,a._damageUntil);
   });
 
   if(tapMarker.active){
@@ -514,7 +565,14 @@ function renderField(){
     }
   }
 
-  document.getElementById("playerFixed").classList.toggle("down",state.player.down);
+  var playerEl=document.getElementById("playerFixed");
+  var now=Date.now();
+  playerEl.classList.toggle("down",state.player.down);
+  playerEl.classList.toggle("attacking",(state.player._attackUntil||0)>now&&!state.player.down);
+  playerEl.classList.toggle("hit",(state.player._hitUntil||0)>now&&!state.player.down);
+  fieldStage.classList.toggle("combatShake",(state.player._hitUntil||0)>now&&!state.player.down);
+  var pq=projection(state.player.x,state.player.y);
+  appendDamagePop(state.player._lastDamage,pq,state.player._damageAt,state.player._damageUntil);
 
   var np=nearestPlace(state.player);
   document.getElementById("locationText").textContent=np.d<8?PLACES[np.key].name:"荒野";
