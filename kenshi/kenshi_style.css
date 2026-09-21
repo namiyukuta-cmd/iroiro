@@ -36,7 +36,7 @@ button{cursor:pointer}
   min-height:0;
   margin:0 auto;
   display:grid;
-  grid-template-rows:58px minmax(0,1fr) 78px;
+  grid-template-rows:58px minmax(0,1fr) 184px;
   overflow:hidden;
   background:var(--ink);
 }
@@ -46,7 +46,7 @@ button{cursor:pointer}
   z-index:50;
   min-width:0;
   display:grid;
-  grid-template-columns:auto minmax(0,1fr) auto;
+  grid-template-columns:minmax(0,1fr) auto;
   align-items:center;
   gap:7px;
   padding:max(5px,env(safe-area-inset-top)) 8px 5px;
@@ -62,15 +62,6 @@ button{cursor:pointer}
 }
 .dayClock b{font-size:14px}
 .dayClock span{font-size:11px;color:#d8cdb7}
-.topStats{
-  min-width:0;
-  display:flex;
-  justify-content:center;
-  gap:7px;
-  white-space:nowrap;
-  font-size:9px;
-}
-.topStats b{font-size:10px}
 .topControls{
   display:flex;
   align-items:center;
@@ -378,60 +369,108 @@ button{cursor:pointer}
 .resultToast.show{opacity:1;transform:translate(-50%,0)}
 
 
-/* 下ホットバー */
+/* 下：主人公状態 + タブ + 大きいアイテム枠 */
 .hotbarBand{
   z-index:45;
+  min-height:0;
+  display:grid;
+  grid-template-rows:34px 44px minmax(0,1fr);
+  padding:5px 7px max(7px,env(safe-area-inset-bottom));
+  background:#e8dda1;
+  border-top:3px solid #bba431;
+  color:#211b12;
+}
+.playerStatusBand{
+  min-width:0;
   display:flex;
   align-items:center;
-  justify-content:center;
-  padding:7px 7px max(7px,env(safe-area-inset-bottom));
-  background:#17140f;
-  border-top:1px solid #3a3022;
+  justify-content:flex-start;
+  gap:15px;
+  padding:0 9px;
+  border:1px solid #aa9634;
+  border-bottom:0;
+  border-radius:8px 8px 0 0;
+  background:#f4eab8;
+  font-size:11px;
+  font-weight:800;
+  white-space:nowrap;
 }
-.footerBar{
-  width:min(470px,calc(100vw - 14px));
+.playerStatusBand b{font-size:13px}
+.playerStatusBand .hpStatus{
+  font-size:12px;
+  font-weight:900;
+}
+.playerStatusBand .hpStatus b{font-size:15px}
+
+.bottomTabs{
   display:grid;
-  grid-template-columns:54px 54px minmax(0,1fr);
-  gap:4px;
-}
-.footerAction,.hotbarSlot{
-  position:relative;
+  grid-template-columns:repeat(4,minmax(0,1fr));
   min-width:0;
-  min-height:54px;
-  border:2px solid #77664c;
-  border-radius:5px;
-  background:#d9ccb0;
-  color:#17130e;
+  border-left:1px solid #aa9634;
+  border-right:1px solid #aa9634;
+  background:#bca83d;
+}
+.bottomTabs button{
+  min-width:0;
+  min-height:44px;
+  border:0;
+  border-right:1px solid #9c892c;
+  border-bottom:1px solid #9c892c;
+  background:#ddce79;
+  color:#241e14;
   font-size:11px;
   font-weight:900;
-  box-shadow:inset 0 0 0 1px rgba(255,255,255,.35);
 }
+.bottomTabs button:last-child{border-right:0}
+.bottomTabs button.active{
+  background:#706325;
+  color:#fff9df;
+}
+
 .hotbar{
   min-width:0;
+  min-height:0;
   display:grid;
   grid-template-columns:repeat(5,minmax(0,1fr));
-  gap:4px;
+  gap:5px;
+  padding:7px;
+  border:1px solid #aa9634;
+  border-top:0;
+  border-radius:0 0 8px 8px;
+  background:#eee3a2;
 }
 .hotbarSlot{
-  padding:3px 2px 2px;
+  position:relative;
+  min-width:0;
+  min-height:0;
+  padding:8px 4px 4px;
   overflow:hidden;
+  border:2px solid #887836;
+  border-radius:8px;
+  background:#fff3bd;
+  color:#17130e;
+  font-size:12px;
+  font-weight:900;
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,.4);
 }
 .hotbarSlot b{
   display:block;
-  font-size:9px;
+  font-size:11px;
   line-height:1.1;
   white-space:nowrap;
   overflow:hidden;
   text-overflow:ellipsis;
+  text-align:center;
 }
 .hotbarSlot span{
   position:absolute;
-  right:4px;
-  bottom:3px;
-  font-size:12px;
+  right:7px;
+  bottom:5px;
+  font-size:18px;
+  line-height:1;
   font-weight:900;
 }
-.hotbarSlot.empty{opacity:.45}
+.hotbarSlot.empty{opacity:.5}
 
 /* オーバーレイ */
 .overlay{
@@ -599,7 +638,7 @@ button{cursor:pointer}
 }
 
 @media(max-width:390px){
-  #app{grid-template-rows:54px minmax(0,1fr) 70px}
+  #app{grid-template-rows:54px minmax(0,1fr) 168px}
   .topHud{padding-left:6px;padding-right:6px;gap:4px}
   .dayClock b{font-size:12px}
   .dayClock span{font-size:9px}
@@ -611,9 +650,15 @@ button{cursor:pointer}
   .fieldInfo{left:8px;top:8px}
     .contextActions{bottom:16px}
   .resultToast{bottom:62px}
-  .footerBar{grid-template-columns:48px 48px minmax(0,1fr);gap:3px}
-  .footerAction,.hotbarSlot{min-height:48px}
-  .hotbar{gap:3px}
+  .hotbarBand{grid-template-rows:31px 40px minmax(0,1fr);padding:4px 5px max(5px,env(safe-area-inset-bottom))}
+  .playerStatusBand{gap:10px;padding:0 7px;font-size:10px}
+  .playerStatusBand b{font-size:12px}
+  .playerStatusBand .hpStatus b{font-size:14px}
+  .bottomTabs button{min-height:40px;font-size:10px}
+  .hotbar{gap:4px;padding:5px}
+  .hotbarSlot{padding:6px 3px 3px}
+  .hotbarSlot b{font-size:10px}
+  .hotbarSlot span{font-size:16px;right:5px;bottom:4px}
 }
 /* タップしたことが分かる押下反応 */
 button{
