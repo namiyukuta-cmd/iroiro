@@ -56,7 +56,7 @@ function freshState(){
 
   return {
     version:2,day:1,hour:8,minute:0,paused:false,speed:1,weather:"乾燥",tick:0,
-    player:{x:18,y:24,hp:100,maxHp:100,hunger:0,money:100,food:2,med:1,ore:0,scrap:0,attack:16,defense:4,down:false,target:null,attackTarget:null},
+    player:{x:18,y:24,hp:100,maxHp:100,hunger:0,money:100,food:2,med:1,ore:0,scrap:0,attack:16,defense:4,speed:1.7,down:false,target:null,attackTarget:null},
     actors:a,party:["player"],relations:{"交易組合":0,"南農場":0,"自由民":0,"無所属":0,"砂盗賊":-100},
     log:["砂塵街の外から始まった。人々は主人公と無関係に動いている。"]
   };
@@ -120,10 +120,15 @@ function followActor(a){
 function moveTowards(o,dt){
   if(!o.target) return;
   var dx=o.target.x-o.x,dy=o.target.y-o.y,d=Math.hypot(dx,dy);
+  if(!Number.isFinite(d)){o.target=null;return}
   if(d<.25){o.target=null;return}
-  var step=o.speed*dt*state.speed;
+  var speed=Number.isFinite(o.speed)?o.speed:1.4;
+  var step=speed*dt*state.speed;
   o.x+=dx/d*Math.min(step,d);
   o.y+=dy/d*Math.min(step,d);
+  if(!Number.isFinite(o.x)||!Number.isFinite(o.y)){
+    o.x=18;o.y=24;o.target=null;
+  }
 }
 
 function chooseBanditTargets(){
@@ -420,7 +425,10 @@ function load(){
   try{
     var raw=localStorage.getItem(SAVE_KEY);
     if(!raw){log("セーブデータがない。");renderAll();return}
-    state=JSON.parse(raw);selectedId="player";openDrawer="";log("ロードした。");renderAll();
+    state=JSON.parse(raw);
+    if(!Number.isFinite(state.player.speed)) state.player.speed=1.7;
+    if(!Number.isFinite(state.player.x)||!Number.isFinite(state.player.y)){state.player.x=18;state.player.y=24;state.player.target=null;}
+    selectedId="player";openDrawer="";log("ロードした。");renderAll();
   }catch(e){state=freshState();log("セーブデータを読み込めなかった。");renderAll()}
 }
 
@@ -439,7 +447,14 @@ function init(){
 
   var isNew=new URLSearchParams(location.search).get("new")==="1";
   if(!isNew){
-    try{var raw=localStorage.getItem(SAVE_KEY);if(raw)state=JSON.parse(raw)}catch(e){}
+    try{
+      var raw=localStorage.getItem(SAVE_KEY);
+      if(raw){
+        state=JSON.parse(raw);
+        if(!Number.isFinite(state.player.speed)) state.player.speed=1.7;
+        if(!Number.isFinite(state.player.x)||!Number.isFinite(state.player.y)){state.player.x=18;state.player.y=24;state.player.target=null;}
+      }
+    }catch(e){}
   }else localStorage.removeItem(SAVE_KEY);
 
   renderAll();
