@@ -83,6 +83,17 @@
     G.refresh();
   }
 
+  function supportShowerLaundry() {
+    if (H.state.location !== "charity_center" || H.state.slot === 3 || H.state.daily.supportShowerLaundry) return;
+    H.state.daily.supportShowerLaundry = true;
+    H.state.stats.hygiene = 100;
+    H.state.stats.wetness = 0;
+    changeStats({ warmth: 5 });
+    H.state.progression.support.lastLaundryDay = H.state.day;
+    H.addHistory("支援センターでシャワーを浴び、衣類を洗濯した。衣類も清潔になった。");
+    G.refresh();
+  }
+
   function foodSupport() {
     if (H.state.daily.foodSupport || H.state.slot === 3) return;
     H.state.daily.foodSupport = true;
@@ -207,6 +218,6 @@
 
   Object.assign(G, {
     board, shoppingLook, checkCasualWork, casualWork, beg, scavenge, rest, wash,
-    foodSupport, supportConsult, openShop, clerkTalk, clerkWork
+    foodSupport, supportShowerLaundry, supportConsult, openShop, clerkTalk, clerkWork
   });
 })();
