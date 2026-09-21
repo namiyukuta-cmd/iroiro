@@ -8,7 +8,7 @@
   <meta http-equiv="Expires" content="0" />
   <meta name="theme-color" content="#17140f" />
   <title>荒野</title>
-  <link rel="stylesheet" href="kenshi_style.css?v=20260921-12" />
+  <link rel="stylesheet" href="kenshi_style.css?v=20260921-13" />
 </head>
 <body>
 <div id="app">
@@ -61,14 +61,18 @@
 
   <footer class="hotbarBand">
     <div class="playerStatusBand">
-      <div class="statusMeter hpMeter">
-        <div class="statusMeterLabel"><span>HP</span><b id="hpText">100/100</b></div>
-        <div class="statusTrack" aria-hidden="true"><div id="hpBarFill" class="statusFill"></div></div>
-      </div>
+      <div class="vitalStack">
+        <div class="statusMeter hpMeter">
+          <span class="statusName">HP</span>
+          <div class="statusTrack" aria-hidden="true"><div id="hpBarFill" class="statusFill"></div></div>
+          <b id="hpText">100/100</b>
+        </div>
 
-      <div class="statusMeter hungerMeter">
-        <div class="statusMeterLabel"><span>空腹</span><b id="hungerText">0/100</b></div>
-        <div class="statusTrack" aria-hidden="true"><div id="hungerBarFill" class="statusFill"></div></div>
+        <div class="statusMeter hungerMeter">
+          <span class="statusName">空腹</span>
+          <div class="statusTrack" aria-hidden="true"><div id="hungerBarFill" class="statusFill"></div></div>
+          <b id="hungerText">0/100</b>
+        </div>
       </div>
 
       <div class="moneyStatus">
@@ -123,6 +127,6 @@
   </section>
 </div>
 
-<script src="kenshi_game.js?v=20260921-17"></script>
+<script src="kenshi_game.js?v=20260921-18"></script>
 </body>
 </html>
