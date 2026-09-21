@@ -45,15 +45,15 @@
   </main>
   <script>
     (function(){
-      var saveKey="iroiro_kenshi_save_v1";
+      var saveKey="iroiro_kenshi_save_v2";
       var cont=document.getElementById("continueGame");
       cont.disabled=!localStorage.getItem(saveKey);
       document.getElementById("newGame").addEventListener("click",function(){
         localStorage.removeItem(saveKey);
-        location.href="kenshi_top.html?new=1";
+        location.href="kenshi_top.html?new=1&v=20260921-2";
       });
       cont.addEventListener("click",function(){
-        if(!cont.disabled) location.href="kenshi_top.html";
+        if(!cont.disabled) location.href="kenshi_top.html?v=20260921-2";
       });
     })();
   </script>
