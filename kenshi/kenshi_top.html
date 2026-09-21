@@ -8,7 +8,7 @@
   <meta http-equiv="Expires" content="0" />
   <meta name="theme-color" content="#17140f" />
   <title>荒野</title>
-  <link rel="stylesheet" href="kenshi_style.css?v=20260921-9" />
+  <link rel="stylesheet" href="kenshi_style.css?v=20260921-10" />
 </head>
 <body>
 <div id="app">
@@ -16,12 +16,6 @@
     <div class="dayClock">
       <b id="dayText">1日目</b>
       <span id="clock">08:00</span>
-    </div>
-
-    <div class="topStats">
-      <span>HP <b id="hpText">100/100</b></span>
-      <span>空腹 <b id="hungerText">0</b></span>
-      <span>金 <b id="moneyText">100</b></span>
     </div>
 
     <div class="topControls">
@@ -66,11 +60,20 @@
   </main>
 
   <footer class="hotbarBand">
-    <div class="footerBar">
-      <button id="inventoryBtn" class="footerAction" type="button" aria-label="持物">袋</button>
-      <button id="partyBtn" class="footerAction" type="button" aria-label="部隊">隊</button>
-      <div id="hotbar" class="hotbar"></div>
+    <div class="playerStatusBand">
+      <span class="hpStatus">HP <b id="hpText">100/100</b></span>
+      <span>空腹 <b id="hungerText">0</b></span>
+      <span>金 <b id="moneyText">100</b></span>
     </div>
+
+    <nav class="bottomTabs" aria-label="管理タブ">
+      <button type="button" data-bottom-panel="inventory" class="active">持物</button>
+      <button type="button" data-bottom-panel="party">部隊</button>
+      <button type="button" data-bottom-panel="faction">勢力</button>
+      <button type="button" data-bottom-panel="log">記録</button>
+    </nav>
+
+    <div id="hotbar" class="hotbar"></div>
   </footer>
 
   <section id="mapOverlay" class="overlay" hidden aria-label="世界地図">
@@ -109,6 +112,6 @@
   </section>
 </div>
 
-<script src="kenshi_game.js?v=20260921-13"></script>
+<script src="kenshi_game.js?v=20260921-14"></script>
 </body>
 </html>
