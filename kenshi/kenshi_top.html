@@ -7,7 +7,7 @@
   <meta http-equiv="Pragma" content="no-cache" />
   <meta http-equiv="Expires" content="0" />
   <title>荒野</title>
-  <link rel="stylesheet" href="kenshi_style.css?v=20260921-3" />
+  <link rel="stylesheet" href="kenshi_style.css?v=20260921-4" />
 </head>
 <body>
 <div id="app">
@@ -49,12 +49,21 @@
   </section>
 
   <section class="encounterPanel">
-    <div class="encounterMain">
-      <div id="encounterTitle" class="encounterTitle">周囲</div>
-      <div id="encounterInfo" class="encounterInfo">近くに誰もいません。</div>
+    <div id="encounterScene" class="encounterScene" aria-label="主人公の周囲">
+      <div class="sceneGround"></div>
+      <div id="scenePlace" class="scenePlace"></div>
+      <div id="sceneEntities" class="sceneEntities"></div>
+      <div class="scenePlayer">
+        <span class="head"></span>
+        <span class="body"></span>
+        <span class="arm armL"></span>
+        <span class="arm armR"></span>
+        <span class="leg legL"></span>
+        <span class="leg legR"></span>
+      </div>
       <div id="resultToast" class="resultToast" aria-live="polite"></div>
+      <div id="encounterActions" class="encounterActions"></div>
     </div>
-    <div id="encounterActions" class="encounterActions"></div>
   </section>
 
   <section class="bottomPanel">
@@ -82,6 +91,6 @@
   </section>
 </div>
 
-<script src="kenshi_game.js?v=20260921-7"></script>
+<script src="kenshi_game.js?v=20260921-8"></script>
 </body>
 </html>
