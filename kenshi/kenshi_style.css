@@ -336,7 +336,7 @@ button{cursor:pointer}
   position:absolute;
   z-index:30;
   left:50%;
-  bottom:104px;
+  bottom:18px;
   transform:translateX(-50%);
   width:min(92%,430px);
   display:flex;
@@ -362,7 +362,7 @@ button{cursor:pointer}
   position:absolute;
   z-index:31;
   left:50%;
-  bottom:153px;
+  bottom:66px;
   transform:translate(-50%,5px);
   max-width:78%;
   padding:6px 10px;
@@ -377,38 +377,6 @@ button{cursor:pointer}
 }
 .resultToast.show{opacity:1;transform:translate(-50%,0)}
 
-.movePad{
-  position:absolute;
-  z-index:28;
-  left:14px;
-  bottom:14px;
-  width:94px;
-  height:94px;
-  display:grid;
-  grid-template-columns:repeat(3,1fr);
-  grid-template-rows:repeat(3,1fr);
-  gap:3px;
-}
-.moveKey{
-  min-width:0;
-  min-height:0;
-  padding:0;
-  border:1.5px solid rgba(255,255,255,.78);
-  border-radius:50%;
-  background:rgba(39,33,24,.64);
-  color:#fff8e9;
-  font-size:14px;
-  font-weight:900;
-  touch-action:none;
-  user-select:none;
-  -webkit-user-select:none;
-}
-.moveKey:active{background:rgba(255,248,233,.88);color:#282116}
-.moveKey.up{grid-column:2;grid-row:1}
-.moveKey.left{grid-column:1;grid-row:2}
-.moveKey.center{grid-column:2;grid-row:2}
-.moveKey.right{grid-column:3;grid-row:2}
-.moveKey.down{grid-column:2;grid-row:3}
 
 /* 下ホットバー */
 .hotbarBand{
@@ -641,9 +609,8 @@ button{cursor:pointer}
   .roundBtn{width:31px;height:31px}
   .mapBtn{width:64px;height:64px;right:8px;top:8px}
   .fieldInfo{left:8px;top:8px}
-  .movePad{width:86px;height:86px;left:10px;bottom:10px}
-  .contextActions{bottom:94px}
-  .resultToast{bottom:141px}
+    .contextActions{bottom:16px}
+  .resultToast{bottom:62px}
   .footerBar{grid-template-columns:48px 48px minmax(0,1fr);gap:3px}
   .footerAction,.hotbarSlot{min-height:48px}
   .hotbar{gap:3px}
