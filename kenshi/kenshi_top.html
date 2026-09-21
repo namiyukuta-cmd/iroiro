@@ -13,9 +13,17 @@
       --sand:#b9aa83;--sand2:#c7b894;--dark:#29261f;--danger:#7d342a;--ok:#4f6542;
     }
     *{box-sizing:border-box}
-    html,body{margin:0;width:100%;min-height:100%;background:#cfc5aa;color:var(--ink)}
+    html,body{
+      margin:0;width:100%;min-height:100%;background:#cfc5aa;color:var(--ink);
+      touch-action:manipulation;
+      -webkit-text-size-adjust:100%;
+    }
     body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
-    button{font:inherit}
+    button,a{
+      font:inherit;
+      touch-action:manipulation;
+      -webkit-tap-highlight-color:transparent;
+    }
     #app{width:min(100%,560px);min-height:100dvh;margin:0 auto;background:var(--paper);display:flex;flex-direction:column}
     .topbar{
       display:flex;align-items:center;justify-content:space-between;gap:8px;
@@ -206,6 +214,6 @@
   </footer>
 </div>
 
-<script src="kenshi_game.js?v=20260921-3"></script>
+<script src="kenshi_game.js?v=20260921-4"></script>
 </body>
 </html>
