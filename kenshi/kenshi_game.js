@@ -14,6 +14,8 @@ var panelContent=document.getElementById("panelContent");
 
 var manual={x:0,y:0};
 var activePanel="inventory";
+var contextSignature=null;
+var hotbarSignature=null;
 var toastTimer=null;
 var lastTick=Date.now();
 var simTimer=null;
@@ -642,17 +644,33 @@ function rest(){
 }
 
 function renderContext(){
+  var a=nearestEncounterActor();
+  var place=nearbyPlace();
+  var sig=[
+    state.player.down?1:0,
+    a?a.id:"",
+    a&&a.down?1:0,
+    a?a.faction:"",
+    a?a.type:"",
+    a?Math.round(a.loot||0):0,
+    place||"",
+    state.player.med,
+    state.player.money,
+    state.player.ore,
+    state.player.scrap
+  ].join("|");
+
+  if(sig===contextSignature)return;
+  contextSignature=sig;
   contextActions.innerHTML="";
 
   if(state.player.down){
-    var pd=nearbyPlace();
-    if(pd==="dust"||pd==="farm"){
+    if(place==="dust"||place==="farm"){
       contextActions.appendChild(actionButton("休息",rest,false));
     }
     return;
   }
 
-  var a=nearestEncounterActor();
   if(a){
     if(a.down){
       contextActions.appendChild(actionButton("治療",function(){healActor(a)},state.player.med<=0||a.faction==="砂盗賊"));
@@ -684,7 +702,6 @@ function renderContext(){
     }
   }
 
-  var place=nearbyPlace();
   if(place==="mine"){
     contextActions.appendChild(actionButton("採掘",mine,false));
   }else if(place==="ruins"||place==="salt"||place==="cross"){
@@ -698,6 +715,10 @@ function renderContext(){
 }
 
 function renderHotbar(){
+  var sig=[state.player.food,state.player.med,state.player.ore,state.player.scrap].join("|");
+  if(sig===hotbarSignature)return;
+  hotbarSignature=sig;
+
   var slots=[
     {name:"食料",count:state.player.food,fn:eat},
     {name:"治療具",count:state.player.med,fn:selfHeal},
@@ -962,12 +983,16 @@ function load(){
     if(!raw){showResult("セーブなし");return}
     state=JSON.parse(raw);
     normalizeState();
+    contextSignature=null;
+    hotbarSignature=null;
     manual.x=0;manual.y=0;
     log("ロードした。");
     showResult("ロード");
     renderAll();
   }catch(e){
     state=freshState();
+    contextSignature=null;
+    hotbarSignature=null;
     showResult("ロード失敗");
     renderAll();
   }
