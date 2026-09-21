@@ -477,9 +477,16 @@ function renderHud(){
   document.getElementById("dayText").textContent=state.day+"日目";
   document.getElementById("clock").textContent=pad(state.hour)+":"+pad(state.minute);
   document.getElementById("weather").textContent=state.weather;
-  document.getElementById("hpText").textContent=Math.round(state.player.hp)+"/"+state.player.maxHp;
-  document.getElementById("hungerText").textContent=Math.round(state.player.hunger);
+  var hpNow=Math.round(state.player.hp);
+  var hungerNow=Math.round(state.player.hunger);
+  document.getElementById("hpText").textContent=hpNow+"/"+state.player.maxHp;
+  document.getElementById("hungerText").textContent=hungerNow+"/100";
   document.getElementById("moneyText").textContent=state.player.money;
+
+  var hpPct=clamp((state.player.hp/state.player.maxHp)*100,0,100);
+  var hungerPct=clamp(state.player.hunger,0,100);
+  document.getElementById("hpBarFill").style.width=hpPct+"%";
+  document.getElementById("hungerBarFill").style.width=hungerPct+"%";
   document.getElementById("pauseBtn").textContent=state.paused?"再開":"停止";
   document.getElementById("speedBtn").textContent="×"+state.speed;
 }
