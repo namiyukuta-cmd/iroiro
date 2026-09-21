@@ -36,7 +36,7 @@ button{cursor:pointer}
   min-height:0;
   margin:0 auto;
   display:grid;
-  grid-template-rows:58px minmax(0,1fr) 202px;
+  grid-template-rows:58px minmax(0,1fr) 224px;
   overflow:hidden;
   background:var(--ink);
 }
@@ -374,7 +374,7 @@ button{cursor:pointer}
   z-index:45;
   min-height:0;
   display:grid;
-  grid-template-rows:52px 44px minmax(0,1fr);
+  grid-template-rows:74px 44px minmax(0,1fr);
   padding:5px 7px max(7px,env(safe-area-inset-bottom));
   background:#e8dda1;
   border-top:3px solid #bba431;
@@ -383,47 +383,48 @@ button{cursor:pointer}
 .playerStatusBand{
   min-width:0;
   display:grid;
-  grid-template-columns:minmax(0,1fr) minmax(0,1fr) 82px;
-  align-items:stretch;
-  gap:7px;
-  padding:5px 7px;
-  border:1px solid #aa9634;
+  grid-template-columns:minmax(0,1fr) 92px;
+  gap:8px;
+  padding:7px 8px;
+  border:2px solid #806f24;
   border-bottom:0;
-  border-radius:8px 8px 0 0;
-  background:#f4eab8;
+  border-radius:9px 9px 0 0;
+  background:#fff0a9;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.7);
 }
-
+.vitalStack{
+  min-width:0;
+  display:grid;
+  grid-template-rows:1fr 1fr;
+  gap:7px;
+}
 .statusMeter{
   min-width:0;
   display:grid;
-  grid-template-rows:auto 12px;
-  gap:3px;
+  grid-template-columns:38px minmax(0,1fr) 60px;
+  align-items:center;
+  gap:7px;
 }
-.statusMeterLabel{
-  min-width:0;
-  display:flex;
-  align-items:baseline;
-  justify-content:space-between;
-  gap:5px;
-  font-size:10px;
-  font-weight:900;
+.statusName{
+  font-size:12px;
+  font-weight:950;
+  line-height:1;
+}
+.statusMeter>b{
+  text-align:right;
+  font-size:12px;
+  font-weight:950;
   white-space:nowrap;
-}
-.statusMeterLabel b{
-  min-width:0;
-  overflow:hidden;
-  text-overflow:ellipsis;
-  font-size:10px;
 }
 .statusTrack{
   position:relative;
   min-width:0;
-  height:12px;
+  height:19px;
   overflow:hidden;
-  border:2px solid #655a2a;
-  border-radius:6px;
-  background:#d3c88f;
-  box-shadow:inset 0 1px 2px rgba(0,0,0,.18);
+  border:3px solid #4c4421;
+  border-radius:10px;
+  background:#c8bc78;
+  box-shadow:inset 0 2px 3px rgba(0,0,0,.25),0 1px 0 rgba(255,255,255,.55);
 }
 .statusFill{
   width:0%;
@@ -431,26 +432,29 @@ button{cursor:pointer}
   transition:width .15s linear;
 }
 .hpMeter .statusFill{
-  background:linear-gradient(90deg,#5d7939,#91ad54);
+  background:linear-gradient(90deg,#37651f,#6fa63c);
 }
 .hungerMeter .statusFill{
-  background:linear-gradient(90deg,#d1b343,#9e6b2d);
+  background:linear-gradient(90deg,#d6a62d,#b66f20);
 }
 .moneyStatus{
   min-width:0;
   display:grid;
   place-content:center;
   text-align:center;
-  border-left:1px solid #c1ae54;
+  border:2px solid #806f24;
+  border-radius:8px;
+  background:#f3d96d;
   line-height:1;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.6);
 }
 .moneyStatus span{
-  font-size:10px;
-  font-weight:900;
+  font-size:11px;
+  font-weight:950;
 }
 .moneyStatus b{
-  margin-top:4px;
-  font-size:20px;
+  margin-top:6px;
+  font-size:24px;
   font-weight:950;
   overflow:hidden;
   text-overflow:ellipsis;
@@ -692,7 +696,7 @@ button{cursor:pointer}
 }
 
 @media(max-width:390px){
-  #app{grid-template-rows:54px minmax(0,1fr) 188px}
+  #app{grid-template-rows:54px minmax(0,1fr) 206px}
   .topHud{padding-left:6px;padding-right:6px;gap:4px}
   .dayClock b{font-size:12px}
   .dayClock span{font-size:9px}
@@ -704,13 +708,15 @@ button{cursor:pointer}
   .fieldInfo{left:8px;top:8px}
     .contextActions{bottom:16px}
   .resultToast{bottom:62px}
-  .hotbarBand{grid-template-rows:48px 40px minmax(0,1fr);padding:4px 5px max(5px,env(safe-area-inset-bottom))}
-  .playerStatusBand{grid-template-columns:minmax(0,1fr) minmax(0,1fr) 68px;gap:5px;padding:4px 5px}
-  .statusMeter{grid-template-rows:auto 10px;gap:2px}
-  .statusMeterLabel,.statusMeterLabel b{font-size:9px}
-  .statusTrack{height:10px}
+  .hotbarBand{grid-template-rows:66px 40px minmax(0,1fr);padding:4px 5px max(5px,env(safe-area-inset-bottom))}
+  .playerStatusBand{grid-template-columns:minmax(0,1fr) 76px;gap:6px;padding:5px 6px}
+  .vitalStack{gap:5px}
+  .statusMeter{grid-template-columns:32px minmax(0,1fr) 54px;gap:5px}
+  .statusName{font-size:10px}
+  .statusMeter>b{font-size:10px}
+  .statusTrack{height:16px;border-width:2px}
   .moneyStatus span{font-size:9px}
-  .moneyStatus b{font-size:17px}
+  .moneyStatus b{font-size:20px}
   .bottomTabs button{min-height:40px;font-size:10px}
   .hotbar{gap:4px;padding:5px}
   .hotbarSlot{padding:6px 3px 3px}
