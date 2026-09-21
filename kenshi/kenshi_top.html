@@ -2,103 +2,121 @@
 <html lang="ja">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no" />
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
   <meta http-equiv="Pragma" content="no-cache" />
   <meta http-equiv="Expires" content="0" />
+  <meta name="theme-color" content="#17140f" />
   <title>荒野</title>
-  <link rel="stylesheet" href="kenshi_style.css?v=20260921-6" />
+  <link rel="stylesheet" href="kenshi_style.css?v=20260921-7" />
 </head>
 <body>
 <div id="app">
-  <header class="topbar">
-    <div class="timebox">
-      <b id="clock">1日目 08:00</b>
-      <span id="weather">乾燥</span>
+  <header class="topHud">
+    <div class="dayClock">
+      <b id="dayText">1日目</b>
+      <span id="clock">08:00</span>
     </div>
-    <div class="topActions">
+
+    <div class="topStats">
+      <span>HP <b id="hpText">100/100</b></span>
+      <span>空腹 <b id="hungerText">0</b></span>
+      <span>金 <b id="moneyText">100</b></span>
+    </div>
+
+    <div class="topControls">
       <button id="speedBtn" type="button">×1</button>
       <button id="pauseBtn" type="button">停止</button>
-      <button id="saveBtn" type="button">保存</button>
-      <button id="loadBtn" type="button">読込</button>
-      <a href="kenshi_index.html">入口</a>
+      <div class="quickMenuWrap">
+        <button id="quickMenuBtn" class="roundBtn" type="button" aria-label="メニュー">…</button>
+        <div id="quickMenu" class="quickMenu" hidden>
+          <button id="saveBtn" type="button">保存</button>
+          <button id="loadBtn" type="button">読込</button>
+          <a href="kenshi_index.html">入口</a>
+        </div>
+      </div>
     </div>
   </header>
 
-  <section class="travelShell">
-    <aside class="destinationPanel">
-      <div class="destinationTitle">行き先</div>
-      <div id="travelSelector" class="travelSelector" aria-label="行き先一覧"></div>
+  <main id="fieldStage" class="fieldStage" aria-label="荒野フィールド">
+    <div id="fieldObjects" class="fieldObjects"></div>
+
+    <div id="playerFixed" class="fieldPlayer" aria-label="主人公">
+      <span class="head"></span>
+      <span class="body"></span>
+      <span class="arm armL"></span>
+      <span class="arm armR"></span>
+      <span class="leg legL"></span>
+      <span class="leg legR"></span>
+    </div>
+
+    <aside class="fieldInfo">
+      <b id="weather">乾燥</b>
+      <span id="locationText">荒野</span>
+      <span id="travelText"></span>
     </aside>
 
-    <section id="mapPanel" class="mapPanel">
-      <div id="mapViewport" class="mapViewport" aria-label="世界地図">
-        <div id="worldStage" class="worldStage">
-          <svg id="routeSvg" class="route" viewBox="0 0 100 100" preserveAspectRatio="none"></svg>
-          <div id="landmarks"></div>
-          <div id="actors"></div>
-          <div id="moveCursor" class="moveCursor" aria-hidden="true"></div>
-        </div>
+    <button id="mapBtn" class="mapBtn" type="button" aria-label="地図を開く">
+      <span class="mapGrid"></span>
+      <span class="mapPlayer">▲</span>
+    </button>
 
-        <div class="mapTools">
-          <button id="zoomOutBtn" type="button" aria-label="縮小">−</button>
-          <button id="zoomResetBtn" type="button" aria-label="全体表示">全体</button>
-          <button id="zoomInBtn" type="button" aria-label="拡大">＋</button>
-        </div>
+    <div id="contextActions" class="contextActions"></div>
+    <div id="resultToast" class="resultToast" aria-live="polite"></div>
 
-        <div class="mapStatus">
-          <span>HP <b id="hpText">100/100</b></span>
-          <span>空腹 <b id="hungerText">0</b></span>
-          <span>所持金 <b id="moneyText">100</b></span>
+    <div id="movePad" class="movePad" aria-label="自由移動">
+      <button class="moveKey up" type="button" data-move="up" aria-label="上">▲</button>
+      <button class="moveKey left" type="button" data-move="left" aria-label="左">◀</button>
+      <button id="stopMoveBtn" class="moveKey center" type="button" aria-label="停止">●</button>
+      <button class="moveKey right" type="button" data-move="right" aria-label="右">▶</button>
+      <button class="moveKey down" type="button" data-move="down" aria-label="下">▼</button>
+    </div>
+  </main>
+
+  <footer class="hotbarBand">
+    <div class="footerBar">
+      <button id="inventoryBtn" class="footerAction" type="button" aria-label="持物">袋</button>
+      <button id="partyBtn" class="footerAction" type="button" aria-label="部隊">隊</button>
+      <div id="hotbar" class="hotbar"></div>
+    </div>
+  </footer>
+
+  <section id="mapOverlay" class="overlay" hidden aria-label="世界地図">
+    <div class="overlayCard mapCard">
+      <header class="overlayHead">
+        <h2>世界地図</h2>
+        <button id="closeMapBtn" type="button">×</button>
+      </header>
+      <div class="worldMapWrap">
+        <div id="worldMap" class="worldMap">
+          <svg id="mapRoutes" class="mapRoutes" viewBox="0 0 100 100" preserveAspectRatio="none"></svg>
+          <div id="mapPlaces"></div>
+          <div id="mapActors"></div>
+          <div id="mapPlayerDot" class="mapPlayerDot"></div>
         </div>
       </div>
-
-      <div class="travelControls">
-        <div class="movePad" aria-label="自由移動">
-          <button class="moveKey up" type="button" data-move="up" aria-label="上">▲</button>
-          <button class="moveKey left" type="button" data-move="left" aria-label="左">◀</button>
-          <button id="moveConfirm" class="moveKey center" type="button" aria-label="選択地点へ移動">●</button>
-          <button class="moveKey right" type="button" data-move="right" aria-label="右">▶</button>
-          <button class="moveKey down" type="button" data-move="down" aria-label="下">▼</button>
-        </div>
-        <div class="travelControlText">
-          <b>移動</b>
-          <span>方向キー＝自由移動</span>
-          <span>紫で選択 → ●で目的地へ</span>
-        </div>
-      </div>
-    </section>
-  </section>
-
-  <section id="encounterPanel" class="encounterPanel">
-    <div id="encounterScene" class="encounterScene" aria-label="主人公の周囲">
-      <div class="sceneGround"></div>
-      <div id="scenePlace" class="scenePlace"></div>
-      <div id="sceneEntities" class="sceneEntities"></div>
-      <div class="scenePlayer">
-        <span class="head"></span>
-        <span class="body"></span>
-        <span class="arm armL"></span>
-        <span class="arm armR"></span>
-        <span class="leg legL"></span>
-        <span class="leg legR"></span>
-      </div>
-      <div id="resultToast" class="resultToast" aria-live="polite"></div>
-      <div id="encounterActions" class="encounterActions"></div>
+      <div class="destinationHead">行き先</div>
+      <div id="destinationList" class="destinationList"></div>
     </div>
   </section>
 
-  <section id="menuArea" class="menuArea">
-    <nav class="menuTabs">
-      <button type="button" data-menu="inventory" class="active">持物</button>
-      <button type="button" data-menu="party">部隊</button>
-      <button type="button" data-menu="faction">勢力</button>
-      <button type="button" data-menu="log">記録</button>
-    </nav>
-    <div id="menuPane" class="menuPane"></div>
+  <section id="panelOverlay" class="overlay" hidden aria-label="管理">
+    <div class="overlayCard panelCard">
+      <header class="overlayHead">
+        <h2 id="panelTitle">持物</h2>
+        <button id="closePanelBtn" type="button">×</button>
+      </header>
+      <nav class="panelTabs">
+        <button type="button" data-panel="inventory" class="active">持物</button>
+        <button type="button" data-panel="party">部隊</button>
+        <button type="button" data-panel="faction">勢力</button>
+        <button type="button" data-panel="log">記録</button>
+      </nav>
+      <div id="panelContent" class="panelContent"></div>
+    </div>
   </section>
 </div>
 
-<script src="kenshi_game.js?v=20260921-10"></script>
+<script src="kenshi_game.js?v=20260921-11"></script>
 </body>
 </html>
