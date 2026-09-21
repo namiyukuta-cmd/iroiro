@@ -6,7 +6,7 @@
   <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0" />
   <meta http-equiv="Pragma" content="no-cache" />
   <meta http-equiv="Expires" content="0" />
-  <meta name="dd-build" content="20260921touchfix1" />
+  <meta name="dd-build" content="20260921layoutfix2" />
   <title>DD - 地点探索</title>
   <style>
     *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
@@ -17,7 +17,7 @@
     button{touch-action:manipulation}
     #game{width:min(100%,520px);min-height:100svh;margin:0 auto;padding:max(6px,env(safe-area-inset-top)) 8px calc(84px + env(safe-area-inset-bottom));display:flex;flex-direction:column;gap:6px}
 
-    #topPanel{min-height:86px;border:2px solid var(--purple);border-radius:13px;background:#faf8f3;padding:6px 8px;display:grid;grid-template-columns:auto 1fr;gap:8px;align-items:center}
+    #topPanel{min-height:78px;border:2px solid var(--purple);border-radius:13px;background:#faf8f3;padding:6px 8px;display:grid;grid-template-columns:auto 1fr;gap:8px;align-items:center}
     #clockArea{display:flex;align-items:center;gap:7px;min-width:0}
     #clockDial{position:relative;width:58px;height:58px;flex:0 0 58px;border:3px solid var(--purple);border-radius:50%;background:#fff}
     #clockDial::before{content:"12";position:absolute;left:50%;top:1px;transform:translateX(-50%);font-size:7px;font-weight:900}
@@ -30,18 +30,18 @@
     #clockPin{position:absolute;width:7px;height:7px;left:50%;top:50%;transform:translate(-50%,-50%);border-radius:50%;background:#25231f}
     #timeText{font-size:26px;font-weight:1000;line-height:1;letter-spacing:-1px;white-space:nowrap}
     #dayText{margin-top:3px;font-size:10px;font-weight:900;white-space:nowrap}
-    #topInfo{min-width:0;display:grid;grid-template-columns:1fr auto;grid-template-areas:"place place" "links controls";gap:4px 7px;align-items:center}
+    #topInfo{min-width:0;display:grid;grid-template-columns:1fr;grid-template-areas:"place" "links";gap:5px;align-items:center}
     #placeBlock{grid-area:place;display:flex;justify-content:flex-end;align-items:baseline;gap:6px;min-width:0}
     #placeName{font-size:17px;font-weight:1000;line-height:1.1;text-align:right;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
     #placeType{font-size:10px;font-weight:900;opacity:.58;white-space:nowrap}
     #topLinks{grid-area:links;display:flex;justify-content:flex-end;gap:8px;min-width:0}
     .headLink{color:#292725;text-decoration:none;font-size:12px;font-weight:1000;white-space:nowrap;min-height:40px;padding:0 8px;border:1.5px solid var(--ink);border-radius:7px;background:#fff;display:flex;align-items:center;justify-content:center}
-    #autoControls{grid-area:controls;display:flex;justify-content:flex-end;gap:5px}
+    #autoControls{display:flex;justify-content:flex-end;gap:5px;margin-bottom:4px}
     #autoButton,#autoSpeedButton{height:42px;border:1.5px solid var(--ink);border-radius:7px;background:#fff;color:#1d1d1b;font-size:11px;font-weight:1000;padding:0 10px;box-shadow:0 1px 0 rgba(0,0,0,.13);white-space:nowrap}
     #autoSpeedButton{background:#e9e4da}
     #autoButton.on{background:var(--ink);color:#fff}
 
-    #encounterArea{position:relative;border:1.5px solid #aaa397;border-radius:12px;background:rgba(255,255,255,.25);padding:6px 7px 6px}
+    #encounterArea{position:relative;border:1.5px solid #aaa397;border-radius:12px;background:rgba(255,255,255,.25);padding:7px 7px 6px}
     #encounterStage{position:relative;height:210px;display:grid;grid-template-columns:minmax(0,1fr) 100px;gap:6px;align-items:center}
     #cardColumn{position:relative;height:100%;display:grid;place-items:center}
     #cardSlot{position:relative;width:140px;height:190px;border:2px dashed #8b867c;border-radius:11px;background:rgba(255,255,255,.48);display:grid;place-items:center;cursor:pointer;transition:transform .12s ease,background .15s ease,border-color .15s ease}
@@ -145,11 +145,11 @@
     <div id="topInfo">
       <div id="placeBlock"><div id="placeName">森</div><div id="placeType">探索地点</div></div>
       <div id="topLinks"><a class="headLink" href="DD_inventory.html">アイテム</a><a class="headLink" href="DD_map.html?v=20260916quickslots4">← マップ</a></div>
-      <div id="autoControls"><button id="autoButton" type="button" aria-pressed="false">オート：OFF</button><button id="autoSpeedButton" type="button">速度：ゆっくり</button></div>
     </div>
   </header>
 
   <section id="encounterArea" aria-label="出る札">
+    <div id="autoControls"><button id="autoButton" type="button" aria-pressed="false">オート：OFF</button><button id="autoSpeedButton" type="button">速度：ゆっくり</button></div>
     <div id="encounterStage">
       <div id="cardColumn">
         <div id="cardSlot" class="empty" role="button" tabindex="0" aria-label="札を出す">
