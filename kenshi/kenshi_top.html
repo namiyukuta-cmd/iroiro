@@ -1,0 +1,150 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+  <meta http-equiv="Pragma" content="no-cache" />
+  <meta http-equiv="Expires" content="0" />
+  <title>荒野</title>
+  <style>
+    :root{
+      --bg:#cbc2aa;--paper:#e9e1cf;--panel:#d9ceb3;--ink:#211f1a;
+      --muted:#6a6252;--line:#3a352b;--danger:#7a3329;--ok:#536544;
+    }
+    *{box-sizing:border-box}
+    html,body{margin:0;width:100%;min-height:100%;background:var(--bg);color:var(--ink)}
+    body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+    button{font:inherit;color:inherit}
+    #app{width:min(100%,560px);min-height:100dvh;margin:0 auto;background:var(--paper);display:flex;flex-direction:column}
+    .topbar{
+      position:sticky;top:0;z-index:8;background:#29261f;color:#f2ead9;
+      padding:max(8px,env(safe-area-inset-top)) 10px 8px;
+      display:grid;grid-template-columns:1fr auto;gap:8px;align-items:center;
+      border-bottom:2px solid #171510;
+    }
+    .worldline{font-size:12px;line-height:1.35}
+    .worldline b{font-size:15px}
+    .pause{
+      min-height:40px;min-width:72px;border:1px solid #cfc2a4;border-radius:6px;
+      background:#4a4438;color:#fff;font-weight:800;
+    }
+    .status{
+      display:grid;grid-template-columns:repeat(5,1fr);gap:1px;background:var(--line);
+      border-bottom:1px solid var(--line);
+    }
+    .stat{background:#e5dcc7;padding:6px 4px;text-align:center;min-width:0}
+    .stat small{display:block;color:var(--muted);font-size:10px}
+    .stat strong{display:block;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .mapWrap{padding:10px}
+    .map{
+      position:relative;height:330px;border:2px solid var(--line);border-radius:8px;
+      overflow:hidden;background:
+        radial-gradient(circle at 20% 20%,rgba(72,70,46,.16),transparent 24%),
+        radial-gradient(circle at 78% 70%,rgba(120,86,48,.18),transparent 30%),
+        #b9aa84;
+    }
+    .map:before{
+      content:"";position:absolute;inset:0;opacity:.25;
+      background-image:linear-gradient(28deg,transparent 49%,#71664f 50%,transparent 51%);
+      background-size:64px 64px;
+    }
+    .road{position:absolute;height:3px;background:#685f4e;transform-origin:left center;opacity:.65;z-index:1}
+    .place{
+      position:absolute;z-index:3;transform:translate(-50%,-50%);
+      min-width:72px;min-height:46px;padding:5px 6px;border:2px solid #39352c;border-radius:7px;
+      background:#e8dec5;font-size:11px;font-weight:800;line-height:1.2;
+      box-shadow:0 2px 0 rgba(0,0,0,.18);
+    }
+    .place.current{background:#2f2c25;color:#fff;border-color:#111}
+    .place.adjacent{outline:3px solid rgba(255,255,255,.55)}
+    .place .count{display:block;margin-top:3px;font-size:9px;font-weight:600;opacity:.72}
+    .place:disabled{opacity:.58}
+    .playerMark{
+      position:absolute;z-index:5;width:16px;height:16px;border-radius:50%;
+      background:#171510;border:3px solid #f6edda;transform:translate(-50%,-50%);
+      pointer-events:none;box-shadow:0 0 0 1px #171510;
+    }
+    .panel{border-top:2px solid var(--line);background:var(--panel)}
+    .tabs{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--line)}
+    .tab{
+      min-height:44px;border:0;background:#c8bda1;font-weight:800;font-size:13px;
+    }
+    .tab.active{background:#2d2a23;color:white}
+    .pane{padding:10px;min-height:190px}
+    .actionGrid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+    .action{
+      min-height:50px;border:1.5px solid var(--line);border-radius:7px;background:#f0e8d5;
+      font-weight:800;font-size:13px;
+    }
+    .action:disabled{opacity:.35}
+    .cards{display:grid;gap:7px}
+    .card{
+      border:1px solid #746b58;border-radius:6px;background:#efe6d2;padding:8px;
+      display:flex;justify-content:space-between;gap:8px;align-items:center;font-size:12px
+    }
+    .card b{font-size:13px}
+    .bad{color:var(--danger);font-weight:800}
+    .good{color:var(--ok);font-weight:800}
+    .log{display:grid;gap:5px;font-size:12px;line-height:1.45}
+    .log div{border-bottom:1px dashed #9b8e72;padding-bottom:4px}
+    .inventory{display:grid;grid-template-columns:repeat(4,1fr);gap:7px}
+    .item{border:1px solid #746b58;border-radius:6px;background:#efe6d2;padding:8px 5px;text-align:center;font-size:11px}
+    .item strong{display:block;font-size:15px}
+    .bottom{
+      margin-top:auto;padding:8px 10px max(8px,env(safe-area-inset-bottom));
+      background:#29261f;display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;
+    }
+    .bottom button,.bottom a{
+      min-height:42px;border:1px solid #a89c80;border-radius:6px;background:#4a4438;color:#fff;
+      text-decoration:none;display:grid;place-items:center;font-size:12px;font-weight:800;
+    }
+    .notice{font-size:11px;color:var(--muted);padding:0 10px 8px}
+    @media (max-width:380px){
+      .map{height:300px}.place{min-width:64px;font-size:10px}.actionGrid{grid-template-columns:repeat(2,1fr)}
+    }
+  </style>
+</head>
+<body>
+  <div id="app">
+    <header class="topbar">
+      <div class="worldline">
+        <b id="locName">砂塵街</b><br>
+        <span id="clock">1日目 08:00</span> ／ <span id="weather">乾燥</span>
+      </div>
+      <button id="pauseBtn" class="pause" type="button">一時停止</button>
+    </header>
+
+    <section class="status">
+      <div class="stat"><small>HP</small><strong id="hp">100</strong></div>
+      <div class="stat"><small>空腹</small><strong id="hunger">0</strong></div>
+      <div class="stat"><small>所持金</small><strong id="money">100</strong></div>
+      <div class="stat"><small>仲間</small><strong id="party">1</strong></div>
+      <div class="stat"><small>状態</small><strong id="condition">正常</strong></div>
+    </section>
+
+    <main class="mapWrap">
+      <div id="map" class="map" aria-label="荒野地図"></div>
+    </main>
+
+    <div id="notice" class="notice">隣接地点を押すと移動します。世界は停止しない限り自動で進みます。</div>
+
+    <section class="panel">
+      <nav class="tabs">
+        <button class="tab active" data-tab="actions" type="button">行動</button>
+        <button class="tab" data-tab="nearby" type="button">周辺</button>
+        <button class="tab" data-tab="party" type="button">部隊</button>
+        <button class="tab" data-tab="log" type="button">記録</button>
+      </nav>
+      <div id="pane" class="pane"></div>
+    </section>
+
+    <footer class="bottom">
+      <button id="saveBtn" type="button">セーブ</button>
+      <button id="loadBtn" type="button">ロード</button>
+      <a href="kenshi_index.html">入口へ</a>
+    </footer>
+  </div>
+  <script src="kenshi_game.js?v=20260921-1"></script>
+</body>
+</html>
