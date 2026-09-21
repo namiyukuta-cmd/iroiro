@@ -77,9 +77,10 @@ button,a{font:inherit}
   background:#f5f3ec;
 }
 .roadScene{
-  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 900 900'%3E%3Crect width='900' height='900' fill='%23f7f5ef'/%3E%3Cg fill='none' stroke='%23665f55' stroke-width='3' opacity='.8'%3E%3Cpath d='M360 900 C395 700 420 510 445 320 C458 220 470 120 470 0'/%3E%3Cpath d='M575 900 C535 700 505 510 482 320 C470 220 465 120 470 0'/%3E%3Cpath d='M0 300 C180 250 270 260 370 285'/%3E%3Cpath d='M900 250 C700 220 610 245 535 280'/%3E%3C/g%3E%3Cg fill='%23d9d6cd' stroke='%23706a60' stroke-width='2'%3E%3Cellipse cx='130' cy='260' rx='115' ry='70'/%3E%3Cellipse cx='760' cy='245' rx='120' ry='75'/%3E%3Cellipse cx='170' cy='560' rx='70' ry='120'/%3E%3Cellipse cx='710' cy='500' rx='65' ry='110'/%3E%3C/g%3E%3Cg stroke='%23706a60' stroke-width='2' opacity='.55'%3E%3Cpath d='M0 410 H320 M590 390 H900 M0 680 H290 M620 650 H900'/%3E%3C/g%3E%3C/svg%3E");
+  background-image:url("asset/9A9125A4-4E9E-4194-A5BD-A3DA78D7E11A.png");
   background-size:cover;
-  background-position:center;
+  background-position:center 46%;
+  background-repeat:no-repeat;
 }
 .sceneArt.townScene{filter:sepia(.08)}
 .sceneArt.mineScene{filter:contrast(1.06) brightness(.93)}
