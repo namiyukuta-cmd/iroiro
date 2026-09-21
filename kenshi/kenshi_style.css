@@ -762,3 +762,70 @@ button:active:not(:disabled){
 }
 .tapMoveMarker:before{width:2px;height:30px}
 .tapMoveMarker:after{width:30px;height:2px}
+
+/* 追加行動：依頼・取引・仲間の仕事 */
+.questCard{
+  display:grid;
+  gap:6px;
+  margin-bottom:8px;
+  padding:10px;
+  border:1px solid #705f47;
+  border-radius:8px;
+  background:#2d261d;
+}
+.questCard.activeQuest{border-color:#b89c46;background:#342d20}
+.questCard b{font-size:13px}
+.questCard span{font-size:10px;line-height:1.45;color:#e5d9c4}
+.questCard strong{font-size:15px}
+.questCard small,.questEmpty,.questSectionTitle{font-size:9px;color:#cdbb9e}
+.questCard button,.jobButtons button,.shopGrid button{
+  min-height:36px;
+  border:1px solid #76664e;
+  border-radius:6px;
+  background:#463b2c;
+  color:#fff3da;
+  font-size:10px;
+  font-weight:900;
+}
+.questSectionTitle{margin:9px 0 6px;font-weight:900}
+.questEmpty{padding:9px 3px}
+
+.shopGrid{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:7px;
+}
+.shopGrid button{
+  min-height:58px;
+  display:grid;
+  align-content:center;
+  gap:5px;
+}
+.shopGrid button b{font-size:11px}
+.shopGrid button span{font-size:15px}
+.shopGrid button:disabled{opacity:.45}
+.tradeStats,.equipmentLine{
+  margin-top:8px;
+  padding:8px;
+  border:1px solid #5d503c;
+  border-radius:6px;
+  background:#2c251c;
+  color:#eadfc9;
+  font-size:10px;
+  font-weight:800;
+}
+
+.partyJobCard{
+  margin-bottom:8px;
+  padding:6px;
+  border:1px solid #514534;
+  border-radius:7px;
+  background:#29231b;
+}
+.partyJobCard small{display:block;margin:4px 2px 6px;color:#ccb99b;font-size:9px}
+.jobButtons{
+  display:flex;
+  flex-wrap:wrap;
+  gap:4px;
+}
+.jobButtons button{flex:1 1 58px;min-height:31px;padding:3px 5px}
