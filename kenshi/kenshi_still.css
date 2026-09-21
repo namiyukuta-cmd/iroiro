@@ -321,8 +321,7 @@ button,a{font:inherit}
   min-height:50px;
   padding:2px;
   display:grid;
-  grid-template-rows:32px 10px;
-  align-content:center;
+  place-content:center;
   justify-items:center;
   text-align:center;
   overflow:hidden;
@@ -333,14 +332,6 @@ button.itemCard{width:100%;appearance:none}
   height:32px;
   object-fit:contain;
   image-rendering:pixelated;
-}
-.itemName{
-  width:100%;
-  overflow:hidden;
-  text-overflow:ellipsis;
-  white-space:nowrap;
-  font-size:7px;
-  line-height:10px;
 }
 .itemQty{
   position:absolute;
