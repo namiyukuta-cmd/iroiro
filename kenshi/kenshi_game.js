@@ -13,6 +13,7 @@ var panelOverlay=document.getElementById("panelOverlay");
 var panelContent=document.getElementById("panelContent");
 
 var manual={x:0,y:0};
+var tapMarker={x:0,y:0,active:false};
 var activePanel="inventory";
 var autoWork={type:null,nextAt:0};
 var contextSignature=null;
@@ -363,6 +364,9 @@ function simulationTick(){
   }
 
   worldAI(dt);
+  if(tapMarker.active&&dist(state.player,tapMarker)<.45){
+    clearTapMarker();
+  }
   runAutoWork(now,false);
   advance(.55*state.speed);
   state.player.hunger=clamp(state.player.hunger+.018*state.speed,0,100);
@@ -374,6 +378,16 @@ function simulationTick(){
   renderContext();
   renderHotbar();
   if(!mapOverlay.hidden)renderWorldMap();
+}
+
+function clearTapMarker(){
+  tapMarker.active=false;
+}
+
+function setTapMarker(x,y){
+  tapMarker.x=x;
+  tapMarker.y=y;
+  tapMarker.active=true;
 }
 
 function projection(wx,wy){
@@ -440,6 +454,17 @@ function renderField(){
     d.innerHTML=actorVisual(a);
     fieldObjects.appendChild(d);
   });
+
+  if(tapMarker.active){
+    var mq=projection(tapMarker.x,tapMarker.y);
+    if(mq.x>-40&&mq.x<mq.w+40&&mq.y>-40&&mq.y<mq.h+40){
+      var marker=document.createElement("div");
+      marker.className="tapMoveMarker";
+      marker.style.left=mq.x+"px";
+      marker.style.top=mq.y+"px";
+      fieldObjects.appendChild(marker);
+    }
+  }
 
   document.getElementById("playerFixed").classList.toggle("down",state.player.down);
 
@@ -534,6 +559,7 @@ function recruitActor(a){
 
 function fleeFrom(a){
   if(!a)return;
+  clearTapMarker();
   stopAutoWork(false);
   manual.x=0;manual.y=0;
   state.travelDestination=null;
@@ -748,6 +774,7 @@ function renderContext(){
 
     if(a.faction==="砂盗賊"){
       contextActions.appendChild(actionButton("戦う",function(){
+        clearTapMarker();
         stopAutoWork(false);
         state.travelDestination=null;
         state.player.attackTarget=a.id;
@@ -918,6 +945,7 @@ function renderWorldMap(){
 }
 
 function startTravel(key){
+  clearTapMarker();
   stopAutoWork(false);
   var p=PLACES[key];
   if(!p||state.player.down)return;
@@ -936,6 +964,7 @@ var FIELD_DRAG_RADIUS=64;
 var FIELD_TAP_MAX_MS=450;
 
 function stopMovement(show){
+  clearTapMarker();
   manual.x=0;manual.y=0;
   state.player.target=null;
   state.player.attackTarget=null;
@@ -949,6 +978,7 @@ function isFieldUiTarget(target){
 }
 
 function cancelAutoForManual(){
+  clearTapMarker();
   stopAutoWork(false);
   state.travelDestination=null;
   state.player.target=null;
@@ -1009,6 +1039,7 @@ function tapFieldMove(clientX,clientY){
   state.travelDestination=null;
   state.player.attackTarget=null;
   state.player.target=target;
+  setTapMarker(target.x,target.y);
 }
 
 function endFieldMove(e){
@@ -1058,6 +1089,7 @@ function load(){
     if(!raw){showResult("セーブなし");return}
     state=JSON.parse(raw);
     normalizeState();
+    tapMarker={x:0,y:0,active:false};
     autoWork={type:null,nextAt:0};
     contextSignature=null;
     hotbarSignature=null;
@@ -1067,6 +1099,7 @@ function load(){
     renderAll();
   }catch(e){
     state=freshState();
+    tapMarker={x:0,y:0,active:false};
     autoWork={type:null,nextAt:0};
     contextSignature=null;
     hotbarSignature=null;
