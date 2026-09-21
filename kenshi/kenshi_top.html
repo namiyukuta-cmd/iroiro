@@ -76,7 +76,28 @@
     .actor.worker .body{background:#59604a}
     .actor.wanderer .body{background:#4b5562}
     .actor.party .body{background:#1f3557}
-    .actor.player .body{background:#111}.actor.player .head{background:#111}
+    .actor.player{width:34px;height:44px}
+    .actor.player .head{
+      left:12px;top:2px;width:10px;height:10px;
+      border:2px solid #111;background:transparent
+    }
+    .actor.player .body{
+      left:16px;top:13px;width:2px;height:15px;
+      border-radius:0;background:#111
+    }
+    .actor.player .body:before,
+    .actor.player .body:after{
+      content:"";position:absolute;left:0;top:4px;width:2px;height:14px;
+      background:#111;transform-origin:top center
+    }
+    .actor.player .body:before{transform:rotate(55deg)}
+    .actor.player .body:after{transform:rotate(-55deg)}
+    .actor.player .leg1,
+    .actor.player .leg2{
+      top:27px;width:2px;height:14px;background:#111;transform-origin:top center
+    }
+    .actor.player .leg1{left:16px;transform:rotate(28deg)}
+    .actor.player .leg2{right:16px;transform:rotate(-28deg)}
     .actor.selected:after{
       content:"";position:absolute;left:4px;top:-4px;width:20px;height:20px;border:2px solid #fff;border-radius:50%;
       box-shadow:0 0 0 1px #111;
@@ -185,6 +206,6 @@
   </footer>
 </div>
 
-<script src="kenshi_game.js?v=20260921-2"></script>
+<script src="kenshi_game.js?v=20260921-3"></script>
 </body>
 </html>
