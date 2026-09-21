@@ -85,7 +85,7 @@ button,a{font:inherit}
   height:82%;
   aspect-ratio:auto;
 }
-.sceneArt,.mapView,.scenePeople{position:absolute;inset:0}
+.sceneArt,.mapView{position:absolute;inset:0}
 .sceneArt{
   background:#f7f5ef;
   background-repeat:no-repeat;
@@ -100,65 +100,6 @@ button,a{font:inherit}
 .sceneArt.mineScene{filter:contrast(1.06) brightness(.93)}
 .sceneArt.farmScene{filter:brightness(1.03)}
 .sceneArt.ruinsScene{filter:grayscale(.65) contrast(1.08)}
-.scenePeople{
-  z-index:3;
-  pointer-events:none;
-}
-.scenePerson{
-  position:absolute;
-  width:18px;
-  height:42px;
-  transform:translate(-50%,-100%);
-  filter:drop-shadow(0 2px 1px rgba(255,255,255,.55));
-}
-.scenePerson .head{
-  position:absolute;
-  left:50%;top:0;
-  width:9px;height:9px;
-  transform:translateX(-50%);
-  border:2px solid #37332d;
-  border-radius:50%;
-  background:#eeeae1;
-}
-.scenePerson .body{
-  position:absolute;
-  left:50%;top:10px;
-  width:2px;height:18px;
-  transform:translateX(-50%);
-  background:#37332d;
-}
-.scenePerson .body:before,
-.scenePerson .body:after{
-  content:"";
-  position:absolute;
-  top:4px;
-  width:2px;height:15px;
-  background:#37332d;
-  transform-origin:top center;
-}
-.scenePerson .body:before{left:-1px;transform:rotate(36deg)}
-.scenePerson .body:after{right:-1px;transform:rotate(-36deg)}
-.scenePerson .legs{
-  position:absolute;
-  left:50%;top:27px;
-  width:2px;height:14px;
-  transform:translateX(-50%);
-  background:#37332d;
-}
-.scenePerson .legs:before,
-.scenePerson .legs:after{
-  content:"";
-  position:absolute;
-  top:0;
-  width:2px;height:15px;
-  background:#37332d;
-  transform-origin:top center;
-}
-.scenePerson .legs:before{left:0;transform:rotate(18deg)}
-.scenePerson .legs:after{right:0;transform:rotate(-18deg)}
-.scenePerson.worker .head{background:#d6d1c4}
-.scenePerson.trader .body{width:4px}
-.scenePerson.guard .body:after{height:19px;transform:rotate(-10deg)}
 .sceneCaption{
   position:absolute;
   left:7px;top:7px;
@@ -233,12 +174,35 @@ button,a{font:inherit}
   left:7px;bottom:6px;
   font-size:8px;font-weight:900;color:#5e5134;
 }
+.sceneActions{
+  position:absolute;
+  z-index:9;
+  right:0;
+  top:30%;
+  width:84px;
+  display:grid;
+  gap:6px;
+}
+.sceneActions[hidden]{display:none}
+.sceneActions button{
+  min-height:40px;
+  padding:5px 8px 5px 10px;
+  border:1px solid #756b5a;
+  border-right:0;
+  border-radius:17px 0 0 17px;
+  background:rgba(58,52,44,.92);
+  color:#fffaf0;
+  font-size:9px;
+  font-weight:950;
+  box-shadow:0 2px 7px rgba(0,0,0,.12);
+}
+.sceneActions button:active{transform:translateX(-3px)}
 .destinationTab{
   position:absolute;
   z-index:9;
   right:0;
-  bottom:12%;
-  min-width:74px;
+  bottom:8%;
+  min-width:78px;
   min-height:40px;
   padding:5px 10px 5px 12px;
   border:1px solid #756849;
@@ -257,8 +221,8 @@ button,a{font:inherit}
   grid-template-rows:1fr 1fr;
   gap:5px 7px;
   padding:6px 9px;
-  background:#fff1a8;
-  border-top:2px solid #b79c2d;
+  background:#eee8d2;
+  border-top:2px solid #a59b7d;
 }
 .meter{
   min-width:0;
@@ -285,9 +249,9 @@ button,a{font:inherit}
   align-self:center;
   justify-self:center;
   width:60px;height:60px;
-  border:3px solid #9b8122;
+  border:3px solid #9b8c59;
   border-radius:50%;
-  background:#f8df5f;
+  background:#e8ddb5;
   display:grid;
   place-content:center;
   text-align:center;
@@ -299,24 +263,24 @@ button,a{font:inherit}
   min-height:0;
   display:grid;
   grid-template-rows:42px minmax(0,1fr);
-  border-top:2px solid #a78f29;
-  background:#f3e47f;
+  border-top:2px solid #a89f83;
+  background:#e9e2c9;
 }
 .tabBar{
   display:grid;
-  grid-template-columns:repeat(4,minmax(0,1fr));
+  grid-template-columns:repeat(3,minmax(0,1fr));
 }
 .tab{
   border:0;
-  border-right:1px solid #9f892b;
-  border-bottom:1px solid #9f892b;
-  background:#e7d76f;
-  color:#241e13;
+  border-right:1px solid #aaa083;
+  border-bottom:1px solid #aaa083;
+  background:#ded6ba;
+  color:#2c281f;
   font-size:10px;
   font-weight:950;
 }
 .tab:last-child{border-right:0}
-.tab.active{background:#766720;color:#fff8dc}
+.tab.active{background:#7c7150;color:#fffaf0}
 .panelContent{
   min-height:0;
   overflow:auto;
@@ -339,9 +303,9 @@ button,a{font:inherit}
 }
 .actionGrid button,.itemCard,.partyCard,.logRow{
   min-height:42px;
-  border:1px solid #9a8430;
+  border:1px solid #aaa083;
   border-radius:7px;
-  background:#fff2a9;
+  background:#f4efdf;
   color:#211c12;
   font-size:10px;
   font-weight:900;
@@ -430,6 +394,5 @@ button,a{font:inherit}
 }
 .mapPlayerMarker.traveling i{background:#d79b2c}
 .sceneWindow.mapMode .sceneCaption,
-.sceneWindow.mapMode .travelState,
-.sceneWindow.mapMode .scenePeople{display:none}
+.sceneWindow.mapMode .travelState{display:none}
 .sceneWindow.mapMode .mapNode{font-size:10px}
