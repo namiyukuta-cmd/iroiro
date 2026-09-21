@@ -1049,6 +1049,19 @@ function rest(){
   renderAll();
 }
 
+function makeContextGroup(label,className){
+  var wrap=document.createElement("div");
+  wrap.className="contextGroup "+className;
+  var title=document.createElement("span");
+  title.className="contextGroupTitle";
+  title.textContent=label;
+  var buttons=document.createElement("div");
+  buttons.className="contextGroupButtons";
+  wrap.appendChild(title);
+  wrap.appendChild(buttons);
+  return {wrap:wrap,buttons:buttons};
+}
+
 function renderContext(){
   var a=nearestEncounterActor();
   var place=nearbyPlace();
@@ -1075,76 +1088,82 @@ function renderContext(){
   contextSignature=sig;
   contextActions.innerHTML="";
 
+  var actorGroup=makeContextGroup("人物","actorGroup");
+  var placeGroup=makeContextGroup("場所","placeGroup");
+  var actorCount=0;
+  var placeCount=0;
+
+  function addActor(label,fn,disabled){
+    actorGroup.buttons.appendChild(actionButton(label,fn,disabled));
+    actorCount++;
+  }
+
+  function addPlace(label,fn,disabled){
+    placeGroup.buttons.appendChild(actionButton(label,fn,disabled));
+    placeCount++;
+  }
+
   if(state.player.down){
     if(place==="dust"||place==="farm"){
-      contextActions.appendChild(actionButton("休息",rest,false));
+      addPlace("休息",rest,false);
     }
+    if(placeCount)contextActions.appendChild(placeGroup.wrap);
     return;
   }
 
   if(a){
     if(a.down){
-      contextActions.appendChild(actionButton("治療",function(){healActor(a)},state.player.med<=0||a.faction==="砂盗賊"));
-      contextActions.appendChild(actionButton("漁る",function(){lootActor(a)},a.loot<=0));
-      return;
-    }
-
-    if(a.faction==="砂盗賊"){
-      contextActions.appendChild(actionButton("戦う",function(){
+      addActor("治療",function(){healActor(a)},state.player.med<=0||a.faction==="砂盗賊");
+      addActor("漁る",function(){lootActor(a)},a.loot<=0);
+    }else if(a.faction==="砂盗賊"){
+      addActor("戦う",function(){
         clearTapMarker();
         stopAutoWork(false);
         state.travelDestination=null;
         state.player.attackTarget=a.id;
         showResult("戦闘");
-      },false));
-      contextActions.appendChild(actionButton("逃げる",function(){fleeFrom(a)},false));
-      return;
-    }
-
-    if(a.type==="trader"){
-      contextActions.appendChild(actionButton("話す",function(){talkActor(a)},false));
-      contextActions.appendChild(actionButton("取引",function(){openTrade(a)},false));
-      return;
-    }
-
-    if(a.type==="wanderer"&&a.faction==="無所属"){
-      contextActions.appendChild(actionButton("話す",function(){talkActor(a)},false));
-      contextActions.appendChild(actionButton("雇う 50",function(){recruitActor(a)},state.player.money<50));
-      return;
-    }
-
-    if(a.type==="guard"||a.type==="worker"||a.type==="dog"||a.type==="pack"){
-      contextActions.appendChild(actionButton("話す",function(){talkActor(a)},false));
-      return;
+      },false);
+      addActor("逃げる",function(){fleeFrom(a)},false);
+    }else if(a.type==="trader"){
+      addActor("話す",function(){talkActor(a)},false);
+      addActor("取引",function(){openTrade(a)},false);
+    }else if(a.type==="wanderer"&&a.faction==="無所属"){
+      addActor("話す",function(){talkActor(a)},false);
+      addActor("雇う 50",function(){recruitActor(a)},state.player.money<50);
+    }else if(a.type==="guard"||a.type==="worker"||a.type==="dog"||a.type==="pack"){
+      addActor("話す",function(){talkActor(a)},false);
     }
   }
 
   if(state.activeQuest){
     var qdef=QUESTS[state.activeQuest.id];
     if(place===qdef.turnPlace&&questReady()){
-      contextActions.appendChild(actionButton("依頼報告",completeQuest,false));
+      addPlace("依頼報告",completeQuest,false);
     }
   }
 
   if(place==="mine"){
-    contextActions.appendChild(actionButton(autoWork.type==="mine"?"採掘中・停止":"採掘",function(){startAutoWork("mine")},false));
-    contextActions.appendChild(actionButton("依頼",function(){openQuestBoard("mine")},false));
+    addPlace(autoWork.type==="mine"?"採掘中・停止":"採掘",function(){startAutoWork("mine")},false);
+    addPlace("依頼",function(){openQuestBoard("mine")},false);
   }else if(place==="ruins"||place==="salt"){
-    contextActions.appendChild(actionButton(autoWork.type==="scavenge"?"漁り中・停止":"漁る",function(){startAutoWork("scavenge")},false));
+    addPlace(autoWork.type==="scavenge"?"漁り中・停止":"漁る",function(){startAutoWork("scavenge")},false);
   }else if(place==="cross"){
-    contextActions.appendChild(actionButton(autoWork.type==="scavenge"?"漁り中・停止":"漁る",function(){startAutoWork("scavenge")},false));
-    contextActions.appendChild(actionButton("依頼",function(){openQuestBoard("cross")},false));
+    addPlace(autoWork.type==="scavenge"?"漁り中・停止":"漁る",function(){startAutoWork("scavenge")},false);
+    addPlace("依頼",function(){openQuestBoard("cross")},false);
   }else if(place==="farm"){
-    contextActions.appendChild(actionButton(autoWork.type==="farm"?"農作業中・停止":"農作業",function(){startAutoWork("farm")},false));
-    contextActions.appendChild(actionButton("依頼",function(){openQuestBoard("farm")},false));
-    contextActions.appendChild(actionButton("休息",rest,false));
+    addPlace(autoWork.type==="farm"?"農作業中・停止":"農作業",function(){startAutoWork("farm")},false);
+    addPlace("依頼",function(){openQuestBoard("farm")},false);
+    addPlace("休息",rest,false);
   }else if(place==="dust"){
-    contextActions.appendChild(actionButton("依頼",function(){openQuestBoard("dust")},false));
-    contextActions.appendChild(actionButton("休息",rest,false));
+    addPlace("依頼",function(){openQuestBoard("dust")},false);
+    addPlace("休息",rest,false);
   }else{
-    contextActions.appendChild(actionButton("野営",function(){campRest(false)},false));
-    contextActions.appendChild(actionButton("焚き火",function(){campRest(true)},state.player.scrap<1||state.player.food<1));
+    addPlace("野営",function(){campRest(false)},false);
+    addPlace("焚き火",function(){campRest(true)},state.player.scrap<1||state.player.food<1);
   }
+
+  if(actorCount)contextActions.appendChild(actorGroup.wrap);
+  if(placeCount)contextActions.appendChild(placeGroup.wrap);
 }
 
 function renderHotbar(){
