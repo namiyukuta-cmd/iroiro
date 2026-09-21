@@ -270,55 +270,205 @@ button,a{
   margin:0 7px 5px;
   border:2px solid #9b5a45;
   border-radius:8px;
-  background:var(--panel);
-  display:grid;
-  grid-template-columns:minmax(0,1fr) minmax(120px,42%);
+  background:#d8ccb2;
   overflow:hidden;
 }
-.encounterMain{
-  min-width:0;
-  padding:8px 9px;
+.encounterScene{
   position:relative;
+  width:100%;
+  height:100%;
+  min-height:0;
+  overflow:hidden;
+  background:
+    linear-gradient(180deg,rgba(226,216,194,.96),rgba(194,178,144,.96));
 }
-.encounterTitle{
-  font-size:13px;
+.sceneGround{
+  position:absolute;
+  left:0;
+  right:0;
+  bottom:22%;
+  height:2px;
+  background:rgba(86,73,55,.42);
+}
+.scenePlace{
+  position:absolute;
+  left:8px;
+  top:6px;
+  z-index:5;
+  min-height:16px;
+  padding:2px 5px;
+  border-radius:4px;
+  background:rgba(246,238,218,.78);
+  color:#4f4637;
+  font-size:9px;
   font-weight:900;
-  white-space:nowrap;
+}
+.scenePlace:empty{display:none}
+.sceneEntities{
+  position:absolute;
+  inset:0;
+  z-index:3;
+}
+.sceneEntity{
+  position:absolute;
+  transform:translate(-50%,-50%);
+  min-width:18px;
+  text-align:center;
+  pointer-events:none;
+}
+.sceneEntity .sceneName{
+  display:block;
+  margin-top:2px;
+  max-width:58px;
   overflow:hidden;
   text-overflow:ellipsis;
+  white-space:nowrap;
+  font-size:7px;
+  font-weight:900;
+  color:#3d382f;
 }
-.encounterInfo{
-  margin-top:4px;
-  color:var(--muted);
-  font-size:10px;
-  line-height:1.35;
+.sceneHuman{
+  position:relative;
+  width:18px;
+  height:28px;
+  margin:0 auto;
 }
+.sceneHuman .hHead{
+  position:absolute;
+  left:6px;
+  top:0;
+  width:7px;
+  height:7px;
+  border:1.5px solid #3e392f;
+  border-radius:50%;
+  background:#e8dfcb;
+}
+.sceneHuman .hBody{
+  position:absolute;
+  left:8px;
+  top:7px;
+  width:3px;
+  height:11px;
+  border-radius:2px;
+  background:#4f4a40;
+}
+.sceneHuman .hArmL,.sceneHuman .hArmR,
+.sceneHuman .hLegL,.sceneHuman .hLegR{
+  position:absolute;
+  width:2.5px;
+  height:10px;
+  border-radius:2px;
+  background:#4f4a40;
+  transform-origin:top;
+}
+.sceneHuman .hArmL{left:8px;top:9px;transform:rotate(50deg)}
+.sceneHuman .hArmR{left:9px;top:9px;transform:rotate(-50deg)}
+.sceneHuman .hLegL{left:8px;top:17px;transform:rotate(25deg)}
+.sceneHuman .hLegR{left:9px;top:17px;transform:rotate(-25deg)}
+.sceneEntity.bandit .sceneHuman *{border-color:#7e2e26}
+.sceneEntity.bandit .sceneHuman .hBody,
+.sceneEntity.bandit .sceneHuman .hArmL,
+.sceneEntity.bandit .sceneHuman .hArmR,
+.sceneEntity.bandit .sceneHuman .hLegL,
+.sceneEntity.bandit .sceneHuman .hLegR{background:#7e2e26}
+.sceneEntity.trader .sceneHuman .hBody,
+.sceneEntity.guard .sceneHuman .hBody{background:#665a39}
+.sceneAnimal{
+  position:relative;
+  width:24px;
+  height:15px;
+  margin:5px auto 0;
+}
+.sceneAnimal:before{
+  content:"";
+  position:absolute;
+  left:4px;
+  top:5px;
+  width:14px;
+  height:7px;
+  border-radius:55% 45% 45% 50%;
+  background:#5c4d3c;
+}
+.sceneAnimal:after{
+  content:"";
+  position:absolute;
+  right:1px;
+  top:2px;
+  width:7px;
+  height:7px;
+  border-radius:50% 50% 42% 42%;
+  background:#5c4d3c;
+}
+.sceneEntity.pack .sceneAnimal{transform:scale(1.2)}
+.sceneEntity.down{transform:translate(-50%,-50%) rotate(90deg);opacity:.7}
+.sceneEntity.down .sceneName{transform:rotate(-90deg);margin-top:-4px;margin-left:15px}
+.scenePlayer{
+  position:absolute;
+  left:50%;
+  top:58%;
+  z-index:4;
+  width:28px;
+  height:38px;
+  transform:translate(-50%,-50%);
+  pointer-events:none;
+}
+.scenePlayer .head{
+  position:absolute;
+  left:9px;
+  top:0;
+  width:10px;
+  height:10px;
+  border:2px solid #4b2d83;
+  border-radius:50%;
+}
+.scenePlayer .body{
+  position:absolute;
+  left:13px;
+  top:10px;
+  width:3px;
+  height:14px;
+  background:#4b2d83;
+}
+.scenePlayer .arm,.scenePlayer .leg{
+  position:absolute;
+  width:3px;
+  height:14px;
+  background:#4b2d83;
+  transform-origin:top;
+}
+.scenePlayer .armL{left:13px;top:13px;transform:rotate(55deg)}
+.scenePlayer .armR{left:14px;top:13px;transform:rotate(-55deg)}
+.scenePlayer .legL{left:13px;top:23px;transform:rotate(28deg)}
+.scenePlayer .legR{left:14px;top:23px;transform:rotate(-28deg)}
 .encounterActions{
-  min-width:0;
-  padding:6px;
-  display:grid;
-  grid-template-columns:repeat(2,minmax(0,1fr));
-  gap:5px;
-  align-content:center;
-  border-left:1px solid #b49a85;
+  position:absolute;
+  right:6px;
+  bottom:5px;
+  z-index:8;
+  display:flex;
+  flex-wrap:wrap;
+  justify-content:flex-end;
+  gap:4px;
+  max-width:68%;
 }
 .encounterActions button{
-  min-height:34px;
-  padding:3px 4px;
+  min-height:28px;
+  padding:3px 7px;
   border:1px solid var(--line);
   border-radius:6px;
-  background:#fff9ea;
-  font-size:10px;
+  background:rgba(255,249,234,.94);
+  font-size:9px;
   font-weight:850;
 }
 .encounterActions button:disabled{opacity:.38}
 .resultToast{
   position:absolute;
-  left:9px;
-  bottom:4px;
-  max-width:95%;
+  left:7px;
+  bottom:6px;
+  z-index:8;
+  max-width:30%;
   color:#5c342b;
-  font-size:10px;
+  font-size:9px;
   font-weight:900;
   opacity:0;
   transform:translateY(3px);
