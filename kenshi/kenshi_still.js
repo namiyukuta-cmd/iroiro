@@ -3,7 +3,8 @@
 
 var SAVE_KEY="iroiro_kenshi_still_save_v1";
 var INVENTORY_CAPACITY=20;
-var ITEM_META={
+var ITEMS=window.KENSHI_ITEMS||{};
+var ITEM_META=window.KENSHI_LEGACY_ITEM_META||{
   food:{name:"食料",stack:5},
   med:{name:"治療具",stack:5},
   ore:{name:"鉄鉱石",stack:5},
