@@ -1,486 +1,452 @@
 (function(){
 "use strict";
 
-var SAVE_KEY="iroiro_kenshi_save_v1";
+var SAVE_KEY="iroiro_kenshi_save_v2";
+var world=document.getElementById("world");
+var actorLayer=document.getElementById("actors");
+var landmarkLayer=document.getElementById("landmarks");
+var routeSvg=document.getElementById("routeSvg");
+var drawer=document.getElementById("drawer");
+var selectedId=null;
+var moveMode=false;
+var openDrawer="";
+var lastTick=Date.now();
+var simTimer=null;
 
 var PLACES={
-  dust:{name:"砂塵街",x:23,y:18,neighbors:["cross","farm"],kind:"town"},
-  cross:{name:"十字路",x:51,y:34,neighbors:["dust","mine","ruins","farm"],kind:"road"},
-  mine:{name:"鉄鉱山",x:79,y:19,neighbors:["cross","camp"],kind:"mine"},
-  ruins:{name:"旧遺跡",x:76,y:55,neighbors:["cross","salt","camp"],kind:"ruins"},
-  farm:{name:"南農場",x:21,y:57,neighbors:["dust","cross","salt"],kind:"farm"},
-  salt:{name:"塩の荒地",x:43,y:79,neighbors:["farm","ruins","camp"],kind:"wild"},
-  camp:{name:"盗賊野営地",x:82,y:82,neighbors:["mine","ruins","salt"],kind:"bandit"}
+  dust:{name:"砂塵街",x:18,y:20,kind:"town"},
+  cross:{name:"十字路",x:49,y:35,kind:"cross"},
+  mine:{name:"鉄鉱山",x:80,y:19,kind:"mine"},
+  ruins:{name:"旧遺跡",x:78,y:55,kind:"ruins"},
+  farm:{name:"南農場",x:20,y:59,kind:"farm"},
+  salt:{name:"塩の荒地",x:45,y:80,kind:"salt"},
+  camp:{name:"盗賊野営地",x:83,y:82,kind:"camp"}
 };
 
-var ROADS=[
-  ["dust","cross"],["dust","farm"],["cross","mine"],["cross","ruins"],
-  ["cross","farm"],["mine","camp"],["ruins","salt"],["ruins","camp"],
-  ["farm","salt"],["salt","camp"]
-];
+var ROADS=[["dust","cross"],["dust","farm"],["cross","mine"],["cross","ruins"],["cross","farm"],["mine","camp"],["ruins","salt"],["ruins","camp"],["farm","salt"],["salt","camp"]];
 
-var NPC_BLUEPRINTS=[
-  ["行商人","交易組合","trader","dust",95,180],
-  ["護衛","交易組合","guard","dust",120,35],
-  ["鉱夫","自由民","worker","mine",100,28],
-  ["鉱夫","自由民","worker","mine",100,22],
-  ["農民","南農場","worker","farm",90,18],
-  ["農民","南農場","worker","farm",90,15],
-  ["放浪者","無所属","wanderer","cross",100,15],
-  ["旅人","無所属","wanderer","ruins",100,24],
-  ["砂盗賊","砂盗賊","bandit","camp",105,35],
-  ["砂盗賊","砂盗賊","bandit","camp",105,30],
-  ["砂盗賊","砂盗賊","bandit","salt",105,28]
-];
+function dist(a,b){var dx=a.x-b.x,dy=a.y-b.y;return Math.hypot(dx,dy)}
+function clamp(v,a,b){return Math.max(a,Math.min(b,v))}
+function pad(n){return String(n).padStart(2,"0")}
+function rnd(a,b){return a+Math.random()*(b-a)}
+function choice(a){return a[Math.floor(Math.random()*a.length)]}
 
-var state=null;
-var activeTab="actions";
-var timer=null;
-
-function makeNPCs(){
-  return NPC_BLUEPRINTS.map(function(b,i){
-    return {id:i+1,name:b[0],faction:b[1],role:b[2],loc:b[3],hp:b[4],maxHp:b[4],money:b[5],down:false,recruited:false};
-  });
+function actor(id,name,faction,type,x,y,extra){
+  var o={id:id,name:name,faction:faction,type:type,x:x,y:y,hp:100,maxHp:100,money:20,down:false,
+    target:null,speed:rnd(1.1,1.8),group:null,owner:null,loot:0,recruited:false,attackCd:0};
+  return Object.assign(o,extra||{});
 }
 
 function freshState(){
+  var a=[];
+  a.push(actor("trader","商人","交易組合","trader",18,20,{money:220,group:"caravan",route:["dust","cross","mine","cross","dust"],routeIndex:1,speed:1.25}));
+  a.push(actor("guard","護衛","交易組合","guard",16.5,21,{hp:120,maxHp:120,group:"caravan",follow:"trader",speed:1.45}));
+  a.push(actor("pack","荷獣","交易組合","pack",15.5,19.5,{hp:130,maxHp:130,group:"caravan",follow:"trader",speed:1.25}));
+
+  a.push(actor("wanderer","放浪者","無所属","wanderer",48,38,{money:35,route:["cross","ruins","salt","farm","cross"],routeIndex:1,speed:1.15}));
+  a.push(actor("dog","犬","無所属","dog",46.5,39,{hp:80,maxHp:80,owner:"wanderer",follow:"wanderer",speed:1.65}));
+
+  a.push(actor("miner1","鉱夫","自由民","worker",79,20,{money:24,home:"mine",speed:1.0}));
+  a.push(actor("miner2","鉱夫","自由民","worker",82,21,{money:18,home:"mine",speed:1.0}));
+  a.push(actor("farmer1","農民","南農場","worker",18,59,{money:16,home:"farm",speed:.9}));
+  a.push(actor("farmer2","農民","南農場","worker",22,61,{money:14,home:"farm",speed:.9}));
+
+  a.push(actor("bandit1","砂盗賊","砂盗賊","bandit",81,81,{money:30,group:"bandits",speed:1.45}));
+  a.push(actor("bandit2","砂盗賊","砂盗賊","bandit",84,83,{money:22,group:"bandits",speed:1.42}));
+  a.push(actor("bandit3","砂盗賊","砂盗賊","bandit",86,80,{money:26,group:"bandits",speed:1.38}));
+
   return {
-    version:1,day:1,hour:8,minute:0,paused:false,ticks:0,
-    weather:"乾燥",
-    player:{loc:"dust",hp:100,maxHp:100,hunger:0,money:100,food:2,med:1,ore:0,scrap:0,attack:13,defense:3,down:false},
-    party:[{name:"主人公",hp:100,maxHp:100}],
-    npcs:makeNPCs(),
-    relations:{"交易組合":0,"南農場":0,"砂盗賊":-100,"自由民":0,"無所属":0},
-    log:["砂塵街から始まった。世界はすでに動いている。"]
+    version:2,day:1,hour:8,minute:0,paused:false,speed:1,weather:"乾燥",tick:0,
+    player:{x:18,y:24,hp:100,maxHp:100,hunger:0,money:100,food:2,med:1,ore:0,scrap:0,attack:16,defense:4,down:false,target:null,attackTarget:null},
+    actors:a,party:["player"],relations:{"交易組合":0,"南農場":0,"自由民":0,"無所属":0,"砂盗賊":-100},
+    log:["砂塵街の外から始まった。人々は主人公と無関係に動いている。"]
   };
 }
 
-function byId(id){return document.getElementById(id)}
-function choice(a){return a[Math.floor(Math.random()*a.length)]}
-function clamp(n,a,b){return Math.max(a,Math.min(b,n))}
-function pad(n){return String(n).padStart(2,"0")}
+var state=freshState();
 
-function log(msg){
-  state.log.unshift(msg);
-  state.log=state.log.slice(0,40);
-}
+function log(msg){state.log.unshift(msg);state.log=state.log.slice(0,50)}
 
 function advance(minutes){
   state.minute+=minutes;
-  while(state.minute>=60){state.minute-=60;state.hour+=1}
-  while(state.hour>=24){state.hour-=24;state.day+=1}
+  while(state.minute>=60){state.minute-=60;state.hour++}
+  while(state.hour>=24){state.hour-=24;state.day++}
 }
 
-function isHostile(npc){
-  return npc.faction==="砂盗賊";
+function getActor(id){return state.actors.find(function(a){return a.id===id})||null}
+function aliveActors(){return state.actors.filter(function(a){return !a.down})}
+function hostile(a,bFaction){
+  if(a.faction==="砂盗賊" && bFaction!=="砂盗賊") return true;
+  if(bFaction==="砂盗賊" && a.faction!=="砂盗賊") return true;
+  return false;
 }
 
-function livingAt(loc){
-  return state.npcs.filter(function(n){return n.loc===loc && !n.down && !n.recruited});
-}
-
-function downAt(loc){
-  return state.npcs.filter(function(n){return n.loc===loc && n.down && !n.recruited});
-}
-
-function connected(a,b){
-  return PLACES[a].neighbors.indexOf(b)>=0;
-}
-
-function travelTime(a,b){
-  var ax=PLACES[a].x,ay=PLACES[a].y,bx=PLACES[b].x,by=PLACES[b].y;
-  var d=Math.hypot(ax-bx,ay-by);
-  return Math.round(20+d*0.7);
-}
-
-function moveNPCs(){
-  state.npcs.forEach(function(n){
-    if(n.down||n.recruited) return;
-    var chance=n.role==="wanderer"?0.45:n.role==="trader"?0.32:n.role==="bandit"?0.36:0.18;
-    if(Math.random()>chance) return;
-    var opts=PLACES[n.loc].neighbors.slice();
-    if(n.role==="trader" && opts.indexOf("dust")>=0 && Math.random()<0.45){n.loc="dust";return}
-    if(n.role==="worker" && n.faction==="自由民" && n.loc!=="mine" && opts.indexOf("mine")>=0 && Math.random()<0.55){n.loc="mine";return}
-    if(n.role==="worker" && n.faction==="南農場" && n.loc!=="farm" && opts.indexOf("farm")>=0 && Math.random()<0.55){n.loc="farm";return}
-    n.loc=choice(opts);
+function nearestPlace(pos){
+  var best=null,bd=999;
+  Object.keys(PLACES).forEach(function(k){
+    var d=dist(pos,PLACES[k]);if(d<bd){bd=d;best=k}
   });
+  return {key:best,d:bd};
 }
 
-function resolveWorldCombat(){
-  Object.keys(PLACES).forEach(function(loc){
-    var here=livingAt(loc);
-    var bandits=here.filter(function(n){return isHostile(n)});
-    var others=here.filter(function(n){return !isHostile(n)});
-    if(!bandits.length||!others.length||Math.random()>0.36) return;
-    var a=choice(bandits),b=choice(others);
-    var da=4+Math.floor(Math.random()*12);
-    var db=6+Math.floor(Math.random()*15);
-    a.hp=clamp(a.hp-da,0,a.maxHp);
-    b.hp=clamp(b.hp-db,0,b.maxHp);
-    log(PLACES[loc].name+"で"+a.name+"と"+b.name+"が戦闘。");
-    if(a.hp<=0){a.down=true;log(a.name+"が倒れた。")}
-    if(b.hp<=0){b.down=true;log(b.name+"が倒れた。")}
-  });
-}
+function setTarget(a,x,y){a.target={x:clamp(x,2,98),y:clamp(y,3,97)}}
 
-function banditEncounter(){
-  if(state.player.down) return;
-  var bandits=livingAt(state.player.loc).filter(isHostile);
-  if(!bandits.length||Math.random()>0.34) return;
-  var enemy=choice(bandits);
-  var playerDamage=Math.max(1,Math.floor(state.player.attack*(0.7+Math.random()*0.7)));
-  var enemyDamage=Math.max(1,Math.floor((12+Math.random()*10)-state.player.defense));
-  enemy.hp=clamp(enemy.hp-playerDamage,0,enemy.maxHp);
-  state.player.hp=clamp(state.player.hp-enemyDamage,0,state.player.maxHp);
-  log(enemy.name+"に襲われた。主人公 -"+enemyDamage+" / "+enemy.name+" -"+playerDamage);
-  if(enemy.hp<=0){enemy.down=true;log(enemy.name+"が倒れた。")}
-  if(state.player.hp<=0){
-    state.player.down=true;
-    state.paused=true;
-    log("主人公は倒れた。休息か治療で立て直す必要がある。");
+function routeActor(a){
+  if(a.follow) return;
+  if(a.route && (!a.target || dist(a,a.target)<2)){
+    var key=a.route[a.routeIndex%a.route.length];
+    a.routeIndex=(a.routeIndex+1)%a.route.length;
+    setTarget(a,PLACES[key].x+rnd(-1.8,1.8),PLACES[key].y+rnd(-1.8,1.8));
+    return;
+  }
+  if(a.home && (!a.target || dist(a,a.target)<1.5) && Math.random()<.35){
+    var h=PLACES[a.home];setTarget(a,h.x+rnd(-4,4),h.y+rnd(-4,4));return;
+  }
+  if(a.type==="bandit" && (!a.target || dist(a,a.target)<2)){
+    var choices=["camp","salt","ruins","cross"];var p=PLACES[choice(choices)];
+    setTarget(a,p.x+rnd(-3,3),p.y+rnd(-3,3));
   }
 }
 
-function worldTick(){
-  if(!state||state.paused) return;
-  state.ticks+=1;
-  advance(10);
-  state.player.hunger=clamp(state.player.hunger+1,0,100);
-  if(state.player.hunger>=85 && state.ticks%3===0){
-    state.player.hp=clamp(state.player.hp-2,0,state.player.maxHp);
-    if(state.player.hp<=0){state.player.down=true;state.paused=true;log("空腹で倒れた。")}
-  }
-  if(state.ticks%2===0) moveNPCs();
-  resolveWorldCombat();
-  banditEncounter();
-  if(state.ticks%12===0){
-    state.weather=choice(["乾燥","強風","砂埃","薄曇り"]);
-  }
-  render();
-  if(state.ticks%6===0) save(false);
+function followActor(a){
+  if(!a.follow) return false;
+  var lead=getActor(a.follow);
+  if(!lead || lead.down) return false;
+  var ox=(a.type==="dog"?-2.1:-1.5),oy=(a.type==="dog"?1.4:1.1);
+  if(a.type==="pack"){ox=-2.8;oy=-1.2}
+  setTarget(a,lead.x+ox,lead.y+oy);
+  return true;
 }
 
-function movePlayer(target){
-  if(state.player.down) return;
-  if(!connected(state.player.loc,target)) return;
-  var from=state.player.loc;
-  var mins=travelTime(from,target);
-  state.player.loc=target;
-  advance(mins);
-  state.player.hunger=clamp(state.player.hunger+4,0,100);
-  log(PLACES[target].name+"へ移動した。");
-  banditEncounter();
-  render();
+function moveTowards(o,dt){
+  if(!o.target) return;
+  var dx=o.target.x-o.x,dy=o.target.y-o.y,d=Math.hypot(dx,dy);
+  if(d<.25){o.target=null;return}
+  var step=o.speed*dt*state.speed;
+  o.x+=dx/d*Math.min(step,d);
+  o.y+=dy/d*Math.min(step,d);
 }
 
-function mine(){
-  if(state.player.loc!=="mine"||state.player.down) return;
-  var got=1+Math.floor(Math.random()*3);
-  state.player.ore+=got;
-  advance(50);
-  state.player.hunger=clamp(state.player.hunger+5,0,100);
-  log("鉄鉱石を"+got+"個採掘した。");
-  if(Math.random()<0.18) banditEncounter();
-  render();
-}
-
-function scavenge(){
-  if(["ruins","cross","salt"].indexOf(state.player.loc)<0||state.player.down) return;
-  advance(40);
-  state.player.hunger=clamp(state.player.hunger+4,0,100);
-  var r=Math.random();
-  if(r<0.35){var s=1+Math.floor(Math.random()*2);state.player.scrap+=s;log("廃材を"+s+"個見つけた。")}
-  else if(r<0.55){state.player.food+=1;log("保存食を1個見つけた。")}
-  else if(r<0.68){state.player.med+=1;log("治療具を1個見つけた。")}
-  else if(r<0.82){var m=5+Math.floor(Math.random()*18);state.player.money+=m;log(m+"を拾った。")}
-  else log("使える物は見つからなかった。");
-  if(Math.random()<0.2) banditEncounter();
-  render();
-}
-
-function workFarm(){
-  if(state.player.loc!=="farm"||state.player.down) return;
-  advance(60);
-  var pay=8+Math.floor(Math.random()*8);
-  state.player.money+=pay;
-  state.player.food+=1;
-  state.player.hunger=clamp(state.player.hunger+5,0,100);
-  state.relations["南農場"]+=1;
-  log("農作業をして"+pay+"と保存食1個を得た。");
-  render();
-}
-
-function eat(){
-  if(state.player.food<=0) return;
-  state.player.food-=1;
-  state.player.hunger=clamp(state.player.hunger-38,0,100);
-  log("保存食を食べた。");
-  render();
-}
-
-function useMed(){
-  if(state.player.med<=0||state.player.hp>=state.player.maxHp) return;
-  state.player.med-=1;
-  state.player.hp=clamp(state.player.hp+35,0,state.player.maxHp);
-  if(state.player.hp>0) state.player.down=false;
-  log("治療具を使った。");
-  render();
-}
-
-function rest(){
-  if(["dust","farm"].indexOf(state.player.loc)<0) return;
-  advance(180);
-  state.player.hp=clamp(state.player.hp+40,0,state.player.maxHp);
-  state.player.hunger=clamp(state.player.hunger+8,0,100);
-  state.player.down=false;
-  state.paused=false;
-  log("休息した。");
-  render();
-}
-
-function sellOre(){
-  if(state.player.loc!=="dust"||state.player.ore<=0) return;
-  var value=state.player.ore*13;
-  log("鉄鉱石"+state.player.ore+"個を"+value+"で売った。");
-  state.player.money+=value;
-  state.player.ore=0;
-  render();
-}
-
-function sellScrap(){
-  if(state.player.loc!=="dust"||state.player.scrap<=0) return;
-  var value=state.player.scrap*9;
-  log("廃材"+state.player.scrap+"個を"+value+"で売った。");
-  state.player.money+=value;
-  state.player.scrap=0;
-  render();
-}
-
-function buyFood(){
-  if(state.player.loc!=="dust"||state.player.money<12) return;
-  state.player.money-=12;state.player.food+=1;log("保存食を12で買った。");render();
-}
-
-function buyMed(){
-  if(state.player.loc!=="dust"||state.player.money<28) return;
-  state.player.money-=28;state.player.med+=1;log("治療具を28で買った。");render();
-}
-
-function lootDown(){
-  var list=downAt(state.player.loc).filter(function(n){return n.money>0});
-  if(!list.length) return;
-  var n=list[0],gain=n.money;
-  n.money=0;state.player.money+=gain;
-  if(Math.random()<0.35){state.player.scrap+=1;log("倒れている"+n.name+"から"+gain+"と廃材1個を回収した。")}
-  else log("倒れている"+n.name+"から"+gain+"を回収した。");
-  render();
-}
-
-function healNPC(){
-  if(state.player.med<=0) return;
-  var list=downAt(state.player.loc).filter(function(n){return !isHostile(n)});
-  if(!list.length) return;
-  var n=list[0];
-  state.player.med-=1;
-  n.hp=Math.max(30,Math.round(n.maxHp*0.35));
-  n.down=false;
-  state.relations[n.faction]=(state.relations[n.faction]||0)+4;
-  log(n.name+"を治療した。"+n.faction+"との関係が少し良くなった。");
-  render();
-}
-
-function recruit(){
-  var list=livingAt(state.player.loc).filter(function(n){return n.role==="wanderer" && n.faction==="無所属" && !n.recruited});
-  if(!list.length||state.player.money<50) return;
-  var n=list[0];
-  state.player.money-=50;n.recruited=true;
-  state.party.push({name:n.name,hp:n.hp,maxHp:n.maxHp});
-  log(n.name+"を仲間にした。");
-  render();
-}
-
-function save(show){
-  try{
-    localStorage.setItem(SAVE_KEY,JSON.stringify(state));
-    if(show) log("セーブした。");
-  }catch(e){if(show) log("セーブに失敗した。")}
-  if(show) render();
-}
-
-function load(){
-  try{
-    var raw=localStorage.getItem(SAVE_KEY);
-    if(!raw){log("セーブデータがない。");render();return}
-    state=JSON.parse(raw);
-    state.paused=true;
-    log("ロードした。");
-    render();
-  }catch(e){state=freshState();log("セーブデータを読み込めなかったため新規状態に戻した。");render()}
-}
-
-function button(label,fn,disabled){
-  var b=document.createElement("button");
-  b.type="button";b.className="action";b.textContent=label;b.disabled=!!disabled;
-  b.addEventListener("click",fn);
-  return b;
-}
-
-function renderRoads(){
-  var map=byId("map");
-  ROADS.forEach(function(pair){
-    var a=PLACES[pair[0]],b=PLACES[pair[1]];
-    var dx=b.x-a.x,dy=b.y-a.y;
-    var len=Math.hypot(dx,dy);
-    var angle=Math.atan2(dy,dx)*180/Math.PI;
-    var r=document.createElement("div");
-    r.className="road";
-    r.style.left=a.x+"%";r.style.top=a.y+"%";
-    r.style.width=len+"%";r.style.transform="rotate("+angle+"deg)";
-    map.appendChild(r);
+function chooseBanditTargets(){
+  var targets=aliveActors().filter(function(a){return a.faction!=="砂盗賊" && a.type!=="dog" && a.type!=="pack"});
+  state.actors.filter(function(a){return a.type==="bandit"&&!a.down}).forEach(function(b){
+    var best=null,bd=18;
+    targets.forEach(function(t){var d=dist(b,t);if(d<bd){bd=d;best=t}});
+    var pd=dist(b,state.player);
+    if(!state.player.down && pd<bd){best={id:"player",x:state.player.x,y:state.player.y};bd=pd}
+    if(best) setTarget(b,best.x,best.y);
   });
 }
 
-function renderMap(){
-  var map=byId("map");
-  map.innerHTML="";
-  renderRoads();
-  Object.keys(PLACES).forEach(function(key){
-    var p=PLACES[key];
+function damagePlayer(amount,from){
+  state.player.hp=clamp(state.player.hp-amount,0,state.player.maxHp);
+  if(state.player.hp<=0&&!state.player.down){
+    state.player.down=true;state.player.target=null;state.player.attackTarget=null;log("主人公が倒れた。");
+  } else if(from && Math.random()<.18){log(from.name+"に襲われた。")}
+}
+
+function damageActor(a,amount,fromName){
+  a.hp=clamp(a.hp-amount,0,a.maxHp);
+  if(a.hp<=0&&!a.down){a.down=true;a.target=null;a.loot=a.money;a.money=0;log(a.name+"が倒れた。")}
+  else if(fromName && Math.random()<.12){log(fromName+"と"+a.name+"が戦っている。")}
+}
+
+function combatStep(dt){
+  state.actors.forEach(function(a){a.attackCd=Math.max(0,a.attackCd-dt)});
+
+  var alive=aliveActors();
+  for(var i=0;i<alive.length;i++){
+    for(var j=i+1;j<alive.length;j++){
+      var a=alive[i],b=alive[j];
+      if(!hostile(a,b.faction) || dist(a,b)>3.4) continue;
+      if(a.attackCd<=0){damageActor(b,Math.floor(rnd(6,15)),a.name);a.attackCd=1.4}
+      if(b.attackCd<=0 && !b.down){damageActor(a,Math.floor(rnd(5,14)),b.name);b.attackCd=1.4}
+    }
+  }
+
+  state.actors.filter(function(a){return a.type==="bandit"&&!a.down}).forEach(function(b){
+    if(state.player.down||dist(b,state.player)>3.5) return;
+    if(b.attackCd<=0){damagePlayer(Math.max(1,Math.floor(rnd(7,15)-state.player.defense)),b);b.attackCd=1.35}
+  });
+
+  if(state.player.attackTarget && !state.player.down){
+    var t=getActor(state.player.attackTarget);
+    if(!t||t.down){state.player.attackTarget=null;return}
+    var d=dist(state.player,t);
+    if(d>3){state.player.target={x:t.x,y:t.y}}
+    else{
+      state.player.target=null;
+      if(!state.player._attackCd||state.player._attackCd<=0){
+        damageActor(t,Math.floor(rnd(state.player.attack*.7,state.player.attack*1.25)),"主人公");
+        state.player._attackCd=1.1;
+      }
+    }
+  }
+  state.player._attackCd=Math.max(0,(state.player._attackCd||0)-dt);
+}
+
+function worldAI(dt){
+  state.tick++;
+  chooseBanditTargets();
+  state.actors.forEach(function(a){
+    if(a.down||a.recruited)return;
+    if(a.follow){followActor(a)}
+    else if(state.tick%12===0){routeActor(a)}
+    moveTowards(a,dt);
+  });
+
+  state.actors.filter(function(a){return a.recruited&&!a.down}).forEach(function(a){
+    setTarget(a,state.player.x-1.5+rnd(-.5,.5),state.player.y+1+rnd(-.5,.5));
+    moveTowards(a,dt);
+  });
+
+  if(!state.player.down) moveTowards(state.player,dt);
+  combatStep(dt);
+}
+
+function simulationTick(){
+  if(state.paused)return;
+  var now=Date.now(),dt=Math.min(.25,(now-lastTick)/1000);lastTick=now;
+  worldAI(dt);
+  advance(.55*state.speed);
+  state.player.hunger=clamp(state.player.hunger+.018*state.speed,0,100);
+  if(state.player.hunger>85 && Math.random()<.03) damagePlayer(1);
+  if(state.tick%600===0) state.weather=choice(["乾燥","強風","砂埃","薄曇り"]);
+  renderActors();
+  renderHud();
+  renderContext();
+}
+
+function createLandmarks(){
+  routeSvg.innerHTML="";
+  ROADS.forEach(function(r){
+    var a=PLACES[r[0]],b=PLACES[r[1]];
+    var line=document.createElementNS("http://www.w3.org/2000/svg","line");
+    line.setAttribute("x1",a.x);line.setAttribute("y1",a.y);line.setAttribute("x2",b.x);line.setAttribute("y2",b.y);
+    routeSvg.appendChild(line);
+  });
+  landmarkLayer.innerHTML="";
+  Object.keys(PLACES).forEach(function(k){
+    var p=PLACES[k],d=document.createElement("div");
+    d.className="landmark lm-"+p.kind;d.style.left=p.x+"%";d.style.top=p.y+"%";
+    d.innerHTML="<div class='icon'></div><span>"+p.name+"</span>";
+    landmarkLayer.appendChild(d);
+  });
+}
+
+function actorClass(a){
+  var cls="actor "+a.type;
+  if(a.type==="dog"||a.type==="pack")cls+=" animal";
+  if(a.down)cls+=" down";
+  if(a.recruited)cls+=" party";
+  if(selectedId===a.id)cls+=" selected";
+  return cls;
+}
+
+function actorTag(a){
+  if(a.type==="dog") return "犬";
+  if(a.type==="pack") return "荷獣";
+  if(a.type==="bandit") return "盗賊";
+  if(a.type==="trader") return "商人";
+  if(a.type==="guard") return "護衛";
+  return "";
+}
+
+function renderActors(){
+  actorLayer.innerHTML="";
+  var p=document.createElement("button");
+  p.type="button";p.className="actor player"+(selectedId==="player"?" selected":"")+(state.player.down?" down":"");
+  p.style.left=state.player.x+"%";p.style.top=state.player.y+"%";
+  p.innerHTML="<span class='head'></span><span class='body'></span><span class='leg1'></span><span class='leg2'></span>";
+  p.addEventListener("click",function(e){e.stopPropagation();selectedId="player";moveMode=!moveMode;openDrawer="";renderAll()});
+  actorLayer.appendChild(p);
+
+  state.actors.forEach(function(a){
     var b=document.createElement("button");
-    b.type="button";b.className="place";
-    if(key===state.player.loc)b.classList.add("current");
-    if(connected(state.player.loc,key))b.classList.add("adjacent");
-    b.style.left=p.x+"%";b.style.top=p.y+"%";
-    var alive=livingAt(key).length,down=downAt(key).length;
-    b.innerHTML=p.name+"<span class='count'>人 "+alive+(down?" / 倒 "+down:"")+"</span>";
-    b.disabled=key!==state.player.loc&&!connected(state.player.loc,key);
-    if(connected(state.player.loc,key)) b.addEventListener("click",function(){movePlayer(key)});
-    map.appendChild(b);
+    b.type="button";b.className=actorClass(a);b.style.left=a.x+"%";b.style.top=a.y+"%";
+    var tag=actorTag(a);
+    b.innerHTML=(tag?"<span class='tag'>"+tag+"</span>":"")+"<span class='head'></span><span class='body'></span><span class='leg1'></span><span class='leg2'></span>";
+    b.addEventListener("click",function(e){e.stopPropagation();selectedId=a.id;moveMode=false;openDrawer="";renderAll()});
+    actorLayer.appendChild(b);
   });
-  var cur=PLACES[state.player.loc];
-  var mark=document.createElement("div");
-  mark.className="playerMark";mark.style.left=cur.x+"%";mark.style.top=(cur.y+8)+"%";
-  map.appendChild(mark);
 }
 
-function renderActions(){
-  var pane=byId("pane");pane.innerHTML="";
-  var grid=document.createElement("div");grid.className="actionGrid";
-  var loc=state.player.loc;
-  if(loc==="mine")grid.appendChild(button("採掘",mine,state.player.down));
-  if(["ruins","cross","salt"].indexOf(loc)>=0)grid.appendChild(button("漁る",scavenge,state.player.down));
-  if(loc==="farm")grid.appendChild(button("農作業",workFarm,state.player.down));
-  if(loc==="dust"){
-    grid.appendChild(button("鉱石を売る",sellOre,state.player.ore<=0));
-    grid.appendChild(button("廃材を売る",sellScrap,state.player.scrap<=0));
-    grid.appendChild(button("食料を買う",buyFood,state.player.money<12));
-    grid.appendChild(button("治療具を買う",buyMed,state.player.money<28));
+function renderHud(){
+  document.getElementById("clock").textContent=state.day+"日目 "+pad(state.hour)+":"+pad(Math.floor(state.minute));
+  document.getElementById("weather").textContent=state.weather;
+  document.getElementById("hpText").textContent=Math.round(state.player.hp)+"/"+state.player.maxHp;
+  document.getElementById("hpBar").style.width=(state.player.hp/state.player.maxHp*100)+"%";
+  document.getElementById("hungerText").textContent=Math.round(state.player.hunger);
+  document.getElementById("moneyText").textContent=state.player.money;
+  document.getElementById("pauseBtn").textContent=state.paused?"再開":"一時停止";
+  document.getElementById("speedBtn").textContent="×"+state.speed;
+  document.getElementById("hint").textContent=moveMode?"地面を押して移動先を指定":"主人公を押すと移動指定";
+}
+
+function clearContext(){
+  document.getElementById("context").classList.remove("show");
+  document.getElementById("contextText").innerHTML="";
+  document.getElementById("contextActions").innerHTML="";
+}
+
+function addContextButton(label,fn,disabled){
+  var b=document.createElement("button");b.type="button";b.textContent=label;b.disabled=!!disabled;b.addEventListener("click",fn);return b;
+}
+
+function nearbyLandmark(){
+  var n=nearestPlace(state.player);return n.d<7?n.key:null;
+}
+
+function healActor(a){
+  if(state.player.med<=0||!a.down)return;
+  state.player.med--;a.down=false;a.hp=Math.max(30,Math.round(a.maxHp*.35));
+  state.relations[a.faction]=(state.relations[a.faction]||0)+4;log(a.name+"を治療した。");renderAll();
+}
+function lootActor(a){
+  if(!a.down||a.loot<=0)return;
+  var gain=a.loot;a.loot=0;state.player.money+=gain;
+  if(Math.random()<.4)state.player.scrap++;log(a.name+"から"+gain+"を回収した。");renderAll();
+}
+function recruitActor(a){
+  if(a.down||a.faction!=="無所属"||state.player.money<50)return;
+  state.player.money-=50;a.recruited=true;a.faction="主人公";a.follow=null;a.route=null;state.party.push(a.id);
+  if(a.id==="wanderer"){
+    var dog=getActor("dog");if(dog&&!dog.down){dog.recruited=true;dog.faction="主人公";state.party.push("dog")}
   }
-  if(["dust","farm"].indexOf(loc)>=0)grid.appendChild(button("休息",rest,false));
-  grid.appendChild(button("食べる",eat,state.player.food<=0));
-  grid.appendChild(button("自分を治療",useMed,state.player.med<=0||state.player.hp>=state.player.maxHp));
-  var canLoot=downAt(loc).some(function(n){return n.money>0});
-  grid.appendChild(button("倒れた者を漁る",lootDown,!canLoot));
-  var canHeal=downAt(loc).some(function(n){return !isHostile(n)});
-  grid.appendChild(button("倒れた者を治療",healNPC,!canHeal||state.player.med<=0));
-  var canRecruit=livingAt(loc).some(function(n){return n.role==="wanderer"&&n.faction==="無所属"});
-  grid.appendChild(button("放浪者を雇う 50",recruit,!canRecruit||state.player.money<50));
-  pane.appendChild(grid);
-  var inv=document.createElement("div");inv.className="inventory";inv.style.marginTop="10px";
-  [["食料",state.player.food],["治療具",state.player.med],["鉄鉱石",state.player.ore],["廃材",state.player.scrap]].forEach(function(it){
-    var d=document.createElement("div");d.className="item";d.innerHTML=it[0]+"<strong>"+it[1]+"</strong>";inv.appendChild(d);
-  });
-  pane.appendChild(inv);
+  log(a.name+"が仲間になった。");renderAll();
+}
+function buyFood(){if(state.player.money<12)return;state.player.money-=12;state.player.food++;log("保存食を買った。");renderAll()}
+function buyMed(){if(state.player.money<28)return;state.player.money-=28;state.player.med++;log("治療具を買った。");renderAll()}
+function sellOre(){if(state.player.ore<=0)return;var v=state.player.ore*13;state.player.money+=v;state.player.ore=0;log("鉄鉱石を"+v+"で売った。");renderAll()}
+function sellScrap(){if(state.player.scrap<=0)return;var v=state.player.scrap*9;state.player.money+=v;state.player.scrap=0;log("廃材を"+v+"で売った。");renderAll()}
+function eat(){if(state.player.food<=0)return;state.player.food--;state.player.hunger=clamp(state.player.hunger-38,0,100);log("保存食を食べた。");renderAll()}
+function selfHeal(){if(state.player.med<=0||state.player.hp>=state.player.maxHp)return;state.player.med--;state.player.hp=clamp(state.player.hp+35,0,state.player.maxHp);state.player.down=false;log("治療した。");renderAll()}
+function mine(){state.player.ore+=1+Math.floor(Math.random()*3);state.player.hunger=clamp(state.player.hunger+4,0,100);advance(40);log("鉄鉱石を採掘した。");renderAll()}
+function scavenge(){
+  var r=Math.random();if(r<.38){state.player.scrap++;log("廃材を見つけた。")}else if(r<.62){state.player.food++;log("保存食を見つけた。")}
+  else if(r<.78){state.player.med++;log("治療具を見つけた。")}else log("使える物はなかった。");
+  advance(30);renderAll();
+}
+function farm(){state.player.money+=10;state.player.food++;advance(50);state.relations["南農場"]++;log("農作業を手伝った。");renderAll()}
+function rest(){state.player.hp=clamp(state.player.hp+40,0,state.player.maxHp);state.player.down=false;advance(180);log("休息した。");renderAll()}
+
+function renderContext(){
+  var box=document.getElementById("context"),txt=document.getElementById("contextText"),acts=document.getElementById("contextActions");
+  txt.innerHTML="";acts.innerHTML="";
+
+  if(selectedId && selectedId!=="player"){
+    var a=getActor(selectedId);
+    if(!a){clearContext();return}
+    var d=dist(state.player,a);
+    txt.innerHTML="<b>"+a.name+"</b><br>"+a.faction+" ／ HP "+Math.round(a.hp)+"/"+a.maxHp+(d>8?" ／ 遠い":"");
+    if(d<=8){
+      if(a.down){
+        acts.appendChild(addContextButton("治療",function(){healActor(a)},state.player.med<=0||a.faction==="砂盗賊"));
+        acts.appendChild(addContextButton("漁る",function(){lootActor(a)},a.loot<=0));
+      }else if(a.faction==="無所属" && (a.type==="wanderer")){
+        acts.appendChild(addContextButton("雇う 50",function(){recruitActor(a)},state.player.money<50));
+      }else if(a.type==="trader"){
+        acts.appendChild(addContextButton("食料 12",buyFood,state.player.money<12));
+        acts.appendChild(addContextButton("治療具 28",buyMed,state.player.money<28));
+        acts.appendChild(addContextButton("鉱石売却",sellOre,state.player.ore<=0));
+        acts.appendChild(addContextButton("廃材売却",sellScrap,state.player.scrap<=0));
+      }else if(a.faction==="砂盗賊"){
+        acts.appendChild(addContextButton("攻撃",function(){state.player.attackTarget=a.id;selectedId="player";renderAll()},false));
+      }
+    }
+    box.classList.add("show");return;
+  }
+
+  var place=nearbyLandmark();
+  if(place){
+    var p=PLACES[place];
+    txt.innerHTML="<b>"+p.name+"</b><br>近くにいる";
+    if(place==="mine")acts.appendChild(addContextButton("採掘",mine,false));
+    if(place==="ruins"||place==="salt"||place==="cross")acts.appendChild(addContextButton("漁る",scavenge,false));
+    if(place==="farm"){acts.appendChild(addContextButton("農作業",farm,false));acts.appendChild(addContextButton("休息",rest,false))}
+    if(place==="dust"){acts.appendChild(addContextButton("休息",rest,false))}
+    box.classList.add("show");return;
+  }
+  clearContext();
 }
 
-function renderNearby(){
-  var pane=byId("pane");pane.innerHTML="";
-  var cards=document.createElement("div");cards.className="cards";
-  var list=state.npcs.filter(function(n){return n.loc===state.player.loc&&!n.recruited});
-  if(!list.length){cards.innerHTML="<div class='card'>周囲には誰もいない。</div>";pane.appendChild(cards);return}
-  list.forEach(function(n){
-    var c=document.createElement("div");c.className="card";
-    var stateText=n.down?"倒れている":"行動中";
-    var side=isHostile(n)?"bad":"";
-    c.innerHTML="<div><b>"+n.name+"</b><br><span class='"+side+"'>"+n.faction+"</span> ・ "+stateText+"</div><div>HP "+n.hp+"/"+n.maxHp+"</div>";
-    cards.appendChild(c);
-  });
-  pane.appendChild(cards);
+function renderInventory(){
+  drawer.innerHTML="<div class='drawerGrid'>"+
+    "<div class='cell'>食料<b>"+state.player.food+"</b></div>"+
+    "<div class='cell'>治療具<b>"+state.player.med+"</b></div>"+
+    "<div class='cell'>鉄鉱石<b>"+state.player.ore+"</b></div>"+
+    "<div class='cell'>廃材<b>"+state.player.scrap+"</b></div>"+
+    "</div><div class='drawerActions'><button id='eatBtn'>食べる</button><button id='healBtn'>治療</button></div>";
+  drawer.querySelector("#eatBtn").addEventListener("click",eat);
+  drawer.querySelector("#healBtn").addEventListener("click",selfHeal);
 }
-
 function renderParty(){
-  var pane=byId("pane");pane.innerHTML="";
-  var cards=document.createElement("div");cards.className="cards";
-  var p=document.createElement("div");p.className="card";
-  p.innerHTML="<div><b>主人公</b><br>攻撃 "+state.player.attack+" / 防御 "+state.player.defense+"</div><div>HP "+state.player.hp+"/"+state.player.maxHp+"</div>";
-  cards.appendChild(p);
-  state.party.slice(1).forEach(function(m){
-    var c=document.createElement("div");c.className="card";
-    c.innerHTML="<div><b>"+m.name+"</b><br>部隊員</div><div>HP "+m.hp+"/"+m.maxHp+"</div>";
-    cards.appendChild(c);
+  var html="<div class='drawerGrid'><div class='cell'>主人公<b>"+Math.round(state.player.hp)+"/"+state.player.maxHp+"</b></div>";
+  state.party.filter(function(id){return id!=="player"}).forEach(function(id){
+    var a=getActor(id);if(a)html+="<div class='cell'>"+a.name+"<b>"+Math.round(a.hp)+"/"+a.maxHp+"</b></div>";
   });
-  var rel=document.createElement("div");rel.style.marginTop="10px";rel.className="cards";
-  Object.keys(state.relations).forEach(function(k){
-    var c=document.createElement("div");c.className="card";
-    var v=state.relations[k],cls=v<0?"bad":(v>0?"good":"");
-    c.innerHTML="<div>"+k+"</div><div class='"+cls+"'>"+v+"</div>";rel.appendChild(c);
-  });
-  pane.appendChild(cards);pane.appendChild(rel);
+  html+="</div>";drawer.innerHTML=html;
 }
-
+function renderWorldDrawer(){
+  var near=aliveActors().filter(function(a){return dist(a,state.player)<16}).sort(function(a,b){return dist(a,state.player)-dist(b,state.player)}).slice(0,8);
+  drawer.innerHTML="<div class='log'>"+(near.length?near.map(function(a){return "<div>"+a.name+" ／ "+a.faction+" ／ 約"+Math.round(dist(a,state.player))+"</div>"}).join(""):"<div>近くに人影はない。</div>")+"</div>";
+}
 function renderLog(){
-  var pane=byId("pane");pane.innerHTML="";
-  var box=document.createElement("div");box.className="log";
-  state.log.slice(0,16).forEach(function(t){var d=document.createElement("div");d.textContent=t;box.appendChild(d)});
-  pane.appendChild(box);
+  drawer.innerHTML="<div class='log'>"+state.log.slice(0,14).map(function(x){return "<div>"+x+"</div>"}).join("")+"</div>";
 }
-
-function renderPane(){
-  if(activeTab==="actions")renderActions();
-  else if(activeTab==="nearby")renderNearby();
-  else if(activeTab==="party")renderParty();
+function renderDrawer(){
+  drawer.classList.toggle("show",!!openDrawer);
+  if(!openDrawer){drawer.innerHTML="";return}
+  if(openDrawer==="inventory")renderInventory();
+  else if(openDrawer==="party")renderParty();
+  else if(openDrawer==="world")renderWorldDrawer();
   else renderLog();
 }
 
-function render(){
-  byId("locName").textContent=PLACES[state.player.loc].name;
-  byId("clock").textContent=state.day+"日目 "+pad(state.hour)+":"+pad(state.minute);
-  byId("weather").textContent=state.weather;
-  byId("hp").textContent=state.player.hp+"/"+state.player.maxHp;
-  byId("hunger").textContent=state.player.hunger;
-  byId("money").textContent=state.player.money;
-  byId("party").textContent=state.party.length;
-  byId("condition").textContent=state.player.down?"倒れている":(state.player.hunger>=80?"飢餓":(state.player.hp<45?"負傷":"正常"));
-  byId("pauseBtn").textContent=state.paused?"再開":"一時停止";
-  renderMap();renderPane();
+function renderAll(){renderActors();renderHud();renderContext();renderDrawer()}
+
+function worldTap(e){
+  if(!moveMode||state.player.down)return;
+  var rect=world.getBoundingClientRect();
+  var x=(e.clientX-rect.left)/rect.width*100,y=(e.clientY-rect.top)/rect.height*100;
+  state.player.target={x:clamp(x,2,98),y:clamp(y,3,97)};
+  state.player.attackTarget=null;selectedId="player";moveMode=false;renderAll();
+}
+
+function save(show){
+  try{localStorage.setItem(SAVE_KEY,JSON.stringify(state));if(show)log("セーブした。")}catch(e){if(show)log("セーブに失敗した。")}
+  if(show)renderAll();
+}
+function load(){
+  try{
+    var raw=localStorage.getItem(SAVE_KEY);
+    if(!raw){log("セーブデータがない。");renderAll();return}
+    state=JSON.parse(raw);selectedId=null;moveMode=false;openDrawer="";log("ロードした。");renderAll();
+  }catch(e){state=freshState();log("セーブデータを読み込めなかった。");renderAll()}
 }
 
 function init(){
-  var newGame=new URLSearchParams(location.search).get("new")==="1";
-  if(newGame){
-    state=freshState();
-    save(false);
-  }else{
-    try{
-      var raw=localStorage.getItem(SAVE_KEY);
-      state=raw?JSON.parse(raw):freshState();
-    }catch(e){state=freshState()}
-  }
-
-  document.querySelectorAll(".tab").forEach(function(t){
-    t.addEventListener("click",function(){
-      activeTab=t.getAttribute("data-tab");
-      document.querySelectorAll(".tab").forEach(function(x){x.classList.toggle("active",x===t)});
-      renderPane();
+  createLandmarks();
+  world.addEventListener("click",worldTap);
+  document.getElementById("pauseBtn").addEventListener("click",function(){state.paused=!state.paused;lastTick=Date.now();renderAll()});
+  document.getElementById("speedBtn").addEventListener("click",function(){state.speed=state.speed===1?2:(state.speed===2?4:1);renderHud()});
+  document.getElementById("saveBtn").addEventListener("click",function(){save(true)});
+  document.getElementById("loadBtn").addEventListener("click",load);
+  document.querySelectorAll("[data-drawer]").forEach(function(b){
+    b.addEventListener("click",function(){
+      var v=b.getAttribute("data-drawer");openDrawer=openDrawer===v?"":v;selectedId=null;moveMode=false;renderAll();
     });
   });
 
-  byId("pauseBtn").addEventListener("click",function(){state.paused=!state.paused;render()});
-  byId("saveBtn").addEventListener("click",function(){save(true)});
-  byId("loadBtn").addEventListener("click",load);
+  var isNew=new URLSearchParams(location.search).get("new")==="1";
+  if(!isNew){
+    try{var raw=localStorage.getItem(SAVE_KEY);if(raw)state=JSON.parse(raw)}catch(e){}
+  }else localStorage.removeItem(SAVE_KEY);
 
-  render();
-  timer=setInterval(worldTick,1600);
+  renderAll();
+  lastTick=Date.now();
+  simTimer=setInterval(simulationTick,120);
+  setInterval(function(){save(false)},10000);
   window.addEventListener("beforeunload",function(){save(false)});
 }
 
