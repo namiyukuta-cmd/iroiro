@@ -43,6 +43,7 @@
     scavenge: {},
     talk: {},
     foodSupport: false,
+    supportShowerLaundry: false,
     wash: {},
     recyclerWork: false,
     clerkWork: false,
@@ -97,7 +98,8 @@
         nextDay: 1,
         workAccess: false,
         shelterReferral: false,
-        caseOpened: false
+        caseOpened: false,
+        lastLaundryDay: 0
       },
       recycler: {
         sales: 0,
