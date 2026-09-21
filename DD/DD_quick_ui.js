@@ -11,21 +11,21 @@
   style.id = 'ddQuickUiFourSlotStyle';
   style.textContent = `
     #actionGrid{display:block!important}
-    .quickUiLabel{height:14px;display:flex;align-items:center;font-size:9px;font-weight:1000;color:#66615a;letter-spacing:.02em}
-    .quickUiLabel.skillLabel{margin-top:4px}
-    .quickSlotRow{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px}
-    .skillSlotRow{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:4px}
-    .quickSlotRow .actionTile{height:58px}
-    .quickSlotRow .actionIcon{font-size:24px}
-    .quickSlotRow .slotType{font-size:8px;line-height:1;font-weight:1000;color:#77736c;margin-bottom:1px}
+    .quickUiLabel{height:11px;display:flex;align-items:center;font-size:9px;font-weight:1000;color:#66615a;letter-spacing:.02em}
+    .quickUiLabel.skillLabel{margin-top:1px}
+    .quickSlotRow{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:4px}
+    .skillSlotRow{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:3px}
+    .quickSlotRow .actionTile{height:42px}
+    .quickSlotRow .actionIcon{font-size:20px}
+    .quickSlotRow .slotType{font-size:7px;line-height:1;font-weight:1000;color:#77736c;margin-bottom:1px}
     .quickSlotRow .actionCount{font-size:8px}
-    .skillSlotRow .actionTile{height:54px}
+    .skillSlotRow .actionTile{height:38px}
     #partyPanel.wolfMode .skillSlotRow{margin-top:1px}
     @media (max-width:370px){
-      .quickSlotRow{gap:4px}
-      .skillSlotRow{gap:3px}
-      .quickSlotRow .actionTile{height:54px}
-      .skillSlotRow .actionTile{height:50px}
+      .quickSlotRow{gap:3px}
+      .skillSlotRow{gap:2px}
+      .quickSlotRow .actionTile{height:40px}
+      .skillSlotRow .actionTile{height:36px}
     }
   `;
   document.head.appendChild(style);
@@ -151,27 +151,4 @@
   window.addEventListener('ddinventorychange',()=>queueMicrotask(arrange));
   window.addEventListener('ddwolfchange',()=>queueMicrotask(arrange));
   queueMicrotask(arrange);
-})();
-
-(() => {
-  const topPanel=document.getElementById('topPanel');
-  if(!topPanel)return;
-  const style=document.createElement('style');
-  style.id='ddPointHeaderRepair';
-  style.textContent=`
-    #topPanel{display:grid!important;grid-template-columns:auto 1fr!important;grid-template-areas:"clock place" "links controls"!important;gap:6px 10px!important;align-items:center!important;min-height:auto!important;padding:7px 9px!important}
-    #clockArea{grid-area:clock!important}
-    #topInfo{display:contents!important}
-    #placeBlock{grid-area:place!important;display:flex!important;justify-content:flex-end!important;align-items:baseline!important;gap:6px!important;min-width:0!important}
-    #topLinks{grid-area:links!important;display:flex!important;justify-content:flex-start!important;align-items:center!important;gap:10px!important;min-width:0!important}
-    #autoControls{grid-area:controls!important;display:flex!important;justify-content:flex-end!important;align-items:center!important;gap:6px!important}
-    .headLink{font-size:11px!important}
-    #autoButton,#autoSpeedButton{height:31px!important;font-size:10px!important;padding:0 8px!important}
-    @media(max-width:390px){
-      #topPanel{grid-template-columns:auto 1fr!important;grid-template-areas:"clock place" "links links" "controls controls"!important}
-      #topLinks{justify-content:flex-end!important}
-      #autoControls{justify-content:flex-end!important}
-    }
-  `;
-  document.head.appendChild(style);
 })();
