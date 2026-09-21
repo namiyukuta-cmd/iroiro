@@ -3,7 +3,7 @@
 
 var SAVE_KEY="iroiro_kenshi_still_save_v1";
 var MAP_POS={
-  road:{x:49,y:56},
+  road:{x:41,y:56},
   dust:{x:18,y:24},
   cross:{x:49,y:45},
   mine:{x:79,y:25},
@@ -23,12 +23,12 @@ var PLACES={
 function freshState(){
   return {
     day:1,hour:8,minute:0,
-    place:"road",
+    place:"cross",
     hp:100,maxHp:100,hunger:0,money:100,
     food:2,med:1,ore:0,scrap:0,
     party:["主人公"],
     travel:null,
-    log:["街道から始まった。"]
+    log:["十字路から始まった。"]
   };
 }
 
@@ -43,7 +43,8 @@ function pad(n){return String(n).padStart(2,"0")}
 
 function normalizeState(){
   if(!state||typeof state!=="object")state=freshState();
-  if(!PLACES[state.place])state.place="road";
+  if(!PLACES[state.place])state.place="cross";
+  if(!state.travel&&state.place==="road")state.place="cross";
   if(!Array.isArray(state.party))state.party=["主人公"];
   if(!Array.isArray(state.log))state.log=[];
   if(!("travel" in state))state.travel=null;
