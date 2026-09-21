@@ -72,6 +72,7 @@
 
     if (id === "charity_center") {
       a.push({ label: "食料支援を受ける", desc: "今日の食料を確保し、残りを持ち物に入れる。", run: G.foodSupport, disabled: H.state.daily.foodSupport || slot === 3 });
+      a.push({ label: "シャワーと洗濯を利用する", desc: "1日1回。衛生を整え、濡れを落とし、衣類も清潔にする。", run: G.supportShowerLaundry, disabled: H.state.daily.supportShowerLaundry || slot === 3 });
       a.push({ label: "支援相談をする", desc: H.state.progression.support.stage ? `前回の続き。次回 DAY${H.state.progression.support.nextDay} 以降` : "何を優先するか決め、継続相談を始める。", run: G.supportConsult, disabled: slot === 3 });
       a.push({ label: "洗面を使う", desc: "身支度を整える。", run: G.wash, disabled: !!H.state.daily.wash[id] || slot === 3 });
       if (slot === 3 && H.state.progression.support.shelterReferral) {
