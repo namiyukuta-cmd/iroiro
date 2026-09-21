@@ -14,6 +14,7 @@ var panelContent=document.getElementById("panelContent");
 
 var manual={x:0,y:0};
 var activePanel="inventory";
+var autoWork={type:null,nextAt:0};
 var contextSignature=null;
 var hotbarSignature=null;
 var toastTimer=null;
@@ -362,6 +363,7 @@ function simulationTick(){
   }
 
   worldAI(dt);
+  runAutoWork(now,false);
   advance(.55*state.speed);
   state.player.hunger=clamp(state.player.hunger+.018*state.speed,0,100);
   if(state.player.hunger>85&&Math.random()<.03)damagePlayer(1);
@@ -532,6 +534,7 @@ function recruitActor(a){
 
 function fleeFrom(a){
   if(!a)return;
+  stopAutoWork(false);
   manual.x=0;manual.y=0;
   state.travelDestination=null;
   state.player.attackTarget=null;
@@ -602,17 +605,79 @@ function selfHeal(){
   renderAll();
 }
 
-function mine(){
+function autoWorkLabel(type){
+  if(type==="mine")return "採掘";
+  if(type==="scavenge")return "漁る";
+  if(type==="farm")return "農作業";
+  return "";
+}
+
+function validAutoWorkPlace(type){
+  var place=nearbyPlace();
+  if(type==="mine")return place==="mine";
+  if(type==="scavenge")return place==="ruins"||place==="salt"||place==="cross";
+  if(type==="farm")return place==="farm";
+  return false;
+}
+
+function stopAutoWork(show){
+  if(!autoWork.type)return;
+  var label=autoWorkLabel(autoWork.type);
+  autoWork.type=null;
+  autoWork.nextAt=0;
+  contextSignature=null;
+  if(show)showResult(label+" 停止");
+  renderContext();
+}
+
+function startAutoWork(type){
+  if(autoWork.type===type){
+    stopAutoWork(true);
+    return;
+  }
+  if(!validAutoWorkPlace(type))return;
+
+  autoWork.type=type;
+  autoWork.nextAt=0;
+  contextSignature=null;
+  showResult(autoWorkLabel(type)+" 開始");
+  runAutoWork(Date.now(),true);
+  renderContext();
+}
+
+function runAutoWork(now,force){
+  if(!autoWork.type)return;
+  if(state.player.down||state.player.attackTarget||state.travelDestination||
+     Math.hypot(manual.x,manual.y)>.05||state.player.target){
+    stopAutoWork(false);
+    return;
+  }
+  if(!validAutoWorkPlace(autoWork.type)){
+    stopAutoWork(false);
+    return;
+  }
+  if(!force&&now<autoWork.nextAt)return;
+
+  var type=autoWork.type;
+  if(type==="mine")mine(true);
+  else if(type==="scavenge")scavenge(true);
+  else if(type==="farm")farm(true);
+
+  autoWork.nextAt=now+1100;
+}
+
+function mine(fromAuto){
   var got=1+Math.floor(Math.random()*3);
   state.player.ore+=got;
   state.player.hunger=clamp(state.player.hunger+4,0,100);
   advance(40);
   log("鉄鉱石を"+got+"個採掘した。");
   showResult("鉄鉱石 +"+got);
-  renderAll();
+  hotbarSignature=null;
+  if(!fromAuto)renderAll();
 }
 
-function scavenge(){
+function scavenge(fromAuto){
   var r=Math.random(),msg="";
   if(r<.38){state.player.scrap++;msg="廃材 +1";log("廃材を見つけた。")}
   else if(r<.62){state.player.food++;msg="食料 +1";log("保存食を見つけた。")}
@@ -620,17 +685,19 @@ function scavenge(){
   else{msg="何も見つからなかった";log("使える物はなかった。")}
   advance(30);
   showResult(msg);
-  renderAll();
+  hotbarSignature=null;
+  if(!fromAuto)renderAll();
 }
 
-function farm(){
+function farm(fromAuto){
   state.player.money+=10;
   state.player.food++;
   state.relations["南農場"]=(state.relations["南農場"]||0)+1;
   advance(50);
   log("農作業を手伝った。");
   showResult("金 +10 / 食料 +1");
-  renderAll();
+  hotbarSignature=null;
+  if(!fromAuto)renderAll();
 }
 
 function rest(){
@@ -657,7 +724,8 @@ function renderContext(){
     state.player.med,
     state.player.money,
     state.player.ore,
-    state.player.scrap
+    state.player.scrap,
+    autoWork.type||""
   ].join("|");
 
   if(sig===contextSignature)return;
@@ -680,6 +748,7 @@ function renderContext(){
 
     if(a.faction==="砂盗賊"){
       contextActions.appendChild(actionButton("戦う",function(){
+        stopAutoWork(false);
         state.travelDestination=null;
         state.player.attackTarget=a.id;
         showResult("戦闘");
@@ -703,11 +772,11 @@ function renderContext(){
   }
 
   if(place==="mine"){
-    contextActions.appendChild(actionButton("採掘",mine,false));
+    contextActions.appendChild(actionButton(autoWork.type==="mine"?"採掘中・停止":"採掘",function(){startAutoWork("mine")},false));
   }else if(place==="ruins"||place==="salt"||place==="cross"){
-    contextActions.appendChild(actionButton("漁る",scavenge,false));
+    contextActions.appendChild(actionButton(autoWork.type==="scavenge"?"漁り中・停止":"漁る",function(){startAutoWork("scavenge")},false));
   }else if(place==="farm"){
-    contextActions.appendChild(actionButton("農作業",farm,false));
+    contextActions.appendChild(actionButton(autoWork.type==="farm"?"農作業中・停止":"農作業",function(){startAutoWork("farm")},false));
     contextActions.appendChild(actionButton("休息",rest,false));
   }else if(place==="dust"){
     contextActions.appendChild(actionButton("休息",rest,false));
@@ -849,6 +918,7 @@ function renderWorldMap(){
 }
 
 function startTravel(key){
+  stopAutoWork(false);
   var p=PLACES[key];
   if(!p||state.player.down)return;
   manual.x=0;manual.y=0;
@@ -879,6 +949,7 @@ function isFieldUiTarget(target){
 }
 
 function cancelAutoForManual(){
+  stopAutoWork(false);
   state.travelDestination=null;
   state.player.target=null;
   state.player.attackTarget=null;
@@ -932,6 +1003,7 @@ function screenToWorld(clientX,clientY){
 
 function tapFieldMove(clientX,clientY){
   if(state.player.down)return;
+  stopAutoWork(false);
   var target=screenToWorld(clientX,clientY);
   manual.x=0;manual.y=0;
   state.travelDestination=null;
@@ -986,6 +1058,7 @@ function load(){
     if(!raw){showResult("セーブなし");return}
     state=JSON.parse(raw);
     normalizeState();
+    autoWork={type:null,nextAt:0};
     contextSignature=null;
     hotbarSignature=null;
     manual.x=0;manual.y=0;
@@ -994,6 +1067,7 @@ function load(){
     renderAll();
   }catch(e){
     state=freshState();
+    autoWork={type:null,nextAt:0};
     contextSignature=null;
     hotbarSignature=null;
     showResult("ロード失敗");
