@@ -608,3 +608,61 @@ button,a{
   .encounterPanel{grid-template-columns:minmax(0,1fr) 44%}
   .mapStatus{gap:5px;font-size:8px}
 }
+/* 赤=長距離 / 青=近距離 / 黄=管理 / 紫=場所ポイント */
+.mapViewport{border-color:#a94f3e}
+.encounterPanel{border-color:#4b78be}
+.menuArea{border-color:#c4ad2e}
+.modePanel{transition:box-shadow .12s ease,filter .12s ease}
+.modePanel.modeActive{box-shadow:0 0 0 2px rgba(32,28,22,.72) inset}
+.modePanel:not(.modeActive){filter:saturate(.86)}
+.travelSelector{
+  position:absolute;
+  left:6px;
+  top:6px;
+  z-index:25;
+  width:88px;
+  max-height:calc(100% - 42px);
+  overflow-y:auto;
+  overscroll-behavior:contain;
+  padding:4px;
+  border:2px solid #7650a8;
+  border-radius:6px;
+  background:rgba(239,230,250,.93);
+  box-shadow:0 1px 4px rgba(43,34,54,.2);
+}
+.travelSelector button{
+  width:100%;
+  min-height:25px;
+  margin:0 0 3px;
+  padding:3px 4px;
+  border:1px solid transparent;
+  border-radius:4px;
+  background:transparent;
+  color:#3f3156;
+  text-align:left;
+  font-size:8px;
+  font-weight:850;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+.travelSelector button:last-child{margin-bottom:0}
+.travelSelector button.selected{
+  border-color:#66428f;
+  background:#7550a0;
+  color:#fff;
+}
+.travelSelector button.destination:after{
+  content:" 移動中";
+  font-size:7px;
+  opacity:.9;
+}
+.mapStatus{left:auto;right:6px}
+.moveCursor{
+  border-color:#8058aa;
+  box-shadow:0 0 0 1px rgba(57,41,75,.9);
+}
+.moveCursor:before,.moveCursor:after{background:#68478e}
+.encounterPanel.modeActive{box-shadow:0 0 0 2px rgba(50,92,164,.55) inset}
+.mapPanel.modeActive .mapViewport{box-shadow:0 0 0 2px rgba(169,79,62,.42) inset}
+.menuArea.modeActive{box-shadow:0 0 0 2px rgba(160,139,28,.55) inset}
