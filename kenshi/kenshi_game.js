@@ -605,15 +605,51 @@ function rest(){
   renderAll();
 }
 
+function sceneEntityHtml(a){
+  var animal=a.type==="dog"||a.type==="pack";
+  if(animal){
+    return "<div class='sceneAnimal'></div><span class='sceneName'>"+a.name+"</span>";
+  }
+  return "<div class='sceneHuman'>"+
+    "<span class='hHead'></span><span class='hBody'></span>"+
+    "<span class='hArmL'></span><span class='hArmR'></span>"+
+    "<span class='hLegL'></span><span class='hLegR'></span>"+
+    "</div><span class='sceneName'>"+a.name+"</span>";
+}
+
+function renderSceneEntities(){
+  var layer=document.getElementById("sceneEntities");
+  var placeLabel=document.getElementById("scenePlace");
+  layer.innerHTML="";
+
+  var near=state.actors.filter(function(a){
+    return dist(a,state.player)<=9;
+  });
+
+  near.forEach(function(a){
+    var dx=a.x-state.player.x;
+    var dy=a.y-state.player.y;
+    var x=clamp(50+dx*5.2,8,92);
+    var y=clamp(58+dy*4.7,18,82);
+
+    var d=document.createElement("div");
+    d.className="sceneEntity "+a.type+(a.down?" down":"")+(a.recruited?" party":"");
+    d.style.left=x+"%";
+    d.style.top=y+"%";
+    d.innerHTML=sceneEntityHtml(a);
+    layer.appendChild(d);
+  });
+
+  var place=nearbyPlace();
+  placeLabel.textContent=place?PLACES[place].name:"";
+}
+
 function renderEncounter(){
-  var title=document.getElementById("encounterTitle");
-  var info=document.getElementById("encounterInfo");
   var actions=document.getElementById("encounterActions");
   actions.innerHTML="";
+  renderSceneEntities();
 
   if(state.player.down){
-    title.textContent="主人公";
-    info.textContent="倒れています。安全な場所なら休息できます。";
     var placeDown=nearbyPlace();
     if(placeDown==="dust"||placeDown==="farm"){
       actions.appendChild(actionButton("休息",rest,false));
@@ -623,10 +659,6 @@ function renderEncounter(){
 
   var a=nearestEncounterActor();
   if(a){
-    var d=Math.round(dist(a,state.player)*10)/10;
-    title.textContent=a.name;
-    info.textContent=a.faction+" ／ 距離 "+d+" ／ HP "+Math.round(a.hp)+"/"+a.maxHp;
-
     if(a.down){
       actions.appendChild(actionButton("治療",function(){healActor(a)},state.player.med<=0||a.faction==="砂盗賊"));
       actions.appendChild(actionButton("漁る",function(){lootActor(a)},a.loot<=0));
@@ -654,22 +686,10 @@ function renderEncounter(){
       actions.appendChild(actionButton("雇う 50",function(){recruitActor(a)},state.player.money<50));
       return;
     }
-
-    if(a.type==="dog"){
-      info.textContent="犬が近くにいます。"+(a.recruited?"仲間です。":"放浪者について歩いています。");
-      return;
-    }
-
-    info.textContent=a.name+"が近くを通っています。";
-    return;
   }
 
   var place=nearbyPlace();
   if(place){
-    var p=PLACES[place];
-    title.textContent=p.name;
-    info.textContent="主人公はこの場所の近くにいます。";
-
     if(place==="mine"){
       actions.appendChild(actionButton("採掘",mine,false));
     }
@@ -683,11 +703,7 @@ function renderEncounter(){
     if(place==="dust"){
       actions.appendChild(actionButton("休息",rest,false));
     }
-    return;
   }
-
-  title.textContent="周囲";
-  info.textContent="近くに人や施設はありません。上の地図では世界が動き続けています。";
 }
 
 function renderInventory(){
