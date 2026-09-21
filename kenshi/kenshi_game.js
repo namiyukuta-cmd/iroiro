@@ -11,7 +11,6 @@ var routeSvg=document.getElementById("routeSvg");
 var menuPane=document.getElementById("menuPane");
 
 var activeMenu="inventory";
-var activeMode="travel";
 var selectedTravelKey="dust";
 var moveCursor={x:18,y:20};
 var moveHoldTimer=null;
@@ -360,65 +359,16 @@ function renderTravelSelector(){
     b.type="button";
     b.textContent=p.name;
     b.className=(key===selectedTravelKey?"selected ":"")+(state.travelDestination===key?"destination":"");
-    b.addEventListener("pointerdown",function(e){e.stopPropagation()});
-    b.addEventListener("click",function(e){
-      e.stopPropagation();
-      activeMode="travel";
+    b.addEventListener("click",function(){
       selectedTravelKey=key;
       syncTravelCursor();
       renderTravelSelector();
       renderActors();
-      renderMode();
     });
     box.appendChild(b);
   });
   var selected=box.querySelector(".selected");
   if(selected&&selected.scrollIntoView)selected.scrollIntoView({block:"nearest"});
-}
-
-function renderMode(){
-  var map=document.getElementById("mapPanel");
-  var local=document.getElementById("encounterPanel");
-  var menu=document.getElementById("menuArea");
-  if(map)map.classList.toggle("modeActive",activeMode==="travel");
-  if(local)local.classList.toggle("modeActive",activeMode==="local");
-  if(menu)menu.classList.toggle("modeActive",activeMode==="menu");
-
-  var label=document.getElementById("moveLabel");
-  var hint=document.getElementById("moveHint");
-  if(activeMode==="travel"){
-    label.textContent="長距離移動";
-    hint.textContent="紫で場所選択 → ●で出発";
-  }else if(activeMode==="local"){
-    label.textContent="近距離移動";
-    hint.textContent="方向で即移動 / ●で停止";
-  }else{
-    label.textContent="メニュー";
-    hint.textContent="黄色を直接タップ";
-  }
-}
-
-function setMode(mode){
-  if(mode!=="travel"&&mode!=="local"&&mode!=="menu")return;
-  if(mode==="local"&&activeMode!=="local"){
-    state.travelDestination=null;
-    state.player.target=null;
-    state.player.attackTarget=null;
-  }
-  activeMode=mode;
-  renderMode();
-  renderTravelSelector();
-  renderActors();
-}
-
-function cycleTravel(delta){
-  var i=TRAVEL_KEYS.indexOf(selectedTravelKey);
-  if(i<0)i=0;
-  i=(i+delta+TRAVEL_KEYS.length)%TRAVEL_KEYS.length;
-  selectedTravelKey=TRAVEL_KEYS[i];
-  syncTravelCursor();
-  renderTravelSelector();
-  renderActors();
 }
 
 function startTravel(){
@@ -433,10 +383,11 @@ function startTravel(){
   renderTravelSelector();
 }
 
-function localStep(dir){
+function manualStep(dir){
   if(state.player.down)return;
   var step=4.5;
-  var x=state.player.x,y=state.player.y;
+  var base=(!state.travelDestination&&state.player.target)?state.player.target:state.player;
+  var x=base.x,y=base.y;
   if(dir==="up")y-=step;
   if(dir==="down")y+=step;
   if(dir==="left")x-=step;
@@ -444,12 +395,7 @@ function localStep(dir){
   state.travelDestination=null;
   state.player.attackTarget=null;
   state.player.target={x:clamp(x,2,98),y:clamp(y,3,97)};
-}
-
-function stopLocal(){
-  state.player.target=null;
-  state.player.attackTarget=null;
-  showResult("停止");
+  renderTravelSelector();
 }
 
 function checkTravelArrival(){
@@ -518,7 +464,7 @@ function renderActors(){
 
   var cursor=document.getElementById("moveCursor");
   if(cursor){
-    cursor.style.display=activeMode==="travel"?"block":"none";
+    cursor.style.display="block";
     cursor.style.left=moveCursor.x+"%";
     cursor.style.top=moveCursor.y+"%";
   }
@@ -614,7 +560,6 @@ function recruitActor(a){
 
 function fleeFrom(a){
   if(!a)return;
-  activeMode="local";
   state.travelDestination=null;
   var dx=state.player.x-a.x;
   var dy=state.player.y-a.y;
@@ -629,7 +574,6 @@ function fleeFrom(a){
   log(a.name+"から逃走を開始した。");
   showResult("逃走");
   renderAll();
-  renderMode();
 }
 
 function buyFood(){
@@ -886,12 +830,6 @@ function renderLog(){
 }
 
 function renderMenu(){
-  document.getElementById("mapPanel").addEventListener("pointerdown",function(){setMode("travel")});
-  document.getElementById("encounterPanel").addEventListener("pointerdown",function(e){
-    if(!e.target.closest("button"))setMode("local");
-  });
-  document.getElementById("menuArea").addEventListener("pointerdown",function(){setMode("menu")});
-
   document.querySelectorAll("[data-menu]").forEach(function(b){
     b.classList.toggle("active",b.getAttribute("data-menu")===activeMenu);
   });
@@ -908,19 +846,10 @@ function renderAll(){
   renderEncounter();
   renderMenu();
   renderTravelSelector();
-  renderMode();
 }
 
 function handleDirection(dir){
-  if(activeMode==="travel"){
-    if(dir==="up"||dir==="left")cycleTravel(-1);
-    else cycleTravel(1);
-    return;
-  }
-  if(activeMode==="local"){
-    localStep(dir);
-    return;
-  }
+  manualStep(dir);
 }
 
 function stopMoveHold(){
@@ -933,19 +862,11 @@ function stopMoveHold(){
 function startMoveHold(dir){
   stopMoveHold();
   handleDirection(dir);
-  var wait=activeMode==="travel"?260:170;
-  moveHoldTimer=setInterval(function(){handleDirection(dir)},wait);
+  moveHoldTimer=setInterval(function(){handleDirection(dir)},170);
 }
 
 function confirmMove(){
-  if(activeMode==="travel"){
-    startTravel();
-    return;
-  }
-  if(activeMode==="local"){
-    stopLocal();
-    return;
-  }
+  startTravel();
 }
 
 function save(show){
@@ -1099,10 +1020,8 @@ function init(){
 
   document.querySelectorAll("[data-menu]").forEach(function(b){
     b.addEventListener("click",function(){
-      activeMode="menu";
       activeMenu=b.getAttribute("data-menu");
       renderMenu();
-      renderMode();
     });
   });
 
