@@ -31,34 +31,19 @@
       outerPoor: Object.freeze({
         name: '小門外・底辺区',
         background: './asset/bg_desert_wall.jpeg',
-
-        // 色線のような見えるレーンは作らない。
-        // 行動地点は見えない座標として保持し、必要な時だけ選択表示する。
-        locationPoints: Object.freeze([
-          Object.freeze({id:'poor_left', left:18, bottom:12}),
-          Object.freeze({id:'poor_center', left:47, bottom:8}),
-          Object.freeze({id:'poor_right', left:78, bottom:12}),
-          Object.freeze({id:'poor_front_left', left:31, bottom:3}),
-          Object.freeze({id:'poor_front_right', left:66, bottom:3})
-        ]),
-
-        // 配置順：遠景背景 → 建物/店 → NPC → 行動地点/時間イベント。
-        // 主人公専用レーンは置かない。
         objects: Object.freeze([
-          // 左右を大きい家で囲い、中央を町の通りとして開ける
-          Object.freeze({src:'./asset/house_poor.png', left:-8, bottom:8, height:35, layer:'town', depth:1}),
-          Object.freeze({src:'./asset/house_poor.png', left:73, bottom:8, height:35, layer:'town', depth:1, flip:true}),
+          // 建物：左右を大きく、中央奥は小さく
+          Object.freeze({src:'./asset/house_poor.png', left:-7, bottom:15, height:36, layer:'town', depth:1}),
+          Object.freeze({src:'./asset/house_poor.png', left:77, bottom:15, height:36, layer:'town', depth:1, flip:true}),
+          Object.freeze({src:'./asset/house_poor.png', left:25, bottom:19, height:19, layer:'town', depth:2, flip:true}),
+          Object.freeze({src:'./asset/house_poor.png', left:56, bottom:19, height:19, layer:'town', depth:2}),
 
-          // 奥の家は小さく、左右の集落が続いているように見せる
-          Object.freeze({src:'./asset/house_poor.png', left:18, bottom:14, height:20, layer:'town', depth:2, flip:true}),
-          Object.freeze({src:'./asset/house_poor.png', left:58, bottom:14, height:20, layer:'town', depth:2}),
+          // 奥NPC
+          Object.freeze({src:'https://raw.githubusercontent.com/namiyukuta-cmd/iroiro/main/SHOP/asset/Npc/npc_oldman_01.png', left:20, bottom:13, height:22, layer:'people', depth:3}),
+          Object.freeze({src:'https://raw.githubusercontent.com/namiyukuta-cmd/iroiro/main/SHOP/asset/Npc/npc_porter_01.png', left:82, bottom:13, height:22, layer:'people', depth:3}),
 
-          // 中央前景に商いの塊
-          Object.freeze({src:'./asset/stall.png', left:34, bottom:1, height:31, layer:'interactive', depth:3}),
-
-          // NPCは建物より手前、主人公より奥
-          Object.freeze({src:'https://raw.githubusercontent.com/namiyukuta-cmd/iroiro/main/SHOP/asset/Npc/npc_oldman_01.png', left:17, bottom:7, height:22, layer:'people', depth:4}),
-          Object.freeze({src:'https://raw.githubusercontent.com/namiyukuta-cmd/iroiro/main/SHOP/asset/Npc/npc_porter_01.png', left:83, bottom:7, height:22, layer:'people', depth:4})
+          // 手前の商い
+          Object.freeze({src:'./asset/stall.png', left:42, bottom:3, height:30, layer:'interactive', depth:4})
         ])
       }),
       smallGateOutside: Object.freeze({
