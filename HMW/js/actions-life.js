@@ -156,17 +156,89 @@
       "hair_tie", "hair_brush", "disposable_razor", "scissors",
       "sanitary_products", "wet_wipes", "soap", "bandage"
     ];
-    openModal("買い物", `所持金 ${H.state.money}円`, ids.map((id) => ({
-      label: `${D.items[id].name} ${D.items[id].price}円`,
-      disabled: H.state.money < D.items[id].price,
-      onClick: () => {
-        H.state.money -= D.items[id].price;
-        H.addItem(id, 1);
-        H.addHistory(`${D.items[id].name}を買った。持ち物として残る。`);
+    const cart = Object.fromEntries(ids.map((id) => [id, 0]));
+
+    openModal(
+      "買い物",
+      `<div class="shop-summary"><span>所持金 <b>${H.state.money}円</b></span><span id="shop-total">合計 0円</span></div><div class="shop-list" id="shop-list"></div>`,
+      [],
+      true
+    );
+
+    const list = document.getElementById("shop-list");
+    const actionBox = document.getElementById("modal-actions");
+
+    function totalPrice() {
+      return ids.reduce((sum, id) => sum + cart[id] * D.items[id].price, 0);
+    }
+
+    function renderCart() {
+      const total = totalPrice();
+      const totalEl = document.getElementById("shop-total");
+      if (totalEl) totalEl.textContent = `合計 ${total}円`;
+
+      list.innerHTML = ids.map((id) => {
+        const item = D.items[id];
+        const qty = cart[id];
+        const canAdd = total + item.price <= H.state.money;
+        return `
+          <div class="shop-row">
+            <div class="shop-item">
+              <b>${item.name}</b>
+              <span>${item.price}円</span>
+            </div>
+            <div class="shop-qty">
+              <button type="button" class="shop-step" data-shop-minus="${id}" ${qty <= 0 ? "disabled" : ""}>−</button>
+              <b>${qty}</b>
+              <button type="button" class="shop-step" data-shop-plus="${id}" ${canAdd ? "" : "disabled"}>＋</button>
+            </div>
+          </div>
+        `;
+      }).join("");
+
+      list.querySelectorAll("[data-shop-minus]").forEach((button) => {
+        button.addEventListener("click", () => {
+          const id = button.dataset.shopMinus;
+          if (cart[id] > 0) cart[id] -= 1;
+          renderCart();
+        });
+      });
+
+      list.querySelectorAll("[data-shop-plus]").forEach((button) => {
+        button.addEventListener("click", () => {
+          const id = button.dataset.shopPlus;
+          if (totalPrice() + D.items[id].price > H.state.money) return;
+          cart[id] += 1;
+          renderCart();
+        });
+      });
+
+      actionBox.innerHTML = "";
+      const checkout = document.createElement("button");
+      checkout.className = "modal-btn good shop-checkout";
+      checkout.textContent = total > 0 ? `まとめて支払う（${total}円）` : "カゴは空です";
+      checkout.disabled = total <= 0 || total > H.state.money;
+      checkout.addEventListener("click", () => {
+        const finalTotal = totalPrice();
+        if (finalTotal <= 0 || finalTotal > H.state.money) return;
+
+        const bought = [];
+        ids.forEach((id) => {
+          const qty = cart[id];
+          if (!qty) return;
+          H.addItem(id, qty);
+          bought.push(`${D.items[id].name}×${qty}`);
+        });
+
+        H.state.money -= finalTotal;
+        H.addHistory(`${bought.join("、")}をまとめて買った。合計${finalTotal}円。`);
         closeModal();
         G.refresh();
-      }
-    })));
+      });
+      actionBox.appendChild(checkout);
+    }
+
+    renderCart();
   }
 
   function clerkWork() {
