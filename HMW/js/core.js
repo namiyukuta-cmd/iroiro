@@ -14,6 +14,7 @@
     s.world = { ...fresh.world, ...(s.world || {}) };
     s.world.locations = s.world.locations || {};
     s.inventory = s.inventory || {};
+    s.body = { ...fresh.body, ...(s.body || {}) };
     s.knownLocations = { ...fresh.knownLocations, ...(s.knownLocations || {}) };
     s.relationships = s.relationships || {};
     Object.keys(fresh.relationships).forEach((id) => {
