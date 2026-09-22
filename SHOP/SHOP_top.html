@@ -82,14 +82,73 @@
       pointer-events:none;
       user-select:none;
       -webkit-user-drag:none;
+      filter:drop-shadow(0 2px 2px rgba(47,34,22,.18));
+    }
+    .scene-atmosphere{
+      position:absolute;
+      inset:0;
+      overflow:hidden;
+      pointer-events:none;
+      z-index:5;
+    }
+    .scene-atmosphere::before{
+      content:"";
+      position:absolute;
+      inset:0;
+      background:
+        radial-gradient(circle at 78% 22%,rgba(255,238,179,.30),transparent 18%),
+        linear-gradient(to bottom,rgba(255,255,255,.04) 0 58%,rgba(228,164,93,.10) 76%,rgba(76,48,34,.08) 100%);
+    }
+    .sun-glow{
+      position:absolute;
+      right:12%;
+      top:15%;
+      width:56px;
+      height:56px;
+      border-radius:50%;
+      background:rgba(255,242,190,.18);
+      box-shadow:0 0 34px 18px rgba(255,223,152,.12);
+    }
+    .bird{
+      position:absolute;
+      font-family:serif;
+      font-weight:900;
+      color:rgba(64,55,48,.52);
+      line-height:1;
+      transform:rotate(-7deg);
+      animation:birdDrift 9s ease-in-out infinite alternate;
+    }
+    .bird-1{left:18%;top:24%;font-size:16px}
+    .bird-2{left:24%;top:28%;font-size:12px;animation-delay:-3s}
+    .bird-3{left:69%;top:32%;font-size:11px;animation-delay:-6s}
+    .dust{
+      position:absolute;
+      width:5px;
+      height:5px;
+      border-radius:50%;
+      background:rgba(239,207,151,.38);
+      box-shadow:0 0 6px rgba(239,207,151,.28);
+      animation:dustFloat 7s ease-in-out infinite alternate;
+    }
+    .dust-1{left:14%;top:66%}
+    .dust-2{left:39%;top:71%;animation-delay:-2s}
+    .dust-3{left:63%;top:64%;animation-delay:-4s}
+    .dust-4{left:84%;top:72%;animation-delay:-6s}
+    @keyframes birdDrift{
+      from{transform:translateX(0) rotate(-7deg)}
+      to{transform:translateX(18px) rotate(-4deg)}
+    }
+    @keyframes dustFloat{
+      from{transform:translate(0,0);opacity:.18}
+      to{transform:translate(13px,-11px);opacity:.7}
     }
     .layer-people{
       filter:
-        drop-shadow(1px 0 0 rgba(255,248,225,.9))
-        drop-shadow(-1px 0 0 rgba(255,248,225,.9))
-        drop-shadow(0 1px 0 rgba(255,248,225,.9))
-        drop-shadow(0 -1px 0 rgba(255,248,225,.9))
-        drop-shadow(2px 2px 3px rgba(0,0,0,.35));
+        drop-shadow(1px 0 0 rgba(255,248,225,.72))
+        drop-shadow(-1px 0 0 rgba(255,248,225,.72))
+        drop-shadow(0 1px 0 rgba(255,248,225,.72))
+        drop-shadow(0 -1px 0 rgba(255,248,225,.72))
+        drop-shadow(2px 3px 3px rgba(0,0,0,.32));
     }
 
     .town-placeholder{
@@ -249,8 +308,8 @@
     <nav class="bottom-menu" id="bottomMenu" aria-label="メニュー"></nav>
   </div>
 
-  <script src="./SHOP_data.js?v=20260923-0848"></script>
-  <script src="./SHOP_save.js?v=20260923-0848"></script>
-  <script src="./SHOP_app.js?v=20260923-0848"></script>
+  <script src="./SHOP_data.js?v=20260923-0855"></script>
+  <script src="./SHOP_save.js?v=20260923-0855"></script>
+  <script src="./SHOP_app.js?v=20260923-0855"></script>
 </body>
 </html>
