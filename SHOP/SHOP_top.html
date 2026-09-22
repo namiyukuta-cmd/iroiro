@@ -59,18 +59,13 @@
     .town-scroll{
       width:100%;
       height:100%;
-      overflow-x:auto;
-      overflow-y:hidden;
-      overscroll-behavior-x:contain;
-      -webkit-overflow-scrolling:touch;
-      scrollbar-width:none;
-      touch-action:pan-x;
+      overflow:hidden;
     }
-    .town-scroll::-webkit-scrollbar{display:none}
     .town-strip{
       position:relative;
+      width:100%;
       height:100%;
-      min-width:1200px;
+      min-width:0;
       background:#c7bca8;
       background-size:cover;
       background-position:center bottom;
