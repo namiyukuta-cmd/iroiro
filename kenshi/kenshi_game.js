@@ -88,6 +88,120 @@ function actor(id,name,faction,type,x,y,extra){
   return Object.assign(base,extra||{});
 }
 
+var ENEMY_FACTIONS={
+  "砂盗賊":true,
+  "野盗":true,
+  "飢えた盗賊":true,
+  "野犬":true
+};
+
+var POPULATION_RULES={
+  sand:{min:6,max:10,groupMin:2,groupMax:4},
+  outlaw:{min:4,max:8,groupMin:2,groupMax:3},
+  hungry:{min:4,max:8,groupMin:2,groupMax:4},
+  wildDog:{min:3,max:6,groupMin:2,groupMax:3},
+  guard:{min:3,max:5,groupMin:1,groupMax:1},
+  wanderer:{min:3,max:5,groupMin:1,groupMax:1},
+  miner:{min:3,max:5,groupMin:1,groupMax:1},
+  farmer:{min:3,max:5,groupMin:1,groupMax:1}
+};
+
+function isEnemyActor(a){
+  return !!(a&&ENEMY_FACTIONS[a.faction]);
+}
+
+function populationKind(a){
+  if(!a||a.recruited)return null;
+  if(a.faction==="砂盗賊")return "sand";
+  if(a.faction==="野盗")return "outlaw";
+  if(a.faction==="飢えた盗賊")return "hungry";
+  if(a.faction==="野犬")return "wildDog";
+  if(a.type==="guard")return "guard";
+  if(a.type==="wanderer"&&a.faction==="無所属")return "wanderer";
+  if(a.type==="worker"&&a.home==="mine")return "miner";
+  if(a.type==="worker"&&a.home==="farm")return "farmer";
+  return null;
+}
+
+function spawnPoint(kind){
+  var p;
+  if(kind==="sand"){
+    p=Math.random()<.65?PLACES.camp:null;
+    if(p)return {x:clamp(p.x+rnd(-5,5),2,98),y:clamp(p.y+rnd(-5,5),3,97)};
+  }
+  if(kind==="outlaw"){
+    p=choice([PLACES.ruins,PLACES.salt,PLACES.cross]);
+    return {x:clamp(p.x+rnd(-7,7),2,98),y:clamp(p.y+rnd(-7,7),3,97)};
+  }
+  if(kind==="hungry"){
+    p=choice([PLACES.farm,PLACES.cross,PLACES.dust]);
+    return {x:clamp(p.x+rnd(-8,8),2,98),y:clamp(p.y+rnd(-8,8),3,97)};
+  }
+  if(kind==="guard"){
+    p=choice([PLACES.dust,PLACES.cross]);
+    return {x:clamp(p.x+rnd(-3,3),2,98),y:clamp(p.y+rnd(-3,3),3,97)};
+  }
+  if(kind==="wanderer"){
+    p=choice([PLACES.cross,PLACES.dust,PLACES.farm]);
+    return {x:clamp(p.x+rnd(-5,5),2,98),y:clamp(p.y+rnd(-5,5),3,97)};
+  }
+  if(kind==="miner"){
+    p=PLACES.mine;
+    return {x:clamp(p.x+rnd(-4,4),2,98),y:clamp(p.y+rnd(-4,4),3,97)};
+  }
+  if(kind==="farmer"){
+    p=PLACES.farm;
+    return {x:clamp(p.x+rnd(-4,4),2,98),y:clamp(p.y+rnd(-4,4),3,97)};
+  }
+
+  var edge=Math.floor(Math.random()*4);
+  if(edge===0)return {x:2,y:rnd(8,92)};
+  if(edge===1)return {x:98,y:rnd(8,92)};
+  if(edge===2)return {x:rnd(8,92),y:3};
+  return {x:rnd(8,92),y:97};
+}
+
+function createPopulationActor(kind){
+  state.spawnSerial=(state.spawnSerial||1)+1;
+  var id="spawn_"+kind+"_"+state.spawnSerial;
+  var p=spawnPoint(kind);
+  if(kind==="sand")return actor(id,"砂盗賊","砂盗賊","bandit",p.x,p.y,{money:Math.floor(rnd(16,36)),group:"sand_spawn",speed:rnd(1.3,1.55)});
+  if(kind==="outlaw")return actor(id,"野盗","野盗","bandit",p.x,p.y,{money:Math.floor(rnd(10,28)),group:"outlaw_spawn",speed:rnd(1.25,1.5),hp:90,maxHp:90});
+  if(kind==="hungry")return actor(id,"飢えた盗賊","飢えた盗賊","bandit",p.x,p.y,{money:Math.floor(rnd(2,14)),group:"hungry_spawn",speed:rnd(1.2,1.45),hp:78,maxHp:78});
+  if(kind==="wildDog")return actor(id,"野犬","野犬","dog",p.x,p.y,{money:0,group:"wilddog_spawn",speed:rnd(1.5,1.8),hp:68,maxHp:68});
+  if(kind==="guard")return actor(id,"衛兵","交易組合","guard",p.x,p.y,{money:Math.floor(rnd(18,35)),route:["dust","cross","dust"],routeIndex:1,speed:1.25,hp:115,maxHp:115});
+  if(kind==="wanderer")return actor(id,"旅人","無所属","wanderer",p.x,p.y,{money:Math.floor(rnd(12,42)),route:["cross","ruins","farm","dust","cross"],routeIndex:1,speed:rnd(1.05,1.3)});
+  if(kind==="miner")return actor(id,"鉱夫","自由民","worker",p.x,p.y,{money:Math.floor(rnd(10,28)),home:"mine",speed:1.0});
+  return actor(id,"農民","南農場","worker",p.x,p.y,{money:Math.floor(rnd(8,22)),home:"farm",speed:.9});
+}
+
+function countPopulation(kind){
+  return state.actors.filter(function(a){
+    return !a.down&&!a.recruited&&populationKind(a)===kind;
+  }).length;
+}
+
+function ensurePopulation(fillToMinimum){
+  Object.keys(POPULATION_RULES).forEach(function(kind){
+    var rule=POPULATION_RULES[kind];
+    var current=countPopulation(kind);
+    if(current>=rule.min||current>=rule.max)return;
+    var need=rule.min-current;
+    var amount=fillToMinimum?need:Math.min(need,Math.floor(rnd(rule.groupMin,rule.groupMax+1)));
+    amount=Math.min(amount,rule.max-current);
+    for(var i=0;i<amount;i++)state.actors.push(createPopulationActor(kind));
+  });
+}
+
+function cleanupWorldActors(){
+  var now=Date.now();
+  state.actors=state.actors.filter(function(a){
+    if(!a.down||a.recruited)return true;
+    if(!a._downAt)a._downAt=now;
+    return now-a._downAt<45000;
+  });
+}
+
 function freshState(){
   var actors=[];
   actors.push(actor("trader","商人","交易組合","trader",18,20,{money:220,group:"caravan",route:["dust","cross","mine","cross","dust"],routeIndex:1,speed:1.25}));
@@ -107,9 +221,9 @@ function freshState(){
   actors.push(actor("bandit3","砂盗賊","砂盗賊","bandit",86,80,{money:26,group:"bandits",speed:1.38}));
 
   return {
-    version:4,
+    version:5,
     day:1,hour:8,minute:0,
-    paused:false,speed:1,weather:"乾燥",tick:0,
+    paused:false,speed:1,weather:"乾燥",tick:0,spawnSerial:1,
     travelDestination:null,
     activeQuest:null,
     completedQuests:[],
@@ -132,7 +246,11 @@ function normalizeState(){
   if(!state||!state.player){state=freshState();return}
   if(!Array.isArray(state.actors))state.actors=[];
   if(!Array.isArray(state.party))state.party=["player"];
-  if(!state.relations)state.relations={"交易組合":0,"南農場":0,"自由民":0,"無所属":0,"砂盗賊":-100};
+  if(!state.relations)state.relations={"交易組合":0,"南農場":0,"自由民":0,"無所属":0,"砂盗賊":-100,"野盗":-100,"飢えた盗賊":-100,"野犬":-100};
+  if(!Number.isFinite(state.spawnSerial))state.spawnSerial=1;
+  if(!Number.isFinite(state.relations["野盗"]))state.relations["野盗"]=-100;
+  if(!Number.isFinite(state.relations["飢えた盗賊"]))state.relations["飢えた盗賊"]=-100;
+  if(!Number.isFinite(state.relations["野犬"]))state.relations["野犬"]=-100;
   if(!Array.isArray(state.log))state.log=[];
   if(!Array.isArray(state.completedQuests))state.completedQuests=[];
   if(state.activeQuest&&(!state.activeQuest.id||!QUESTS[state.activeQuest.id]))state.activeQuest=null;
@@ -143,6 +261,7 @@ function normalizeState(){
     if(!Number.isFinite(a.workCd))a.workCd=0;
   });
   if(!Number.isFinite(state.speed))state.speed=1;
+  if(!Number.isFinite(state.tick))state.tick=0;
   if(!Number.isFinite(state.day))state.day=1;
   if(!Number.isFinite(state.hour))state.hour=8;
   if(!Number.isFinite(state.minute))state.minute=0;
@@ -195,9 +314,10 @@ function nearbyPlace(){
 }
 
 function hostile(a,bFaction){
-  if(a.faction==="砂盗賊"&&bFaction!=="砂盗賊")return true;
-  if(bFaction==="砂盗賊"&&a.faction!=="砂盗賊")return true;
-  return false;
+  var aEnemy=!!ENEMY_FACTIONS[a.faction];
+  var bEnemy=!!ENEMY_FACTIONS[bFaction];
+  if(aEnemy===bEnemy)return false;
+  return aEnemy||bEnemy;
 }
 
 function setTarget(a,x,y){
@@ -230,7 +350,7 @@ function routeActor(a){
     setTarget(a,h.x+rnd(-4,4),h.y+rnd(-4,4));
     return;
   }
-  if(a.type==="bandit"&&(!a.target||dist(a,a.target)<1.8)){
+  if(isEnemyActor(a)&&(!a.target||dist(a,a.target)<1.8)){
     var p=PLACES[choice(["camp","salt","ruins","cross"])];
     setTarget(a,p.x+rnd(-3,3),p.y+rnd(-3,3));
   }
@@ -249,11 +369,11 @@ function followActor(a){
 
 function chooseBanditTargets(){
   var targets=aliveActors().filter(function(a){
-    return a.faction!=="砂盗賊"&&a.type!=="dog"&&a.type!=="pack";
+    return !isEnemyActor(a)&&a.type!=="pack";
   });
 
   state.actors.filter(function(a){
-    return a.type==="bandit"&&!a.down;
+    return isEnemyActor(a)&&!a.down;
   }).forEach(function(b){
     var best=null,bd=18;
     targets.forEach(function(t){
@@ -325,6 +445,7 @@ function damageActor(a,amount,fromName){
   a.hp=clamp(a.hp-amount,0,a.maxHp);
   if(a.hp<=0&&!a.down){
     a.down=true;
+    a._downAt=Date.now();
     a.target=null;
     a.loot=a.money;
     a.money=0;
@@ -362,7 +483,7 @@ function combatStep(dt){
   }
 
   state.actors.filter(function(a){
-    return a.type==="bandit"&&!a.down;
+    return isEnemyActor(a)&&!a.down;
   }).forEach(function(b){
     if(state.player.down||dist(b,state.player)>3.4)return;
     if(b.attackCd<=0){
@@ -421,6 +542,8 @@ function checkTravelArrival(){
 
 function worldAI(dt){
   state.tick++;
+  if(state.tick%80===0)ensurePopulation(false);
+  if(state.tick%100===0)cleanupWorldActors();
   chooseBanditTargets();
 
   state.actors.forEach(function(a){
@@ -612,8 +735,8 @@ function nearestEncounterActor(){
   });
   if(!near.length)return null;
   near.sort(function(a,b){
-    var ap=(a.faction==="砂盗賊"&&!a.down)?0:(a.down?1:2);
-    var bp=(b.faction==="砂盗賊"&&!b.down)?0:(b.down?1:2);
+    var ap=(isEnemyActor(a)&&!a.down)?0:(a.down?1:2);
+    var bp=(isEnemyActor(b)&&!b.down)?0:(b.down?1:2);
     if(ap!==bp)return ap-bp;
     return dist(a,state.player)-dist(b,state.player);
   });
@@ -1251,9 +1374,9 @@ function renderContext(){
 
   if(a){
     if(a.down){
-      addActor("治療",function(){healActor(a)},state.player.med<=0||a.faction==="砂盗賊");
+      addActor("治療",function(){healActor(a)},state.player.med<=0||isEnemyActor(a));
       addActor("漁る",function(){lootActor(a)},a.loot<=0);
-    }else if(a.faction==="砂盗賊"){
+    }else if(isEnemyActor(a)){
       addActor("戦う",function(){
         clearTapMarker();
         stopAutoWork(false);
@@ -1660,6 +1783,7 @@ function init(){
     }catch(e){}
   }
   normalizeState();
+  ensurePopulation(true);
 
   fieldStage.addEventListener("pointerdown",beginFieldMove,{passive:false});
   fieldStage.addEventListener("pointermove",moveFieldMove,{passive:false});
