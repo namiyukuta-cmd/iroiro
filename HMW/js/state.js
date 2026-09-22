@@ -23,6 +23,32 @@
     "malice"
   ]);
 
+  HMW.ROMANCE_GROWTH = Object.freeze({
+    conversation: Object.freeze({ familiarity: 1, trust: 0, goodwill: 0, desire: 0 }),
+    shared_time: Object.freeze({ familiarity: 1, trust: 0, goodwill: 1, desire: 0 }),
+    share_food: Object.freeze({ familiarity: 1, trust: 1, goodwill: 2, desire: 0 }),
+    help: Object.freeze({ familiarity: 1, trust: 2, goodwill: 1, desire: 0 }),
+    personal: Object.freeze({ familiarity: 2, trust: 2, goodwill: 1, desire: 0 }),
+    affection: Object.freeze({ familiarity: 2, trust: 1, goodwill: 2, desire: 1 }),
+    confession: Object.freeze({ familiarity: 3, trust: 1, goodwill: 3, desire: 2 }),
+    touch: Object.freeze({ familiarity: 2, trust: 1, goodwill: 2, desire: 2 }),
+    overnight: Object.freeze({ familiarity: 2, trust: 1, goodwill: 2, desire: 1 })
+  });
+
+  HMW.growRomance = (id, type, extra = {}) => {
+    const rel = HMW.state.relationships?.[id];
+    const person = HMW.DATA?.people?.[id];
+    if (!rel || !person?.romance) return null;
+
+    const base = HMW.ROMANCE_GROWTH[type] || {};
+    ["familiarity", "trust", "goodwill", "desire"].forEach((key) => {
+      const amount = (Number(base[key]) || 0) + (Number(extra[key]) || 0);
+      if (amount) rel[key] = clamp100((Number(rel[key]) || 0) + amount);
+    });
+    rel.lastContactDay = HMW.state.day;
+    return rel;
+  };
+
   const relationship = (id) => {
     const mind = HMW.DATA?.people?.[id]?.mind || {};
     return {
