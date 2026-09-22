@@ -13,7 +13,7 @@
         label: "この辺りの事情を聞く",
         onClick: () => {
           H.state.daily.talk.homeless_named = true;
-          r.familiarity += 1;
+          H.growRomance("homeless_named", "conversation");
           if (r.familiarity >= 2) {
             H.state.sleep.known.underpass = true;
             unlock("underpass", "高架下の場所を教えられた。");
@@ -37,8 +37,7 @@
         const id = ["bread", "food_pack", "leftover_food"].find((x) => (H.state.inventory[x] || 0) > 0);
         if (!id) return;
         H.removeItem(id, 1);
-        r.goodwill += 2;
-        r.trust += 1;
+        H.growRomance("homeless_named", "share_food");
         if (r.trust >= 2) {
           H.state.progression.homelessNetwork.safeSleepAdvice = true;
           H.state.progression.stability.streetNetwork = true;
@@ -122,7 +121,7 @@
         label: "支援先を聞く",
         onClick: () => {
           H.state.daily.talk.police_named = true;
-          r.familiarity += 1;
+          H.growRomance("police_named", "conversation");
           H.state.progression.police.referralKnown = true;
           unlock("charity_center", "支援センターを教えられた。");
           closeModal();
@@ -134,8 +133,7 @@
         disabled: r.familiarity < 2,
         onClick: () => {
           H.state.daily.talk.police_named = true;
-          r.familiarity += 1;
-          r.trust += 1;
+          H.growRomance("police_named", "conversation", { trust: 1 });
           H.state.progression.police.patrolTipKnown = true;
           H.state.world.policeAttention = Math.max(0, H.state.world.policeAttention - 1);
           closeModal();
@@ -146,7 +144,7 @@
         label: "用件だけで離れる",
         onClick: () => {
           H.state.daily.talk.police_named = true;
-          r.familiarity += 1;
+          H.growRomance("police_named", "conversation");
           closeModal();
           H.addHistory("距離を保ったまま用件だけ済ませた。顔と態度は覚えられた。");
           G.refresh();
@@ -163,8 +161,7 @@
         label: "困っていることを正直に話す",
         onClick: () => {
           H.state.daily.talk.support_named = true;
-          r.familiarity += 1;
-          r.trust += 1;
+          H.growRomance("support_named", "personal");
           H.state.progression.stability.supportBase = true;
           closeModal();
           advanceTime(1, "食事・寝場所・仕事のうち今どこが詰まっているかを伝えた。次の相談に引き継がれる。");
@@ -174,7 +171,7 @@
         label: "必要な情報だけ聞く",
         onClick: () => {
           H.state.daily.talk.support_named = true;
-          r.familiarity += 1;
+          H.growRomance("support_named", "conversation");
           closeModal();
           H.addHistory("窓口と利用時間だけ確認した。距離は保ったまま、必要な情報だけ得た。");
           G.refresh();
@@ -191,7 +188,7 @@
         label: "高架下のことを聞く",
         onClick: () => {
           H.state.daily.talk.thug_named = true;
-          r.familiarity += 1;
+          H.growRomance("thug_named", "conversation");
           H.state.sleep.known.underpass = true;
           unlock("underpass", "高架下の場所を聞いた。");
           if (r.familiarity >= 2) H.state.progression.thug.safePassage = true;
@@ -206,7 +203,7 @@
         disabled: r.familiarity < 2,
         onClick: () => {
           H.state.daily.talk.thug_named = true;
-          r.familiarity += 1;
+          H.growRomance("thug_named", "conversation");
           H.state.progression.thug.carryKnown = true;
           H.addLead("thug_carry", "中身不明の荷運びを受けるか決める");
           closeModal();
@@ -217,7 +214,7 @@
         label: "距離を取る",
         onClick: () => {
           H.state.daily.talk.thug_named = true;
-          r.familiarity += 1;
+          H.growRomance("thug_named", "conversation");
           closeModal();
           H.addHistory("深入りせず離れた。拒んだことも相手との履歴として残る。");
           G.refresh();
@@ -230,7 +227,7 @@
     if (!H.state.progression.thug.carryKnown) return;
     H.state.money += 900;
     H.state.world.policeAttention += 2;
-    rel("thug_named").trust += 1;
+    H.growRomance("thug_named", "help");
     H.state.progression.thug.debt += 1;
     H.state.progression.stability.paidWorkDays += 1;
     changeStats({ fatigue: 10, hunger: 4 });
