@@ -55,8 +55,43 @@
     loadButton.addEventListener('click', () => loadGame(loadButton));
   }
 
+  function renderScene() {
+    const state = window.SHOP_STATE;
+    const key = state.sceneKey && data.scenes[state.sceneKey] ? state.sceneKey : 'outerPoor';
+    const scene = data.scenes[key];
+    const strip = $('townStrip');
+    const placeholder = $('townPlaceholder');
+
+    strip.style.minWidth = scene.width + 'px';
+    strip.style.width = scene.width + 'px';
+    strip.style.backgroundImage = 'url("' + scene.background + '")';
+    strip.style.backgroundPosition = 'center bottom';
+    strip.style.backgroundSize = 'cover';
+    strip.style.backgroundRepeat = 'no-repeat';
+
+    strip.querySelectorAll('.scene-object').forEach(node => node.remove());
+
+    scene.objects.forEach(item => {
+      const image = document.createElement('img');
+      image.className = 'scene-object';
+      image.src = item.src;
+      image.alt = '';
+      image.draggable = false;
+      image.style.left = item.left + 'px';
+      image.style.height = item.height + '%';
+      image.style.zIndex = String(item.layer || 1);
+      if (item.flip) image.style.transform = 'scaleX(-1)';
+      strip.appendChild(image);
+    });
+
+    placeholder.style.display = 'none';
+    state.scene = scene.name;
+  }
+
   function render() {
     const state = window.SHOP_STATE;
+
+    renderScene();
 
     $('dayText').textContent = Number(state.day || 1) + '日目';
     $('timeText').textContent = formatTime(state.minutes);
@@ -116,6 +151,6 @@
   }
 
   // 町背景は横方向にスクロールする。
-  // 背景画像・主人公画像・ゲーム内容は後でJS側から設定する。
+  // 背景・建物・門・屋台はJSデータから重ねて表示する。
   // オートセーブ・オートロード・ブラウザ保存は行わない。
 })();
