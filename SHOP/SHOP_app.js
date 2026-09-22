@@ -62,8 +62,8 @@
     const strip = $('townStrip');
     const placeholder = $('townPlaceholder');
 
-    strip.style.minWidth = scene.width + 'px';
-    strip.style.width = scene.width + 'px';
+    strip.style.minWidth = '0';
+    strip.style.width = '100%';
     strip.style.backgroundImage = 'url("' + scene.background + '")';
     strip.style.backgroundPosition = 'center bottom';
     strip.style.backgroundSize = 'cover';
@@ -77,7 +77,7 @@
       image.src = item.src;
       image.alt = '';
       image.draggable = false;
-      image.style.left = item.left + 'px';
+      image.style.left = item.left + '%';
       image.style.height = item.height + '%';
       image.style.zIndex = String(item.layer || 1);
       if (item.flip) image.style.transform = 'scaleX(-1)';
@@ -150,7 +150,7 @@
     status.textContent = '続きから始める場合は「ロード」を押してください。';
   }
 
-  // 町背景は横方向にスクロールする。
+  // 1つの「場」は1画面で表示し、移動時にsceneKeyを切り替える。
   // 背景・建物・門・屋台はJSデータから重ねて表示する。
   // オートセーブ・オートロード・ブラウザ保存は行わない。
 })();
