@@ -150,7 +150,7 @@
   }
 
   function openShop() {
-    const ids = ["bread", "rice_ball", "bottled_water", "toothbrush", "toothpaste", "wet_wipes", "soap", "bandage"];
+    const ids = ["bread", "rice_ball", "bottled_water", "toothbrush", "toothpaste", "sanitary_products", "wet_wipes", "soap", "bandage"];
     openModal("買い物", `所持金 ${H.state.money}円`, ids.map((id) => ({
       label: `${D.items[id].name} ${D.items[id].price}円`,
       disabled: H.state.money < D.items[id].price,
