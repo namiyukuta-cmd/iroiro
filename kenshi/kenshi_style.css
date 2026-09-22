@@ -36,7 +36,7 @@ button{cursor:pointer}
   min-height:0;
   margin:0 auto;
   display:grid;
-  grid-template-rows:58px minmax(0,1fr) 224px;
+  grid-template-rows:58px minmax(0,1fr) 188px;
   overflow:hidden;
   background:var(--ink);
 }
@@ -602,9 +602,13 @@ button{cursor:pointer}
   min-width:0;
   min-height:0;
   display:grid;
-  grid-template-columns:repeat(5,minmax(0,1fr));
-  gap:5px;
-  padding:7px;
+  grid-template-columns:repeat(auto-fill,32px);
+  grid-auto-rows:32px;
+  align-content:start;
+  justify-content:start;
+  gap:3px;
+  padding:5px;
+  overflow:hidden;
   border:1px solid #aa9634;
   border-top:0;
   border-radius:0 0 8px 8px;
@@ -612,36 +616,41 @@ button{cursor:pointer}
 }
 .hotbarSlot{
   position:relative;
-  min-width:0;
-  min-height:0;
-  padding:8px 4px 4px;
+  width:32px;
+  height:32px;
+  min-width:32px;
+  min-height:32px;
+  padding:2px;
   overflow:hidden;
-  border:2px solid #887836;
-  border-radius:8px;
+  border:1px solid #887836;
+  border-radius:4px;
   background:#fff3bd;
   color:#17130e;
-  font-size:12px;
   font-weight:900;
   box-shadow:inset 0 0 0 1px rgba(255,255,255,.4);
 }
 .hotbarSlot b{
   display:block;
-  font-size:11px;
-  line-height:1.1;
-  white-space:nowrap;
+  width:100%;
   overflow:hidden;
-  text-overflow:ellipsis;
+  white-space:nowrap;
+  text-overflow:clip;
   text-align:center;
+  font-size:6px;
+  line-height:9px;
 }
 .hotbarSlot span{
   position:absolute;
-  right:7px;
-  bottom:5px;
-  font-size:18px;
+  right:2px;
+  bottom:2px;
+  font-size:10px;
   line-height:1;
-  font-weight:900;
+  font-weight:950;
 }
-.hotbarSlot.empty{opacity:.5}
+.hotbarSlot.empty{
+  opacity:.42;
+  border-style:dashed;
+}
 
 /* オーバーレイ */
 .overlay{
@@ -809,7 +818,7 @@ button{cursor:pointer}
 }
 
 @media(max-width:390px){
-  #app{grid-template-rows:54px minmax(0,1fr) 206px}
+  #app{grid-template-rows:54px minmax(0,1fr) 176px}
   .topHud{padding-left:6px;padding-right:6px;gap:4px}
   .dayClock b{font-size:12px}
   .dayClock span{font-size:9px}
@@ -831,10 +840,7 @@ button{cursor:pointer}
   .moneyStatus span{font-size:9px}
   .moneyStatus b{margin-top:3px;font-size:19px}
   .bottomTabs button{min-height:40px;font-size:10px}
-  .hotbar{gap:4px;padding:5px}
-  .hotbarSlot{padding:6px 3px 3px}
-  .hotbarSlot b{font-size:10px}
-  .hotbarSlot span{font-size:16px;right:5px;bottom:4px}
+  .hotbar{gap:3px;padding:5px}
 }
 /* タップしたことが分かる押下反応 */
 button{
