@@ -129,6 +129,8 @@
     const list = s.leads.filter((x) => !x.done).map((x) => x.text);
     if (s.stats.hunger >= 72) list.unshift("空腹が強い。食料支援・購入・持ち物で戻せる");
     if (s.stats.fatigue >= 78) list.unshift("疲労が高い。休むか今夜の寝場所を優先");
+    const period = H.getMenstrualStatus?.();
+    if (period?.active && !s.daily.periodCare) list.unshift(`生理${period.periodDay}日目。今日の生理用品が必要`);
     if (s.slot === 3) list.unshift("深夜。眠る場所を選ぶまで翌朝には進まない");
     if (s.world.policeAttention >= 3) list.push(`警察の注意度 ${s.world.policeAttention}`);
     return [...new Set(list)].slice(0, 5);
@@ -261,7 +263,7 @@
     const buttons = [];
     entries.forEach(([id]) => {
       const item = D.items[id];
-      if (item && ["hunger", "health", "hygiene", "warmth", "wetness"].some((k) => typeof item[k] === "number")) {
+      if (item && (item.periodCare || ["hunger", "health", "hygiene", "warmth", "wetness"].some((k) => typeof item[k] === "number"))) {
         buttons.push({ label: `${item.name}を使う`, onClick: () => G.useItem(id) });
       }
     });
