@@ -65,16 +65,11 @@
     strip.style.minWidth = '0';
     strip.style.width = '100%';
     strip.style.backgroundImage = 'url("' + scene.background + '")';
-    strip.style.backgroundPosition = 'center 72%';
-    strip.style.backgroundSize = '165% auto';
+    strip.style.backgroundPosition = 'center bottom';
+    strip.style.backgroundSize = 'cover';
     strip.style.backgroundRepeat = 'no-repeat';
 
-    strip.querySelectorAll('.scene-object,.player-lane').forEach(node => node.remove());
-
-    const playerLane = document.createElement('div');
-    playerLane.className = 'player-lane';
-    playerLane.setAttribute('aria-hidden','true');
-    strip.appendChild(playerLane);
+    strip.querySelectorAll('.scene-object').forEach(node => node.remove());
 
     scene.objects.forEach(item => {
       const image = document.createElement('img');
