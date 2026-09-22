@@ -3,11 +3,66 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
   <title>SHOP</title>
 </head>
 <body>
   <main>
     <h1>お店屋さん</h1>
+
+    <section aria-label="セーブ">
+      <button id="loadButton" type="button">ロード</button>
+      <button id="saveButton" type="button">セーブ</button>
+      <p id="saveStatus" aria-live="polite"></p>
+    </section>
   </main>
+
+  <script src="./SHOP_save.js"></script>
+  <script>
+    (() => {
+      // ゲーム本体ができたら、このオブジェクトへ状態を集約する。
+      // ブラウザ保存は行わず、ページを閉じれば未セーブ分は消える。
+      window.SHOP_STATE = window.SHOP_STATE || {
+        version: 1
+      };
+
+      const status = document.getElementById('saveStatus');
+      const saveButton = document.getElementById('saveButton');
+      const loadButton = document.getElementById('loadButton');
+
+      saveButton.addEventListener('click', async () => {
+        saveButton.disabled = true;
+        status.textContent = '保存中';
+        try {
+          await window.SHOP_SAVE.save(window.SHOP_STATE);
+          status.textContent = '保存しました';
+        } catch (error) {
+          status.textContent = error && error.message ? error.message : '保存に失敗しました';
+        } finally {
+          saveButton.disabled = false;
+        }
+      });
+
+      loadButton.addEventListener('click', async () => {
+        loadButton.disabled = true;
+        status.textContent = '読込中';
+        try {
+          const data = await window.SHOP_SAVE.load();
+          if (data && typeof data === 'object') {
+            window.SHOP_STATE = data;
+          }
+          status.textContent = '読み込みました';
+        } catch (error) {
+          status.textContent = error && error.message ? error.message : '読み込みに失敗しました';
+        } finally {
+          loadButton.disabled = false;
+        }
+      });
+
+      // オートセーブ・オートロードは意図的に実装しない。
+    })();
+  </script>
 </body>
 </html>
