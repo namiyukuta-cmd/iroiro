@@ -6,7 +6,7 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
   <meta http-equiv="Pragma" content="no-cache" />
   <meta http-equiv="Expires" content="0" />
-  <title>お店屋さん</title>
+  <title>SHOP</title>
   <style>
     *{box-sizing:border-box}
     html,body{margin:0;width:100%;min-height:100%;background:#d7d0bc;color:#211f1a}
@@ -32,13 +32,13 @@
       padding:max(16px,env(safe-area-inset-top)) 16px 14px;
       border-bottom:2px solid #29261f;
       background:#eee8d8;
-      display:flex;
+      display:grid;
+      grid-template-columns:minmax(0,1fr) auto;
+      gap:8px 12px;
       align-items:center;
-      justify-content:space-between;
-      gap:12px;
     }
     h1{margin:0;font-size:24px}
-    .money{font-weight:800;font-size:16px}
+    .hud{display:flex;gap:12px;align-items:center;justify-content:flex-end;flex-wrap:wrap;font-weight:800;font-size:15px}
     main{padding:18px 16px 24px;display:grid;align-content:start;gap:18px}
     .shop-board{
       min-height:250px;
@@ -52,11 +52,11 @@
     .shelf{
       display:grid;
       grid-template-columns:repeat(3,1fr);
-      grid-template-rows:repeat(3,62px);
+      grid-auto-rows:62px;
       border:4px solid #9b5b3d;
       background:#e9dfcb;
     }
-    .shelf div{border:1px solid rgba(41,38,31,.5)}
+    .shelf-slot{border:1px solid rgba(41,38,31,.5)}
     .counter{
       height:52px;
       border:4px solid #b7a91d;
@@ -101,82 +101,28 @@
 <body>
   <div class="app">
     <header>
-      <h1>お店屋さん</h1>
-      <div class="money">所持金 <span id="moneyText">0</span></div>
+      <h1 id="gameTitle"></h1>
+      <div class="hud">
+        <span id="dayText"></span>
+        <span id="timeText"></span>
+        <span id="moneyText"></span>
+      </div>
     </header>
 
     <main>
-      <section class="shop-board" aria-label="店内">
-        <div class="shelf" aria-label="商品棚">
-          <div></div><div></div><div></div>
-          <div></div><div></div><div></div>
-          <div></div><div></div><div></div>
-        </div>
-        <div class="counter" aria-label="カウンター"></div>
-        <div class="floor">店内</div>
+      <section class="shop-board" id="shopBoard">
+        <div class="shelf" id="shelf"></div>
+        <div class="counter" id="counter"></div>
+        <div class="floor" id="floor"></div>
       </section>
       <p id="saveStatus" aria-live="polite"></p>
     </main>
 
-    <nav aria-label="メニュー">
-      <button id="loadButton" type="button">ロード</button>
-      <button id="saveButton" type="button">セーブ</button>
-      <a class="navbtn" href="./SHOP_index.html">戻る</a>
-    </nav>
+    <nav id="bottomNav"></nav>
   </div>
 
+  <script src="./SHOP_data.js"></script>
   <script src="./SHOP_save.js"></script>
-  <script>
-    (() => {
-      // ブラウザ保存はしない。未セーブの状態はページを閉じると消える。
-      window.SHOP_STATE = { version: 1, money: 0 };
-
-      const status = document.getElementById('saveStatus');
-      const saveButton = document.getElementById('saveButton');
-      const loadButton = document.getElementById('loadButton');
-      const moneyText = document.getElementById('moneyText');
-      const params = new URLSearchParams(location.search);
-
-      if (params.get('continue') === '1') {
-        status.textContent = '続きから始める場合は「ロード」を押してください。';
-      }
-
-      function render(){
-        moneyText.textContent = Number(window.SHOP_STATE.money || 0);
-      }
-
-      saveButton.addEventListener('click', async () => {
-        saveButton.disabled = true;
-        status.textContent = '保存中';
-        try {
-          await window.SHOP_SAVE.save(window.SHOP_STATE);
-          status.textContent = '保存しました';
-        } catch (error) {
-          status.textContent = error && error.message ? error.message : '保存に失敗しました';
-        } finally {
-          saveButton.disabled = false;
-        }
-      });
-
-      loadButton.addEventListener('click', async () => {
-        loadButton.disabled = true;
-        status.textContent = '読込中';
-        try {
-          const data = await window.SHOP_SAVE.load();
-          if (data && typeof data === 'object') {
-            window.SHOP_STATE = data;
-            render();
-          }
-          status.textContent = '読み込みました';
-        } catch (error) {
-          status.textContent = error && error.message ? error.message : '読み込みに失敗しました';
-        } finally {
-          loadButton.disabled = false;
-        }
-      });
-
-      render();
-    })();
-  </script>
+  <script src="./SHOP_app.js"></script>
 </body>
 </html>
