@@ -84,7 +84,12 @@
       -webkit-user-drag:none;
     }
     .layer-people{
-      filter:none;
+      filter:
+        drop-shadow(2px 0 0 rgba(255,248,225,.98))
+        drop-shadow(-2px 0 0 rgba(255,248,225,.98))
+        drop-shadow(0 2px 0 rgba(255,248,225,.98))
+        drop-shadow(0 -2px 0 rgba(255,248,225,.98))
+        drop-shadow(3px 3px 4px rgba(0,0,0,.42));
     }
     .town-placeholder{
       position:absolute;
@@ -233,8 +238,8 @@
     <nav class="bottom-menu" id="bottomMenu" aria-label="メニュー"></nav>
   </div>
 
-  <script src="./SHOP_data.js?v=20260923-0829"></script>
-  <script src="./SHOP_save.js?v=20260923-0829"></script>
-  <script src="./SHOP_app.js?v=20260923-0829"></script>
+  <script src="./SHOP_data.js?v=20260923-0833"></script>
+  <script src="./SHOP_save.js?v=20260923-0833"></script>
+  <script src="./SHOP_app.js?v=20260923-0833"></script>
 </body>
 </html>
