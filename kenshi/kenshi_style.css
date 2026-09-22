@@ -126,14 +126,26 @@ button{cursor:pointer}
   min-height:0;
   overflow:hidden;
   touch-action:none;
-  background:
-    radial-gradient(circle at 20% 25%,rgba(68,58,39,.18),transparent 10%),
-    radial-gradient(circle at 75% 65%,rgba(77,63,41,.22),transparent 13%),
-    repeating-linear-gradient(23deg,transparent 0 74px,rgba(74,62,42,.08) 75px 78px,transparent 79px 150px),
-    linear-gradient(180deg,var(--sand2),var(--sand));
+  background:#8c7955;
+}
+.worldTerrain{
+  position:absolute;
+  z-index:0;
+  left:0;
+  top:0;
+  width:0;
+  height:0;
+  background-image:url("asset/world_map.png");
+  background-repeat:no-repeat;
+  background-size:100% 100%;
+  background-position:0 0;
+  pointer-events:none;
+  user-select:none;
+  will-change:left,top,width,height;
 }
 .fieldObjects{
   position:absolute;
+  z-index:1;
   inset:0;
   pointer-events:none;
 }
@@ -696,7 +708,7 @@ button{cursor:pointer}
   overflow:hidden;
   border:1px solid #8b795e;
   border-radius:8px;
-  background:#b7a178;
+  background:#b7a178 url("asset/world_map.png") center/100% 100% no-repeat;
 }
 .mapRoutes{
   position:absolute;inset:0;width:100%;height:100%;pointer-events:none;
@@ -959,3 +971,11 @@ button:active:not(:disabled){
   font-size:12px;
   font-weight:950;
 }
+
+/* world_map.png is the shared visual map; dynamic actors/player stay over it */
+.worldMap .mapRoutes,
+.worldMap .mapPlace{display:none}
+.mapBtn{
+  background:#bca77c url("asset/world_map.png") center/cover no-repeat;
+}
+.mapBtn .mapGrid{display:none}
