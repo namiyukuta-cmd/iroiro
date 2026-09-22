@@ -1,17 +1,59 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="ja">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0">
-  <meta http-equiv="Pragma" content="no-cache">
-  <meta http-equiv="Expires" content="0">
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+  <meta http-equiv="Pragma" content="no-cache" />
+  <meta http-equiv="Expires" content="0" />
   <title>SHOP</title>
+  <style>
+    *{box-sizing:border-box}
+    html,body{margin:0;width:100%;min-height:100%}
+    body{
+      min-height:100dvh;
+      display:grid;
+      place-items:center;
+      background:#d7d0bc;
+      color:#211f1a;
+      font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+      background-image:
+        linear-gradient(rgba(80,67,45,.08) 1px,transparent 1px),
+        linear-gradient(90deg,rgba(80,67,45,.06) 1px,transparent 1px);
+      background-size:22px 22px;
+    }
+    main{width:min(100% - 36px,430px);display:grid;gap:14px}
+    h1{margin:0 0 6px;text-align:center;font-size:30px;letter-spacing:.05em}
+    .sub{text-align:center;margin:0 0 22px;color:#5b5548;font-size:13px}
+    .menu{
+      min-height:64px;
+      border:2px solid #29261f;
+      border-radius:10px;
+      background:#eee8d8;
+      color:#211f1a;
+      font:inherit;
+      font-size:19px;
+      font-weight:800;
+      display:grid;
+      place-items:center;
+      text-decoration:none;
+      cursor:pointer;
+      box-shadow:inset 0 0 0 1px rgba(255,255,255,.5);
+    }
+    .menu:active{transform:scale(.985);background:#e0d6be}
+    .back{margin-top:8px;min-height:50px;font-size:16px}
+  </style>
 </head>
 <body>
   <main>
-    <h1>SHOP</h1>
-    <a href="./SHOP_top.html">はじめる</a>
+    <div>
+      <h1>お店屋さん</h1>
+      <p class="sub">仕入れて、並べて、売る小さなお店</p>
+    </div>
+
+    <a class="menu" href="./SHOP_top.html?new=1">新しく始める</a>
+    <a class="menu" href="./SHOP_top.html?continue=1">続きから</a>
+    <a class="menu back" href="../index.html">ゲーム一覧へ戻る</a>
   </main>
 </body>
 </html>
