@@ -32,20 +32,16 @@
         name: '小門外・底辺区',
         background: './asset/bg_desert_wall.jpeg',
         objects: Object.freeze([
-          // 遠景帯：小さな家を上側に置き、奥行きを作る
-          Object.freeze({src:'./asset/house_poor.png', left:6, bottom:31, height:10, layer:'town'}),
-          Object.freeze({src:'./asset/house_poor.png', left:36, bottom:30, height:9.5, layer:'town', flip:true}),
-          Object.freeze({src:'./asset/house_poor.png', left:69, bottom:31, height:10.5, layer:'town'}),
-
-          // 中景帯：少し大きい家を中央に置く
-          Object.freeze({src:'./asset/house_poor.png', left:-2, bottom:17, height:15, layer:'town'}),
-          Object.freeze({src:'./asset/house_poor.png', left:28, bottom:16, height:14.5, layer:'town', flip:true}),
-          Object.freeze({src:'./asset/house_poor.png', left:60, bottom:17, height:15.5, layer:'town'}),
-          Object.freeze({src:'./asset/house_poor.png', left:84, bottom:16, height:14, layer:'town', flip:true}),
-
-          // 前景帯：人物は見やすい大きさで左右に配置
-          Object.freeze({src:'https://raw.githubusercontent.com/namiyukuta-cmd/iroiro/main/SHOP/asset/Npc/npc_oldman_01.png', left:14, bottom:4, height:23, layer:'people'}),
-          Object.freeze({src:'https://raw.githubusercontent.com/namiyukuta-cmd/iroiro/main/SHOP/asset/Npc/npc_porter_01.png', left:72, bottom:4, height:23, layer:'people'})
+          // 3帯固定ではなく、奥から手前まで段階的に散らす
+          Object.freeze({src:'./asset/house_poor.png', left:5,  bottom:30, height:9,   layer:'town', depth:1}),
+          Object.freeze({src:'./asset/house_poor.png', left:34, bottom:27, height:10,  layer:'town', depth:2, flip:true}),
+          Object.freeze({src:'./asset/house_poor.png', left:68, bottom:24, height:11,  layer:'town', depth:3}),
+          Object.freeze({src:'./asset/house_poor.png', left:-3, bottom:20, height:12.5,layer:'town', depth:4}),
+          Object.freeze({src:'./asset/house_poor.png', left:25, bottom:16, height:14,  layer:'town', depth:5, flip:true}),
+          Object.freeze({src:'./asset/house_poor.png', left:55, bottom:12, height:16,  layer:'town', depth:6}),
+          Object.freeze({src:'./asset/house_poor.png', left:82, bottom:9,  height:18,  layer:'town', depth:7, flip:true}),
+          Object.freeze({src:'https://raw.githubusercontent.com/namiyukuta-cmd/iroiro/main/SHOP/asset/Npc/npc_oldman_01.png', left:15, bottom:4, height:23, layer:'people', depth:8}),
+          Object.freeze({src:'https://raw.githubusercontent.com/namiyukuta-cmd/iroiro/main/SHOP/asset/Npc/npc_porter_01.png', left:72, bottom:4, height:23, layer:'people', depth:8})
         ])
       }),
       smallGateOutside: Object.freeze({
