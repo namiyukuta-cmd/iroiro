@@ -73,8 +73,20 @@
       min-width:1200px;
       background:#c7bca8;
       background-size:cover;
-      background-position:center;
+      background-position:center bottom;
       background-repeat:no-repeat;
+      overflow:hidden;
+    }
+    .scene-object{
+      position:absolute;
+      bottom:0;
+      display:block;
+      max-width:none;
+      object-fit:contain;
+      object-position:center bottom;
+      pointer-events:none;
+      user-select:none;
+      -webkit-user-drag:none;
     }
     .town-placeholder{
       position:absolute;
