@@ -60,6 +60,15 @@
     const key = state.sceneKey && data.scenes[state.sceneKey] ? state.sceneKey : 'outerPoor';
     const scene = data.scenes[key];
     const strip = $('townStrip');
+    if(scene.playerAnchor){
+      strip.dataset.playerLeft=String(scene.playerAnchor.left);
+      strip.dataset.playerBottom=String(scene.playerAnchor.bottom);
+      strip.dataset.playerHeight=String(scene.playerAnchor.height);
+    }else{
+      delete strip.dataset.playerLeft;
+      delete strip.dataset.playerBottom;
+      delete strip.dataset.playerHeight;
+    }
     const placeholder = $('townPlaceholder');
 
     strip.style.minWidth = '0';
