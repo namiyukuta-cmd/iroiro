@@ -228,9 +228,9 @@
     openModal("人と関わる", "今ここにいる相手。", list.map(modalAction));
   }
 
-  function mainButton(label, run) {
+  function mainButton(label, run, className = "") {
     const b = document.createElement("button");
-    b.className = "primary-action";
+    b.className = `primary-action${className ? ` ${className}` : ""}`;
     b.textContent = label;
     b.addEventListener("click", run);
     return b;
@@ -260,6 +260,20 @@
       box.appendChild(panel);
       return;
     }
+    if (H.state.location === "convenience_store") {
+      box.appendChild(mainButton("買い物", G.openShop));
+      box.appendChild(mainButton("店員と話す", G.clerkTalk));
+      box.appendChild(mainButton("移動", openMap));
+
+      const canCleanup = H.state.progression.clerk.cleanupUnlocked
+        && H.state.slot >= 2
+        && !H.state.daily.clerkWork;
+      if (canCleanup) {
+        box.appendChild(mainButton("清掃仕事を受ける", G.clerkWork, "cleanup-action"));
+      }
+      return;
+    }
+
     box.appendChild(mainButton("行動", openLocationActions));
     box.appendChild(mainButton("人と話す", openPeopleHere));
     box.appendChild(mainButton("移動", openMap));
