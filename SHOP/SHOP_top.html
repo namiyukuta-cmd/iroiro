@@ -9,116 +9,218 @@
   <title>SHOP</title>
   <style>
     *{box-sizing:border-box}
-    html,body{margin:0;width:100%;min-height:100%;background:#d7d0bc;color:#211f1a}
-    body{
-      min-height:100dvh;
-      font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
-      background-image:
-        linear-gradient(rgba(80,67,45,.08) 1px,transparent 1px),
-        linear-gradient(90deg,rgba(80,67,45,.06) 1px,transparent 1px);
-      background-size:22px 22px;
-    }
+    html,body{margin:0;width:100%;height:100%;background:#d8d0bb;color:#211f1a}
+    body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;overflow:hidden}
+    button,a{font:inherit;color:inherit}
     .app{
       width:min(100%,520px);
-      min-height:100dvh;
+      height:100dvh;
       margin:0 auto;
       display:grid;
-      grid-template-rows:auto minmax(0,1fr) auto;
-      background:rgba(238,232,216,.72);
+      grid-template-rows:auto minmax(0,1fr) auto auto;
+      background:#eee8d8;
       border-left:1px solid rgba(41,38,31,.28);
       border-right:1px solid rgba(41,38,31,.28);
     }
-    header{
-      padding:max(16px,env(safe-area-inset-top)) 16px 14px;
+
+    .top-status{
+      padding:max(10px,env(safe-area-inset-top)) 12px 10px;
       border-bottom:2px solid #29261f;
-      background:#eee8d8;
       display:grid;
-      grid-template-columns:minmax(0,1fr) auto;
-      gap:8px 12px;
-      align-items:center;
+      grid-template-columns:repeat(4,minmax(0,1fr));
+      gap:6px;
+      background:#e9e1cf;
     }
-    h1{margin:0;font-size:24px}
-    .hud{display:flex;gap:12px;align-items:center;justify-content:flex-end;flex-wrap:wrap;font-weight:800;font-size:15px}
-    main{padding:18px 16px 24px;display:grid;align-content:start;gap:18px}
-    .shop-board{
-      min-height:250px;
-      border:2px solid #29261f;
-      border-radius:12px;
-      background:#f3eddd;
-      padding:16px;
+    .status-cell{
+      min-width:0;
+      padding:6px 4px;
+      text-align:center;
+      border:1px solid #6e6659;
+      border-radius:8px;
+      background:#f8f3e8;
+    }
+    .status-label{display:block;font-size:10px;color:#6b6457;line-height:1}
+    .status-value{display:block;margin-top:4px;font-size:14px;font-weight:900;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+    .scene-area{
+      min-height:0;
       display:grid;
-      gap:16px;
+      grid-template-rows:minmax(0,1.2fr) minmax(150px,.8fr);
+      background:#cfc6b3;
     }
-    .shelf{
-      display:grid;
-      grid-template-columns:repeat(3,1fr);
-      grid-auto-rows:62px;
-      border:4px solid #9b5b3d;
-      background:#e9dfcb;
+
+    .town-panel{
+      position:relative;
+      min-height:0;
+      border-bottom:2px solid #29261f;
+      background:#bdb39f;
+      overflow:hidden;
     }
-    .shelf-slot{border:1px solid rgba(41,38,31,.5)}
-    .counter{
-      height:52px;
-      border:4px solid #b7a91d;
-      background:#f4e989;
-      border-radius:4px;
+    .town-scroll{
+      width:100%;
+      height:100%;
+      overflow-x:auto;
+      overflow-y:hidden;
+      overscroll-behavior-x:contain;
+      -webkit-overflow-scrolling:touch;
+      scrollbar-width:none;
+      touch-action:pan-x;
     }
-    .floor{
-      min-height:180px;
-      border:2px dashed rgba(41,38,31,.28);
-      border-radius:12px;
+    .town-scroll::-webkit-scrollbar{display:none}
+    .town-strip{
+      position:relative;
+      height:100%;
+      min-width:1200px;
+      background:#c7bca8;
+      background-size:cover;
+      background-position:center;
+      background-repeat:no-repeat;
+    }
+    .town-placeholder{
+      position:absolute;
+      inset:0;
       display:grid;
       place-items:center;
-      color:#6b6456;
-      font-weight:700;
-      font-size:14px;
+      color:#5d5548;
+      font-weight:900;
+      letter-spacing:.08em;
+      background:
+        linear-gradient(rgba(55,48,39,.06) 1px,transparent 1px),
+        linear-gradient(90deg,rgba(55,48,39,.05) 1px,transparent 1px);
+      background-size:28px 28px;
     }
-    #saveStatus{min-height:24px;margin:0;color:#5b5548;font-size:14px;font-weight:700}
-    nav{
-      padding:12px 14px max(12px,env(safe-area-inset-bottom));
-      border-top:2px solid #29261f;
-      background:#eee8d8;
+    .scene-name{
+      position:absolute;
+      left:10px;
+      top:10px;
+      z-index:2;
+      padding:6px 9px;
+      border:1px solid #29261f;
+      border-radius:8px;
+      background:rgba(248,243,232,.9);
+      font-size:13px;
+      font-weight:900;
+      pointer-events:none;
+    }
+
+    .player-panel{
+      min-height:0;
+      padding:12px;
       display:grid;
-      grid-template-columns:1fr 1fr 1fr;
-      gap:10px;
+      grid-template-columns:92px minmax(0,1fr);
+      gap:12px;
+      background:#eee8d8;
     }
-    button,a.navbtn{
-      min-height:50px;
+    .portrait{
       border:2px solid #29261f;
       border-radius:10px;
+      background:#f8f3e8;
+      display:grid;
+      place-items:center;
+      overflow:hidden;
+      font-size:13px;
+      font-weight:900;
+      color:#746c5f;
+    }
+    .portrait img{width:100%;height:100%;object-fit:cover;display:block}
+    .stats{display:grid;align-content:center;gap:10px}
+    .stat-row{display:grid;grid-template-columns:44px minmax(0,1fr) 42px;gap:8px;align-items:center;font-size:13px;font-weight:900}
+    .bar{
+      height:14px;
+      border:1px solid #29261f;
+      border-radius:999px;
+      overflow:hidden;
+      background:#d7cebb;
+    }
+    .bar-fill{height:100%;width:0%;background:#514a40}
+    .stat-num{text-align:right;font-variant-numeric:tabular-nums}
+
+    #saveStatus{
+      min-height:26px;
+      margin:0;
+      padding:4px 12px;
+      border-top:1px solid #afa592;
+      background:#eee8d8;
+      color:#5b5548;
+      font-size:12px;
+      font-weight:700;
+    }
+
+    .bottom-menu{
+      padding:10px 10px max(10px,env(safe-area-inset-bottom));
+      border-top:2px solid #29261f;
+      background:#e9e1cf;
+      display:grid;
+      grid-template-columns:repeat(5,minmax(0,1fr));
+      gap:7px;
+    }
+    .menu-btn,.menu-link{
+      min-height:48px;
+      border:2px solid #29261f;
+      border-radius:9px;
       background:#fffaf0;
-      color:#211f1a;
-      font:inherit;
-      font-weight:800;
       text-decoration:none;
       display:grid;
       place-items:center;
+      text-align:center;
+      font-size:13px;
+      font-weight:900;
+      padding:4px;
     }
-    button:active,a.navbtn:active{transform:scale(.985);background:#e0d6be}
-    button:disabled{opacity:.5}
+    .menu-btn:active,.menu-link:active{transform:scale(.98);background:#e0d6be}
+    .menu-btn:disabled{opacity:.5}
+
+    @media(max-height:700px){
+      .scene-area{grid-template-rows:minmax(0,1fr) 145px}
+      .player-panel{grid-template-columns:78px minmax(0,1fr);padding:9px}
+      .bottom-menu{padding-top:7px}
+      .menu-btn,.menu-link{min-height:43px}
+    }
   </style>
 </head>
 <body>
   <div class="app">
-    <header>
-      <h1 id="gameTitle"></h1>
-      <div class="hud">
-        <span id="dayText"></span>
-        <span id="timeText"></span>
-        <span id="moneyText"></span>
-      </div>
+    <header class="top-status" aria-label="日時と天候">
+      <div class="status-cell"><span class="status-label" id="dayLabel"></span><span class="status-value" id="dayText"></span></div>
+      <div class="status-cell"><span class="status-label" id="timeLabel"></span><span class="status-value" id="timeText"></span></div>
+      <div class="status-cell"><span class="status-label" id="tempLabel"></span><span class="status-value" id="tempText"></span></div>
+      <div class="status-cell"><span class="status-label" id="weatherLabel"></span><span class="status-value" id="weatherText"></span></div>
     </header>
 
-    <main>
-      <section class="shop-board" id="shopBoard">
-        <div class="shelf" id="shelf"></div>
-        <div class="counter" id="counter"></div>
-        <div class="floor" id="floor"></div>
+    <main class="scene-area">
+      <section class="town-panel" aria-label="町">
+        <div class="scene-name" id="sceneName"></div>
+        <div class="town-scroll" id="townScroll">
+          <div class="town-strip" id="townStrip">
+            <div class="town-placeholder" id="townPlaceholder"></div>
+          </div>
+        </div>
       </section>
-      <p id="saveStatus" aria-live="polite"></p>
+
+      <section class="player-panel" aria-label="主人公の状態">
+        <div class="portrait" id="portrait"></div>
+        <div class="stats">
+          <div class="stat-row">
+            <span id="hpLabel"></span>
+            <div class="bar"><div class="bar-fill" id="hpBar"></div></div>
+            <span class="stat-num" id="hpText"></span>
+          </div>
+          <div class="stat-row">
+            <span id="hungerLabel"></span>
+            <div class="bar"><div class="bar-fill" id="hungerBar"></div></div>
+            <span class="stat-num" id="hungerText"></span>
+          </div>
+          <div class="stat-row">
+            <span id="thirstLabel"></span>
+            <div class="bar"><div class="bar-fill" id="thirstBar"></div></div>
+            <span class="stat-num" id="thirstText"></span>
+          </div>
+        </div>
+      </section>
     </main>
 
-    <nav id="bottomNav"></nav>
+    <p id="saveStatus" aria-live="polite"></p>
+    <nav class="bottom-menu" id="bottomMenu" aria-label="メニュー"></nav>
   </div>
 
   <script src="./SHOP_data.js"></script>
