@@ -11,6 +11,7 @@
     bottled_water: { name: "水", hunger: -2, price: 100 },
     toothbrush: { name: "歯ブラシ", price: 150 },
     toothpaste: { name: "歯磨き粉", price: 220 },
+    sanitary_products: { name: "生理用品（1日分）", price: 90, periodCare: true },
     soap: { name: "石けん", hygiene: 18, price: 120 },
     wet_wipes: { name: "ウェットティッシュ", hygiene: 10, price: 110 },
     bandage: { name: "手当用品", health: 10, price: 260 },
