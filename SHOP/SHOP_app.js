@@ -73,7 +73,7 @@
 
     scene.objects.forEach(item => {
       const image = document.createElement('img');
-      image.className = 'scene-object';
+      image.className = 'scene-object layer-' + (item.layer || 'town');
       image.src = item.src;
       image.alt = '';
       image.draggable = false;
