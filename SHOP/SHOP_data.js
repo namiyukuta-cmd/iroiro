@@ -32,44 +32,44 @@
         name: '小門外・底辺区',
         background: './asset/bg_desert_wall.jpeg',
         objects: Object.freeze([
-          Object.freeze({src:'./asset/house_poor.png', left:-2, bottom:5.5, height:30, layer:'town'}),
-          Object.freeze({src:'./asset/house_poor.png', left:26, bottom:5.2, height:28, layer:'town', flip:true}),
-          Object.freeze({src:'./asset/house_poor.png', left:55, bottom:5.5, height:31, layer:'town'}),
-          Object.freeze({src:'./asset/house_poor.png', left:80, bottom:5.2, height:27, layer:'town', flip:true}),
-          Object.freeze({src:'https://raw.githubusercontent.com/namiyukuta-cmd/iroiro/main/SHOP/asset/Npc/npc_oldman_01.png', left:12, bottom:5, height:22, layer:'people'}),
-          Object.freeze({src:'https://raw.githubusercontent.com/namiyukuta-cmd/iroiro/main/SHOP/asset/Npc/npc_porter_01.png', left:76, bottom:5, height:22, layer:'people'})
+          Object.freeze({src:'./asset/house_poor.png', left:0, bottom:8, height:21, layer:'town'}),
+          Object.freeze({src:'./asset/house_poor.png', left:30, bottom:7, height:20, layer:'town', flip:true}),
+          Object.freeze({src:'./asset/house_poor.png', left:58, bottom:8, height:22, layer:'town'}),
+          Object.freeze({src:'./asset/house_poor.png', left:82, bottom:7, height:19, layer:'town', flip:true}),
+          Object.freeze({src:'https://raw.githubusercontent.com/namiyukuta-cmd/iroiro/main/SHOP/asset/Npc/npc_oldman_01.png', left:18, bottom:5, height:22, layer:'people'}),
+          Object.freeze({src:'https://raw.githubusercontent.com/namiyukuta-cmd/iroiro/main/SHOP/asset/Npc/npc_porter_01.png', left:69, bottom:5, height:22, layer:'people'})
         ])
       }),
       smallGateOutside: Object.freeze({
         name: '小門前',
         background: './asset/bg_desert_wall.jpeg',
         objects: Object.freeze([
-          Object.freeze({src:'./asset/house_poor.png', left:-7, bottom:5.5, height:27, layer:'town'}),
-          Object.freeze({src:'./asset/gate_small.png', left:30, bottom:4.8, height:39, layer:'town'}),
-          Object.freeze({src:'./asset/house_poor.png', left:73, bottom:5.5, height:26, layer:'town', flip:true}),
-          Object.freeze({src:'https://raw.githubusercontent.com/namiyukuta-cmd/iroiro/main/SHOP/asset/Npc/npc_man_01.png', left:12, bottom:5, height:22, layer:'people'}),
-          Object.freeze({src:'https://raw.githubusercontent.com/namiyukuta-cmd/iroiro/main/SHOP/asset/Npc/npc_guard_01.png', left:76, bottom:5, height:22, layer:'people'})
+          Object.freeze({src:'./asset/house_poor.png', left:-5, bottom:8, height:19, layer:'town'}),
+          Object.freeze({src:'./asset/gate_small.png', left:31, bottom:6, height:32, layer:'town'}),
+          Object.freeze({src:'./asset/house_poor.png', left:76, bottom:8, height:18, layer:'town', flip:true}),
+          Object.freeze({src:'https://raw.githubusercontent.com/namiyukuta-cmd/iroiro/main/SHOP/asset/Npc/npc_man_01.png', left:14, bottom:5, height:22, layer:'people'}),
+          Object.freeze({src:'https://raw.githubusercontent.com/namiyukuta-cmd/iroiro/main/SHOP/asset/Npc/npc_guard_01.png', left:58, bottom:5, height:22, layer:'people'})
         ])
       }),
       cityCommon: Object.freeze({
         name: '市内・庶民街',
         background: './asset/bg_desert_wall.jpeg',
         objects: Object.freeze([
-          Object.freeze({src:'./asset/house_normal.png', left:-5, bottom:5.5, height:31, layer:'town'}),
-          Object.freeze({src:'./asset/stall.png', left:36, bottom:3.8, height:22, layer:'interactive'}),
-          Object.freeze({src:'./asset/house_normal.png', left:64, bottom:5.5, height:30, layer:'town', flip:true}),
-          Object.freeze({src:'https://raw.githubusercontent.com/namiyukuta-cmd/iroiro/main/SHOP/asset/Npc/npc_woman_01.png', left:8, bottom:5, height:21, layer:'people'}),
-          Object.freeze({src:'https://raw.githubusercontent.com/namiyukuta-cmd/iroiro/main/SHOP/asset/Npc/npc_traveler_01.png', left:73, bottom:5, height:21, layer:'people'}),
-          Object.freeze({src:'https://raw.githubusercontent.com/namiyukuta-cmd/iroiro/main/SHOP/asset/Npc/npc_child_01.png', left:88, bottom:5, height:14, layer:'people'})
+          Object.freeze({src:'./asset/house_normal.png', left:-3, bottom:8, height:23, layer:'town'}),
+          Object.freeze({src:'./asset/stall.png', left:37, bottom:2, height:17, layer:'interactive'}),
+          Object.freeze({src:'./asset/house_normal.png', left:67, bottom:8, height:22, layer:'town', flip:true}),
+          Object.freeze({src:'https://raw.githubusercontent.com/namiyukuta-cmd/iroiro/main/SHOP/asset/Npc/npc_woman_01.png', left:17, bottom:5, height:21, layer:'people'}),
+          Object.freeze({src:'https://raw.githubusercontent.com/namiyukuta-cmd/iroiro/main/SHOP/asset/Npc/npc_traveler_01.png', left:49, bottom:5, height:21, layer:'people'}),
+          Object.freeze({src:'https://raw.githubusercontent.com/namiyukuta-cmd/iroiro/main/SHOP/asset/Npc/npc_child_01.png', left:77, bottom:5, height:14, layer:'people'})
         ])
       }),
       upperArea: Object.freeze({
         name: '上級区',
         background: './asset/bg_desert_wall.jpeg',
         objects: Object.freeze([
-          Object.freeze({src:'./asset/house_upper.png', left:3, bottom:5.8, height:35, layer:'town'}),
-          Object.freeze({src:'./asset/house_upper.png', left:51, bottom:5.8, height:34, layer:'town', flip:true}),
-          Object.freeze({src:'https://raw.githubusercontent.com/namiyukuta-cmd/iroiro/main/SHOP/asset/Npc/npc_beggar_01.png', left:74, bottom:5, height:21, layer:'people'})
+          Object.freeze({src:'./asset/house_upper.png', left:5, bottom:9, height:27, layer:'town'}),
+          Object.freeze({src:'./asset/house_upper.png', left:53, bottom:9, height:26, layer:'town', flip:true}),
+          Object.freeze({src:'https://raw.githubusercontent.com/namiyukuta-cmd/iroiro/main/SHOP/asset/Npc/npc_beggar_01.png', left:41, bottom:5, height:21, layer:'people'})
         ])
       })
     }),
