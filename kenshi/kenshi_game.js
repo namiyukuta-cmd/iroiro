@@ -301,7 +301,7 @@ function aliveActors(){
 
 function nearestPlace(pos){
   var best=null,bd=999;
-  Object.keys(PLACES).forEach(function(k){
+  [].forEach(function(k){
     var d=dist(pos,PLACES[k]);
     if(d<bd){bd=d;best=k}
   });
@@ -605,12 +605,23 @@ function setTapMarker(x,y){
 
 function projection(wx,wy){
   var r=fieldStage.getBoundingClientRect();
-  var scale=Math.max(8.5,Math.min(r.width,r.height)/31);
+  var scale=Math.max(11,Math.min(r.width,r.height)/22);
   return {
     x:r.width/2+(wx-state.player.x)*scale,
     y:r.height*.56+(wy-state.player.y)*scale,
     scale:scale,w:r.width,h:r.height
   };
+}
+
+function renderWorldTerrain(){
+  var terrain=document.getElementById("worldTerrain");
+  if(!terrain)return;
+  var a=projection(0,0);
+  var b=projection(100,100);
+  terrain.style.left=a.x+"px";
+  terrain.style.top=a.y+"px";
+  terrain.style.width=(b.x-a.x)+"px";
+  terrain.style.height=(b.y-a.y)+"px";
 }
 
 function roadElement(a,b){
@@ -642,9 +653,11 @@ function actorVisual(a){
 }
 
 function renderField(){
+  renderWorldTerrain();
   fieldObjects.innerHTML="";
 
-  ROADS.forEach(function(r){
+  /* roads and place labels are already painted into world_map.png */
+  [].forEach(function(r){
     var el=roadElement(PLACES[r[0]],PLACES[r[1]]);
     if(el)fieldObjects.appendChild(el);
   });
