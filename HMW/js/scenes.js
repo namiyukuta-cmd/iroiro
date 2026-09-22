@@ -41,7 +41,7 @@
         {
           label: "目が合った時だけ会釈する",
           run: () => {
-            rel("police_named").familiarity += 1;
+            H.growRomance("police_named", "conversation");
             mark("station_police_first");
             H.addHistory("駅前の警官と一度だけ目が合い、会釈だけ交わした。");
             G.refresh();
@@ -59,7 +59,7 @@
         {
           label: "少し離れた場所に座る",
           run: () => {
-            rel("homeless_named").familiarity += 1;
+            H.growRomance("homeless_named", "shared_time");
             mark("park_homeless_first");
             H.addHistory("同じ公園を使うホームレスと、互いの顔を覚える程度の距離で過ごした。");
             G.refresh();
@@ -77,7 +77,7 @@
         {
           label: "相談の流れだけ聞く",
           run: () => {
-            rel("support_named").familiarity += 1;
+            H.growRomance("support_named", "conversation");
             mark("charity_support_first");
             H.addHistory("支援員から、継続相談は日をまたいで手続きを進めるものだと聞いた。");
             G.refresh();
@@ -136,7 +136,7 @@
         {
           label: "視線だけ返して通る",
           run: () => {
-            rel("thug_named").familiarity += 1;
+            H.growRomance("thug_named", "conversation");
             H.state.progression.thug.familiarity = rel("thug_named").familiarity;
             mark("industrial_thug_first");
             H.addHistory("工業通りの不良と、言葉を交わさないまま互いの顔を覚えた。");
@@ -173,7 +173,7 @@
         {
           label: "前回から変わったことを伝える",
           run: () => {
-            rel("support_named").trust += 1;
+            H.growRomance("support_named", "personal");
             H.state.progression.stability.supportBase = true;
             mark("support_followup");
             H.addHistory("前回から変わったことを伝え、相談記録に追加してもらった。");
@@ -219,7 +219,7 @@
             {
               label: "交番へ届ける",
               run: () => {
-                rel("police_named").goodwill += 1;
+                H.growRomance("police_named", null, { goodwill: 1 });
                 finishDaily(id, "拾った50円を交番へ届けた。警官側にはその行動が残った。");
               }
             }
@@ -369,7 +369,7 @@
             run: () => {
               H.state.progression.homelessNetwork.safeSleepAdvice = true;
               H.state.progression.stability.streetNetwork = true;
-              if (samKnown) rel("homeless_named").goodwill += 1;
+              if (samKnown) H.growRomance("homeless_named", "help");
               finishDaily(id, samKnown
                 ? "サムから高架下で避ける入口を聞いた。"
                 : "高架下で避けた方がいい入口を聞き覚えた。");
