@@ -32,12 +32,20 @@
         name: '小門外・底辺区',
         background: './asset/bg_desert_wall.jpeg',
         objects: Object.freeze([
-          Object.freeze({src:'./asset/house_poor.png', left:0, bottom:8, height:21, layer:'town'}),
-          Object.freeze({src:'./asset/house_poor.png', left:30, bottom:7, height:20, layer:'town', flip:true}),
-          Object.freeze({src:'./asset/house_poor.png', left:58, bottom:8, height:22, layer:'town'}),
-          Object.freeze({src:'./asset/house_poor.png', left:82, bottom:7, height:19, layer:'town', flip:true}),
-          Object.freeze({src:'https://raw.githubusercontent.com/namiyukuta-cmd/iroiro/main/SHOP/asset/Npc/npc_oldman_01.png', left:18, bottom:5, height:22, layer:'people'}),
-          Object.freeze({src:'https://raw.githubusercontent.com/namiyukuta-cmd/iroiro/main/SHOP/asset/Npc/npc_porter_01.png', left:69, bottom:5, height:22, layer:'people'})
+          // 遠景帯：小さな家を上側に置き、奥行きを作る
+          Object.freeze({src:'./asset/house_poor.png', left:6, bottom:31, height:10, layer:'town'}),
+          Object.freeze({src:'./asset/house_poor.png', left:36, bottom:30, height:9.5, layer:'town', flip:true}),
+          Object.freeze({src:'./asset/house_poor.png', left:69, bottom:31, height:10.5, layer:'town'}),
+
+          // 中景帯：少し大きい家を中央に置く
+          Object.freeze({src:'./asset/house_poor.png', left:-2, bottom:17, height:15, layer:'town'}),
+          Object.freeze({src:'./asset/house_poor.png', left:28, bottom:16, height:14.5, layer:'town', flip:true}),
+          Object.freeze({src:'./asset/house_poor.png', left:60, bottom:17, height:15.5, layer:'town'}),
+          Object.freeze({src:'./asset/house_poor.png', left:84, bottom:16, height:14, layer:'town', flip:true}),
+
+          // 前景帯：人物は見やすい大きさで左右に配置
+          Object.freeze({src:'https://raw.githubusercontent.com/namiyukuta-cmd/iroiro/main/SHOP/asset/Npc/npc_oldman_01.png', left:14, bottom:4, height:23, layer:'people'}),
+          Object.freeze({src:'https://raw.githubusercontent.com/namiyukuta-cmd/iroiro/main/SHOP/asset/Npc/npc_porter_01.png', left:72, bottom:4, height:23, layer:'people'})
         ])
       }),
       smallGateOutside: Object.freeze({
