@@ -1315,9 +1315,9 @@ function renderHotbar(){
     {name:"食料",count:state.player.food,fn:eat},
     {name:"治療具",count:state.player.med,fn:selfHeal},
     {name:"鉄鉱石",count:state.player.ore},
-    {name:"廃材",count:state.player.scrap},
-    null
+    {name:"廃材",count:state.player.scrap}
   ];
+  while(slots.length<20)slots.push(null);
 
   hotbar.innerHTML="";
   slots.forEach(function(s){
@@ -1325,10 +1325,11 @@ function renderHotbar(){
     b.type="button";
     b.className="hotbarSlot"+(!s?" empty":"");
     if(s){
+      b.setAttribute("aria-label",s.name+" "+s.count+"個");
       b.innerHTML="<b>"+s.name+"</b><span>"+s.count+"</span>";
       if(s.fn)b.addEventListener("click",s.fn);
     }else{
-      b.innerHTML="<b>空き</b><span>·</span>";
+      b.setAttribute("aria-label","空き");
       b.disabled=true;
     }
     hotbar.appendChild(b);
