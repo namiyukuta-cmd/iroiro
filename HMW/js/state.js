@@ -70,6 +70,7 @@
     talk: {},
     foodSupport: false,
     supportShowerLaundry: false,
+    periodCare: false,
     wash: {},
     recyclerWork: false,
     clerkWork: false,
@@ -97,6 +98,11 @@
       wetness: 0
     },
     inventory: {},
+    body: {
+      cycleDay: 24,
+      cycleLength: 28,
+      periodLength: 5
+    },
     knownLocations: {
       station_front: true,
       shopping_street: true,
@@ -194,6 +200,27 @@
 
   HMW.resetDaily = () => {
     HMW.state.daily = createDaily();
+  };
+
+  HMW.getMenstrualStatus = () => {
+    const body = HMW.state.body || {};
+    const cycleLength = Math.max(1, Number(body.cycleLength) || 28);
+    const periodLength = Math.max(1, Math.min(cycleLength, Number(body.periodLength) || 5));
+    const cycleDay = Math.max(1, Math.min(cycleLength, Number(body.cycleDay) || 1));
+    return {
+      cycleDay,
+      cycleLength,
+      periodLength,
+      active: cycleDay <= periodLength,
+      periodDay: cycleDay <= periodLength ? cycleDay : 0
+    };
+  };
+
+  HMW.advanceMenstrualCycle = () => {
+    const body = HMW.state.body || (HMW.state.body = { cycleDay: 24, cycleLength: 28, periodLength: 5 });
+    const cycleLength = Math.max(1, Number(body.cycleLength) || 28);
+    body.cycleDay = ((Math.max(1, Number(body.cycleDay) || 1)) % cycleLength) + 1;
+    return HMW.getMenstrualStatus();
   };
 
   HMW.clampStats = () => {
