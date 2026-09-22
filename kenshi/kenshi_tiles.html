@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no" />
+  <meta name="theme-color" content="#17140f" />
+  <title>荒野・地形タイル試作</title>
+  <link rel="stylesheet" href="kenshi_tiles.css?v=20260922-1" />
+</head>
+<body>
+<div id="tileApp">
+  <header class="tileHud">
+    <div><b>地形タイル試作</b><span id="posText">0,0</span></div>
+    <button id="pauseBtn" type="button">停止</button>
+  </header>
+
+  <main id="viewport" class="viewport" aria-label="地形フィールド">
+    <div id="world" class="world">
+      <div id="terrainLayer" class="terrainLayer"></div>
+      <div id="objectLayer" class="objectLayer"></div>
+      <div id="entityLayer" class="entityLayer"></div>
+      <div id="player" class="playerDot" aria-label="主人公"></div>
+    </div>
+    <div class="hint">タップ＝そこまで自動移動　長押しドラッグ＝自由移動</div>
+  </main>
+
+  <footer class="tileFooter">
+    <div class="legend">
+      <span><i class="p"></i>主人公</span>
+      <span><i class="n"></i>中立</span>
+      <span><i class="e"></i>敵対</span>
+      <span><i class="a"></i>動物</span>
+    </div>
+    <div id="statusText">草原</div>
+  </footer>
+</div>
+<script src="kenshi_tiles.js?v=20260922-1"></script>
+</body>
+</html>
