@@ -293,22 +293,53 @@
     openModal("記録", H.state.history.map((x) => `<div class="log-row">${esc(x)}</div>`).join(""), [], true);
   }
 
+  function saveSlotActions() {
+    return Array.from({ length: H.SAVE_SLOT_COUNT || 3 }, (_, i) => {
+      const slot = i + 1;
+      return {
+        label: H.describeSaveSlot ? H.describeSaveSlot(slot) : `スロット${slot}`,
+        onClick: async () => {
+          closeModal();
+          await H.saveGame(slot);
+          refresh();
+        }
+      };
+    });
+  }
+
+  function loadSlotActions() {
+    return Array.from({ length: H.SAVE_SLOT_COUNT || 3 }, (_, i) => {
+      const slot = i + 1;
+      return {
+        label: H.describeSaveSlot ? H.describeSaveSlot(slot) : `スロット${slot}`,
+        onClick: async () => {
+          closeModal();
+          const loaded = await H.loadGame(slot);
+          if (!loaded) return info("ロード", `スロット${slot}にはセーブデータがない。`);
+          G.ensureState();
+          refresh();
+        }
+      };
+    });
+  }
+
   function openSave() {
-    openModal("セーブ / ロード", "端末保存。トークン登録済みならprivate-game-dataにも同期。", [
-      { label: "セーブ", onClick: async () => { closeModal(); await H.saveGame(); refresh(); } },
-      { label: "ロード", onClick: async () => { closeModal(); await H.loadGame(); G.ensureState(); refresh(); } },
-      { label: "最初から", className: "danger", onClick: () => openModal("最初から", "現在のセーブを上書きする。", [
-        { label: "最初から始める", className: "danger", onClick: () => { H.state = H.createInitialState(); H.saveLocal(); closeModal(); refresh(); } },
+    const actions = saveSlotActions();
+    actions.push({
+      label: "最初から",
+      className: "danger",
+      onClick: () => openModal("最初から", "現在の進行を最初からにする。セーブスロットは消さない。", [
+        { label: "最初から始める", className: "danger", onClick: () => { H.state = H.createInitialState(); closeModal(); refresh(); } },
         { label: "やめる", onClick: closeModal }
-      ]) }
-    ]);
+      ])
+    });
+    openModal("セーブ", "保存先を選ぶ。スロットごとに別のデータとして残る。", actions);
   }
 
   function openLoad() {
-    openModal("ロード", "保存済みの状態を読み込む。", [
-      { label: "ロードする", onClick: async () => { closeModal(); await H.loadGame(); G.ensureState(); refresh(); } },
-      { label: "やめる", onClick: closeModal }
-    ]);
+    const actions = loadSlotActions();
+    actions.push({ label: "やめる", onClick: closeModal });
+    openModal("ロード", "読み込むスロットを選ぶ。", actions);
   }
 
   function openMenu() {
