@@ -110,8 +110,7 @@
     p.caseOpened = true;
     p.priority = priority;
     p.nextDay = H.state.day + 1;
-    rel("support_named").familiarity += 1;
-    rel("support_named").trust += 1;
+    H.growRomance("support_named", "personal");
     H.state.progression.stability.supportBase = true;
     H.addLead("support_return", `DAY${p.nextDay}以降に再相談する`);
     closeModal();
@@ -134,8 +133,7 @@
     }
     p.stage += 1;
     p.nextDay = H.state.day + 1;
-    rel("support_named").familiarity += 1;
-    rel("support_named").trust += 1;
+    H.growRomance("support_named", "personal");
     H.state.progression.stability.supportBase = true;
     let text = "手続きを一段進めた。";
     if (p.stage === 2) {
