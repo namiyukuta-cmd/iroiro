@@ -265,11 +265,21 @@
       box.appendChild(mainButton("店員と話す", G.clerkTalk));
       box.appendChild(mainButton("移動", openMap));
 
-      const canCleanup = H.state.progression.clerk.cleanupUnlocked
-        && H.state.slot >= 2
-        && !H.state.daily.clerkWork;
-      if (canCleanup) {
-        box.appendChild(mainButton("清掃仕事を受ける", G.clerkWork, "cleanup-action"));
+      if (H.state.progression.clerk.cleanupUnlocked) {
+        let cleanupHint = "";
+        if (H.state.daily.clerkWork) {
+          cleanupHint = "今日はもう清掃仕事を終えている。次は翌日以降に受けられる。";
+        } else if (H.state.slot < 2) {
+          cleanupHint = "清掃仕事は夕方以降に受けられる。";
+        } else if (H.state.stats.fatigue > 88 || H.state.stats.hunger > 90) {
+          cleanupHint = "清掃仕事は疲労88以下・空腹90以下の時に受けられる。";
+        }
+
+        box.appendChild(mainButton(
+          "清掃仕事を受ける",
+          cleanupHint ? () => info("清掃仕事", cleanupHint) : G.clerkWork,
+          `cleanup-action${cleanupHint ? " cleanup-unavailable" : ""}`
+        ));
       }
       return;
     }
