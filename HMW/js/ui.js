@@ -152,19 +152,25 @@
     };
     Object.entries(fields).forEach(([id, value]) => { $(id).innerHTML = `${value[0]}<b>${value[1]}</b>`; });
 
-    const periodEl = $("period-status");
     const period = H.getMenstrualStatus?.();
-    if (periodEl) {
-      if (period?.active) {
-        periodEl.classList.remove("hidden");
-        periodEl.innerHTML = `<b>生理 ${period.periodDay}日目</b><span>${H.state.daily.periodCare ? "生理用品：使用済み" : "生理用品：未使用"}</span>`;
-      } else {
-        periodEl.classList.add("hidden");
-        periodEl.textContent = "";
-      }
-    }
+    const cycleLabel = $("cycle-label");
+    const cycleTrack = $("cycle-track");
+    if (period && cycleLabel && cycleTrack) {
+      const ovulationDay = Math.max(1, period.cycleLength - 14);
+      const care = period.active
+        ? `・${H.state.daily.periodCare ? "用品済" : "用品未使用"}`
+        : "";
+      cycleLabel.textContent = period.active
+        ? `生理 ${period.periodDay}日目 ${period.cycleDay}/${period.cycleLength}${care}`
+        : `${period.cycleDay}/${period.cycleLength}`;
 
-    $("night-bed").textContent = "未定";
+      cycleTrack.innerHTML = Array.from({ length: period.cycleLength }, (_, i) => {
+        const day = i + 1;
+        const icon = day <= period.periodLength ? "🌙" : (day === ovulationDay ? "🥚" : "");
+        const today = day === period.cycleDay ? " today" : "";
+        return `<span class="cycle-day${today}" title="${day}日目">${icon}</span>`;
+      }).join("");
+    }
   }
 
   function renderCityScene() {
