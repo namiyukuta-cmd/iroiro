@@ -69,7 +69,20 @@
     strip.style.backgroundSize = 'cover';
     strip.style.backgroundRepeat = 'no-repeat';
 
-    strip.querySelectorAll('.scene-object').forEach(node => node.remove());
+    strip.querySelectorAll('.scene-object,.scene-atmosphere').forEach(node => node.remove());
+
+    const atmosphere=document.createElement('div');
+    atmosphere.className='scene-atmosphere';
+    atmosphere.innerHTML=
+      '<span class="sun-glow"></span>'+
+      '<span class="bird bird-1">⌁</span>'+
+      '<span class="bird bird-2">⌁</span>'+
+      '<span class="bird bird-3">⌁</span>'+
+      '<span class="dust dust-1"></span>'+
+      '<span class="dust dust-2"></span>'+
+      '<span class="dust dust-3"></span>'+
+      '<span class="dust dust-4"></span>';
+    strip.appendChild(atmosphere);
 
     scene.objects.forEach(item => {
       const image = document.createElement('img');
