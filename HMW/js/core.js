@@ -154,7 +154,7 @@
     if (e.id === "police") {
       if (choice === "calm") {
         H.state.world.policeAttention = Math.max(0, H.state.world.policeAttention - 1);
-        rel("police_named").familiarity += 1;
+        H.growRomance("police_named", "conversation");
         clearEvent("質問に答えた。注意度が少し下がった。");
       } else if (choice === "stop") {
         H.state.world.policeAttention = Math.max(0, H.state.world.policeAttention - 1);
@@ -175,7 +175,7 @@
         H.state.progression.thug.safePassage = true;
         clearEvent("200円を払い、今夜は高架下を使える。");
       } else if (choice === "name" && rel("thug_named").familiarity >= 2) {
-        rel("thug_named").trust += 1;
+        H.growRomance("thug_named", "help");
         H.state.progression.thug.safePassage = true;
         clearEvent("名前付き不良が口を挟み、寝場所を使えるようになった。");
       }
