@@ -45,7 +45,7 @@
     .scene-area{
       min-height:0;
       display:grid;
-      grid-template-rows:minmax(0,1fr) minmax(170px,.9fr);
+      grid-template-rows:minmax(0,1.2fr) minmax(150px,.8fr);
       background:#cfc6b3;
     }
 
@@ -67,8 +67,8 @@
       height:100%;
       min-width:0;
       background:#c7bca8;
-      background-size:165% auto;
-      background-position:center 72%;
+      background-size:cover;
+      background-position:center bottom;
       background-repeat:no-repeat;
       overflow:hidden;
     }
@@ -91,15 +91,7 @@
         drop-shadow(0 -1px 0 rgba(255,248,225,.9))
         drop-shadow(2px 2px 3px rgba(0,0,0,.35));
     }
-    .player-lane{
-      position:absolute;
-      left:40%;
-      bottom:0;
-      width:20%;
-      height:34%;
-      z-index:99;
-      pointer-events:none;
-    }
+
     .town-placeholder{
       position:absolute;
       inset:0;
@@ -257,8 +249,8 @@
     <nav class="bottom-menu" id="bottomMenu" aria-label="メニュー"></nav>
   </div>
 
-  <script src="./SHOP_data.js?v=20260923-0842"></script>
-  <script src="./SHOP_save.js?v=20260923-0842"></script>
-  <script src="./SHOP_app.js?v=20260923-0842"></script>
+  <script src="./SHOP_data.js?v=20260923-0848"></script>
+  <script src="./SHOP_save.js?v=20260923-0848"></script>
+  <script src="./SHOP_app.js?v=20260923-0848"></script>
 </body>
 </html>
