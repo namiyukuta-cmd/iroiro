@@ -225,6 +225,12 @@ function freshState(){
     day:1,hour:8,minute:0,
     paused:false,speed:1,weather:"乾燥",tick:0,spawnSerial:1,
     travelDestination:null,
+    travelRoute:[],
+    travelRouteIndex:0,
+    travelPaused:false,
+    travelEncounterId:null,
+    travelEncounterKind:null,
+    travelSeen:[],
     activeQuest:null,
     completedQuests:[],
     player:{
@@ -271,6 +277,17 @@ function normalizeState(){
   }
   if(!Number.isFinite(state.player._attackCd))state.player._attackCd=0;
   if(state.travelDestination&&!PLACES[state.travelDestination])state.travelDestination=null;
+  if(!Array.isArray(state.travelRoute))state.travelRoute=[];
+  if(!Number.isFinite(state.travelRouteIndex))state.travelRouteIndex=0;
+  if(typeof state.travelPaused!=="boolean")state.travelPaused=false;
+  if(!Array.isArray(state.travelSeen))state.travelSeen=[];
+  if(!state.travelDestination){
+    state.travelRoute=[];
+    state.travelRouteIndex=0;
+    state.travelPaused=false;
+    state.travelEncounterId=null;
+    state.travelEncounterKind=null;
+  }
 }
 
 function log(msg){
@@ -425,8 +442,12 @@ function appendDamagePop(amount,q,at,until){
 function damagePlayer(amount,from){
   markHit(state.player,amount);
   state.player.hp=clamp(state.player.hp-amount,0,state.player.maxHp);
-  if(from&&from.id&&!state.player.attackTarget&&!state.player.target&&!state.travelDestination&&Math.hypot(manual.x,manual.y)<.05){
-    state.player.attackTarget=from.id;
+  if(from&&from.id&&!state.player.attackTarget&&Math.hypot(manual.x,manual.y)<.05){
+    if(state.travelDestination){
+      pauseTravelForActor(from,"enemy");
+    }else if(!state.player.target){
+      state.player.attackTarget=from.id;
+    }
   }
   if(state.player.hp<=0&&!state.player.down){
     state.player.down=true;
@@ -514,30 +535,157 @@ function combatStep(dt){
   state.player._attackCd=Math.max(0,state.player._attackCd-dt);
 }
 
-function applyManualMovement(dt){
-  var m=Math.hypot(manual.x,manual.y);
-  if(m<.05||state.player.down)return false;
+function roadNeighbors(key){
+  var out=[];
+  ROADS.forEach(function(r){
+    if(r[0]===key)out.push(r[1]);
+    else if(r[1]===key)out.push(r[0]);
+  });
+  return out;
+}
+
+function shortestPlacePath(fromKey,toKey){
+  if(!PLACES[fromKey]||!PLACES[toKey])return [];
+  if(fromKey===toKey)return [fromKey];
+
+  var distMap={},prev={},open=Object.keys(PLACES);
+  open.forEach(function(k){distMap[k]=Infinity});
+  distMap[fromKey]=0;
+
+  while(open.length){
+    open.sort(function(a,b){return distMap[a]-distMap[b]});
+    var cur=open.shift();
+    if(cur===toKey)break;
+    if(!Number.isFinite(distMap[cur]))break;
+
+    roadNeighbors(cur).forEach(function(n){
+      if(open.indexOf(n)<0)return;
+      var alt=distMap[cur]+dist(PLACES[cur],PLACES[n]);
+      if(alt<distMap[n]){
+        distMap[n]=alt;
+        prev[n]=cur;
+      }
+    });
+  }
+
+  if(!Number.isFinite(distMap[toKey]))return [fromKey,toKey];
+
+  var path=[toKey],k=toKey;
+  while(k!==fromKey){
+    k=prev[k];
+    if(!k)return [fromKey,toKey];
+    path.unshift(k);
+  }
+  return path;
+}
+
+function clearTravel(){
   state.travelDestination=null;
+  state.travelRoute=[];
+  state.travelRouteIndex=0;
+  state.travelPaused=false;
+  state.travelEncounterId=null;
+  state.travelEncounterKind=null;
+  state.travelSeen=[];
   state.player.target=null;
+}
+
+function setNextTravelTarget(){
+  if(!state.travelDestination||state.player.down)return;
+
+  while(state.travelRouteIndex<state.travelRoute.length){
+    var key=state.travelRoute[state.travelRouteIndex];
+    var p=PLACES[key];
+    if(!p){state.travelRouteIndex++;continue}
+    if(dist(state.player,p)<1.15){
+      state.travelRouteIndex++;
+      continue;
+    }
+    state.player.target={x:p.x,y:p.y};
+    return;
+  }
+
+  var dest=PLACES[state.travelDestination];
+  if(dest&&dist(state.player,dest)>=1.15){
+    state.player.target={x:dest.x,y:dest.y};
+    return;
+  }
+
+  var name=dest?dest.name:"目的地";
+  clearTravel();
+  log(name+"に到着した。");
+  showResult(name+" 到着");
+  contextSignature=null;
+}
+
+function resumeTravel(){
+  if(!state.travelDestination)return;
+  state.travelPaused=false;
+  state.travelEncounterId=null;
+  state.travelEncounterKind=null;
   state.player.attackTarget=null;
-  var dx=manual.x/m,dy=manual.y/m;
-  var speed=state.player.speed*1.9*state.speed;
-  state.player.x=clamp(state.player.x+dx*speed*dt,2,98);
-  state.player.y=clamp(state.player.y+dy*speed*dt,3,97);
-  return true;
+  setNextTravelTarget();
+  contextSignature=null;
+}
+
+function pauseTravelForActor(a,kind){
+  if(!a||!state.travelDestination||state.travelPaused)return;
+  state.travelPaused=true;
+  state.travelEncounterId=a.id;
+  state.travelEncounterKind=kind;
+  state.player.target=null;
+  if(state.travelSeen.indexOf(a.id)<0)state.travelSeen.push(a.id);
+
+  if(kind==="enemy"){
+    state.player.attackTarget=a.id;
+    log(a.name+"と遭遇した。");
+    showResult(a.name+"と遭遇");
+  }else{
+    state.player.attackTarget=null;
+    log(a.name+"と道中で出会った。");
+    showResult(a.name+"と遭遇");
+  }
+  contextSignature=null;
+}
+
+function travelEncounterStep(){
+  if(!state.travelDestination||state.player.down)return;
+
+  if(state.travelPaused){
+    if(state.travelEncounterKind==="enemy"){
+      var enemy=getActor(state.travelEncounterId);
+      if(!enemy||enemy.down||dist(enemy,state.player)>8){
+        resumeTravel();
+      }
+    }
+    return;
+  }
+
+  var near=state.actors.filter(function(a){
+    if(a.down||a.recruited)return false;
+    if(state.travelSeen.indexOf(a.id)>=0)return false;
+    if(dist(a,state.player)>5.2)return false;
+    return isEnemyActor(a)||a.type==="trader"||a.type==="wanderer"||a.type==="guard";
+  });
+
+  if(!near.length)return;
+  near.sort(function(a,b){
+    var ae=isEnemyActor(a)?0:1,be=isEnemyActor(b)?0:1;
+    if(ae!==be)return ae-be;
+    return dist(a,state.player)-dist(b,state.player);
+  });
+
+  var a=near[0];
+  pauseTravelForActor(a,isEnemyActor(a)?"enemy":"friendly");
+}
+
+function applyManualMovement(dt){
+  return false;
 }
 
 function checkTravelArrival(){
-  if(!state.travelDestination)return;
-  var p=PLACES[state.travelDestination];
-  if(!p){state.travelDestination=null;return}
-  if(dist(state.player,p)<.8){
-    var name=p.name;
-    state.travelDestination=null;
-    state.player.target=null;
-    log(name+"に到着した。");
-    showResult(name+" 到着");
-  }
+  if(!state.travelDestination||state.travelPaused)return;
+  setNextTravelTarget();
 }
 
 function worldAI(dt){
@@ -559,12 +707,15 @@ function worldAI(dt){
     partyJobStep(a,dt);
   });
 
-  if(!applyManualMovement(dt)&&!state.player.down){
+  travelEncounterStep();
+
+  if(!state.player.down&&!state.travelPaused){
     moveTowards(state.player,dt);
   }
 
   checkTravelArrival();
   combatStep(dt);
+  travelEncounterStep();
 }
 
 function simulationTick(){
@@ -660,17 +811,6 @@ function renderField(){
   [].forEach(function(r){
     var el=roadElement(PLACES[r[0]],PLACES[r[1]]);
     if(el)fieldObjects.appendChild(el);
-  });
-
-  Object.keys(PLACES).forEach(function(k){
-    var p=PLACES[k],q=projection(p.x,p.y);
-    if(q.x<-80||q.x>q.w+80||q.y<-80||q.y>q.h+80)return;
-    var d=document.createElement("div");
-    d.className="fieldLandmark "+p.kind;
-    d.style.left=q.x+"px";
-    d.style.top=q.y+"px";
-    d.innerHTML="<div class='landIcon'></div><span>"+p.name+"</span>";
-    fieldObjects.appendChild(d);
   });
 
   state.actors.forEach(function(a){
@@ -811,6 +951,7 @@ function recruitActor(a){
 
   log(a.name+"が仲間になった。");
   showResult(a.name+"が仲間になった");
+  if(state.travelPaused&&state.travelEncounterId===a.id)resumeTravel();
   renderAll();
 }
 
@@ -1018,6 +1159,9 @@ function talkActor(a){
   var msg=choice(pool);
   log(msg);
   showResult("話した");
+  if(state.travelPaused&&state.travelEncounterId===a.id&&state.travelEncounterKind==="friendly"){
+    resumeTravel();
+  }
 }
 
 function openTrade(a){
@@ -1355,7 +1499,10 @@ function renderContext(){
     state.activeQuest?state.activeQuest.id:"",
     state.activeQuest?(state.activeQuest.progress||0):0,
     state.player.sword?1:0,
-    state.player.armor?1:0
+    state.player.armor?1:0,
+    state.travelDestination||"",
+    state.travelPaused?1:0,
+    state.travelEncounterId||""
   ].join("|");
 
   if(sig===contextSignature)return;
@@ -1393,7 +1540,11 @@ function renderContext(){
       addActor("戦う",function(){
         clearTapMarker();
         stopAutoWork(false);
-        state.travelDestination=null;
+        if(state.travelDestination){
+          state.travelPaused=true;
+          state.travelEncounterId=a.id;
+          state.travelEncounterKind="enemy";
+        }
         state.player.attackTarget=a.id;
         showResult("戦闘");
       },false);
@@ -1406,6 +1557,10 @@ function renderContext(){
       addActor("雇う 50",function(){recruitActor(a)},state.player.money<50);
     }else if(a.type==="guard"||a.type==="worker"||a.type==="dog"||a.type==="pack"){
       addActor("話す",function(){talkActor(a)},false);
+    }
+
+    if(state.travelPaused&&state.travelEncounterKind==="friendly"&&state.travelEncounterId===a.id){
+      addActor("進む",function(){resumeTravel()},false);
     }
   }
 
@@ -1566,11 +1721,17 @@ function renderWorldMap(){
 
   places.innerHTML="";
   Object.keys(PLACES).forEach(function(k){
-    var p=PLACES[k],d=document.createElement("div");
+    var p=PLACES[k],d=document.createElement("button");
+    d.type="button";
     d.className="mapPlace";
     d.style.left=p.x+"%";
     d.style.top=p.y+"%";
-    d.textContent=p.name;
+    d.setAttribute("aria-label",p.name+"へ移動");
+    d.title=p.name;
+    d.addEventListener("click",function(){
+      startTravel(k);
+      mapOverlay.hidden=true;
+    });
     places.appendChild(d);
   });
 
@@ -1607,13 +1768,26 @@ function startTravel(key){
   stopAutoWork(false);
   var p=PLACES[key];
   if(!p||state.player.down)return;
+
   manual.x=0;manual.y=0;
-  state.travelDestination=key;
   state.player.attackTarget=null;
-  state.player.target={x:p.x,y:p.y};
+  state.travelDestination=key;
+  state.travelPaused=false;
+  state.travelEncounterId=null;
+  state.travelEncounterKind=null;
+
+  var start=nearestPlace(state.player).key;
+  state.travelRoute=shortestPlacePath(start,key);
+  state.travelRouteIndex=0;
+  state.travelSeen=state.actors.filter(function(a){
+    return !a.down&&!isEnemyActor(a)&&dist(a,state.player)<=6.5;
+  }).map(function(a){return a.id});
+
+  setNextTravelTarget();
   log(p.name+"へ向かった。");
   showResult(p.name+"へ移動");
   renderHud();
+  contextSignature=null;
 }
 
 var fieldPointer=null;
@@ -1664,20 +1838,6 @@ function moveFieldMove(e){
   e.preventDefault();
   fieldPointer.lastX=e.clientX;
   fieldPointer.lastY=e.clientY;
-
-  var dx=e.clientX-fieldPointer.startX;
-  var dy=e.clientY-fieldPointer.startY;
-  var d=Math.hypot(dx,dy);
-
-  if(!fieldPointer.dragging&&d>=FIELD_DRAG_DEADZONE){
-    fieldPointer.dragging=true;
-    cancelAutoForManual();
-  }
-  if(!fieldPointer.dragging)return;
-
-  var scale=Math.max(FIELD_DRAG_RADIUS,d);
-  manual.x=clamp(dx/scale,-1,1);
-  manual.y=clamp(dy/scale,-1,1);
 }
 
 function screenToWorld(clientX,clientY){
@@ -1691,13 +1851,8 @@ function screenToWorld(clientX,clientY){
 
 function tapFieldMove(clientX,clientY){
   if(state.player.down)return;
-  stopAutoWork(false);
-  var target=screenToWorld(clientX,clientY);
-  manual.x=0;manual.y=0;
-  state.travelDestination=null;
-  state.player.attackTarget=null;
-  state.player.target=target;
-  setTapMarker(target.x,target.y);
+  renderWorldMap();
+  mapOverlay.hidden=false;
 }
 
 function endFieldMove(e){
@@ -1712,12 +1867,8 @@ function endFieldMove(e){
 
   fieldPointer=null;
 
-  if(p.dragging){
-    manual.x=0;manual.y=0;
-    return;
-  }
-
-  if(d<FIELD_DRAG_DEADZONE&&elapsed<=FIELD_TAP_MAX_MS){
+  manual.x=0;manual.y=0;
+  if(d<22&&elapsed<=FIELD_TAP_MAX_MS){
     tapFieldMove(e.clientX,e.clientY);
   }
 }
@@ -1755,6 +1906,7 @@ function load(){
     contextSignature=null;
     hotbarSignature=null;
     manual.x=0;manual.y=0;
+    if(state.travelDestination&&!state.travelPaused)setNextTravelTarget();
     log("ロードした。");
     showResult("ロード");
     renderAll();
@@ -1816,7 +1968,10 @@ function init(){
       openPanel(b.getAttribute("data-bottom-panel"));
     });
   });
-  document.getElementById("closePanelBtn").addEventListener("click",function(){panelOverlay.hidden=true});
+  document.getElementById("closePanelBtn").addEventListener("click",function(){
+    panelOverlay.hidden=true;
+    if(state.travelPaused&&state.travelEncounterKind==="friendly")resumeTravel();
+  });
 
   document.querySelectorAll("[data-panel]").forEach(function(b){
     b.addEventListener("click",function(){
