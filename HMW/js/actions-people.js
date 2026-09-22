@@ -237,6 +237,25 @@
   function useItem(id) {
     const item = D.items[id];
     if (!item || !(H.state.inventory[id] > 0)) return;
+
+    if (item.periodCare) {
+      const period = H.getMenstrualStatus?.();
+      if (!period?.active) {
+        info("生理用品", "今は使う必要がない。必要な時まで持っておける。");
+        return;
+      }
+      if (H.state.daily.periodCare) {
+        info("生理用品", "今日はすでに使っている。");
+        return;
+      }
+      H.removeItem(id, 1);
+      H.state.daily.periodCare = true;
+      H.addHistory("生理用品を使った。今日の衛生管理ができた。");
+      closeModal();
+      G.refresh();
+      return;
+    }
+
     H.removeItem(id, 1);
     const effects = {};
     ["hunger", "health", "hygiene", "warmth", "wetness"].forEach((key) => {
@@ -273,6 +292,12 @@
       H.state.progression.support.shelterReferral = false;
       text = "紹介された一時宿泊先で休んだ。";
     }
+    const periodBeforeSleep = H.getMenstrualStatus?.();
+    if (periodBeforeSleep?.active) {
+      s.fatigue += 2;
+      if (!H.state.daily.periodCare) s.hygiene -= 10;
+    }
+
     const interrupted = random(`sleep-${place}-${H.state.day}`, 1, 100) <= risk;
     if (interrupted) {
       if (place === "park") { H.state.world.policeAttention += 1; s.fatigue += 9; text += " 夜中に起こされ、少し睡眠が削られた。"; }
@@ -286,11 +311,17 @@
     }
     H.state.day += 1;
     H.state.slot = 0;
+    const nextPeriod = H.advanceMenstrualCycle?.();
     H.resetDaily();
     H.state.sleep.lastPlace = place;
     s.hunger += 7;
     H.clampStats();
     G.rollWeather();
+    if (nextPeriod?.active && nextPeriod.periodDay === 1) {
+      H.addHistory("生理が始まった。数日間は生理用品の確保が必要になる。");
+    } else if (!nextPeriod?.active && nextPeriod?.cycleDay === nextPeriod?.periodLength + 1) {
+      H.addHistory("生理が終わった。");
+    }
     H.completeLead("sleep_tonight");
     H.addLead("sleep_tonight", "今夜眠れる場所を確保する");
     H.addHistory(text);
