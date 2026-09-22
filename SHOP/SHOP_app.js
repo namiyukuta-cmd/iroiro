@@ -78,8 +78,10 @@
       image.alt = '';
       image.draggable = false;
       image.style.left = item.left + '%';
+      image.style.bottom = (item.bottom || 0) + '%';
       image.style.height = item.height + '%';
-      image.style.zIndex = String(item.layer || 1);
+      const z = typeof item.layer === 'string' ? data.layers[item.layer] : item.layer;
+      image.style.zIndex = String(z ?? data.layers.town);
       if (item.flip) image.style.transform = 'scaleX(-1)';
       strip.appendChild(image);
     });
@@ -151,6 +153,7 @@
   }
 
   // 1つの「場」は1画面で表示し、移動時にsceneKeyを切り替える。
+  // 遠景=far、町背景=town、人=people、会話対象/店=interactive、主人公=player の奥行きで重ねる。
   // 背景・建物・門・屋台はJSデータから重ねて表示する。
   // オートセーブ・オートロード・ブラウザ保存は行わない。
 })();
