@@ -203,6 +203,16 @@
   </style>
 </head>
 <body>
+<script>
+(() => {
+  const SHOP_BUILD='20260923-0842';
+  const u=new URL(location.href);
+  if(u.searchParams.get('build')!==SHOP_BUILD){
+    u.searchParams.set('build',SHOP_BUILD);
+    location.replace(u.toString());
+  }
+})();
+</script>
   <div class="app">
     <header class="top-status" aria-label="日時と天候">
       <div class="status-cell"><span class="status-label" id="dayLabel"></span><span class="status-value" id="dayText"></span></div>
@@ -247,8 +257,8 @@
     <nav class="bottom-menu" id="bottomMenu" aria-label="メニュー"></nav>
   </div>
 
-  <script src="./SHOP_data.js?v=20260923-0838"></script>
-  <script src="./SHOP_save.js?v=20260923-0838"></script>
-  <script src="./SHOP_app.js?v=20260923-0838"></script>
+  <script src="./SHOP_data.js?v=20260923-0842"></script>
+  <script src="./SHOP_save.js?v=20260923-0842"></script>
+  <script src="./SHOP_app.js?v=20260923-0842"></script>
 </body>
 </html>
