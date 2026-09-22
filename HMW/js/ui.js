@@ -304,6 +304,13 @@
     ]);
   }
 
+  function openLoad() {
+    openModal("ロード", "保存済みの状態を読み込む。", [
+      { label: "ロードする", onClick: async () => { closeModal(); await H.loadGame(); G.ensureState(); refresh(); } },
+      { label: "やめる", onClick: closeModal }
+    ]);
+  }
+
   function openMenu() {
     openModal("メニュー", "", [
       { label: "状況・今ある用事", onClick: () => { closeModal(); openTasks(); } },
@@ -326,6 +333,7 @@
     $("nav-inventory").addEventListener("click", openInventory);
     $("nav-log").addEventListener("click", openLog);
     $("nav-save").addEventListener("click", openSave);
+    $("nav-load").addEventListener("click", openLoad);
     $("modal-close").addEventListener("click", closeModal);
     $("modal-backdrop").addEventListener("click", (e) => { if (e.target === $("modal-backdrop")) closeModal(); });
     H.loadLocal();
