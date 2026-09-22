@@ -31,19 +31,25 @@
       outerPoor: Object.freeze({
         name: '小門外・底辺区',
         background: './asset/bg_desert_wall.jpeg',
+
+        // 主人公は黄色で示された手前左の位置。表示用レーンは作らない。
+        playerAnchor: Object.freeze({left:30, bottom:2, height:30}),
+
         objects: Object.freeze([
-          // 建物：左右を大きく、中央奥は小さく
-          Object.freeze({src:'./asset/house_poor.png', left:-7, bottom:15, height:36, layer:'town', depth:1}),
-          Object.freeze({src:'./asset/house_poor.png', left:77, bottom:15, height:36, layer:'town', depth:1, flip:true}),
-          Object.freeze({src:'./asset/house_poor.png', left:25, bottom:19, height:19, layer:'town', depth:2, flip:true}),
-          Object.freeze({src:'./asset/house_poor.png', left:56, bottom:19, height:19, layer:'town', depth:2}),
+          // 奥：中央の小さい家
+          Object.freeze({src:'./asset/house_poor.png', left:27, bottom:22, height:17, layer:'town', depth:1, flip:true}),
+          Object.freeze({src:'./asset/house_poor.png', left:56, bottom:22, height:17, layer:'town', depth:1}),
 
-          // 奥NPC
-          Object.freeze({src:'https://raw.githubusercontent.com/namiyukuta-cmd/iroiro/main/SHOP/asset/Npc/npc_oldman_01.png', left:20, bottom:13, height:22, layer:'people', depth:3}),
-          Object.freeze({src:'https://raw.githubusercontent.com/namiyukuta-cmd/iroiro/main/SHOP/asset/Npc/npc_porter_01.png', left:82, bottom:13, height:22, layer:'people', depth:3}),
+          // 中景：左右の大きい家
+          Object.freeze({src:'./asset/house_poor.png', left:-8, bottom:12, height:39, layer:'town', depth:2}),
+          Object.freeze({src:'./asset/house_poor.png', left:72, bottom:12, height:39, layer:'town', depth:2, flip:true}),
 
-          // 手前の商い
-          Object.freeze({src:'./asset/stall.png', left:42, bottom:3, height:30, layer:'interactive', depth:4})
+          // 奥側のNPC 2人。屋台より奥。
+          Object.freeze({src:'https://raw.githubusercontent.com/namiyukuta-cmd/iroiro/main/SHOP/asset/Npc/npc_oldman_01.png', left:18, bottom:10, height:22, layer:'people', depth:3}),
+          Object.freeze({src:'https://raw.githubusercontent.com/namiyukuta-cmd/iroiro/main/SHOP/asset/Npc/npc_porter_01.png', left:84, bottom:10, height:22, layer:'people', depth:3}),
+
+          // 手前中央右の屋台。主人公位置よりは奥。
+          Object.freeze({src:'./asset/stall.png', left:40, bottom:1, height:31, layer:'interactive', depth:4})
         ])
       }),
       smallGateOutside: Object.freeze({
