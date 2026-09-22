@@ -151,6 +151,19 @@
       fatigue: ["疲労", s.fatigue]
     };
     Object.entries(fields).forEach(([id, value]) => { $(id).innerHTML = `${value[0]}<b>${value[1]}</b>`; });
+
+    const periodEl = $("period-status");
+    const period = H.getMenstrualStatus?.();
+    if (periodEl) {
+      if (period?.active) {
+        periodEl.classList.remove("hidden");
+        periodEl.innerHTML = `<b>生理 ${period.periodDay}日目</b><span>${H.state.daily.periodCare ? "生理用品：使用済み" : "生理用品：未使用"}</span>`;
+      } else {
+        periodEl.classList.add("hidden");
+        periodEl.textContent = "";
+      }
+    }
+
     $("night-bed").textContent = "未定";
   }
 
@@ -241,9 +254,9 @@
       box.appendChild(panel);
       return;
     }
-    box.appendChild(mainButton("行動する", openLocationActions));
-    box.appendChild(mainButton("人と関わる", openPeopleHere));
-    box.appendChild(mainButton("移動する", openMap));
+    box.appendChild(mainButton("行動", openLocationActions));
+    box.appendChild(mainButton("人と話す", openPeopleHere));
+    box.appendChild(mainButton("移動", openMap));
   }
 
   function openMap() {
