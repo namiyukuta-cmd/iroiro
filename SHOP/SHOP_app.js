@@ -69,20 +69,7 @@
     strip.style.backgroundSize = 'cover';
     strip.style.backgroundRepeat = 'no-repeat';
 
-    strip.querySelectorAll('.scene-object,.scene-atmosphere').forEach(node => node.remove());
-
-    const atmosphere=document.createElement('div');
-    atmosphere.className='scene-atmosphere';
-    atmosphere.innerHTML=
-      '<span class="sun-glow"></span>'+
-      '<span class="bird bird-1">⌁</span>'+
-      '<span class="bird bird-2">⌁</span>'+
-      '<span class="bird bird-3">⌁</span>'+
-      '<span class="dust dust-1"></span>'+
-      '<span class="dust dust-2"></span>'+
-      '<span class="dust dust-3"></span>'+
-      '<span class="dust dust-4"></span>';
-    strip.appendChild(atmosphere);
+    strip.querySelectorAll('.scene-object').forEach(node => node.remove());
 
     scene.objects.forEach(item => {
       const image = document.createElement('img');
@@ -94,7 +81,8 @@
       image.style.bottom = (item.bottom || 0) + '%';
       image.style.height = item.height + '%';
       const z = typeof item.layer === 'string' ? data.layers[item.layer] : item.layer;
-      image.style.zIndex = String(z ?? data.layers.town);
+      const depth = Number(item.depth || 0);
+      image.style.zIndex = String((z ?? data.layers.town) + depth);
       if (item.flip) image.style.transform = 'scaleX(-1)';
       strip.appendChild(image);
     });
