@@ -22,35 +22,36 @@
     scenes: Object.freeze({
       outerPoor: Object.freeze({
         name: '小門外・底辺区',
-        width: 1600,
         background: './asset/bg_desert_wall.jpeg',
         objects: Object.freeze([
-          Object.freeze({src:'./asset/house_poor.png', left:35, height:78, layer:2}),
-          Object.freeze({src:'./asset/house_poor.png', left:410, height:72, layer:2, flip:true}),
-          Object.freeze({src:'./asset/stall.png', left:790, height:61, layer:4}),
-          Object.freeze({src:'./asset/house_poor.png', left:1040, height:75, layer:2}),
-          Object.freeze({src:'./asset/gate_small.png', left:1250, height:95, layer:5})
+          Object.freeze({src:'./asset/house_poor.png', left:2, height:48, layer:2}),
+          Object.freeze({src:'./asset/house_poor.png', left:42, height:43, layer:2, flip:true}),
+          Object.freeze({src:'./asset/house_poor.png', left:72, height:46, layer:2})
+        ])
+      }),
+      smallGateOutside: Object.freeze({
+        name: '小門前',
+        background: './asset/bg_desert_wall.jpeg',
+        objects: Object.freeze([
+          Object.freeze({src:'./asset/house_poor.png', left:-10, height:38, layer:2}),
+          Object.freeze({src:'./asset/gate_small.png', left:38, height:64, layer:5})
         ])
       }),
       cityCommon: Object.freeze({
         name: '市内・庶民街',
-        width: 1600,
         background: './asset/bg_desert_wall.jpeg',
         objects: Object.freeze([
-          Object.freeze({src:'./asset/house_normal.png', left:70, height:82, layer:2}),
-          Object.freeze({src:'./asset/stall.png', left:520, height:62, layer:4}),
-          Object.freeze({src:'./asset/house_normal.png', left:860, height:80, layer:2, flip:true}),
-          Object.freeze({src:'./asset/gate_small.png', left:1240, height:94, layer:5})
+          Object.freeze({src:'./asset/house_normal.png', left:-5, height:52, layer:2}),
+          Object.freeze({src:'./asset/stall.png', left:32, height:40, layer:4}),
+          Object.freeze({src:'./asset/house_normal.png', left:68, height:49, layer:2, flip:true})
         ])
       }),
       upperArea: Object.freeze({
         name: '上級区',
-        width: 1600,
         background: './asset/bg_desert_wall.jpeg',
         objects: Object.freeze([
-          Object.freeze({src:'./asset/house_upper.png', left:90, height:88, layer:2}),
-          Object.freeze({src:'./asset/house_upper.png', left:640, height:84, layer:2, flip:true}),
-          Object.freeze({src:'./asset/house_normal.png', left:1130, height:76, layer:2})
+          Object.freeze({src:'./asset/house_upper.png', left:3, height:58, layer:2}),
+          Object.freeze({src:'./asset/house_upper.png', left:53, height:55, layer:2, flip:true})
         ])
       })
     }),
