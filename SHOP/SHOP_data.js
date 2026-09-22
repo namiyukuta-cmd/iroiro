@@ -36,8 +36,8 @@
           Object.freeze({src:'./asset/house_poor.png', left:30, bottom:7, height:20, layer:'town', flip:true}),
           Object.freeze({src:'./asset/house_poor.png', left:58, bottom:8, height:22, layer:'town'}),
           Object.freeze({src:'./asset/house_poor.png', left:82, bottom:7, height:19, layer:'town', flip:true}),
-          Object.freeze({src:'./asset/silhouette_03.png', left:18, bottom:5, height:18, layer:'people'}),
-          Object.freeze({src:'./asset/silhouette_07.png', left:69, bottom:5, height:18, layer:'people'})
+          Object.freeze({src:'./asset/npc_oldman_01 2.png', left:18, bottom:5, height:18, layer:'people'}),
+          Object.freeze({src:'./asset/npc_porter_01 2.png', left:69, bottom:5, height:18, layer:'people'})
         ])
       }),
       smallGateOutside: Object.freeze({
@@ -47,8 +47,8 @@
           Object.freeze({src:'./asset/house_poor.png', left:-5, bottom:8, height:19, layer:'town'}),
           Object.freeze({src:'./asset/gate_small.png', left:31, bottom:6, height:32, layer:'town'}),
           Object.freeze({src:'./asset/house_poor.png', left:76, bottom:8, height:18, layer:'town', flip:true}),
-          Object.freeze({src:'./asset/silhouette_01.png', left:14, bottom:5, height:18, layer:'people'}),
-          Object.freeze({src:'./asset/silhouette_06.png', left:58, bottom:5, height:18, layer:'people'})
+          Object.freeze({src:'./asset/npc_man_01 2.png', left:14, bottom:5, height:18, layer:'people'}),
+          Object.freeze({src:'./asset/npc_guard_01 2.png', left:58, bottom:5, height:18, layer:'people'})
         ])
       }),
       cityCommon: Object.freeze({
@@ -58,9 +58,9 @@
           Object.freeze({src:'./asset/house_normal.png', left:-3, bottom:8, height:23, layer:'town'}),
           Object.freeze({src:'./asset/stall.png', left:37, bottom:2, height:17, layer:'interactive'}),
           Object.freeze({src:'./asset/house_normal.png', left:67, bottom:8, height:22, layer:'town', flip:true}),
-          Object.freeze({src:'./asset/silhouette_02.png', left:17, bottom:5, height:18, layer:'people'}),
-          Object.freeze({src:'./asset/silhouette_04.png', left:49, bottom:5, height:18, layer:'people'}),
-          Object.freeze({src:'./asset/silhouette_05.png', left:77, bottom:5, height:18, layer:'people'})
+          Object.freeze({src:'./asset/npc_woman_01 2.png', left:17, bottom:5, height:18, layer:'people'}),
+          Object.freeze({src:'./asset/npc_traveler_01 2.png', left:49, bottom:5, height:18, layer:'people'}),
+          Object.freeze({src:'./asset/npc_child_01 2.png', left:77, bottom:5, height:18, layer:'people'})
         ])
       }),
       upperArea: Object.freeze({
@@ -69,7 +69,7 @@
         objects: Object.freeze([
           Object.freeze({src:'./asset/house_upper.png', left:5, bottom:9, height:27, layer:'town'}),
           Object.freeze({src:'./asset/house_upper.png', left:53, bottom:9, height:26, layer:'town', flip:true}),
-          Object.freeze({src:'./asset/silhouette_08.png', left:41, bottom:5, height:18, layer:'people'})
+          Object.freeze({src:'./asset/npc_beggar_01.png', left:41, bottom:5, height:18, layer:'people'})
         ])
       })
     }),
