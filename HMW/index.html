@@ -7,7 +7,7 @@
   <meta http-equiv="Pragma" content="no-cache" />
   <meta http-equiv="Expires" content="0" />
   <title>HMW</title>
-  <link rel="stylesheet" href="css/style.css?v=20260922-1335" />
+  <link rel="stylesheet" href="css/style.css?v=20260922-1343" />
 </head>
 <body>
   <div class="app">
@@ -26,12 +26,14 @@
       <div class="stat" id="warmth">体温<b>55</b></div>
       <div class="stat" id="wetness">濡れ<b>0</b></div>
       <div class="stat" id="fatigue">疲労<b>25</b></div>
-      <div class="period-status hidden" id="period-status"></div>
     </div>
 
-    <div class="sleep-row">
-      <span>今夜の寝床</span>
-      <b id="night-bed">未定</b>
+    <div class="cycle-row">
+      <div class="cycle-head">
+        <span>月周期</span>
+        <b id="cycle-label">24/28</b>
+      </div>
+      <div class="cycle-track" id="cycle-track" aria-label="月周期"></div>
     </div>
 
     <main class="main">
@@ -74,7 +76,7 @@
   <script src="js/actions-life.js?v=20260922-1320"></script>
   <script src="js/actions-people.js?v=20260922-1320"></script>
   <script src="js/scenes.js?v=20260922-1148"></script>
-  <script src="js/ui.js?v=20260922-1335"></script>
+  <script src="js/ui.js?v=20260922-1343"></script>
   <script src="js/display-names.js?v=20260909-2130"></script>
 </body>
 </html>
