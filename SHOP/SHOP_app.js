@@ -5,14 +5,9 @@
   const clone = value => JSON.parse(JSON.stringify(value));
   window.SHOP_STATE = clone(data.initialState);
 
-  const title = document.getElementById('gameTitle');
-  const dayText = document.getElementById('dayText');
-  const timeText = document.getElementById('timeText');
-  const moneyText = document.getElementById('moneyText');
-  const shelf = document.getElementById('shelf');
-  const floor = document.getElementById('floor');
-  const status = document.getElementById('saveStatus');
-  const nav = document.getElementById('bottomNav');
+  const $ = id => document.getElementById(id);
+  const status = $('saveStatus');
+  const menu = $('bottomMenu');
 
   function formatTime(totalMinutes) {
     const value = Math.max(0, Number(totalMinutes) || 0) % 1440;
@@ -21,44 +16,65 @@
     return String(hour).padStart(2, '0') + ':' + String(minute).padStart(2, '0');
   }
 
+  function clampPercent(value) {
+    return Math.max(0, Math.min(100, Number(value) || 0));
+  }
+
   function makeButton(id, label) {
     const button = document.createElement('button');
     button.type = 'button';
     button.id = id;
+    button.className = 'menu-btn';
     button.textContent = label;
     return button;
   }
 
-  function buildLayout() {
+  function buildStaticContent() {
     document.title = data.title;
-    title.textContent = data.title;
-    floor.textContent = data.labels.floor;
 
-    shelf.replaceChildren();
-    for (let i = 0; i < data.layout.shelfSlots; i += 1) {
-      const slot = document.createElement('div');
-      slot.className = 'shelf-slot';
-      slot.dataset.slot = String(i);
-      shelf.append(slot);
-    }
+    $('dayLabel').textContent = data.labels.day;
+    $('timeLabel').textContent = data.labels.time;
+    $('tempLabel').textContent = data.labels.temperature;
+    $('weatherLabel').textContent = data.labels.weather;
 
-    const loadButton = makeButton('loadButton', data.labels.load);
+    $('hpLabel').textContent = data.labels.hp;
+    $('hungerLabel').textContent = data.labels.hunger;
+    $('thirstLabel').textContent = data.labels.thirst;
+    $('portrait').textContent = data.labels.portrait;
+    $('townPlaceholder').textContent = data.labels.townPlaceholder;
+
+    const mapButton = makeButton('mapButton', data.labels.map);
+    const inventoryButton = makeButton('inventoryButton', data.labels.inventory);
+    const actionButton = makeButton('actionButton', data.labels.action);
     const saveButton = makeButton('saveButton', data.labels.save);
-    const backLink = document.createElement('a');
-    backLink.className = 'navbtn';
-    backLink.href = data.links.backToShopMenu;
-    backLink.textContent = data.labels.back;
-    nav.replaceChildren(loadButton, saveButton, backLink);
+    const loadButton = makeButton('loadButton', data.labels.load);
 
-    loadButton.addEventListener('click', () => loadGame(loadButton));
+    menu.replaceChildren(mapButton, inventoryButton, actionButton, saveButton, loadButton);
+
     saveButton.addEventListener('click', () => saveGame(saveButton));
+    loadButton.addEventListener('click', () => loadGame(loadButton));
   }
 
   function render() {
     const state = window.SHOP_STATE;
-    dayText.textContent = Number(state.day || 1) + data.labels.daySuffix;
-    timeText.textContent = formatTime(state.minutes);
-    moneyText.textContent = data.labels.money + ' ' + Number(state.money || 0);
+
+    $('dayText').textContent = Number(state.day || 1) + '日目';
+    $('timeText').textContent = formatTime(state.minutes);
+    $('tempText').textContent = Number(state.temperature || 0) + '℃';
+    $('weatherText').textContent = state.weather || '';
+    $('sceneName').textContent = state.scene || '';
+
+    const hp = clampPercent(state.hp);
+    const hunger = clampPercent(state.hunger);
+    const thirst = clampPercent(state.thirst);
+
+    $('hpBar').style.width = hp + '%';
+    $('hungerBar').style.width = hunger + '%';
+    $('thirstBar').style.width = thirst + '%';
+
+    $('hpText').textContent = hp;
+    $('hungerText').textContent = hunger;
+    $('thirstText').textContent = thirst;
   }
 
   async function saveGame(button) {
@@ -80,7 +96,7 @@
     try {
       const loaded = await window.SHOP_SAVE.load();
       if (loaded && typeof loaded === 'object') {
-        window.SHOP_STATE = loaded;
+        window.SHOP_STATE = Object.assign(clone(data.initialState), loaded);
         render();
       }
       status.textContent = '読み込みました';
@@ -91,7 +107,7 @@
     }
   }
 
-  buildLayout();
+  buildStaticContent();
   render();
 
   const params = new URLSearchParams(location.search);
@@ -99,5 +115,7 @@
     status.textContent = '続きから始める場合は「ロード」を押してください。';
   }
 
+  // 町背景は横方向にスクロールする。
+  // 背景画像・主人公画像・ゲーム内容は後でJS側から設定する。
   // オートセーブ・オートロード・ブラウザ保存は行わない。
 })();
