@@ -72,7 +72,7 @@
     const layerFar=document.createElement('div');
     layerFar.className='scene-layer scene-layer-far';
     layerFar.style.backgroundImage='url("' + scene.background + '")';
-    layerFar.style.backgroundPosition='center 68%';
+    layerFar.style.backgroundPosition='center 62%';
     layerFar.style.backgroundSize='cover';
     layerFar.style.backgroundRepeat='no-repeat';
 
@@ -87,7 +87,6 @@
 
     const layerPlayer=document.createElement('div');
     layerPlayer.className='scene-layer scene-layer-player';
-    layerPlayer.dataset.role='player-layer';
 
     strip.append(layerFar,layerHouse,layerBackgroundNpc,layerInteractive,layerPlayer);
 
