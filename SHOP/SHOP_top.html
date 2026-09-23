@@ -601,7 +601,7 @@
 <body>
 <script>
 (() => {
-  const SHOP_BUILD='20260923-scene-nav-layout-fix-v1';
+  const SHOP_BUILD='20260923-uniform-scene-shift-v2';
   const u=new URL(location.href);
   if(u.searchParams.get('build')!==SHOP_BUILD){
     u.searchParams.set('build',SHOP_BUILD);
@@ -703,7 +703,7 @@
     for (const file of files) {
       await new Promise((resolve, reject) => {
         const script = document.createElement('script');
-        script.src = file + '?v=20260923-scene-nav-layout-fix-v1&nocache=' + stamp;
+        script.src = file + '?v=20260923-uniform-scene-shift-v2&nocache=' + stamp;
         script.onload = resolve;
         script.onerror = reject;
         document.body.appendChild(script);
