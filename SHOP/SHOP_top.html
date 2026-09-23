@@ -33,16 +33,37 @@
     }
     .status-cell{
       min-width:0;
-      padding:6px 4px;
+      padding:7px 5px;
       text-align:center;
       border:1px solid #6e6659;
       border-radius:8px;
       background:#f8f3e8;
     }
-    .status-label{display:block;font-size:10px;color:#6b6457;line-height:1}
-    .status-value{display:block;margin-top:4px;font-size:14px;font-weight:900;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-    #weatherText{font-size:22px;line-height:1.05}
-    #dayLabel,#timeLabel{font-size:9px}
+    .status-label{
+      display:block;
+      font-size:11px;
+      font-weight:800;
+      color:#3f3a32;
+      line-height:1.15;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+    .status-value{
+      display:block;
+      margin-top:5px;
+      font-size:16px;
+      font-weight:900;
+      line-height:1.05;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+    #dayLabel,#timeLabel{font-size:11px}
+    #dayText{font-size:15px}
+    #timeText{font-size:17px}
+    #tempText{font-size:17px}
+    #weatherText{font-size:24px;line-height:1}
 
     .scene-area{
       min-height:0;
@@ -603,7 +624,7 @@
 <body>
 <script>
 (() => {
-  const SHOP_BUILD='20260923-compact-calendar-prayer-v1';
+  const SHOP_BUILD='20260923-top-text-readable-v1';
   const u=new URL(location.href);
   if(u.searchParams.get('build')!==SHOP_BUILD){
     u.searchParams.set('build',SHOP_BUILD);
@@ -706,7 +727,7 @@
     for (const file of files) {
       await new Promise((resolve, reject) => {
         const script = document.createElement('script');
-        script.src = file + '?v=20260923-compact-calendar-prayer-v1&nocache=' + stamp;
+        script.src = file + '?v=20260923-top-text-readable-v1&nocache=' + stamp;
         script.onload = resolve;
         script.onerror = reject;
         document.body.appendChild(script);
