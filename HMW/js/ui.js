@@ -105,16 +105,41 @@
     }
 
     if (id === "labor_office") {
+      const workSummary = H.getJobSummary?.();
+      const offers = H.getLaborOfficeOffers?.() || [];
+      const next = workSummary?.nextReferral;
       a.push({
-        label: "仕事の条件を確認する",
-        desc: H.state.progression.support.workAccess ? "正式紹介を使える。" : "正式紹介には手続きが必要。別の仕事は使える。",
-        run: () => info("仕事の条件", H.state.progression.support.workAccess
-          ? "紹介可能。体力40以上・疲労75以下・衛生25以上・空腹82以下。"
-          : "正式紹介はまだ不可。駅前の小仕事、回収所、店の清掃は別に利用できる。")
+        label: "仕事の条件・実績を確認する",
+        desc: workSummary
+          ? `勤務実績${workSummary.verifiedWorkDays}日。紹介される仕事は実績で増える。`
+          : "正式紹介の条件を確認する。",
+        run: () => {
+          if (!H.state.progression.support.workAccess) {
+            return info("仕事の条件", "正式紹介はまだ不可。駅前の小仕事、回収所、店の清掃は別に利用できる。");
+          }
+          const offerText = offers.map((offer) =>
+            `${offer.name}：${offer.status.unlocked ? "紹介可" : offer.status.reason}`
+          ).join("／");
+          const nextText = next
+            ? `次の紹介まであと${next.remainingDays}日（${next.name}）`
+            : "現在の紹介段階はすべて解禁済み。";
+          info("仕事の条件・実績",
+            `勤務実績 ${workSummary?.verifiedWorkDays || 0}日。累計仕事収入 ${workSummary?.totalEarnings || 0}円。体力40以上・疲労75以下・衛生25以上・空腹82以下。\n${offerText}\n${nextText}`
+          );
+        }
       });
-      if (H.state.progression.support.workAccess) {
-        a.push({ label: "倉庫の日雇いをする", desc: "伝票を見て箱を揃える作業。報酬は作業結果で変わる。", run: G.formalWork, disabled: H.state.daily.formalWork });
-      }
+
+      offers.filter((offer) => offer.status.unlocked).forEach((offer) => {
+        const availability = offer.availability || {};
+        a.push({
+          label: `${offer.name}をする`,
+          desc: availability.available === false ? availability.reason : offer.description,
+          run: offer.id === "warehouse_day"
+            ? G.formalWork
+            : () => G.referralWork(offer.id),
+          disabled: availability.available === false
+        });
+      });
     }
 
     if (id === "police_station") {
@@ -339,7 +364,25 @@
           return `<div class="task-row"><b>${esc(x.name)}</b><br><span class="muted">${esc(x.description)}</span><br>${req}</div>`;
         }).join("")
       : "<p>住居目標なし</p>";
+
+    const work = H.getJobSummary?.();
+    const workRows = work
+      ? Object.entries(work.records)
+          .filter(([, record]) => record.days > 0)
+          .map(([id, record]) => {
+            const job = H.getJob?.(id);
+            return `<div class="task-row"><b>${esc(job?.name || id)}</b>　${record.days}日／${record.earnings}円</div>`;
+          }).join("")
+      : "";
+    const nextWork = work?.nextReferral
+      ? `次の紹介：${esc(work.nextReferral.name)}まであと${work.nextReferral.remainingDays}日`
+      : "現在の紹介仕事はすべて解禁済み";
+    const workHtml = work
+      ? `<div class="task-row"><b>正式な勤務実績 ${work.verifiedWorkDays}日</b><br>累計仕事収入 ${work.totalEarnings}円<br><span class="muted">${nextWork}</span></div>${workRows}`
+      : "<p>仕事実績なし</p>";
+
     const html = `<div class="menu-summary"><b>生活基盤 ${stability}/5</b><br><span class="stability-dots">${"●".repeat(stability)}${"○".repeat(5 - stability)}</span></div>` +
+      `<div class="menu-summary"><b>仕事実績</b>${workHtml}</div>` +
       `<div class="menu-summary"><b>住居目標</b>${housingHtml}</div>` +
       `<div class="menu-summary"><b>今ある用事</b>${leads.length ? leads.map((x) => `<div class="task-row">${esc(x)}</div>`).join("") : "<p>特になし</p>"}</div>`;
     openModal("状況", html, [], true);
