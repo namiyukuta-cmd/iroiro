@@ -6,7 +6,7 @@
     subtitle: '砂漠都市で暮らし、商いを始める',
 
     initialState: Object.freeze({
-      version: 5,
+      version: 6,
       day: 1,
       minutes: 360,
       temperature: 24,
@@ -138,7 +138,8 @@
           Object.freeze({
             src:'./asset/desert_well_01.png',
             left:50, bottom:12, height:60,
-            layer:'house', centered:true
+            layer:'interactive', centered:true,
+            selectable:true, selectableType:'well'
           })
         ])
       }),
@@ -166,7 +167,8 @@
           Object.freeze({
             src:'./asset/desert_well_01.png',
             left:50, bottom:12, height:60,
-            layer:'house', centered:true
+            layer:'interactive', centered:true,
+            selectable:true, selectableType:'well'
           })
         ])
       }),
@@ -232,8 +234,8 @@
     }),
 
     links: Object.freeze({
-      newGame: './SHOP_top.html?new=1&build=20260923-time-climate-survival-v1',
-      continueGame: './SHOP_top.html?continue=1&build=20260923-time-climate-survival-v1',
+      newGame: './SHOP_top.html?new=1&build=20260923-well-water-v1',
+      continueGame: './SHOP_top.html?continue=1&build=20260923-well-water-v1',
       backToGames: '../index.html',
       backToShopMenu: './SHOP_index.html'
     })
