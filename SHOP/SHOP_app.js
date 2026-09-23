@@ -59,6 +59,48 @@
     loadButton.addEventListener('click', () => loadGame(loadButton));
   }
 
+  function collectPickup(pickup, marker) {
+    const state = window.SHOP_STATE;
+    if (!Array.isArray(state.collectedPickups)) state.collectedPickups = [];
+    if (!state.inventory || typeof state.inventory !== 'object') state.inventory = {};
+
+    if (state.collectedPickups.includes(pickup.id)) return;
+
+    state.collectedPickups.push(pickup.id);
+    state.inventory[pickup.itemId] = (Number(state.inventory[pickup.itemId]) || 0) + 1;
+
+    const item = window.SHOP_ITEMS && window.SHOP_ITEMS.all
+      ? window.SHOP_ITEMS.all[pickup.itemId]
+      : null;
+
+    if (marker) marker.remove();
+    status.textContent = (item ? item.name : 'アイテム') + 'を拾いました';
+  }
+
+  function renderPickups(scene, layer) {
+    const state = window.SHOP_STATE;
+    const collected = Array.isArray(state.collectedPickups) ? state.collectedPickups : [];
+
+    (scene.pickups || []).forEach(pickup => {
+      if (collected.includes(pickup.id)) return;
+
+      const marker = document.createElement('button');
+      marker.type = 'button';
+      marker.className = 'pickup-marker';
+      marker.textContent = '✴︎';
+      marker.setAttribute('aria-label', '拾う');
+      marker.style.left = pickup.left + '%';
+      marker.style.bottom = (pickup.bottom || 0) + '%';
+
+      marker.addEventListener('click', event => {
+        event.stopPropagation();
+        collectPickup(pickup, marker);
+      });
+
+      layer.appendChild(marker);
+    });
+  }
+
   function renderScene() {
     const state = window.SHOP_STATE;
     const key = state.sceneKey && data.scenes[state.sceneKey] ? state.sceneKey : 'outerPoor';
@@ -129,6 +171,8 @@
       if (item.flip) image.style.transform = 'scaleX(-1)';
       (layerMap[item.layer] || layerHouse).appendChild(image);
     });
+
+    renderPickups(scene, layerInteractive);
 
     placeholder.style.display = 'none';
     state.scene = scene.name;
