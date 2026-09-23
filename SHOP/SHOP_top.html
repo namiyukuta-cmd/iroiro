@@ -525,6 +525,59 @@
       color:#a49b89;
       background:#e3dac7;
     }
+    .quick-slot.is-usable{
+      cursor:pointer;
+      border:2px solid #6f624f;
+      background:#fff7dd;
+    }
+    .quick-slot.is-usable:active{
+      transform:scale(.97);
+      background:#efe1b9;
+    }
+
+    .well-choice-panel{
+      position:absolute;
+      left:50%;
+      top:50%;
+      z-index:220;
+      width:min(84%,330px);
+      transform:translate(-50%,-50%);
+      padding:14px;
+      border:3px solid #29261f;
+      border-radius:12px;
+      background:rgba(255,250,240,.97);
+      box-shadow:0 8px 24px rgba(0,0,0,.28);
+    }
+    .well-choice-title{
+      margin-bottom:6px;
+      text-align:center;
+      font-size:17px;
+      font-weight:900;
+    }
+    .well-choice-message{
+      min-height:38px;
+      display:grid;
+      place-items:center;
+      margin-bottom:10px;
+      text-align:center;
+      font-size:13px;
+      font-weight:800;
+      line-height:1.4;
+    }
+    .well-choice-actions{
+      display:grid;
+      gap:8px;
+    }
+    .well-choice-btn{
+      min-height:44px;
+      border:2px solid #29261f;
+      border-radius:9px;
+      background:#fffaf0;
+      font-size:14px;
+      font-weight:900;
+    }
+    .well-choice-btn:active{background:#e0d6be}
+    .well-choice-btn:disabled{opacity:.45}
     .quick-actions{
       display:grid;
       grid-template-columns:1fr 1fr;
@@ -589,7 +642,7 @@
 <body>
 <script>
 (() => {
-  const SHOP_BUILD='20260923-time-climate-survival-v1';
+  const SHOP_BUILD='20260923-well-water-v1';
   const u=new URL(location.href);
   if(u.searchParams.get('build')!==SHOP_BUILD){
     u.searchParams.set('build',SHOP_BUILD);
@@ -680,6 +733,7 @@
       './SHOP_time.js',
       './SHOP_currency.js',
       './SHOP_items.js',
+      './SHOP_well.js',
       './SHOP_action.js',
       './SHOP_save.js',
       './SHOP_app.js'
@@ -687,7 +741,7 @@
     for (const file of files) {
       await new Promise((resolve, reject) => {
         const script = document.createElement('script');
-        script.src = file + '?v=20260923-time-climate-survival-v1&nocache=' + stamp;
+        script.src = file + '?v=20260923-well-water-v1&nocache=' + stamp;
         script.onload = resolve;
         script.onerror = reject;
         document.body.appendChild(script);
