@@ -1105,3 +1105,12 @@
 - `SHOP_action.js` は現在地の `sceneKey` からその地区の物乞い設定を読む方式へ変更。
 - 物売りの通行人停止率は今回は変更せず48%のまま。
 - build: 20260923-begging-by-district-v1
+
+### 2026-09-23 19:xx 上級区を初期状態では進入不可に変更
+- ユーザー決定: 最初から上級区へ行ける状態にはしない。
+- `SHOP_data.js` の初期状態に `access.upperArea: false` を追加。
+- `SHOP_app.js` に地区アクセス判定を追加。
+- 市内・庶民街から上級区へ進む右矢印は、`access.upperArea` が false の間は表示しない。
+- 小門外・底辺区／小門前／市内・庶民街は従来どおり移動可能。
+- 上級区の解放条件そのものはまだ決めていない。今後イベントや条件から `access.upperArea = true` にする前提。
+- build: 20260923-upper-area-locked-v1
