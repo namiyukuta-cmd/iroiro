@@ -166,11 +166,9 @@
     layerFar.style.backgroundSize='cover';
     layerFar.style.backgroundRepeat='no-repeat';
 
-    // 小門外・底辺区だけは既に見た目を合わせた追加シフトを維持。
-    // 他地区は各sceneの配置値だけで合わせ、追加シフトを重ねない。
-    const isOuterPoor = key === 'outerPoor';
-    const farShiftPx = isOuterPoor ? Math.round(strip.clientHeight * 0.10) : 0;
-    const commonShiftPx = isOuterPoor ? Math.round(strip.clientHeight * 0.08) : 0;
+    // 全地区に同じ補正をかける。地区ごとの相対配置はsceneデータ側で維持する。
+    const farShiftPx = Math.round(strip.clientHeight * 0.10);
+    const commonShiftPx = Math.round(strip.clientHeight * 0.08);
 
     const layerHouse=document.createElement('div');
     layerHouse.className='scene-layer scene-layer-house';
