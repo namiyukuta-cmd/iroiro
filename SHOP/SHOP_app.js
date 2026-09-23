@@ -309,7 +309,11 @@
     $('hungerText').textContent = hunger;
     $('thirstText').textContent = thirst;
     const moneyText = $('moneyText');
-    if (moneyText) moneyText.textContent = Number(state.money || 0);
+    if (moneyText) {
+      moneyText.textContent = window.SHOP_CURRENCY
+        ? window.SHOP_CURRENCY.format(state.money)
+        : String(Number(state.money || 0));
+    }
     renderQuickInventory();
   }
 
