@@ -589,7 +589,7 @@
 <body>
 <script>
 (() => {
-  const SHOP_BUILD='20260923-facility-places-v1';
+  const SHOP_BUILD='20260923-time-climate-survival-v1';
   const u=new URL(location.href);
   if(u.searchParams.get('build')!==SHOP_BUILD){
     u.searchParams.set('build',SHOP_BUILD);
@@ -673,10 +673,11 @@
     const stamp = Date.now();
     const files = [
       './SHOP_data.js',
-      './SHOP_time.js',
       './SHOP_calendar.js',
-      './SHOP_temperature.js',
       './SHOP_weather.js',
+      './SHOP_temperature.js',
+      './SHOP_survival.js',
+      './SHOP_time.js',
       './SHOP_currency.js',
       './SHOP_items.js',
       './SHOP_action.js',
@@ -686,7 +687,7 @@
     for (const file of files) {
       await new Promise((resolve, reject) => {
         const script = document.createElement('script');
-        script.src = file + '?v=20260923-facility-places-v1&nocache=' + stamp;
+        script.src = file + '?v=20260923-time-climate-survival-v1&nocache=' + stamp;
         script.onload = resolve;
         script.onerror = reject;
         document.body.appendChild(script);
