@@ -145,9 +145,10 @@
               }
               pay(state,price);
               addItem(state,id,1);
-              message.textContent=item.name+'を椀に入れて持ち帰った。';
+              if(window.SHOP_TIME) window.SHOP_TIME.advance(state,5,'takeout_food');
               refresh();
               showCooked();
+              message.textContent=item.name+'を椀に入れて持ち帰った。';
             }
           ));
         }
