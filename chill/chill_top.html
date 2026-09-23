@@ -4,6 +4,9 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
 <meta name="theme-color" content="#eef2ec">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
 <title>chill</title>
 <style>
 *{box-sizing:border-box}
@@ -260,7 +263,7 @@ button{
     <polygon points="4,24 30,36 15,64" fill="#74867a" opacity=".75"/>
   </svg>
 
-  <img id="girl" src="asset/chill_girl_01.png" alt="女の子">
+  <img id="girl" src="asset/chill_girl_01.png?v=20260924-0206" alt="女の子">
 
   <section id="sheet" class="sheet" aria-label="AIでコード生成できるもの">
     <h2>画像以外で作っているもの</h2>
@@ -365,6 +368,14 @@ button{
 
 <script>
 (()=>{
+const BUILD_ID='20260924-0206';
+const pageUrl=new URL(location.href);
+if(pageUrl.searchParams.get('v')!==BUILD_ID){
+  pageUrl.searchParams.set('v',BUILD_ID);
+  location.replace(pageUrl.toString());
+  return;
+}
+window.addEventListener('pageshow',e=>{ if(e.persisted) location.reload(); });
 const root=document.getElementById('game');
 const sky=document.getElementById('skyCanvas');
 const fx=document.getElementById('fxCanvas');
