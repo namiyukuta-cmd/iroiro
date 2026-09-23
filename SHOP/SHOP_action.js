@@ -114,12 +114,39 @@
     }
   }
 
+  function currentBeggingRule(){
+    const key = stateRef && stateRef.sceneKey ? stateRef.sceneKey : 'outerPoor';
+    const scene = window.SHOP_DATA && window.SHOP_DATA.scenes
+      ? window.SHOP_DATA.scenes[key]
+      : null;
+
+    return scene && scene.begging
+      ? scene.begging
+      : {
+          stopChance:0.48,
+          outcomes:[
+            {weight:55,minCopper:0,maxCopper:0},
+            {weight:30,minCopper:1,maxCopper:3},
+            {weight:12,minCopper:5,maxCopper:5},
+            {weight:3,minCopper:10,maxCopper:10}
+          ]
+        };
+  }
+
   function rollBeggingDonation(){
-    const roll=Math.random()*100;
-    if(roll<55) return 0;
-    if(roll<85) return randomInt(1,3);
-    if(roll<97) return 5;
-    return 10;
+    const rule=currentBeggingRule();
+    const outcomes=Array.isArray(rule.outcomes) ? rule.outcomes : [];
+    const total=outcomes.reduce((sum,row)=>sum+Math.max(0,Number(row.weight)||0),0);
+    if(total<=0) return 0;
+
+    let roll=Math.random()*total;
+    for(const row of outcomes){
+      roll-=Math.max(0,Number(row.weight)||0);
+      if(roll<0){
+        return randomInt(row.minCopper,row.maxCopper);
+      }
+    }
+    return 0;
   }
 
   function handleBeggingResult(){
@@ -203,7 +230,11 @@
     clearPasserby();
 
     const fromLeft=Math.random()>=0.5;
-    const willStop=Math.random()<0.48;
+    const beggingRule=currentBeggingRule();
+    const stopChance=mode==='beg'
+      ? Math.max(0,Math.min(1,Number(beggingRule.stopChance)||0))
+      : 0.48;
+    const willStop=Math.random()<stopChance;
     const stopAt=38 + Math.round(Math.random()*24);
 
     const image=document.createElement('img');
