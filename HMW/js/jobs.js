@@ -159,7 +159,8 @@
     const pay = Math.max(0, Math.floor(Number(result.pay) || 0));
     const score = Math.max(0, Number(result.score) || 0);
     const rounds = Math.max(0, Number(result.rounds) || 0);
-    const perfect = rounds > 0 ? score >= rounds : Number(result.mistakes) === 0;
+    const hasMistakes = result.mistakes !== undefined && result.mistakes !== null;
+    const perfect = hasMistakes ? Number(result.mistakes) === 0 : (rounds > 0 ? score >= rounds : false);
 
     record.days += 1;
     record.earnings += pay;
