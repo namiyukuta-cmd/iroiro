@@ -127,8 +127,8 @@
     }),
 
     links: Object.freeze({
-      newGame: './SHOP_top.html?new=1&build=20260923-1430-main-readability',
-      continueGame: './SHOP_top.html?continue=1&build=20260923-1430-main-readability',
+      newGame: './SHOP_top.html?new=1&build=20260923-1438-main-actual-fix',
+      continueGame: './SHOP_top.html?continue=1&build=20260923-1438-main-actual-fix',
       backToGames: '../index.html',
       backToShopMenu: './SHOP_index.html'
     })
