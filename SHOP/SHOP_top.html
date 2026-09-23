@@ -130,6 +130,38 @@
         drop-shadow(3px 3px 3px rgba(0,0,0,.32));
     }
 
+    .scene-nav-layer{
+      position:absolute;
+      inset:0;
+      z-index:140;
+      pointer-events:none;
+    }
+    .scene-nav-btn{
+      position:absolute;
+      bottom:12px;
+      width:52px;
+      height:44px;
+      border:2px solid #2f2923;
+      border-radius:12px;
+      background:rgba(238,232,216,.92);
+      color:#2f2923;
+      display:grid;
+      place-items:center;
+      font-size:30px;
+      font-weight:900;
+      line-height:1;
+      box-shadow:0 2px 3px rgba(0,0,0,.18);
+      pointer-events:auto;
+      cursor:pointer;
+      -webkit-tap-highlight-color:transparent;
+    }
+    .scene-nav-btn:active{
+      transform:scale(.94);
+      background:#ded3bd;
+    }
+    .scene-nav-prev{left:14px}
+    .scene-nav-next{right:14px}
+
     .action-screen{
       position:absolute;
       inset:0;
@@ -569,7 +601,7 @@
 <body>
 <script>
 (() => {
-  const SHOP_BUILD='20260923-bottom-workspace-v1';
+  const SHOP_BUILD='20260923-scene-arrows-v1';
   const u=new URL(location.href);
   if(u.searchParams.get('build')!==SHOP_BUILD){
     u.searchParams.set('build',SHOP_BUILD);
@@ -671,7 +703,7 @@
     for (const file of files) {
       await new Promise((resolve, reject) => {
         const script = document.createElement('script');
-        script.src = file + '?v=20260923-bottom-workspace-v1&nocache=' + stamp;
+        script.src = file + '?v=20260923-scene-arrows-v1&nocache=' + stamp;
         script.onload = resolve;
         script.onerror = reject;
         document.body.appendChild(script);
