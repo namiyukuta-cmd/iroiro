@@ -126,15 +126,140 @@ button{
   bottom:calc(max(8px,env(safe-area-inset-bottom)) + 58px);
 }
 
+
+.quest-peek{
+  position:absolute;
+  right:-10px;
+  top:18%;
+  z-index:40;
+  min-width:76px;
+  min-height:44px;
+  padding:8px 16px 8px 12px;
+  border:1px solid #222;
+  border-radius:12px 0 0 12px;
+  background:#fff;
+  font-size:13px;
+  font-weight:800;
+  transform:translateX(88px);
+  opacity:0;
+  animation:questPeek .48s cubic-bezier(.2,.9,.25,1.25) 1.1s forwards;
+}
+.quest-peek::before{content:"！";margin-right:5px}
+@keyframes questPeek{
+  0%{transform:translateX(88px);opacity:0}
+  72%{transform:translateX(-7px);opacity:1}
+  100%{transform:translateX(0);opacity:1}
+}
+.quest-backdrop{
+  position:absolute;
+  inset:0;
+  z-index:80;
+  background:rgba(255,255,255,.54);
+  backdrop-filter:blur(2px);
+  opacity:0;
+  pointer-events:none;
+  transition:opacity .18s ease;
+}
+.quest-backdrop.open{opacity:1;pointer-events:auto}
+.quest-book{
+  position:absolute;
+  left:50%;
+  top:50%;
+  width:min(86%,360px);
+  max-height:66%;
+  overflow:auto;
+  z-index:90;
+  padding:20px 18px 16px;
+  border:1.5px solid #222;
+  border-radius:10px;
+  background:#fff;
+  box-shadow:0 12px 34px rgba(0,0,0,.14);
+  transform:translate(58%,-78%) scale(.18) rotate(4deg);
+  transform-origin:100% 0%;
+  opacity:0;
+  pointer-events:none;
+}
+.quest-book.open{
+  pointer-events:auto;
+  animation:questFly .34s cubic-bezier(.2,.82,.25,1.08) forwards;
+}
+@keyframes questFly{
+  from{transform:translate(58%,-78%) scale(.18) rotate(4deg);opacity:.15}
+  to{transform:translate(-50%,-50%) scale(1) rotate(0);opacity:1}
+}
+.quest-book h2{
+  margin:0 0 4px;
+  font-size:20px;
+  text-align:center;
+  letter-spacing:.08em;
+}
+.quest-book .chapter{
+  margin:0 0 14px;
+  text-align:center;
+  font-size:11px;
+  color:#777;
+}
+.quest-book .story{
+  margin:0;
+  padding:14px 4px 18px;
+  border-top:1px solid #ddd;
+  border-bottom:1px solid #ddd;
+  font-size:14px;
+  line-height:1.9;
+}
+.quest-book .choices{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:8px;
+  margin-top:14px;
+}
+.quest-book .choices button{
+  min-height:44px;
+  border:1px solid #aaa;
+  border-radius:8px;
+  background:#fff;
+  font-weight:800;
+}
+.quest-book .choices .accept{
+  border-color:#222;
+  background:#222;
+  color:#fff;
+}
+.quest-book.accepted .story::after{
+  content:"\A\A【受注しました】";
+  white-space:pre;
+  font-weight:800;
+}
+.quest-peek.hidden{display:none}
+
 </style>
 </head>
 <body>
 <main id="game" aria-label="白い箱庭">
   <div id="ground" class="grid-on">
     <div id="objectLayer"></div>
-    <img id="girl" src="asset/chill_girl_01.png?v=20260924-0242" alt="女の子">
+    <img id="girl" src="asset/chill_girl_01.png?v=20260924-0254" alt="女の子">
     <div id="hint">物を選んで、置きたいマスをタップ</div>
   </div>
+
+
+  <button id="questPeek" class="quest-peek" type="button" aria-label="新しい依頼">依頼</button>
+
+  <div id="questBackdrop" class="quest-backdrop" aria-hidden="true"></div>
+
+  <article id="questBook" class="quest-book" aria-label="依頼書">
+    <h2>依頼</h2>
+    <p class="chapter">QUEST 001</p>
+    <p class="story">
+      村はずれの古い道に、夜になるとゾンビが現れるらしい。<br>
+      道を通る人が困っている。<br><br>
+      ゾンビを3体倒し、安全を確かめてほしい。
+    </p>
+    <div class="choices">
+      <button id="questClose" type="button">あとで</button>
+      <button id="questAccept" class="accept" type="button">受ける</button>
+    </div>
+  </article>
 
   <section class="inventory" aria-label="所持アイテム">
     <div class="inventory-slot"></div>
@@ -169,7 +294,7 @@ button{
 
 <script>
 (()=>{
-const BUILD_ID='20260924-0242';
+const BUILD_ID='20260924-0254';
 const url=new URL(location.href);
 if(url.searchParams.get('v')!==BUILD_ID){
   url.searchParams.set('v',BUILD_ID);
@@ -182,6 +307,11 @@ const ground=document.getElementById('ground');
 const layer=document.getElementById('objectLayer');
 const pos=document.getElementById('pos');
 const gridBtn=document.getElementById('gridBtn');
+const questPeek=document.getElementById('questPeek');
+const questBook=document.getElementById('questBook');
+const questBackdrop=document.getElementById('questBackdrop');
+const questClose=document.getElementById('questClose');
+const questAccept=document.getElementById('questAccept');
 const GRID=24;
 let currentTool='select';
 let selectedId=null;
@@ -271,6 +401,38 @@ gridBtn.addEventListener('click',()=>{
 window.addEventListener('resize',()=>{
   objects.forEach(clamp);render();save();
 });
+
+function openQuest(){
+  questBackdrop.classList.add('open');
+  questBook.classList.remove('open');
+  void questBook.offsetWidth;
+  questBook.classList.add('open');
+  questBackdrop.setAttribute('aria-hidden','false');
+}
+function closeQuest(){
+  questBook.classList.remove('open');
+  questBackdrop.classList.remove('open');
+  questBackdrop.setAttribute('aria-hidden','true');
+}
+questPeek.addEventListener('click',openQuest);
+questClose.addEventListener('click',closeQuest);
+questBackdrop.addEventListener('click',closeQuest);
+questAccept.addEventListener('click',()=>{
+  questBook.classList.add('accepted');
+  questAccept.textContent='受注済み';
+  questAccept.disabled=true;
+  questPeek.classList.add('hidden');
+  try{localStorage.setItem('chillQuest001','accepted')}catch(e){}
+});
+try{
+  if(localStorage.getItem('chillQuest001')==='accepted'){
+    questBook.classList.add('accepted');
+    questAccept.textContent='受注済み';
+    questAccept.disabled=true;
+    questPeek.classList.add('hidden');
+  }
+}catch(e){}
+
 load();objects.forEach(clamp);render();syncTools();
 })();
 </script>
