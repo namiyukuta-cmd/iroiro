@@ -82,9 +82,9 @@
       .filter(([,count]) => Number(count) > 0)
       .map(([id,count]) => ({item:items[id], count:Number(count)}))
       .filter(row => row.item)
-      .slice(0,6);
+      .slice(0,9);
 
-    for(let i=0;i<6;i++){
+    for(let i=0;i<9;i++){
       const cell=document.createElement('div');
       cell.className='sell-cell';
       const row=owned[i];
