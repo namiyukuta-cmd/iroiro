@@ -200,6 +200,8 @@
     $("location-name").textContent = loc.name;
     $("location-desc").textContent = loc.description;
     $("last-message").textContent = H.state.lastMessage;
+    const housingGoal = $("housing-goal");
+    if (housingGoal) housingGoal.textContent = H.getHousingGoalText?.() || "";
     renderCityScene();
   }
 
@@ -329,7 +331,16 @@
   function openTasks() {
     const stability = typeof G.stabilityScore === "function" ? G.stabilityScore() : 0;
     const leads = dynamicLeads();
+    const housing = H.getHousingProgress?.() || [];
+    const housingRoutes = housing.filter((x) => x.questRoute);
+    const housingHtml = housingRoutes.length
+      ? housingRoutes.map((x) => {
+          const req = x.requirements.map((r) => `${r.met ? "✓" : "・"} ${esc(r.text)}`).join("<br>");
+          return `<div class="task-row"><b>${esc(x.name)}</b><br><span class="muted">${esc(x.description)}</span><br>${req}</div>`;
+        }).join("")
+      : "<p>住居目標なし</p>";
     const html = `<div class="menu-summary"><b>生活基盤 ${stability}/5</b><br><span class="stability-dots">${"●".repeat(stability)}${"○".repeat(5 - stability)}</span></div>` +
+      `<div class="menu-summary"><b>住居目標</b>${housingHtml}</div>` +
       `<div class="menu-summary"><b>今ある用事</b>${leads.length ? leads.map((x) => `<div class="task-row">${esc(x)}</div>`).join("") : "<p>特になし</p>"}</div>`;
     openModal("状況", html, [], true);
   }
