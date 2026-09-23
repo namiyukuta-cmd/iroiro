@@ -72,6 +72,17 @@
       background-repeat:no-repeat;
       overflow:hidden;
     }
+    .scene-layer{
+      position:absolute;
+      inset:0;
+      overflow:hidden;
+      pointer-events:none;
+    }
+    .scene-layer-far{z-index:0}
+    .scene-layer-house{z-index:20}
+    .scene-layer-backgroundNpc{z-index:40}
+    .scene-layer-interactive{z-index:60}
+    .scene-layer-player{z-index:100}
     .scene-object{
       position:absolute;
       bottom:0;
@@ -201,7 +212,7 @@
 <body>
 <script>
 (() => {
-  const SHOP_BUILD='20260923-0920';
+  const SHOP_BUILD='20260923-0930';
   const u=new URL(location.href);
   if(u.searchParams.get('build')!==SHOP_BUILD){
     u.searchParams.set('build',SHOP_BUILD);
@@ -253,8 +264,8 @@
     <nav class="bottom-menu" id="bottomMenu" aria-label="メニュー"></nav>
   </div>
 
-  <script src="./SHOP_data.js?v=20260923-0920"></script>
-  <script src="./SHOP_save.js?v=20260923-0920"></script>
-  <script src="./SHOP_app.js?v=20260923-0920"></script>
+  <script src="./SHOP_data.js?v=20260923-0930"></script>
+  <script src="./SHOP_save.js?v=20260923-0930"></script>
+  <script src="./SHOP_app.js?v=20260923-0930"></script>
 </body>
 </html>
