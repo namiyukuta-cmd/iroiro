@@ -105,7 +105,10 @@
     const p = s.progression || {};
     if (key === "supportStage") return Number(p.support?.stage) || 0;
     if (key === "housingConsultation") return p.support?.housingConsultation ? 1 : 0;
-    if (key === "paidWorkDays") return Number(p.stability?.paidWorkDays) || 0;
+    if (key === "paidWorkDays") {
+      const verified = Number(p.jobs?.verifiedWorkDays);
+      return Number.isFinite(verified) ? verified : (Number(p.stability?.paidWorkDays) || 0);
+    }
     if (key === "regularIncome") return p.stability?.regularIncome ? 1 : 0;
     if (key === "money") return Number(s.money) || 0;
     return 0;
