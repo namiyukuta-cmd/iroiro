@@ -29,10 +29,67 @@
     return '→' + format(next.minute);
   }
 
+  function syncClimate(state) {
+    if (!state) return state;
+
+    state.day = Math.max(1, Math.floor(Number(state.day) || 1));
+    state.minutes = Math.max(0, Math.floor(Number(state.minutes) || 0));
+
+    if (state.minutes >= 1440) {
+      state.day += Math.floor(state.minutes / 1440);
+      state.minutes %= 1440;
+    }
+
+    if (window.SHOP_WEATHER) window.SHOP_WEATHER.update(state);
+    if (window.SHOP_TEMPERATURE) window.SHOP_TEMPERATURE.update(state);
+    return state;
+  }
+
+  function advance(state, minutes, reason='') {
+    if (!state) return null;
+    let remaining = Math.max(0, Math.floor(Number(minutes) || 0));
+    if (!remaining) {
+      syncClimate(state);
+      return state;
+    }
+
+    syncClimate(state);
+
+    while (remaining > 0) {
+      const step = Math.min(10, remaining);
+
+      state.minutes += step;
+      if (state.minutes >= 1440) {
+        state.day += Math.floor(state.minutes / 1440);
+        state.minutes %= 1440;
+      }
+
+      if (window.SHOP_WEATHER) window.SHOP_WEATHER.update(state);
+      if (window.SHOP_TEMPERATURE) window.SHOP_TEMPERATURE.update(state);
+      if (window.SHOP_SURVIVAL) window.SHOP_SURVIVAL.applyElapsed(state, step);
+
+      remaining -= step;
+    }
+
+    window.dispatchEvent(new CustomEvent('shoptimechange', {
+      detail: {
+        day: state.day,
+        minutes: state.minutes,
+        weather: state.weather,
+        temperature: state.temperature,
+        reason: String(reason || '')
+      }
+    }));
+
+    return state;
+  }
+
   window.SHOP_TIME = Object.freeze({
     prayers: PRAYERS,
     prayerNoticeMinutes: PRAYER_NOTICE_MINUTES,
     format,
-    getPrayerStatus
+    getPrayerStatus,
+    syncClimate,
+    advance
   });
 })();
