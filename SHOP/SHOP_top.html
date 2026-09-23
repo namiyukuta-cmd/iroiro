@@ -353,6 +353,11 @@
       color:#a49b89;
       background:#e3dac7;
     }
+    .sell-cell.selected{
+      outline:3px solid #7a5e22;
+      outline-offset:-3px;
+      background:#fff4d0;
+    }
 
     .action-dialog{
       position:absolute;
@@ -560,7 +565,7 @@
 <body>
 <script>
 (() => {
-  const SHOP_BUILD='20260923-action-sand-workspace-v1';
+  const SHOP_BUILD='20260923-gold-silver-copper-v1';
   const u=new URL(location.href);
   if(u.searchParams.get('build')!==SHOP_BUILD){
     u.searchParams.set('build',SHOP_BUILD);
@@ -648,6 +653,7 @@
       './SHOP_calendar.js',
       './SHOP_temperature.js',
       './SHOP_weather.js',
+      './SHOP_currency.js',
       './SHOP_items.js',
       './SHOP_action.js',
       './SHOP_save.js',
@@ -656,7 +662,7 @@
     for (const file of files) {
       await new Promise((resolve, reject) => {
         const script = document.createElement('script');
-        script.src = file + '?v=20260923-action-sand-workspace-v1&nocache=' + stamp;
+        script.src = file + '?v=20260923-gold-silver-copper-v1&nocache=' + stamp;
         script.onload = resolve;
         script.onerror = reject;
         document.body.appendChild(script);
