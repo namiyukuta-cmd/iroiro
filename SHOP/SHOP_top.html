@@ -174,9 +174,84 @@
       position:relative;
       min-height:0;
       display:grid;
-      place-items:center;
+      grid-template-columns:58px minmax(0,1fr);
       overflow:hidden;
       background:#eee8d8;
+    }
+    .time-rail{
+      position:relative;
+      min-height:0;
+      border-right:2px solid #29261f;
+      background:#e7deca;
+      overflow:hidden;
+    }
+    .time-track{
+      position:absolute;
+      left:30px;
+      top:5%;
+      bottom:5%;
+      width:3px;
+      background:#4c463d;
+    }
+    .time-tick{
+      position:absolute;
+      left:-8px;
+      width:19px;
+      height:1px;
+      background:#4c463d;
+      transform:translateY(-50%);
+    }
+    .time-tick.major{
+      left:-12px;
+      width:27px;
+      height:2px;
+    }
+    .time-label{
+      position:absolute;
+      right:31px;
+      transform:translateY(-50%);
+      font-size:9px;
+      font-weight:800;
+      color:#5e574d;
+      white-space:nowrap;
+    }
+    .time-special{
+      position:absolute;
+      left:-15px;
+      width:33px;
+      height:5px;
+      border-radius:999px;
+      background:#29261f;
+      transform:translateY(-50%);
+    }
+    .time-special-label{
+      position:absolute;
+      left:8px;
+      transform:translateY(-50%);
+      font-size:8px;
+      font-weight:900;
+      white-space:nowrap;
+      writing-mode:vertical-rl;
+      letter-spacing:.04em;
+    }
+    .time-now{
+      position:absolute;
+      left:-7px;
+      width:17px;
+      height:17px;
+      border:3px solid #29261f;
+      border-radius:50%;
+      background:#fffaf0;
+      transform:translate(-50%,-50%);
+      z-index:4;
+    }
+    .action-main{
+      position:relative;
+      min-width:0;
+      min-height:0;
+      display:grid;
+      place-items:center;
+      overflow:hidden;
     }
     .beg-pot{
       width:128px;
@@ -223,8 +298,8 @@
     .sell-cell.empty{color:#aaa}
     .action-dialog{
       position:absolute;
-      left:8%;
-      right:8%;
+      left:7%;
+      right:7%;
       top:8%;
       z-index:5;
       padding:12px;
@@ -340,7 +415,7 @@
 <body>
 <script>
 (() => {
-  const SHOP_BUILD='20260923-1136';
+  const SHOP_BUILD='20260923-1148';
   const u=new URL(location.href);
   if(u.searchParams.get('build')!==SHOP_BUILD){
     u.searchParams.set('build',SHOP_BUILD);
@@ -372,9 +447,14 @@
       </div>
 
       <div class="action-body">
-        <div class="action-dialog" id="actionDialog"></div>
-        <div class="beg-pot" id="begPot" aria-label="物乞いの壺"></div>
-        <div class="sell-grid" id="sellGrid" aria-label="売る物"></div>
+        <aside class="time-rail" aria-label="時間">
+          <div class="time-track" id="timeTrack"></div>
+        </aside>
+        <div class="action-main">
+          <div class="action-dialog" id="actionDialog"></div>
+          <div class="beg-pot" id="begPot" aria-label="物乞いの壺"></div>
+          <div class="sell-grid" id="sellGrid" aria-label="売る物"></div>
+        </div>
       </div>
     </section>
 
@@ -414,10 +494,10 @@
     <nav class="bottom-menu" id="bottomMenu" aria-label="メニュー"></nav>
   </div>
 
-  <script src="./SHOP_data.js?v=20260923-1136"></script>
-  <script src="./SHOP_items.js?v=20260923-1136"></script>
-  <script src="./SHOP_action.js?v=20260923-1136"></script>
-  <script src="./SHOP_save.js?v=20260923-1136"></script>
-  <script src="./SHOP_app.js?v=20260923-1136"></script>
+  <script src="./SHOP_data.js?v=20260923-1148"></script>
+  <script src="./SHOP_items.js?v=20260923-1148"></script>
+  <script src="./SHOP_action.js?v=20260923-1148"></script>
+  <script src="./SHOP_save.js?v=20260923-1148"></script>
+  <script src="./SHOP_app.js?v=20260923-1148"></script>
 </body>
 </html>
