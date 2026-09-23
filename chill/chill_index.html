@@ -79,29 +79,48 @@ h1{
   <h1>Chill</h1>
 
   <div class="monster-wrap" aria-label="モンスター">
-    <svg class="monster" viewBox="0 0 132 132" role="img" aria-label="角のある小さなモンスター">
+    <svg class="monster" viewBox="0 0 132 132" role="img" aria-label="角と尾を持つ獣型モンスター">
       <g class="monster-body" fill="#fff" stroke="#222" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M39 41 L26 19 L49 31" />
-        <path d="M93 41 L106 19 L83 31" />
+        <!-- long swept horns -->
+        <path d="M45 35 C36 31 27 23 22 12 C31 15 40 20 49 27" />
+        <path d="M87 35 C96 31 105 23 110 12 C101 15 92 20 83 27" />
 
-        <path d="M33 49
-                 C39 34, 52 28, 66 28
-                 C80 28, 93 34, 99 49
-                 C105 63, 104 83, 96 96
-                 C89 108, 78 113, 66 113
-                 C54 113, 43 108, 36 96
-                 C28 83, 27 63, 33 49 Z" />
+        <!-- head / mane -->
+        <path d="M39 42
+                 C44 31 54 25 66 25
+                 C78 25 88 31 93 42
+                 L101 51
+                 L95 61
+                 L101 68
+                 L92 75
+                 C88 87 78 94 66 94
+                 C54 94 44 87 40 75
+                 L31 68
+                 L37 61
+                 L31 51 Z" />
 
-        <circle cx="51" cy="61" r="4" fill="#222"/>
-        <circle cx="81" cy="61" r="4" fill="#222"/>
+        <!-- angular eyes -->
+        <path d="M47 53 L59 50 L55 59 L47 58 Z" fill="#222"/>
+        <path d="M85 53 L73 50 L77 59 L85 58 Z" fill="#222"/>
 
-        <path d="M56 79 Q66 86 76 79" fill="none"/>
+        <!-- muzzle -->
+        <path d="M58 67 L66 63 L74 67 L70 75 L62 75 Z" />
+        <path d="M61 79 Q66 83 71 79" fill="none"/>
 
-        <path d="M36 78 Q21 82 25 96 Q31 106 42 96" fill="none"/>
-        <path d="M96 78 Q111 82 107 96 Q101 106 90 96" fill="none"/>
+        <!-- armored chest -->
+        <path d="M48 88 L41 105 L51 116 L66 109 L81 116 L91 105 L84 88" />
+        <path d="M53 92 L66 103 L79 92" fill="none"/>
 
-        <path d="M50 111 L47 122 L58 122" fill="none"/>
-        <path d="M82 111 L85 122 L74 122" fill="none"/>
+        <!-- fore claws -->
+        <path d="M42 98 L31 105 L34 119 L39 112 L44 120 L47 109" fill="none"/>
+        <path d="M90 98 L101 105 L98 119 L93 112 L88 120 L85 109" fill="none"/>
+
+        <!-- tail -->
+        <path d="M88 94 C106 88 115 96 111 108 C108 116 99 118 94 113 C102 113 105 107 101 103 C98 100 94 101 90 104" fill="none"/>
+
+        <!-- small spikes -->
+        <path d="M51 31 L55 20 L61 29" />
+        <path d="M71 29 L77 20 L81 31" />
       </g>
     </svg>
   </div>
