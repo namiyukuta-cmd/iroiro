@@ -46,13 +46,13 @@
           Object.freeze({src:'./asset/house_poor.png', left:20, bottom:25, height:21, layer:'house', flip:true}),
           Object.freeze({src:'./asset/house_poor.png', left:59, bottom:25, height:21, layer:'house'}),
 
-          // ③ 背景NPC
-          Object.freeze({src:'https://raw.githubusercontent.com/namiyukuta-cmd/iroiro/main/SHOP/asset/Npc/npc_oldman_01.png', left:13, bottom:10, height:18, layer:'backgroundNpc'}),
-          Object.freeze({src:'https://raw.githubusercontent.com/namiyukuta-cmd/iroiro/main/SHOP/asset/Npc/npc_porter_01.png', left:84, bottom:10, height:18, layer:'backgroundNpc'}),
+          // ③ 背景NPC。④より奥・小さく・左右へ離す。
+          Object.freeze({src:'https://raw.githubusercontent.com/namiyukuta-cmd/iroiro/main/SHOP/asset/Npc/npc_oldman_01.png', left:15, bottom:20, height:15, layer:'backgroundNpc'}),
+          Object.freeze({src:'https://raw.githubusercontent.com/namiyukuta-cmd/iroiro/main/SHOP/asset/Npc/npc_porter_01.png', left:83, bottom:20, height:15, layer:'backgroundNpc'}),
 
-          // ④ 選択可能層
-          Object.freeze({src:'./asset/stall.png', left:48, bottom:3, height:26, layer:'interactive', selectable:true, selectableType:'shop'}),
-          Object.freeze({src:'https://raw.githubusercontent.com/namiyukuta-cmd/iroiro/main/SHOP/asset/Npc/npc_beggar_01.png', left:28, bottom:2, height:24, layer:'interactive', selectable:true, selectableType:'npc'})
+          // ④ 選択可能層。⑤へ食い込ませない。
+          Object.freeze({src:'./asset/stall.png', left:49, bottom:16, height:25, layer:'interactive', selectable:true, selectableType:'shop'}),
+          Object.freeze({src:'https://raw.githubusercontent.com/namiyukuta-cmd/iroiro/main/SHOP/asset/Npc/npc_beggar_01.png', left:28, bottom:16, height:21, layer:'interactive', selectable:true, selectableType:'npc'})
         ])
       }),
       smallGateOutside: Object.freeze({
@@ -127,8 +127,8 @@
     }),
 
     links: Object.freeze({
-      newGame: './SHOP_top.html?new=1&build=20260923-1452-restore-stable-main',
-      continueGame: './SHOP_top.html?continue=1&build=20260923-1452-restore-stable-main',
+      newGame: './SHOP_top.html?new=1&build=20260923-1458-restore-1418',
+      continueGame: './SHOP_top.html?continue=1&build=20260923-1458-restore-1418',
       backToGames: '../index.html',
       backToShopMenu: './SHOP_index.html'
     })
