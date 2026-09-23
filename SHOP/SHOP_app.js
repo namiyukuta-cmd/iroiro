@@ -233,7 +233,10 @@
       image.style.height = item.height + '%';
       const z = typeof item.layer === 'string' ? data.layers[item.layer] : item.layer;
       image.style.zIndex = String(z ?? data.layers.house);
-      if (item.flip) image.style.transform = 'scaleX(-1)';
+      const transforms = [];
+      if (item.centered) transforms.push('translateX(-50%)');
+      if (item.flip) transforms.push('scaleX(-1)');
+      if (transforms.length) image.style.transform = transforms.join(' ');
       (layerMap[item.layer] || layerHouse).appendChild(image);
     });
 
@@ -276,6 +279,43 @@
         });
         navLayer.appendChild(nextButton);
       }
+    }
+
+    const facilityLinks = Array.isArray(scene.facilityLinks) ? scene.facilityLinks : [];
+    if (facilityLinks.length || scene.returnTo) {
+      const facilityWrap = document.createElement('div');
+      facilityWrap.className = 'scene-nav-facilities';
+
+      facilityLinks.forEach(link => {
+        if (!link || !data.scenes[link.sceneKey]) return;
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.className = 'scene-nav-btn scene-nav-facility-btn';
+        button.textContent = '↑' + (link.label || data.scenes[link.sceneKey].name);
+        button.setAttribute('aria-label', data.scenes[link.sceneKey].name + 'へ移動');
+        button.addEventListener('click', event => {
+          event.stopPropagation();
+          state.sceneKey = link.sceneKey;
+          render();
+        });
+        facilityWrap.appendChild(button);
+      });
+
+      if (scene.returnTo && data.scenes[scene.returnTo]) {
+        const backButton = document.createElement('button');
+        backButton.type = 'button';
+        backButton.className = 'scene-nav-btn scene-nav-facility-btn';
+        backButton.textContent = '↓戻る';
+        backButton.setAttribute('aria-label', data.scenes[scene.returnTo].name + 'へ戻る');
+        backButton.addEventListener('click', event => {
+          event.stopPropagation();
+          state.sceneKey = scene.returnTo;
+          render();
+        });
+        facilityWrap.appendChild(backButton);
+      }
+
+      navLayer.appendChild(facilityWrap);
     }
 
     strip.appendChild(navLayer);
