@@ -20,11 +20,13 @@
     }),
 
     layers: Object.freeze({
-      far: 0,
-      town: 20,
-      people: 40,
-      interactive: 60,
-      player: 100
+      far: 0,            // ①スクロール背景
+      house: 20,         // ②背景としての家
+      backgroundNpc: 40, // ③背景としてのNPC
+      interactive: 60,   // ④選択可能：ショップ/NPC
+      player: 100,       // ⑤主人公移動・配置
+      town: 20,          // 既存シーン互換
+      people: 40         // 既存シーン互換
     }),
 
     scenes: Object.freeze({
@@ -32,24 +34,23 @@
         name: '小門外・底辺区',
         background: './asset/bg_desert_wall.jpeg',
 
-        // 主人公は黄色で示された手前左の位置。表示用レーンは作らない。
-        playerAnchor: Object.freeze({left:30, bottom:2, height:30}),
+        // ⑤主人公移動・配置層。まだ主人公画像は置かない。
+        playerArea: Object.freeze({left:8, right:92, bottom:0, top:18}),
 
         objects: Object.freeze([
-          // 奥：中央の小さい家
-          Object.freeze({src:'./asset/house_poor.png', left:27, bottom:22, height:17, layer:'town', depth:1, flip:true}),
-          Object.freeze({src:'./asset/house_poor.png', left:56, bottom:22, height:17, layer:'town', depth:1}),
+          // ② 背景としての家配置層
+          Object.freeze({src:'./asset/house_poor.png', left:-8, bottom:12, height:37, layer:'house'}),
+          Object.freeze({src:'./asset/house_poor.png', left:72, bottom:12, height:37, layer:'house', flip:true}),
+          Object.freeze({src:'./asset/house_poor.png', left:26, bottom:19, height:20, layer:'house', flip:true}),
+          Object.freeze({src:'./asset/house_poor.png', left:56, bottom:19, height:20, layer:'house'}),
 
-          // 中景：左右の大きい家
-          Object.freeze({src:'./asset/house_poor.png', left:-8, bottom:12, height:39, layer:'town', depth:2}),
-          Object.freeze({src:'./asset/house_poor.png', left:72, bottom:12, height:39, layer:'town', depth:2, flip:true}),
+          // ③ 背景としてのNPC配置層（選択不可）
+          Object.freeze({src:'https://raw.githubusercontent.com/namiyukuta-cmd/iroiro/main/SHOP/asset/Npc/npc_oldman_01.png', left:18, bottom:10, height:22, layer:'backgroundNpc'}),
+          Object.freeze({src:'https://raw.githubusercontent.com/namiyukuta-cmd/iroiro/main/SHOP/asset/Npc/npc_porter_01.png', left:82, bottom:10, height:22, layer:'backgroundNpc'}),
 
-          // 奥側のNPC 2人。屋台より奥。
-          Object.freeze({src:'https://raw.githubusercontent.com/namiyukuta-cmd/iroiro/main/SHOP/asset/Npc/npc_oldman_01.png', left:18, bottom:10, height:22, layer:'people', depth:3}),
-          Object.freeze({src:'https://raw.githubusercontent.com/namiyukuta-cmd/iroiro/main/SHOP/asset/Npc/npc_porter_01.png', left:84, bottom:10, height:22, layer:'people', depth:3}),
-
-          // 手前中央右の屋台。主人公位置よりは奥。
-          Object.freeze({src:'./asset/stall.png', left:40, bottom:1, height:31, layer:'interactive', depth:4})
+          // ④ 選択可能層：ショップと選択可能NPC
+          Object.freeze({src:'./asset/stall.png', left:41, bottom:3, height:31, layer:'interactive', selectable:true, selectableType:'shop'}),
+          Object.freeze({src:'https://raw.githubusercontent.com/namiyukuta-cmd/iroiro/main/SHOP/asset/Npc/npc_beggar_01.png', left:29, bottom:2, height:29, layer:'interactive', selectable:true, selectableType:'npc'})
         ])
       }),
       smallGateOutside: Object.freeze({
