@@ -80,7 +80,7 @@
       const marker = document.createElement('button');
       marker.type = 'button';
       marker.className = 'pickup-marker';
-      marker.textContent = '◇';
+      marker.textContent = '✴︎';
       marker.setAttribute('aria-label', '拾う');
       marker.style.left = pickup.left + '%';
       marker.style.bottom = (pickup.bottom || 0) + '%';
@@ -144,7 +144,16 @@
       if(item.selectable && item.selectableType==='npc') image.classList.add('selectable-npc');
 
       if(item.layer==='backgroundNpc'){
-        image.style.opacity='0.94';
+        image.style.filter='drop-shadow(1px 2px 2px rgba(0,0,0,.22))';
+        image.style.opacity='0.92';
+      }
+      if(item.selectable && item.selectableType==='npc'){
+        image.style.filter=
+          'drop-shadow(2px 0 0 #ffe600) '+
+          'drop-shadow(-2px 0 0 #ffe600) '+
+          'drop-shadow(0 2px 0 #ffe600) '+
+          'drop-shadow(0 -2px 0 #ffe600) '+
+          'drop-shadow(3px 3px 3px rgba(0,0,0,.32))';
       }
       image.src = item.src;
       image.alt = '';
