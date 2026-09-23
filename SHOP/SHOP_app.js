@@ -12,13 +12,6 @@
   const quickBegButton = $('quickBegButton');
   const quickSellButton = $('quickSellButton');
 
-  function formatTime(totalMinutes) {
-    const value = Math.max(0, Number(totalMinutes) || 0) % 1440;
-    const hour = Math.floor(value / 60);
-    const minute = value % 60;
-    return String(hour).padStart(2, '0') + ':' + String(minute).padStart(2, '0');
-  }
-
   function clampPercent(value) {
     return Math.max(0, Math.min(100, Number(value) || 0));
   }
@@ -30,60 +23,6 @@
     button.className = 'menu-btn';
     button.textContent = label;
     return button;
-  }
-
-  function getLunarDate(gameDay) {
-    const months = data.timeSystem && Array.isArray(data.timeSystem.lunarMonths)
-      ? data.timeSystem.lunarMonths
-      : [];
-    const day = Math.max(1, Number(gameDay) || 1);
-    if (!months.length) return {monthName:'月', dayInMonth:day};
-
-    const yearDays = months.reduce((sum, month) => sum + Math.max(1, Number(month.days) || 29), 0);
-    let cursor = (day - 1) % yearDays;
-
-    for (const month of months) {
-      const days = Math.max(1, Number(month.days) || 29);
-      if (cursor < days) {
-        return {
-          monthName: month.name || '月',
-          dayInMonth: cursor + 1
-        };
-      }
-      cursor -= days;
-    }
-    return {monthName:months[0].name || '月', dayInMonth:1};
-  }
-
-  function getPrayerStatus(totalMinutes) {
-    const config = data.timeSystem || {};
-    const prayers = Array.isArray(config.prayers)
-      ? config.prayers.slice().sort((a,b)=>(Number(a.minute)||0)-(Number(b.minute)||0))
-      : [];
-    if (!prayers.length) return '';
-
-    const now = Math.max(0, Number(totalMinutes) || 0) % 1440;
-    const notice = Math.max(1, Number(config.prayerNoticeMinutes) || 30);
-
-    const active = prayers.find(prayer => {
-      const start = Number(prayer.minute) || 0;
-      return now >= start && now < start + notice;
-    });
-    if (active) return '🕌 ' + (active.label || '礼拝');
-
-    const next = prayers.find(prayer => (Number(prayer.minute) || 0) > now) || prayers[0];
-    return '→' + formatTime(next.minute);
-  }
-
-  function weatherIcon(weather) {
-    const value = String(weather || '');
-    if (value.includes('晴')) return '☀️';
-    if (value.includes('曇')) return '☁️';
-    if (value.includes('雨')) return '🌧️';
-    if (value.includes('雷')) return '⛈️';
-    if (value.includes('雪')) return '❄️';
-    if (value.includes('砂')) return '🌪️';
-    return value || '—';
   }
 
   function renderQuickInventory() {
@@ -338,18 +277,18 @@
     renderScene();
 
     const gameDay = Math.max(1, Number(state.day) || 1);
-    const lunar = getLunarDate(gameDay);
+    const lunar = window.SHOP_CALENDAR.getDate(gameDay);
     $('dayLabel').textContent = lunar.monthName + 'の月 ' + lunar.dayInMonth + '日';
     $('dayText').textContent = '（' + gameDay + '日目）';
 
-    $('timeLabel').textContent = getPrayerStatus(state.minutes);
-    $('timeText').textContent = formatTime(state.minutes);
+    $('timeLabel').textContent = window.SHOP_TIME.getPrayerStatus(state.minutes);
+    $('timeText').textContent = window.SHOP_TIME.format(state.minutes);
 
     $('tempLabel').textContent = '';
-    $('tempText').textContent = Number(state.temperature || 0) + '℃';
+    $('tempText').textContent = window.SHOP_TEMPERATURE.format(state.temperature);
 
     $('weatherLabel').textContent = '';
-    $('weatherText').textContent = weatherIcon(state.weather);
+    $('weatherText').textContent = window.SHOP_WEATHER.icon(state.weather);
     $('weatherText').title = state.weather || '';
 
     $('sceneName').textContent = state.scene || '';
