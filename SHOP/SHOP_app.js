@@ -142,6 +142,13 @@
     });
   }
 
+  function canAccessScene(sceneKey,state=window.SHOP_STATE){
+    if(sceneKey==='upperArea'){
+      return !!(state && state.access && state.access.upperArea);
+    }
+    return true;
+  }
+
   function renderScene() {
     const state = window.SHOP_STATE;
     const key = state.sceneKey && data.scenes[state.sceneKey] ? state.sceneKey : 'outerPoor';
@@ -256,17 +263,19 @@
 
     if (sceneIndex >= 0 && sceneIndex < sceneOrder.length - 1) {
       const nextKey = sceneOrder[sceneIndex + 1];
-      const nextButton = document.createElement('button');
-      nextButton.type = 'button';
-      nextButton.className = 'scene-nav-btn scene-nav-next';
-      nextButton.textContent = '→';
-      nextButton.setAttribute('aria-label', data.scenes[nextKey].name + 'へ移動');
-      nextButton.addEventListener('click', event => {
-        event.stopPropagation();
-        state.sceneKey = nextKey;
-        render();
-      });
-      navLayer.appendChild(nextButton);
+      if (canAccessScene(nextKey,state)) {
+        const nextButton = document.createElement('button');
+        nextButton.type = 'button';
+        nextButton.className = 'scene-nav-btn scene-nav-next';
+        nextButton.textContent = '→';
+        nextButton.setAttribute('aria-label', data.scenes[nextKey].name + 'へ移動');
+        nextButton.addEventListener('click', event => {
+          event.stopPropagation();
+          state.sceneKey = nextKey;
+          render();
+        });
+        navLayer.appendChild(nextButton);
+      }
     }
 
     strip.appendChild(navLayer);
