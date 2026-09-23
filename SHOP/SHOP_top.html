@@ -134,38 +134,43 @@
       inset:0;
       z-index:500;
       display:none;
-      grid-template-rows:24% minmax(0,1fr);
+      grid-template-rows:auto 30% minmax(0,1fr);
       background:#eee8d8;
       overflow:hidden;
     }
     .action-screen.is-open{display:grid}
 
-    /* 戻る・モード切替はレイアウトを押し下げない浮きUI */
+    /* 上段：操作帯 */
     .action-head{
-      position:absolute;
-      left:10px;
-      right:10px;
-      top:max(8px,env(safe-area-inset-top));
+      position:relative;
       z-index:20;
-      display:flex;
-      justify-content:space-between;
+      display:grid;
+      grid-template-columns:auto minmax(0,1fr) auto;
       align-items:center;
-      pointer-events:none;
+      gap:8px;
+      padding:max(10px,env(safe-area-inset-top)) 12px 10px;
+      border-bottom:2px solid #29261f;
+      background:#e9e1cf;
     }
     .action-back,.action-mode{
-      pointer-events:auto;
       border:2px solid #29261f;
-      border-radius:999px;
-      background:rgba(255,250,240,.92);
+      border-radius:9px;
+      background:#fffaf0;
       font-weight:900;
-      min-height:38px;
-      padding:5px 11px;
+      min-height:42px;
+      padding:6px 12px;
     }
-    .action-head-title{display:none}
+    .action-head-title{
+      display:block;
+      text-align:center;
+      font-size:16px;
+      font-weight:900;
+      white-space:nowrap;
+    }
     .action-modes{display:flex;gap:6px}
     .action-mode[disabled]{opacity:.35}
 
-    /* 上部：人が行き交い、ときどき立ち止まって会話する */
+    /* 中段：人が行き交い、ときどき止まる */
     .passerby-lane{
       position:relative;
       overflow:hidden;
@@ -174,9 +179,9 @@
     }
     .passerby-sprite{
       position:absolute;
-      bottom:-4%;
-      left:-24%;
-      height:132%;
+      bottom:0;
+      left:-20%;
+      height:92%;
       width:auto;
       max-width:none;
       object-fit:contain;
@@ -189,10 +194,10 @@
     }
     .passerby-popup{
       position:absolute;
-      top:54px;
+      top:10px;
       left:50%;
       z-index:8;
-      max-width:58%;
+      max-width:62%;
       padding:8px 10px;
       border:2px solid #29261f;
       border-radius:10px;
@@ -477,7 +482,7 @@
 <body>
 <script>
 (() => {
-  const SHOP_BUILD='20260923-1412-passerby-stop-talk';
+  const SHOP_BUILD='20260923-1420-passerby-gameplay';
   const u=new URL(location.href);
   if(u.searchParams.get('build')!==SHOP_BUILD){
     u.searchParams.set('build',SHOP_BUILD);
@@ -556,10 +561,10 @@
     <nav class="bottom-menu" id="bottomMenu" aria-label="メニュー"></nav>
   </div>
 
-  <script src="./SHOP_data.js?v=20260923-1412-passerby-stop-talk"></script>
-  <script src="./SHOP_items.js?v=20260923-1412-passerby-stop-talk"></script>
-  <script src="./SHOP_action.js?v=20260923-1412-passerby-stop-talk"></script>
-  <script src="./SHOP_save.js?v=20260923-1412-passerby-stop-talk"></script>
-  <script src="./SHOP_app.js?v=20260923-1412-passerby-stop-talk"></script>
+  <script src="./SHOP_data.js?v=20260923-1420-passerby-gameplay"></script>
+  <script src="./SHOP_items.js?v=20260923-1420-passerby-gameplay"></script>
+  <script src="./SHOP_action.js?v=20260923-1420-passerby-gameplay"></script>
+  <script src="./SHOP_save.js?v=20260923-1420-passerby-gameplay"></script>
+  <script src="./SHOP_app.js?v=20260923-1420-passerby-gameplay"></script>
 </body>
 </html>
