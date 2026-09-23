@@ -51,6 +51,10 @@
 
     menu.replaceChildren(mapButton, inventoryButton, actionButton, saveButton, loadButton);
 
+    actionButton.addEventListener('click', () => {
+      if (window.SHOP_ACTION) window.SHOP_ACTION.open(window.SHOP_STATE);
+    });
+
     saveButton.addEventListener('click', () => saveGame(saveButton));
     loadButton.addEventListener('click', () => loadGame(loadButton));
   }
@@ -85,17 +89,13 @@
     const layerInteractive=document.createElement('div');
     layerInteractive.className='scene-layer scene-layer-interactive';
 
-    const layerPlayer=document.createElement('div');
-    layerPlayer.className='scene-layer scene-layer-player';
-
-    strip.append(layerFar,layerHouse,layerBackgroundNpc,layerInteractive,layerPlayer);
+    strip.append(layerFar,layerHouse,layerBackgroundNpc,layerInteractive);
 
     const layerMap={
       far:layerFar,
       house:layerHouse,
       backgroundNpc:layerBackgroundNpc,
       interactive:layerInteractive,
-      player:layerPlayer,
       town:layerHouse,
       people:layerBackgroundNpc
     };
