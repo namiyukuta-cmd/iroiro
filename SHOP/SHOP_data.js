@@ -30,6 +30,19 @@
       people: 40         // 既存シーン互換
     }),
 
+    timeSystem: Object.freeze({
+      prayers: Object.freeze([
+        Object.freeze({id:'fajr', label:'ファジュル', code:'F', minute:300}),
+        Object.freeze({id:'dhuhr', label:'ズフル', code:'D', minute:720}),
+        Object.freeze({id:'asr', label:'アスル', code:'A', minute:930}),
+        Object.freeze({id:'maghrib', label:'マグリブ', code:'M', minute:1080}),
+        Object.freeze({id:'isha', label:'イシャー', code:'I', minute:1170})
+      ]),
+      fastingStartId: 'fajr',
+      fastingEndId: 'maghrib',
+      lunarCycleDays: 29.53
+    }),
+
     scenes: Object.freeze({
       outerPoor: Object.freeze({
         name: '小門外・底辺区',
@@ -127,8 +140,8 @@
     }),
 
     links: Object.freeze({
-      newGame: './SHOP_top.html?new=1&build=20260923-uniform-scene-shift-v2',
-      continueGame: './SHOP_top.html?continue=1&build=20260923-uniform-scene-shift-v2',
+      newGame: './SHOP_top.html?new=1&build=20260923-time-moon-rails-v1',
+      continueGame: './SHOP_top.html?continue=1&build=20260923-time-moon-rails-v1',
       backToGames: '../index.html',
       backToShopMenu: './SHOP_index.html'
     })
