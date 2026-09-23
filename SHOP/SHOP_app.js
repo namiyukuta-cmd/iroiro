@@ -64,11 +64,11 @@
 
     strip.replaceChildren();
 
-    // 中部を縦に3等分する。
-    // 上1/3 = ①スクロール背景だけを見せる
-    // 中1/3 = ①背景の続きの上に ②家 / ③背景NPC / ④選択可能ショップ・NPC
-    // 下1/3 = ⑤主人公配置層
-    // ②③④は中央1/3から下へはみ出させない。
+    // 中部の構造：
+    // ①スクロール背景は中部全体の最奥。
+    // 上1/3は①だけが見える。
+    // 下側2/3を②家 / ③背景NPC / ④選択可能ショップ・NPCが共有して重なる。
+    // ⑤主人公配置層は最下1/3に重ねる。
     const backgroundZone = document.createElement('div');
     backgroundZone.className = 'field-zone field-bg-zone';
 
