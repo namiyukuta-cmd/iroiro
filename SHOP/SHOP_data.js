@@ -33,6 +33,15 @@
     scenes: Object.freeze({
       outerPoor: Object.freeze({
         name: '小門外・底辺区',
+        begging: Object.freeze({
+          stopChance: 0.52,
+          outcomes: Object.freeze([
+            Object.freeze({weight:65, minCopper:0, maxCopper:0}),
+            Object.freeze({weight:28, minCopper:1, maxCopper:2}),
+            Object.freeze({weight:6, minCopper:3, maxCopper:5}),
+            Object.freeze({weight:1, minCopper:10, maxCopper:10})
+          ])
+        }),
         background: './asset/bg_desert_wall.jpeg',
         pickups: Object.freeze([
           Object.freeze({id:'outer_rag_01', itemId:'rag', left:66, bottom:18}),
@@ -57,6 +66,15 @@
       }),
       smallGateOutside: Object.freeze({
         name: '小門前',
+        begging: Object.freeze({
+          stopChance: 0.48,
+          outcomes: Object.freeze([
+            Object.freeze({weight:55, minCopper:0, maxCopper:0}),
+            Object.freeze({weight:30, minCopper:1, maxCopper:3}),
+            Object.freeze({weight:12, minCopper:5, maxCopper:5}),
+            Object.freeze({weight:3, minCopper:10, maxCopper:10})
+          ])
+        }),
         background: './asset/bg_desert_wall.jpeg',
         pickups: Object.freeze([
           Object.freeze({id:'gate_wood_01', itemId:'wood', left:24, bottom:17})
@@ -72,6 +90,15 @@
 
       cityCommon: Object.freeze({
         name: '市内・庶民街',
+        begging: Object.freeze({
+          stopChance: 0.55,
+          outcomes: Object.freeze([
+            Object.freeze({weight:45, minCopper:0, maxCopper:0}),
+            Object.freeze({weight:30, minCopper:1, maxCopper:3}),
+            Object.freeze({weight:20, minCopper:4, maxCopper:5}),
+            Object.freeze({weight:5, minCopper:10, maxCopper:10})
+          ])
+        }),
         background: './asset/bg_desert_wall.jpeg',
         pickups: Object.freeze([
           Object.freeze({id:'city_bottle_01', itemId:'bottle', left:69, bottom:17}),
@@ -91,6 +118,15 @@
 
       upperArea: Object.freeze({
         name: '上級区',
+        begging: Object.freeze({
+          stopChance: 0.30,
+          outcomes: Object.freeze([
+            Object.freeze({weight:60, minCopper:0, maxCopper:0}),
+            Object.freeze({weight:20, minCopper:3, maxCopper:5}),
+            Object.freeze({weight:15, minCopper:10, maxCopper:10}),
+            Object.freeze({weight:5, minCopper:20, maxCopper:20})
+          ])
+        }),
         background: './asset/bg_desert_wall.jpeg',
         pickups: Object.freeze([
           Object.freeze({id:'upper_scrap_01', itemId:'scrap', left:58, bottom:16})
@@ -127,8 +163,8 @@
     }),
 
     links: Object.freeze({
-      newGame: './SHOP_top.html?new=1&build=20260923-gold-silver-copper-v1',
-      continueGame: './SHOP_top.html?continue=1&build=20260923-gold-silver-copper-v1',
+      newGame: './SHOP_top.html?new=1&build=20260923-begging-by-district-v1',
+      continueGame: './SHOP_top.html?continue=1&build=20260923-begging-by-district-v1',
       backToGames: '../index.html',
       backToShopMenu: './SHOP_index.html'
     })
