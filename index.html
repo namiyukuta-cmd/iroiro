@@ -83,8 +83,20 @@
       <a class="game-button" href="HMW/index.html?v=20260909-1900">HMW（ホームレスウーマン）</a>
       <a class="game-button" href="hotcake-catch.html?v=20260919-1250">ホットケーキキャッチ</a>
       <a class="game-button" href="kenshi/kenshi_index.html?v=20260921-1">Kenshi風</a>
-      <a class="game-button" href="chill/chill_index.html">Chill</a>
+      <a class="game-button" href="chill/chill_index.html?v=20260924-0206">Chill</a>
     </div>
   </main>
+<script>
+(()=>{
+  const BUILD_ID='20260924-0206';
+  const url=new URL(location.href);
+  if(url.searchParams.get('v')!==BUILD_ID){
+    url.searchParams.set('v',BUILD_ID);
+    location.replace(url.toString());
+    return;
+  }
+  window.addEventListener('pageshow',e=>{ if(e.persisted) location.reload(); });
+})();
+</script>
 </body>
 </html>
