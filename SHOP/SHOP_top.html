@@ -81,7 +81,33 @@
     .scene-layer-far{z-index:0}
     .scene-layer-house{z-index:20}
     .scene-layer-backgroundNpc{z-index:40}
-    .scene-layer-interactive{z-index:60}
+    .scene-layer-interactive{z-index:60;pointer-events:none}
+    .pickup-marker{
+      position:absolute;
+      z-index:90;
+      transform:translate(-50%,0);
+      border:0;
+      padding:8px;
+      margin:0;
+      background:transparent;
+      color:#fff4a6;
+      font-size:30px;
+      line-height:1;
+      font-weight:900;
+      text-shadow:
+        0 0 4px #fff,
+        0 0 8px #ffe45c,
+        0 0 14px #ffd000;
+      pointer-events:auto;
+      cursor:pointer;
+      animation:pickupGlow 1.15s ease-in-out infinite alternate;
+    }
+    .pickup-marker:active{transform:translate(-50%,0) scale(.88)}
+    @keyframes pickupGlow{
+      from{opacity:.65;filter:brightness(.9)}
+      to{opacity:1;filter:brightness(1.35)}
+    }
+
     .scene-object{
       position:absolute;
       bottom:0;
@@ -415,7 +441,7 @@
 <body>
 <script>
 (() => {
-  const SHOP_BUILD='20260923-1148';
+  const SHOP_BUILD='20260923-1158';
   const u=new URL(location.href);
   if(u.searchParams.get('build')!==SHOP_BUILD){
     u.searchParams.set('build',SHOP_BUILD);
@@ -494,10 +520,10 @@
     <nav class="bottom-menu" id="bottomMenu" aria-label="メニュー"></nav>
   </div>
 
-  <script src="./SHOP_data.js?v=20260923-1148"></script>
-  <script src="./SHOP_items.js?v=20260923-1148"></script>
-  <script src="./SHOP_action.js?v=20260923-1148"></script>
-  <script src="./SHOP_save.js?v=20260923-1148"></script>
-  <script src="./SHOP_app.js?v=20260923-1148"></script>
+  <script src="./SHOP_data.js?v=20260923-1158"></script>
+  <script src="./SHOP_items.js?v=20260923-1158"></script>
+  <script src="./SHOP_action.js?v=20260923-1158"></script>
+  <script src="./SHOP_save.js?v=20260923-1158"></script>
+  <script src="./SHOP_app.js?v=20260923-1158"></script>
 </body>
 </html>
