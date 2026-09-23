@@ -127,8 +127,8 @@
     }),
 
     links: Object.freeze({
-      newGame: './SHOP_top.html?new=1&build=20260923-1412-passerby-stop-talk',
-      continueGame: './SHOP_top.html?continue=1&build=20260923-1412-passerby-stop-talk',
+      newGame: './SHOP_top.html?new=1&build=20260923-1420-passerby-gameplay',
+      continueGame: './SHOP_top.html?continue=1&build=20260923-1420-passerby-gameplay',
       backToGames: '../index.html',
       backToShopMenu: './SHOP_index.html'
     })
