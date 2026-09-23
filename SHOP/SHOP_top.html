@@ -74,28 +74,15 @@
     }
     .scene-layer{
       position:absolute;
+      inset:0;
       overflow:hidden;
       pointer-events:none;
     }
-
-    /* ① 背景は中部全面。上1/3にはこれだけが見える */
-    .scene-layer-far{
-      inset:0;
-      z-index:0;
-      background-repeat:no-repeat;
-      background-size:cover;
-      background-position:center 62%;
-    }
-
-    /* ②③④ は9:19版と同じく町画面全面を基準に配置する */
-    .scene-layer-house,
-    .scene-layer-backgroundNpc,
-    .scene-layer-interactive{
-      inset:0;
-    }
+    .scene-layer-far{z-index:0}
     .scene-layer-house{z-index:20}
     .scene-layer-backgroundNpc{z-index:40}
-    .scene-layer-interactive{z-index:60;pointer-events:none}
+    .scene-layer-interactive{z-index:60}
+    .scene-layer-player{z-index:100}
     .pickup-marker{
       position:absolute;
       z-index:90;
@@ -108,10 +95,7 @@
       font-size:30px;
       line-height:1;
       font-weight:900;
-      text-shadow:
-        0 0 4px #fff,
-        0 0 8px #ffe45c,
-        0 0 14px #ffd000;
+      text-shadow:0 0 4px #fff,0 0 8px #ffe45c,0 0 14px #ffd000;
       pointer-events:auto;
       cursor:pointer;
       animation:pickupGlow 1.15s ease-in-out infinite alternate;
@@ -121,7 +105,6 @@
       from{opacity:.65;filter:brightness(.9)}
       to{opacity:1;filter:brightness(1.35)}
     }
-
     .scene-object{
       position:absolute;
       bottom:0;
@@ -483,7 +466,7 @@
 <body>
 <script>
 (() => {
-  const SHOP_BUILD='20260923-1138-layoutfix';
+  const SHOP_BUILD='20260923-1146-exact919';
   const u=new URL(location.href);
   if(u.searchParams.get('build')!==SHOP_BUILD){
     u.searchParams.set('build',SHOP_BUILD);
@@ -532,10 +515,6 @@
         <div class="scene-name" id="sceneName"></div>
         <div class="town-scroll" id="townScroll">
           <div class="town-strip" id="townStrip">
-            <div class="scene-layer scene-layer-far" id="sceneLayerFar"></div>
-            <div class="scene-layer scene-layer-house" id="sceneLayerHouse"></div>
-            <div class="scene-layer scene-layer-backgroundNpc" id="sceneLayerBackgroundNpc"></div>
-            <div class="scene-layer scene-layer-interactive" id="sceneLayerInteractive"></div>
             <div class="town-placeholder" id="townPlaceholder"></div>
           </div>
         </div>
@@ -567,10 +546,10 @@
     <nav class="bottom-menu" id="bottomMenu" aria-label="メニュー"></nav>
   </div>
 
-  <script src="./SHOP_data.js?v=20260923-1138-layoutfix"></script>
-  <script src="./SHOP_items.js?v=20260923-1138-layoutfix"></script>
-  <script src="./SHOP_action.js?v=20260923-1138-layoutfix"></script>
-  <script src="./SHOP_save.js?v=20260923-1138-layoutfix"></script>
-  <script src="./SHOP_app.js?v=20260923-1138-layoutfix"></script>
+  <script src="./SHOP_data.js?v=20260923-1146-exact919"></script>
+  <script src="./SHOP_items.js?v=20260923-1146-exact919"></script>
+  <script src="./SHOP_action.js?v=20260923-1146-exact919"></script>
+  <script src="./SHOP_save.js?v=20260923-1146-exact919"></script>
+  <script src="./SHOP_app.js?v=20260923-1146-exact919"></script>
 </body>
 </html>
