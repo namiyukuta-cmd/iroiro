@@ -578,6 +578,55 @@
     }
     .well-choice-btn:active{background:#e0d6be}
     .well-choice-btn:disabled{opacity:.45}
+
+    .stall-choice-panel{
+      position:absolute;
+      left:50%;
+      top:50%;
+      z-index:220;
+      width:min(90%,350px);
+      max-height:88%;
+      overflow-y:auto;
+      transform:translate(-50%,-50%);
+      padding:12px;
+      border:3px solid #29261f;
+      border-radius:12px;
+      background:rgba(255,250,240,.98);
+      box-shadow:0 8px 24px rgba(0,0,0,.28);
+    }
+    .stall-choice-title{
+      margin-bottom:4px;
+      text-align:center;
+      font-size:17px;
+      font-weight:900;
+    }
+    .stall-choice-message{
+      min-height:30px;
+      display:grid;
+      place-items:center;
+      margin-bottom:8px;
+      text-align:center;
+      font-size:12px;
+      font-weight:800;
+      line-height:1.35;
+    }
+    .stall-choice-actions{
+      display:grid;
+      gap:6px;
+    }
+    .stall-choice-btn{
+      min-height:40px;
+      padding:5px 8px;
+      border:2px solid #29261f;
+      border-radius:9px;
+      background:#fffaf0;
+      font-size:12px;
+      font-weight:900;
+      line-height:1.25;
+    }
+    .stall-choice-btn:active{background:#e0d6be}
+    .stall-choice-btn:disabled{opacity:.45}
+
     .quick-actions{
       display:grid;
       grid-template-columns:1fr 1fr;
@@ -642,7 +691,7 @@
 <body>
 <script>
 (() => {
-  const SHOP_BUILD='20260923-food-metadata-v1';
+  const SHOP_BUILD='20260923-simple-stall-v1';
   const u=new URL(location.href);
   if(u.searchParams.get('build')!==SHOP_BUILD){
     u.searchParams.set('build',SHOP_BUILD);
@@ -733,7 +782,9 @@
       './SHOP_time.js',
       './SHOP_currency.js',
       './SHOP_items.js',
+      './SHOP_food.js',
       './SHOP_well.js',
+      './SHOP_stall.js',
       './SHOP_action.js',
       './SHOP_save.js',
       './SHOP_app.js'
@@ -741,7 +792,7 @@
     for (const file of files) {
       await new Promise((resolve, reject) => {
         const script = document.createElement('script');
-        script.src = file + '?v=20260923-food-metadata-v1&nocache=' + stamp;
+        script.src = file + '?v=20260923-simple-stall-v1&nocache=' + stamp;
         script.onload = resolve;
         script.onerror = reject;
         document.body.appendChild(script);
