@@ -60,6 +60,7 @@
       s.activeEvent = null;
       s.lastMessage = "セーブを新しい生活シミュレーション方式へ移行した。深夜を越えるのは睡眠を選んだ時だけ。";
     }
+    s.aiGenerationGuard = { ...fresh.aiGenerationGuard, ...(s.aiGenerationGuard || {}) };
     if (!D.locations[s.location]) s.location = "station_front";
     H.state = s;
     H.ensureJobProgress?.();
