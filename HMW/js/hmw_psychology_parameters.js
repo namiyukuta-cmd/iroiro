@@ -1245,11 +1245,23 @@
       state.respectForHeroine
     ) / 5;
 
+    // 親密さの自発性は、その瞬間の欲求だけでなく、すでに成立している
+    // 恋愛段階・相互好意の認知・接触への安心感も考慮する。
+    const stageReadiness = clamp((Number(state.stage) || 0) * 12.5);
+    const relationshipReadiness = (
+      stageReadiness +
+      state.perceivedReciprocity +
+      state.certaintyOfHerAffection +
+      state.closenessComfort +
+      state.recentAffectionImpact
+    ) / 5;
+
     const score = clamp(
-      (intimacyDesire * 0.55) +
-      (initiativeTrait * 0.30) +
-      (state.restraintBreakingImpulse * 0.15) -
-      (caution * 0.25)
+      (intimacyDesire * 0.52) +
+      (initiativeTrait * 0.25) +
+      (relationshipReadiness * 0.28) +
+      (state.restraintBreakingImpulse * 0.10) -
+      (caution * 0.20)
     );
 
     let mode = "none";
@@ -1261,6 +1273,8 @@
     return {
       score: Math.round(score),
       intimacyDesire: Math.round(intimacyDesire),
+      stageReadiness: Math.round(stageReadiness),
+      relationshipReadiness: Math.round(relationshipReadiness),
       conflict,
       mode,
       guidance: {
