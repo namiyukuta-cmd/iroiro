@@ -22,7 +22,7 @@ button{
 #game{position:relative;width:100%;height:100dvh;overflow:hidden;background:#fff}
 #ground{
   --grid:24px;
-  position:absolute;left:5%;right:5%;top:5%;bottom:132px;
+  position:absolute;left:5%;right:5%;top:5%;bottom:190px;
   border:1px solid #d8d8d8;border-radius:16px;background:#fff;overflow:hidden;
   touch-action:manipulation;
 }
@@ -104,6 +104,28 @@ button{
   font-size:11px;color:#777;background:rgba(255,255,255,.86);padding:5px 9px;border-radius:999px;
   pointer-events:none;z-index:10;white-space:nowrap;
 }
+
+.inventory{
+  position:absolute;
+  left:8px;
+  right:8px;
+  bottom:max(8px,env(safe-area-inset-bottom));
+  z-index:30;
+  display:grid;
+  grid-template-columns:repeat(8,minmax(0,1fr));
+  gap:4px;
+}
+.inventory-slot{
+  aspect-ratio:1/1;
+  min-width:0;
+  border:1px solid #bdbdbd;
+  border-radius:6px;
+  background:#fff;
+}
+.toolbar{
+  bottom:calc(max(8px,env(safe-area-inset-bottom)) + 58px);
+}
+
 </style>
 </head>
 <body>
@@ -113,6 +135,17 @@ button{
     <img id="girl" src="asset/chill_girl_01.png?v=20260924-0242" alt="女の子">
     <div id="hint">物を選んで、置きたいマスをタップ</div>
   </div>
+
+  <section class="inventory" aria-label="所持アイテム">
+    <div class="inventory-slot"></div>
+    <div class="inventory-slot"></div>
+    <div class="inventory-slot"></div>
+    <div class="inventory-slot"></div>
+    <div class="inventory-slot"></div>
+    <div class="inventory-slot"></div>
+    <div class="inventory-slot"></div>
+    <div class="inventory-slot"></div>
+  </section>
 
   <section class="toolbar" aria-label="箱庭編集">
     <div class="palette">
