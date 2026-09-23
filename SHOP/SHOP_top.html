@@ -74,6 +74,7 @@
       height:27px;
       overflow:visible;
     }
+    #timeRail{height:35px}
     .time-track-line,.moon-track-line{
       position:absolute;
       left:0;
@@ -85,26 +86,21 @@
     }
     .fasting-band{
       position:absolute;
-      top:12px;
-      height:6px;
+      top:11px;
+      height:8px;
       border-radius:999px;
       background:#b69a56;
-      opacity:.72;
-      pointer-events:none;
-    }
-    .fasting-status{
-      position:absolute;
-      right:0;
-      top:0;
-      z-index:6;
-      padding:1px 5px;
-      border-radius:5px;
-      background:rgba(238,232,216,.14);
-      font-size:8px;
+      color:#33291f;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      overflow:hidden;
+      font-size:7px;
       font-weight:900;
-      line-height:1.25;
-      color:#f4e9c9;
-      white-space:nowrap;
+      line-height:1;
+      opacity:.78;
+      pointer-events:none;
+      z-index:1;
     }
     .hour-tick{
       position:absolute;
@@ -114,6 +110,7 @@
       background:#d5c9b3;
       transform:translateX(-.5px);
       opacity:.8;
+      z-index:2;
     }
     .hour-tick.major{
       top:9px;
@@ -123,19 +120,22 @@
     }
     .hour-label{
       position:absolute;
-      top:-1px;
+      top:23px;
       transform:translateX(-50%);
       font-size:7px;
       font-weight:800;
       color:#e5dac7;
       white-space:nowrap;
       pointer-events:none;
+      z-index:5;
     }
+    .hour-label.edge-start{transform:none}
+    .hour-label.edge-end{transform:translateX(-100%)}
     .prayer-mark{
       position:absolute;
-      top:4px;
+      top:0;
       width:24px;
-      height:22px;
+      height:23px;
       transform:translateX(-50%);
       border:0;
       padding:0;
@@ -144,14 +144,15 @@
       cursor:pointer;
       pointer-events:auto;
       -webkit-tap-highlight-color:transparent;
+      z-index:6;
     }
     .prayer-mark::before{
       content:'';
       position:absolute;
       left:50%;
-      top:5px;
+      top:8px;
       width:2px;
-      height:15px;
+      height:13px;
       border-radius:2px;
       background:#5ed1e8;
       transform:translateX(-50%);
@@ -159,7 +160,7 @@
     .prayer-code{
       position:absolute;
       left:50%;
-      top:-4px;
+      top:0;
       transform:translateX(-50%);
       font-size:7px;
       font-weight:900;
@@ -168,9 +169,9 @@
     }
     .time-now-marker{
       position:absolute;
-      top:6px;
+      top:8px;
       width:2px;
-      height:17px;
+      height:14px;
       background:#fff8e9;
       transform:translateX(-50%);
       z-index:7;
@@ -180,7 +181,7 @@
       content:'';
       position:absolute;
       left:50%;
-      top:5px;
+      top:6px;
       width:7px;
       height:7px;
       border-radius:50%;
@@ -790,7 +791,7 @@
 <body>
 <script>
 (() => {
-  const SHOP_BUILD='20260923-time-moon-rails-v1';
+  const SHOP_BUILD='20260923-time-rail-clean-v2';
   const u=new URL(location.href);
   if(u.searchParams.get('build')!==SHOP_BUILD){
     u.searchParams.set('build',SHOP_BUILD);
@@ -904,7 +905,7 @@
     for (const file of files) {
       await new Promise((resolve, reject) => {
         const script = document.createElement('script');
-        script.src = file + '?v=20260923-time-moon-rails-v1&nocache=' + stamp;
+        script.src = file + '?v=20260923-time-rail-clean-v2&nocache=' + stamp;
         script.onload = resolve;
         script.onerror = reject;
         document.body.appendChild(script);
