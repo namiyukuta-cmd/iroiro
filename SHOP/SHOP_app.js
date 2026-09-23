@@ -235,6 +235,45 @@
 
     renderPickups(scene, layerInteractive);
 
+    // 茶色の下端スペースに、前後の場所へ移動する矢印を置く。
+    // 町の人物・建物・遠景の配置には干渉させない独立レイヤー。
+    const sceneOrder = ['outerPoor','smallGateOutside','cityCommon','upperArea'];
+    const sceneIndex = sceneOrder.indexOf(key);
+    const navLayer = document.createElement('div');
+    navLayer.className = 'scene-nav-layer';
+
+    if (sceneIndex > 0) {
+      const prevKey = sceneOrder[sceneIndex - 1];
+      const prevButton = document.createElement('button');
+      prevButton.type = 'button';
+      prevButton.className = 'scene-nav-btn scene-nav-prev';
+      prevButton.textContent = '←';
+      prevButton.setAttribute('aria-label', data.scenes[prevKey].name + 'へ移動');
+      prevButton.addEventListener('click', event => {
+        event.stopPropagation();
+        state.sceneKey = prevKey;
+        render();
+      });
+      navLayer.appendChild(prevButton);
+    }
+
+    if (sceneIndex >= 0 && sceneIndex < sceneOrder.length - 1) {
+      const nextKey = sceneOrder[sceneIndex + 1];
+      const nextButton = document.createElement('button');
+      nextButton.type = 'button';
+      nextButton.className = 'scene-nav-btn scene-nav-next';
+      nextButton.textContent = '→';
+      nextButton.setAttribute('aria-label', data.scenes[nextKey].name + 'へ移動');
+      nextButton.addEventListener('click', event => {
+        event.stopPropagation();
+        state.sceneKey = nextKey;
+        render();
+      });
+      navLayer.appendChild(nextButton);
+    }
+
+    strip.appendChild(navLayer);
+
     placeholder.style.display = 'none';
     state.scene = scene.name;
   }
