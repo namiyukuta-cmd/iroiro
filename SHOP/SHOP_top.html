@@ -77,7 +77,7 @@
     }
     .field-bg-zone{
       top:0;
-      height:66.666%;
+      height:100%;
       z-index:0;
     }
     .scroll-background-layer{
@@ -90,7 +90,7 @@
     }
     .field-middle-zone{
       top:33.333%;
-      height:33.333%;
+      height:66.667%;
       z-index:20;
       overflow:hidden;
     }
@@ -239,7 +239,7 @@
 <body>
 <script>
 (() => {
-  const SHOP_BUILD='20260923-1010';
+  const SHOP_BUILD='20260923-1020';
   const u=new URL(location.href);
   if(u.searchParams.get('build')!==SHOP_BUILD){
     u.searchParams.set('build',SHOP_BUILD);
@@ -291,8 +291,8 @@
     <nav class="bottom-menu" id="bottomMenu" aria-label="メニュー"></nav>
   </div>
 
-  <script src="./SHOP_data.js?v=20260923-1010"></script>
-  <script src="./SHOP_save.js?v=20260923-1010"></script>
-  <script src="./SHOP_app.js?v=20260923-1010"></script>
+  <script src="./SHOP_data.js?v=20260923-1020"></script>
+  <script src="./SHOP_save.js?v=20260923-1020"></script>
+  <script src="./SHOP_app.js?v=20260923-1020"></script>
 </body>
 </html>
