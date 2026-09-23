@@ -30,17 +30,32 @@
     const state = window.SHOP_STATE || {};
     const inventory = state.inventory || {};
     const defs = (window.SHOP_ITEMS && window.SHOP_ITEMS.all) || {};
-    const entries = Object.keys(defs).map(id => ({
-      id,
-      name: defs[id].name || id,
-      count: Math.max(0, Number(inventory[id]) || 0)
-    }));
+    const entries = Object.keys(defs)
+      .map(id => ({
+        id,
+        def: defs[id],
+        name: defs[id].name || id,
+        count: Math.max(0, Number(inventory[id]) || 0)
+      }))
+      .filter(item => item.count > 0 || !item.def.hiddenWhenEmpty);
 
     const slots = [];
     entries.forEach(item => {
-      const slot = document.createElement('div');
-      slot.className = 'quick-slot' + (item.count > 0 ? '' : ' is-empty');
+      const isDrinkable = item.count > 0 && item.def.drinkableWater;
+      const slot = document.createElement(isDrinkable ? 'button' : 'div');
+      if (isDrinkable) slot.type = 'button';
+      slot.className = 'quick-slot' + (item.count > 0 ? '' : ' is-empty') + (isDrinkable ? ' is-usable' : '');
       slot.textContent = item.count > 0 ? item.name + ' ×' + item.count : item.name;
+
+      if (isDrinkable) {
+        slot.addEventListener('click', () => {
+          if (!window.SHOP_WELL) return;
+          const result = window.SHOP_WELL.drinkCarriedWater(state, item.id);
+          if (status) status.textContent = result.message;
+          render();
+        });
+      }
+
       slots.push(slot);
     });
 
@@ -52,11 +67,11 @@
     }
     quickInventory.replaceChildren(...slots.slice(0,8));
 
-    const count = window.SHOP_ITEMS && window.SHOP_ITEMS.getInventoryCount
-      ? window.SHOP_ITEMS.getInventoryCount(state)
-      : Object.values(inventory).reduce((sum,n)=>sum + Math.max(0, Number(n)||0),0);
+    const sellableCount = window.SHOP_ITEMS && window.SHOP_ITEMS.getSellableInventoryCount
+      ? window.SHOP_ITEMS.getSellableInventoryCount(state)
+      : 0;
 
-    if (quickSellButton) quickSellButton.disabled = count <= 0;
+    if (quickSellButton) quickSellButton.disabled = sellableCount <= 0;
   }
 
   function buildStaticContent() {
@@ -237,6 +252,22 @@
       if (item.centered) transforms.push('translateX(-50%)');
       if (item.flip) transforms.push('scaleX(-1)');
       if (transforms.length) image.style.transform = transforms.join(' ');
+
+      if (item.selectable && item.selectableType === 'well') {
+        image.style.pointerEvents = 'auto';
+        image.style.cursor = 'pointer';
+        image.setAttribute('role', 'button');
+        image.setAttribute('aria-label', '井戸を使う');
+        image.addEventListener('click', event => {
+          event.stopPropagation();
+          if (!window.SHOP_WELL) return;
+          window.SHOP_WELL.open(state, () => {
+            if (status) status.textContent = '';
+            render();
+          });
+        });
+      }
+
       (layerMap[item.layer] || layerHouse).appendChild(image);
     });
 
