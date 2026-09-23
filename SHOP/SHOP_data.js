@@ -127,8 +127,8 @@
     }),
 
     links: Object.freeze({
-      newGame: './SHOP_top.html?new=1&build=20260923-1512-shift-town-up',
-      continueGame: './SHOP_top.html?continue=1&build=20260923-1512-shift-town-up',
+      newGame: './SHOP_top.html?new=1&build=20260923-farbg84-v2',
+      continueGame: './SHOP_top.html?continue=1&build=20260923-farbg84-v2',
       backToGames: '../index.html',
       backToShopMenu: './SHOP_index.html'
     })
