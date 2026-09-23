@@ -63,16 +63,10 @@
     const state = window.SHOP_STATE;
     if (!Array.isArray(state.collectedPickups)) state.collectedPickups = [];
     if (!state.inventory || typeof state.inventory !== 'object') state.inventory = {};
-
     if (state.collectedPickups.includes(pickup.id)) return;
 
     state.collectedPickups.push(pickup.id);
     state.inventory[pickup.itemId] = (Number(state.inventory[pickup.itemId]) || 0) + 1;
-
-    const item = window.SHOP_ITEMS && window.SHOP_ITEMS.all
-      ? window.SHOP_ITEMS.all[pickup.itemId]
-      : null;
-
     if (marker) marker.remove();
   }
 
@@ -90,12 +84,10 @@
       marker.setAttribute('aria-label', '拾う');
       marker.style.left = pickup.left + '%';
       marker.style.bottom = (pickup.bottom || 0) + '%';
-
       marker.addEventListener('click', event => {
         event.stopPropagation();
         collectPickup(pickup, marker);
       });
-
       layer.appendChild(marker);
     });
   }
@@ -107,60 +99,71 @@
     const strip = $('townStrip');
     const placeholder = $('townPlaceholder');
 
-    const layerFar = $('sceneLayerFar');
-    const layerHouse = $('sceneLayerHouse');
-    const layerBackgroundNpc = $('sceneLayerBackgroundNpc');
-    const layerInteractive = $('sceneLayerInteractive');
-
     strip.style.minWidth = '0';
     strip.style.width = '100%';
     strip.style.backgroundImage = 'none';
 
-    // HTMLはレイアウト固定。JSは場面ごとの中身だけ差し替える。
-    layerHouse.replaceChildren();
-    layerBackgroundNpc.replaceChildren();
-    layerInteractive.replaceChildren();
+    strip.querySelectorAll('.scene-layer').forEach(node => node.remove());
 
-    layerFar.style.backgroundImage = 'url("' + scene.background + '")';
+    // 5層は上下に分割する帯ではなく、同じ画面全面に重なる5枚のレイヤー。
+    const layerFar=document.createElement('div');
+    layerFar.className='scene-layer scene-layer-far';
+    layerFar.style.backgroundImage='url("' + scene.background + '")';
+    layerFar.style.backgroundPosition='center 62%';
+    layerFar.style.backgroundSize='cover';
+    layerFar.style.backgroundRepeat='no-repeat';
 
-    const layerMap = {
-      far: layerFar,
-      house: layerHouse,
-      backgroundNpc: layerBackgroundNpc,
-      interactive: layerInteractive,
-      town: layerHouse,
-      people: layerBackgroundNpc
+    const layerHouse=document.createElement('div');
+    layerHouse.className='scene-layer scene-layer-house';
+
+    const layerBackgroundNpc=document.createElement('div');
+    layerBackgroundNpc.className='scene-layer scene-layer-backgroundNpc';
+
+    const layerInteractive=document.createElement('div');
+    layerInteractive.className='scene-layer scene-layer-interactive';
+
+    const layerPlayer=document.createElement('div');
+    layerPlayer.className='scene-layer scene-layer-player';
+
+    strip.append(layerFar,layerHouse,layerBackgroundNpc,layerInteractive,layerPlayer);
+
+    const layerMap={
+      far:layerFar,
+      house:layerHouse,
+      backgroundNpc:layerBackgroundNpc,
+      interactive:layerInteractive,
+      player:layerPlayer,
+      town:layerHouse,
+      people:layerBackgroundNpc
     };
 
     scene.objects.forEach(item => {
       const image = document.createElement('img');
       image.className = 'scene-object layer-' + (item.layer || 'house');
       if(item.selectable) image.classList.add('is-selectable');
-      if(item.selectable && item.selectableType === 'npc') image.classList.add('selectable-npc');
+      if(item.selectable && item.selectableType==='npc') image.classList.add('selectable-npc');
 
-      if(item.layer === 'backgroundNpc'){
-        image.style.filter = 'drop-shadow(1px 2px 2px rgba(0,0,0,.22))';
-        image.style.opacity = '0.92';
+      if(item.layer==='backgroundNpc'){
+        image.style.filter='drop-shadow(1px 2px 2px rgba(0,0,0,.22))';
+        image.style.opacity='0.92';
       }
-
-      if(item.selectable && item.selectableType === 'npc'){
-        image.style.filter =
+      if(item.selectable && item.selectableType==='npc'){
+        image.style.filter=
           'drop-shadow(2px 0 0 #ffe600) '+
           'drop-shadow(-2px 0 0 #ffe600) '+
           'drop-shadow(0 2px 0 #ffe600) '+
           'drop-shadow(0 -2px 0 #ffe600) '+
           'drop-shadow(3px 3px 3px rgba(0,0,0,.32))';
       }
-
       image.src = item.src;
       image.alt = '';
       image.draggable = false;
       image.style.left = item.left + '%';
       image.style.bottom = (item.bottom || 0) + '%';
       image.style.height = item.height + '%';
-
-      if(item.flip) image.style.transform = 'scaleX(-1)';
-
+      const z = typeof item.layer === 'string' ? data.layers[item.layer] : item.layer;
+      image.style.zIndex = String(z ?? data.layers.house);
+      if (item.flip) image.style.transform = 'scaleX(-1)';
       (layerMap[item.layer] || layerHouse).appendChild(image);
     });
 
@@ -233,7 +236,7 @@
   }
 
   // 1つの「場」は1画面で表示し、移動時にsceneKeyを切り替える。
-  // HTMLがレイアウトを固定し、JSは場面ごとの配置だけを差し替える。
-  // 家・背景NPC・選択可能層は9:19版と同じ町画面全面の座標系を使う。
+  // 遠景=far、町背景=town、人=people、会話対象/店=interactive、主人公=player の奥行きで重ねる。
+  // 背景・建物・門・屋台はJSデータから重ねて表示する。
   // オートセーブ・オートロード・ブラウザ保存は行わない。
 })();
