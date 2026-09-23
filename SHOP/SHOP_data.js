@@ -127,8 +127,8 @@
     }),
 
     links: Object.freeze({
-      newGame: './SHOP_top.html?new=1&build=20260923-1458-restore-1418',
-      continueGame: './SHOP_top.html?continue=1&build=20260923-1458-restore-1418',
+      newGame: './SHOP_top.html?new=1&build=20260923-1504-bg-js-crop',
+      continueGame: './SHOP_top.html?continue=1&build=20260923-1504-bg-js-crop',
       backToGames: '../index.html',
       backToShopMenu: './SHOP_index.html'
     })
