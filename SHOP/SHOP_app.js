@@ -82,21 +82,25 @@
     menu.replaceChildren(mapButton, inventoryButton, actionButton, saveButton, loadButton);
 
     actionButton.addEventListener('click', () => {
-      if (window.SHOP_ACTION) window.SHOP_ACTION.open(window.SHOP_STATE);
+      if (!window.SHOP_ACTION) return;
+      const screen = document.getElementById('actionScreen');
+      if (screen && screen.classList.contains('is-open')) {
+        window.SHOP_ACTION.close();
+      } else {
+        window.SHOP_ACTION.open(window.SHOP_STATE, 'beg');
+      }
     });
 
     if (quickBegButton) {
       quickBegButton.addEventListener('click', () => {
         if (!window.SHOP_ACTION) return;
-        window.SHOP_ACTION.open(window.SHOP_STATE);
-        window.SHOP_ACTION.setMode('beg');
+        window.SHOP_ACTION.open(window.SHOP_STATE, 'beg');
       });
     }
     if (quickSellButton) {
       quickSellButton.addEventListener('click', () => {
         if (!window.SHOP_ACTION) return;
-        window.SHOP_ACTION.open(window.SHOP_STATE);
-        window.SHOP_ACTION.setMode('sell');
+        window.SHOP_ACTION.open(window.SHOP_STATE, 'sell');
       });
     }
 
