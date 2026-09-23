@@ -82,7 +82,6 @@
     .scene-layer-house{z-index:20}
     .scene-layer-backgroundNpc{z-index:40}
     .scene-layer-interactive{z-index:60}
-    .scene-layer-player{z-index:100}
     .scene-object{
       position:absolute;
       bottom:0;
@@ -107,6 +106,135 @@
         drop-shadow(3px 3px 3px rgba(0,0,0,.32));
     }
 
+    .action-screen{
+      position:absolute;
+      inset:0;
+      z-index:500;
+      display:none;
+      grid-template-rows:auto 28% minmax(0,1fr);
+      background:#eee8d8;
+    }
+    .action-screen.is-open{display:grid}
+    .action-head{
+      display:grid;
+      grid-template-columns:auto 1fr auto;
+      align-items:center;
+      gap:8px;
+      padding:10px 12px;
+      border-bottom:2px solid #29261f;
+      background:#e9e1cf;
+    }
+    .action-back,.action-mode{
+      border:2px solid #29261f;
+      border-radius:9px;
+      background:#fffaf0;
+      font-weight:900;
+      min-height:42px;
+      padding:6px 12px;
+    }
+    .action-head-title{text-align:center;font-weight:900}
+    .action-modes{display:flex;gap:6px}
+    .action-mode[disabled]{opacity:.35}
+    .feet-lane{
+      position:relative;
+      overflow:hidden;
+      border-bottom:2px solid #29261f;
+      background:#f8f3e8;
+    }
+    .feet-pair{
+      position:absolute;
+      top:18%;
+      width:76px;
+      height:68px;
+      transform:translateX(-50%);
+    }
+    .feet-pair.left{left:27%}
+    .feet-pair.right{left:73%}
+    .foot{
+      position:absolute;
+      bottom:0;
+      width:30px;
+      height:16px;
+      border-radius:50% 60% 45% 55%;
+      background:#211f1a;
+    }
+    .foot::before{
+      content:'';
+      position:absolute;
+      left:10px;
+      bottom:10px;
+      width:12px;
+      height:42px;
+      background:#211f1a;
+      border-radius:7px 7px 0 0;
+    }
+    .foot.a{left:6px}
+    .foot.b{right:6px}
+    .action-body{
+      position:relative;
+      min-height:0;
+      display:grid;
+      place-items:center;
+      overflow:hidden;
+      background:#eee8d8;
+    }
+    .beg-pot{
+      width:128px;
+      height:92px;
+      border:3px solid #29261f;
+      border-radius:20px 20px 50% 50%;
+      background:#c6a06b;
+      position:relative;
+    }
+    .beg-pot::before{
+      content:'';
+      position:absolute;
+      left:20px;
+      right:20px;
+      top:-20px;
+      height:20px;
+      border:3px solid #29261f;
+      border-bottom:0;
+      background:#d2b17f;
+      transform:perspective(80px) rotateX(35deg);
+    }
+    .sell-grid{
+      width:min(84%,360px);
+      aspect-ratio:3/2;
+      display:grid;
+      grid-template-columns:repeat(3,1fr);
+      grid-template-rows:repeat(2,1fr);
+      border:3px solid #29261f;
+      background:#f8f3e8;
+    }
+    .sell-cell{
+      border-right:1px solid #7d7467;
+      border-bottom:1px solid #7d7467;
+      display:grid;
+      place-items:center;
+      padding:6px;
+      text-align:center;
+      font-size:12px;
+      font-weight:800;
+      background:#fffaf0;
+    }
+    .sell-cell:nth-child(3n){border-right:0}
+    .sell-cell:nth-last-child(-n+3){border-bottom:0}
+    .sell-cell.empty{color:#aaa}
+    .action-dialog{
+      position:absolute;
+      left:8%;
+      right:8%;
+      top:8%;
+      z-index:5;
+      padding:12px;
+      border:3px solid #29261f;
+      border-radius:12px;
+      background:#fffaf0;
+      font-weight:800;
+      display:none;
+    }
+    .action-dialog.is-open{display:block}
     .town-placeholder{
       position:absolute;
       inset:0;
@@ -212,7 +340,7 @@
 <body>
 <script>
 (() => {
-  const SHOP_BUILD='20260923-1108';
+  const SHOP_BUILD='20260923-1136';
   const u=new URL(location.href);
   if(u.searchParams.get('build')!==SHOP_BUILD){
     u.searchParams.set('build',SHOP_BUILD);
@@ -227,6 +355,28 @@
       <div class="status-cell"><span class="status-label" id="tempLabel"></span><span class="status-value" id="tempText"></span></div>
       <div class="status-cell"><span class="status-label" id="weatherLabel"></span><span class="status-value" id="weatherText"></span></div>
     </header>
+
+    <section class="action-screen" id="actionScreen" aria-label="行動">
+      <div class="action-head">
+        <button type="button" class="action-back" id="actionBack">戻る</button>
+        <div class="action-head-title" id="actionTitle">行動</div>
+        <div class="action-modes">
+          <button type="button" class="action-mode" id="begModeButton">物乞い</button>
+          <button type="button" class="action-mode" id="sellModeButton">物を売る</button>
+        </div>
+      </div>
+
+      <div class="feet-lane" aria-label="人の行き交い">
+        <div class="feet-pair left"><span class="foot a"></span><span class="foot b"></span></div>
+        <div class="feet-pair right"><span class="foot a"></span><span class="foot b"></span></div>
+      </div>
+
+      <div class="action-body">
+        <div class="action-dialog" id="actionDialog"></div>
+        <div class="beg-pot" id="begPot" aria-label="物乞いの壺"></div>
+        <div class="sell-grid" id="sellGrid" aria-label="売る物"></div>
+      </div>
+    </section>
 
     <main class="scene-area">
       <section class="town-panel" aria-label="町">
@@ -264,8 +414,10 @@
     <nav class="bottom-menu" id="bottomMenu" aria-label="メニュー"></nav>
   </div>
 
-  <script src="./SHOP_data.js?v=20260923-1108"></script>
-  <script src="./SHOP_save.js?v=20260923-1108"></script>
-  <script src="./SHOP_app.js?v=20260923-1108"></script>
+  <script src="./SHOP_data.js?v=20260923-1136"></script>
+  <script src="./SHOP_items.js?v=20260923-1136"></script>
+  <script src="./SHOP_action.js?v=20260923-1136"></script>
+  <script src="./SHOP_save.js?v=20260923-1136"></script>
+  <script src="./SHOP_app.js?v=20260923-1136"></script>
 </body>
 </html>
