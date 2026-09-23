@@ -311,6 +311,7 @@
     }
     H.state.day += 1;
     H.state.slot = 0;
+    H.decayPsychologyDay?.();
     const nextPeriod = H.advanceMenstrualCycle?.();
     H.resetDaily();
     H.state.sleep.lastPlace = place;
