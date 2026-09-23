@@ -30,31 +30,6 @@
       people: 40         // 既存シーン互換
     }),
 
-    timeSystem: Object.freeze({
-      prayers: Object.freeze([
-        Object.freeze({id:'fajr', label:'ファジュル', minute:300}),
-        Object.freeze({id:'dhuhr', label:'ズフル', minute:720}),
-        Object.freeze({id:'asr', label:'アスル', minute:930}),
-        Object.freeze({id:'maghrib', label:'マグリブ', minute:1080}),
-        Object.freeze({id:'isha', label:'イシャー', minute:1170})
-      ]),
-      prayerNoticeMinutes: 30,
-      lunarMonths: Object.freeze([
-        Object.freeze({name:'ムハッラム', days:30}),
-        Object.freeze({name:'サファル', days:29}),
-        Object.freeze({name:'ラビー1', days:30}),
-        Object.freeze({name:'ラビー2', days:29}),
-        Object.freeze({name:'ジュマーダ1', days:30}),
-        Object.freeze({name:'ジュマーダ2', days:29}),
-        Object.freeze({name:'ラジャブ', days:30}),
-        Object.freeze({name:'シャアバーン', days:29}),
-        Object.freeze({name:'ラマダーン', days:30}),
-        Object.freeze({name:'シャウワール', days:29}),
-        Object.freeze({name:'ズルカアダ', days:30}),
-        Object.freeze({name:'ズルヒッジャ', days:29})
-      ])
-    }),
-
     scenes: Object.freeze({
       outerPoor: Object.freeze({
         name: '小門外・底辺区',
@@ -152,8 +127,8 @@
     }),
 
     links: Object.freeze({
-      newGame: './SHOP_top.html?new=1&build=20260923-top-text-readable-v1',
-      continueGame: './SHOP_top.html?continue=1&build=20260923-top-text-readable-v1',
+      newGame: './SHOP_top.html?new=1&build=20260923-split-world-modules-v1',
+      continueGame: './SHOP_top.html?continue=1&build=20260923-split-world-modules-v1',
       backToGames: '../index.html',
       backToShopMenu: './SHOP_index.html'
     })
