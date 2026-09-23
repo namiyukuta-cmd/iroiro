@@ -107,67 +107,60 @@
     const strip = $('townStrip');
     const placeholder = $('townPlaceholder');
 
+    const layerFar = $('sceneLayerFar');
+    const layerHouse = $('sceneLayerHouse');
+    const layerBackgroundNpc = $('sceneLayerBackgroundNpc');
+    const layerInteractive = $('sceneLayerInteractive');
+
     strip.style.minWidth = '0';
     strip.style.width = '100%';
     strip.style.backgroundImage = 'none';
 
-    strip.querySelectorAll('.scene-layer').forEach(node => node.remove());
+    // HTMLはレイアウト固定。JSは場面ごとの中身だけ差し替える。
+    layerHouse.replaceChildren();
+    layerBackgroundNpc.replaceChildren();
+    layerInteractive.replaceChildren();
 
-    // 5層は上下に分割する帯ではなく、同じ画面全面に重なる5枚のレイヤー。
-    const layerFar=document.createElement('div');
-    layerFar.className='scene-layer scene-layer-far';
-    layerFar.style.backgroundImage='url("' + scene.background + '")';
-    layerFar.style.backgroundPosition='center 62%';
-    layerFar.style.backgroundSize='cover';
-    layerFar.style.backgroundRepeat='no-repeat';
+    layerFar.style.backgroundImage = 'url("' + scene.background + '")';
 
-    const layerHouse=document.createElement('div');
-    layerHouse.className='scene-layer scene-layer-house';
-
-    const layerBackgroundNpc=document.createElement('div');
-    layerBackgroundNpc.className='scene-layer scene-layer-backgroundNpc';
-
-    const layerInteractive=document.createElement('div');
-    layerInteractive.className='scene-layer scene-layer-interactive';
-
-    strip.append(layerFar,layerHouse,layerBackgroundNpc,layerInteractive);
-
-    const layerMap={
-      far:layerFar,
-      house:layerHouse,
-      backgroundNpc:layerBackgroundNpc,
-      interactive:layerInteractive,
-      town:layerHouse,
-      people:layerBackgroundNpc
+    const layerMap = {
+      far: layerFar,
+      house: layerHouse,
+      backgroundNpc: layerBackgroundNpc,
+      interactive: layerInteractive,
+      town: layerHouse,
+      people: layerBackgroundNpc
     };
 
     scene.objects.forEach(item => {
       const image = document.createElement('img');
       image.className = 'scene-object layer-' + (item.layer || 'house');
       if(item.selectable) image.classList.add('is-selectable');
-      if(item.selectable && item.selectableType==='npc') image.classList.add('selectable-npc');
+      if(item.selectable && item.selectableType === 'npc') image.classList.add('selectable-npc');
 
-      if(item.layer==='backgroundNpc'){
-        image.style.filter='drop-shadow(1px 2px 2px rgba(0,0,0,.22))';
-        image.style.opacity='0.92';
+      if(item.layer === 'backgroundNpc'){
+        image.style.filter = 'drop-shadow(1px 2px 2px rgba(0,0,0,.22))';
+        image.style.opacity = '0.92';
       }
-      if(item.selectable && item.selectableType==='npc'){
-        image.style.filter=
+
+      if(item.selectable && item.selectableType === 'npc'){
+        image.style.filter =
           'drop-shadow(2px 0 0 #ffe600) '+
           'drop-shadow(-2px 0 0 #ffe600) '+
           'drop-shadow(0 2px 0 #ffe600) '+
           'drop-shadow(0 -2px 0 #ffe600) '+
           'drop-shadow(3px 3px 3px rgba(0,0,0,.32))';
       }
+
       image.src = item.src;
       image.alt = '';
       image.draggable = false;
       image.style.left = item.left + '%';
       image.style.bottom = (item.bottom || 0) + '%';
       image.style.height = item.height + '%';
-      const z = typeof item.layer === 'string' ? data.layers[item.layer] : item.layer;
-      image.style.zIndex = String(z ?? data.layers.house);
-      if (item.flip) image.style.transform = 'scaleX(-1)';
+
+      if(item.flip) image.style.transform = 'scaleX(-1)';
+
       (layerMap[item.layer] || layerHouse).appendChild(image);
     });
 
@@ -240,7 +233,7 @@
   }
 
   // 1つの「場」は1画面で表示し、移動時にsceneKeyを切り替える。
-  // 遠景=far、町背景=town、人=people、会話対象/店=interactive、主人公=player の奥行きで重ねる。
-  // 背景・建物・門・屋台はJSデータから重ねて表示する。
+  // HTMLがレイアウトを固定し、JSは場面ごとの配置だけを差し替える。
+  // 上1/3は背景のみ、下2/3に家・背景NPC・選択可能層を重ねる。
   // オートセーブ・オートロード・ブラウザ保存は行わない。
 })();
