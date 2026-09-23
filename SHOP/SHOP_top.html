@@ -72,20 +72,48 @@
       background-repeat:no-repeat;
       overflow:hidden;
     }
-    .scene-layer{
+    .field-zone{
+      position:absolute;
+      left:0;
+      width:100%;
+      overflow:hidden;
+    }
+    .field-bg-zone{
+      top:0;
+      height:33.333%;
+      z-index:0;
+    }
+    .scroll-background-layer{
       position:absolute;
       inset:0;
-      overflow:hidden;
+      background-repeat:repeat-x;
+      background-size:cover;
+      background-position:center 68%;
       pointer-events:none;
     }
-    .scene-layer-far{z-index:0}
-    .scene-layer-house{z-index:20}
-    .scene-layer-backgroundNpc{z-index:40}
-    .scene-layer-interactive{z-index:60}
-    .scene-layer-player{z-index:100}
+    .field-middle-zone{
+      top:33.333%;
+      height:33.333%;
+      z-index:20;
+      overflow:visible;
+    }
+    .middle-layer{
+      position:absolute;
+      inset:0;
+      overflow:visible;
+      pointer-events:none;
+    }
+    .middle-house-layer{z-index:20}
+    .middle-background-npc-layer{z-index:40}
+    .middle-interactive-layer{z-index:60}
+    .field-player-zone{
+      top:66.666%;
+      height:33.334%;
+      z-index:100;
+      pointer-events:none;
+    }
     .scene-object{
       position:absolute;
-      bottom:0;
       display:block;
       max-width:none;
       object-fit:contain;
@@ -212,7 +240,7 @@
 <body>
 <script>
 (() => {
-  const SHOP_BUILD='20260923-0923r';
+  const SHOP_BUILD='20260923-0946';
   const u=new URL(location.href);
   if(u.searchParams.get('build')!==SHOP_BUILD){
     u.searchParams.set('build',SHOP_BUILD);
@@ -264,8 +292,8 @@
     <nav class="bottom-menu" id="bottomMenu" aria-label="メニュー"></nav>
   </div>
 
-  <script src="./SHOP_data.js?v=20260923-0923r"></script>
-  <script src="./SHOP_save.js?v=20260923-0923r"></script>
-  <script src="./SHOP_app.js?v=20260923-0923r"></script>
+  <script src="./SHOP_data.js?v=20260923-0946"></script>
+  <script src="./SHOP_save.js?v=20260923-0946"></script>
+  <script src="./SHOP_app.js?v=20260923-0946"></script>
 </body>
 </html>
