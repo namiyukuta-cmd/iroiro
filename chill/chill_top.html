@@ -351,26 +351,16 @@ button{
 
 <script>
 (()=>{
-const pathKey='fresh:'+location.pathname;
 const url=new URL(location.href);
-const token=url.searchParams.get('_nc');
-const seen=sessionStorage.getItem(pathKey);
-
-if(!token || seen===token){
-  const fresh=Date.now().toString();
-  url.searchParams.set('_nc',fresh);
-  sessionStorage.setItem(pathKey,fresh);
+if(!url.searchParams.has('_nc')){
+  url.searchParams.set('_nc',Date.now().toString());
   location.replace(url.toString());
   return;
 }
-sessionStorage.setItem(pathKey,token);
-
 window.addEventListener('pageshow',e=>{
   if(!e.persisted)return;
   const u=new URL(location.href);
-  const fresh=Date.now().toString();
-  u.searchParams.set('_nc',fresh);
-  sessionStorage.setItem(pathKey,fresh);
+  u.searchParams.set('_nc',Date.now().toString());
   location.replace(u.toString());
 });
 
