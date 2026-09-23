@@ -233,7 +233,7 @@ button{
 <main id="game" aria-label="白い箱庭">
   <div id="ground" class="grid-on">
     <div id="objectLayer"></div>
-    <img id="girl" src="asset/chill_girl_01.png?v=20260924-0302" alt="女の子">
+    <img id="girl" src="asset/chill_girl_01.png?_nc=20260924-0310" alt="女の子">
     <div id="hint">物を選んで、置きたいマスをタップ</div>
   </div>
 
@@ -285,14 +285,28 @@ button{
 
 <script>
 (()=>{
-const BUILD_ID='20260924-0302';
+const pathKey='fresh:'+location.pathname;
 const url=new URL(location.href);
-if(url.searchParams.get('v')!==BUILD_ID){
-  url.searchParams.set('v',BUILD_ID);
+const token=url.searchParams.get('_nc');
+const seen=sessionStorage.getItem(pathKey);
+
+if(!token || seen===token){
+  const fresh=Date.now().toString();
+  url.searchParams.set('_nc',fresh);
+  sessionStorage.setItem(pathKey,fresh);
   location.replace(url.toString());
   return;
 }
-window.addEventListener('pageshow',e=>{if(e.persisted)location.reload()});
+sessionStorage.setItem(pathKey,token);
+
+window.addEventListener('pageshow',e=>{
+  if(!e.persisted)return;
+  const u=new URL(location.href);
+  const fresh=Date.now().toString();
+  u.searchParams.set('_nc',fresh);
+  sessionStorage.setItem(pathKey,fresh);
+  location.replace(u.toString());
+});
 
 const ground=document.getElementById('ground');
 const layer=document.getElementById('objectLayer');
