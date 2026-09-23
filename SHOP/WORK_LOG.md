@@ -1114,3 +1114,23 @@
 - 小門外・底辺区／小門前／市内・庶民街は従来どおり移動可能。
 - 上級区の解放条件そのものはまだ決めていない。今後イベントや条件から `access.upperArea = true` にする前提。
 - build: 20260923-upper-area-locked-v1
+
+### 2026-09-23 20:55 井戸・公衆浴場・小モスクを独立した「場所」として追加
+- ユーザー決定: 井戸・モスク・公衆浴場は町の飾りではなく、↑で入る独立した場所にする。
+- 配置:
+  - 小門外・底辺区 → `↑井戸`
+  - 小門前 → `↑公衆浴場`
+  - 市内・庶民街 → `↑井戸` / `↑小モスク`
+- 新規scene:
+  - `outerWell` = 小門外・井戸
+  - `smallGateBathhouse` = 小門前・公衆浴場
+  - `cityWell` = 庶民街・井戸
+  - `cityMosque` = 庶民街・小モスク
+- GitHubへ追加済みの画像を使用:
+  - `SHOP/asset/desert_well_01.png`
+  - `SHOP/asset/desert_bathhouse_01.png`
+  - `SHOP/asset/desert_small_mosque01.png`
+- 各施設sceneでは中央に施設画像を表示し、`↓戻る` で元地区へ戻る。
+- 市内・庶民街は施設が2つあるため、↑ボタンを横並びで表示。
+- 既存の左右地区移動と上級区ロックは維持。
+- build: 20260923-facility-places-v1
