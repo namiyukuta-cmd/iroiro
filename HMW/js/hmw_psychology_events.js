@@ -9,6 +9,60 @@
     return Math.max(min, Math.min(max, n));
   };
 
+  const clone = (value) => JSON.parse(JSON.stringify(value ?? null));
+
+  const historySnapshot = (state = {}, changes = {}) => {
+    const coreKeys = [
+      "stage", "stageName", "romanceScore", "seekHeroine", "attachment", "trust",
+      "romanticAwareness", "jealousy", "fearOfLoss", "longing", "repairDrive",
+      "possessiveness", "physicalNeed", "passion", "reason", "selfControl",
+      "ethics", "respectForHeroine", "hurt", "anger", "sadness",
+      "unresolvedConflictWeight", "unresolvedEmotion", "lastChangeReason"
+    ];
+    const keys = new Set([...coreKeys, ...Object.keys(changes || {})]);
+    const snapshot = {};
+    keys.forEach((key) => {
+      if (state[key] !== undefined) snapshot[key] = clone(state[key]);
+    });
+    return snapshot;
+  };
+
+  const compactEvaluation = (evaluations = {}) => ({
+    romanceOnset: evaluations.romanceOnset ? {
+      onsetType: evaluations.romanceOnset.onsetType,
+      confidence: evaluations.romanceOnset.confidence
+    } : null,
+    conflict: evaluations.conflict ? {
+      outcome: evaluations.conflict.outcome,
+      desirePressure: evaluations.conflict.desirePressure,
+      restraintPressure: evaluations.conflict.restraintPressure,
+      delta: evaluations.conflict.delta
+    } : null,
+    approachAvoidance: evaluations.approachAvoidance ? {
+      mode: evaluations.approachAvoidance.mode,
+      approachPressure: evaluations.approachAvoidance.approachPressure,
+      avoidancePressure: evaluations.approachAvoidance.avoidancePressure,
+      delta: evaluations.approachAvoidance.delta
+    } : null,
+    attachmentTension: evaluations.attachmentTension ? {
+      mode: evaluations.attachmentTension.mode,
+      closenessPull: evaluations.attachmentTension.closenessPull,
+      distancePull: evaluations.attachmentTension.distancePull,
+      difference: evaluations.attachmentTension.difference
+    } : null,
+    repair: evaluations.repair ? {
+      mode: evaluations.repair.mode,
+      repairPressure: evaluations.repair.repairPressure,
+      resistance: evaluations.repair.resistance,
+      delta: evaluations.repair.delta
+    } : null,
+    intimacy: evaluations.intimacy ? {
+      mode: evaluations.intimacy.mode,
+      score: evaluations.intimacy.score,
+      intimacyDesire: evaluations.intimacy.intimacyDesire
+    } : null
+  });
+
   const stageFromRelationship = (rel = {}) => {
     const familiarity = clamp(rel.familiarity);
     const trust = clamp(rel.trust);
@@ -205,49 +259,55 @@
     const engine = window.HMWPsychologyParameters;
     if (!engine) return null;
 
-    const state = H.ensureRelationshipPsychology(id, rel);
+    const current = H.ensureRelationshipPsychology(id, rel);
+    const before = clone(current);
+    const next = clone(current);
     const base = EVENT_DELTAS[eventName] || {};
     const extra = context.psychologyChanges || {};
     const changes = { ...base };
+
     Object.entries(extra).forEach(([key, amount]) => {
       changes[key] = (Number(changes[key]) || 0) + (Number(amount) || 0);
     });
 
     Object.entries(changes).forEach(([key, amount]) => {
-      if (typeof amount !== "number") return;
-      state[key] = clamp((Number(state[key]) || 0) + amount);
+      if (typeof amount !== "number" || !Number.isFinite(amount)) return;
+      next[key] = clamp((Number(next[key]) || 0) + amount);
     });
 
-    state.familiarity = clamp(rel.familiarity);
-    state.trust = clamp(rel.trust);
-    state.physicalNeed = clamp(Math.max(Number(state.physicalNeed) || 0, Number(rel.desire) || 0));
-    state.perceivedAffection = clamp(Math.max(Number(state.perceivedAffection) || 0, Number(rel.goodwill) || 0));
-    state.ethics = clamp(rel.conscience);
-    const stage = stageFromRelationship(rel);
-    if (stage.stage > (Number(state.stage) || 0)) {
-      state.stage = stage.stage;
-      state.stageName = stage.stageName;
-    }
-    state.romanceScore = clamp(Math.max(Number(state.romanceScore) || 0, Number(rel.goodwill) || 0));
-    state.lastChangeReason = context.reason || eventName;
+    // 画面表示用の既存6項目を正本として、対応する心理値を同期する。
+    next.familiarity = clamp(rel.familiarity);
+    next.trust = clamp(rel.trust);
+    next.physicalNeed = clamp(Math.max(Number(next.physicalNeed) || 0, Number(rel.desire) || 0));
+    next.perceivedAffection = clamp(Math.max(Number(next.perceivedAffection) || 0, Number(rel.goodwill) || 0));
+    next.ethics = clamp(rel.conscience);
 
-    rel.psychology = engine.normalizeState(state, id);
+    const stage = stageFromRelationship(rel);
+    if (stage.stage > (Number(next.stage) || 0)) {
+      next.stage = stage.stage;
+      next.stageName = stage.stageName;
+    }
+    next.romanceScore = clamp(Math.max(Number(next.romanceScore) || 0, Number(rel.goodwill) || 0));
+    next.lastChangeReason = context.reason || eventName;
+
+    // 最新恋愛ゲーム側の順序に合わせ、before + change → normalize → evaluate の順で固定する。
+    rel.psychology = engine.normalizeState(next, id);
     const snapshot = H.evaluateNpcPsychology(id);
+    if (!snapshot) return null;
+
+    const after = clone(snapshot.state);
     const entry = {
+      schemaVersion: 2,
       day: H.state.day,
       slot: H.state.slot,
       event: eventName,
       reason: context.reason || "",
-      changes,
-      evaluation: snapshot ? {
-        conflict: snapshot.evaluations.conflict.outcome,
-        approachAvoidance: snapshot.evaluations.approachAvoidance.mode,
-        attachmentTension: snapshot.evaluations.attachmentTension.mode,
-        repair: snapshot.evaluations.repair.mode,
-        intimacy: snapshot.evaluations.intimacy.mode,
-        romanceOnset: snapshot.evaluations.romanceOnset.onsetType
-      } : null
+      before: historySnapshot(before, changes),
+      change: clone(changes),
+      after: historySnapshot(after, changes),
+      evaluation: compactEvaluation(snapshot.evaluations)
     };
+
     rel.psychologyHistory.unshift(entry);
     rel.psychologyHistory = rel.psychologyHistory.slice(0, 80);
     return snapshot;
@@ -257,22 +317,19 @@
     const relationships = H.state?.relationships || {};
     Object.entries(relationships).forEach(([id, rel]) => {
       if (!H.DATA?.people?.[id]?.romance || !rel?.psychology) return;
-      const p = H.ensureRelationshipPsychology(id, rel);
-      const decay = {
-        recentAcceptanceImpact: 6,
-        recentRejectionImpact: 5,
-        recentAffectionImpact: 5,
-        recentJealousyImpact: 5,
-        euphoria: 4,
-        emotionalActivation: 3,
-        encounterImpact: 3,
-        reunionImpact: 3
-      };
-      Object.entries(decay).forEach(([key, amount]) => {
-        p[key] = clamp((Number(p[key]) || 0) - amount);
+      H.applyPsychologyEvent(id, "daily_decay", {
+        reason: "1日経過による直近感情の減衰",
+        psychologyChanges: {
+          recentAcceptanceImpact: -6,
+          recentRejectionImpact: -5,
+          recentAffectionImpact: -5,
+          recentJealousyImpact: -5,
+          euphoria: -4,
+          emotionalActivation: -3,
+          encounterImpact: -3,
+          reunionImpact: -3
+        }
       });
-      rel.psychology = window.HMWPsychologyParameters.normalizeState(p, id);
-      H.evaluateNpcPsychology(id);
     });
   };
 
