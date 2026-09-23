@@ -184,6 +184,30 @@
     }
     .scene-nav-prev{left:14px}
     .scene-nav-next{right:14px}
+    .scene-nav-facilities{
+      position:absolute;
+      left:50%;
+      bottom:12px;
+      transform:translateX(-50%);
+      display:flex;
+      gap:8px;
+      align-items:center;
+      justify-content:center;
+      pointer-events:none;
+    }
+    .scene-nav-facility-btn{
+      position:relative;
+      left:auto;
+      right:auto;
+      bottom:auto;
+      width:auto;
+      min-width:72px;
+      height:44px;
+      padding:0 12px;
+      font-size:14px;
+      white-space:nowrap;
+      pointer-events:auto;
+    }
 
     .action-screen{
       min-height:0;
@@ -565,7 +589,7 @@
 <body>
 <script>
 (() => {
-  const SHOP_BUILD='20260923-upper-area-locked-v1';
+  const SHOP_BUILD='20260923-facility-places-v1';
   const u=new URL(location.href);
   if(u.searchParams.get('build')!==SHOP_BUILD){
     u.searchParams.set('build',SHOP_BUILD);
@@ -662,7 +686,7 @@
     for (const file of files) {
       await new Promise((resolve, reject) => {
         const script = document.createElement('script');
-        script.src = file + '?v=20260923-upper-area-locked-v1&nocache=' + stamp;
+        script.src = file + '?v=20260923-facility-places-v1&nocache=' + stamp;
         script.onload = resolve;
         script.onerror = reject;
         document.body.appendChild(script);
