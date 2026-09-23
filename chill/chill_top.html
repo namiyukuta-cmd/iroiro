@@ -225,11 +225,6 @@ button{
   background:#222;
   color:#fff;
 }
-.quest-book.accepted .story::after{
-  content:"\A\A【受注しました】";
-  white-space:pre;
-  font-weight:800;
-}
 .quest-peek.hidden{display:none}
 
 </style>
@@ -238,7 +233,7 @@ button{
 <main id="game" aria-label="白い箱庭">
   <div id="ground" class="grid-on">
     <div id="objectLayer"></div>
-    <img id="girl" src="asset/chill_girl_01.png?v=20260924-0254" alt="女の子">
+    <img id="girl" src="asset/chill_girl_01.png?v=20260924-0302" alt="女の子">
     <div id="hint">物を選んで、置きたいマスをタップ</div>
   </div>
 
@@ -249,12 +244,8 @@ button{
 
   <article id="questBook" class="quest-book" aria-label="依頼書">
     <h2>依頼</h2>
-    <p class="chapter">QUEST 001</p>
-    <p class="story">
-      村はずれの古い道に、夜になるとゾンビが現れるらしい。<br>
-      道を通る人が困っている。<br><br>
-      ゾンビを3体倒し、安全を確かめてほしい。
-    </p>
+    <p id="questChapter" class="chapter">QUEST 001</p>
+    <p id="questStory" class="story"></p>
     <div class="choices">
       <button id="questClose" type="button">あとで</button>
       <button id="questAccept" class="accept" type="button">受ける</button>
@@ -294,7 +285,7 @@ button{
 
 <script>
 (()=>{
-const BUILD_ID='20260924-0254';
+const BUILD_ID='20260924-0302';
 const url=new URL(location.href);
 if(url.searchParams.get('v')!==BUILD_ID){
   url.searchParams.set('v',BUILD_ID);
@@ -312,6 +303,8 @@ const questBook=document.getElementById('questBook');
 const questBackdrop=document.getElementById('questBackdrop');
 const questClose=document.getElementById('questClose');
 const questAccept=document.getElementById('questAccept');
+const questChapter=document.getElementById('questChapter');
+const questStory=document.getElementById('questStory');
 const GRID=24;
 let currentTool='select';
 let selectedId=null;
@@ -402,7 +395,47 @@ window.addEventListener('resize',()=>{
   objects.forEach(clamp);render();save();
 });
 
+const questPages=[
+  {
+    chapter:'QUEST 001',
+    html:'村はずれの古い道に、夜になるとゾンビが現れるらしい。<br>道を通る人が困っている。<br><br>ゾンビを3体倒し、安全を確かめてほしい。',
+    left:'あとで',
+    right:'受ける'
+  },
+  {
+    chapter:'QUEST 001　1',
+    html:'依頼を引き受けた。<br><br>依頼人は、ゾンビが現れるのは日が落ちてからだと教えてくれた。<br>古い道は村の北側にある。',
+    left:'閉じる',
+    right:'進む'
+  },
+  {
+    chapter:'QUEST 001　2',
+    html:'必要なら準備をしてから向かえばいい。<br><br>急ぐ必要はない。<br>村を出れば、古い道へ続く道標がある。',
+    left:'閉じる',
+    right:'箱庭へ'
+  }
+];
+let questPage=0;
+let questAccepted=false;
+
+function saveQuest(){
+  try{
+    localStorage.setItem('chillQuest001StateV2',JSON.stringify({
+      page:questPage,
+      accepted:questAccepted
+    }));
+  }catch(e){}
+}
+function renderQuestPage(){
+  const p=questPages[questPage]||questPages[0];
+  questChapter.textContent=p.chapter;
+  questStory.innerHTML=p.html;
+  questClose.textContent=p.left;
+  questAccept.textContent=p.right;
+  questPeek.textContent=questAccepted?'依頼中':'依頼';
+}
 function openQuest(){
+  renderQuestPage();
   questBackdrop.classList.add('open');
   questBook.classList.remove('open');
   void questBook.offsetWidth;
@@ -418,20 +451,29 @@ questPeek.addEventListener('click',openQuest);
 questClose.addEventListener('click',closeQuest);
 questBackdrop.addEventListener('click',closeQuest);
 questAccept.addEventListener('click',()=>{
-  questBook.classList.add('accepted');
-  questAccept.textContent='受注済み';
-  questAccept.disabled=true;
-  questPeek.classList.add('hidden');
-  try{localStorage.setItem('chillQuest001','accepted')}catch(e){}
+  if(questPage===0){
+    questAccepted=true;
+    questPage=1;
+    saveQuest();
+    renderQuestPage();
+    return;
+  }
+  if(questPage===1){
+    questPage=2;
+    saveQuest();
+    renderQuestPage();
+    return;
+  }
+  closeQuest();
 });
 try{
-  if(localStorage.getItem('chillQuest001')==='accepted'){
-    questBook.classList.add('accepted');
-    questAccept.textContent='受注済み';
-    questAccept.disabled=true;
-    questPeek.classList.add('hidden');
+  const saved=JSON.parse(localStorage.getItem('chillQuest001StateV2')||'null');
+  if(saved&&Number.isFinite(saved.page)){
+    questPage=Math.max(0,Math.min(2,saved.page));
+    questAccepted=!!saved.accepted;
   }
 }catch(e){}
+renderQuestPage();
 
 load();objects.forEach(clamp);render();syncTools();
 })();
