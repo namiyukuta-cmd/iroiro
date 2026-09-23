@@ -44,13 +44,14 @@
 
     .scene-area{
       min-height:0;
-      display:grid;
-      grid-template-rows:minmax(150px,.8fr) minmax(0,1.2fr);
+      display:block;
       background:#cfc6b3;
     }
 
     .town-panel{
       position:relative;
+      width:100%;
+      height:100%;
       min-height:0;
       border-bottom:2px solid #29261f;
       background:#bdb39f;
@@ -404,31 +405,61 @@
       pointer-events:none;
     }
 
-    .player-panel{
-      min-height:0;
-      padding:12px;
+    .utility-panel{
+      height:188px;
+      min-height:188px;
       display:grid;
-      grid-template-columns:92px minmax(0,1fr);
-      gap:12px;
+      grid-template-columns:34% minmax(0,1fr);
+      border-top:2px solid #29261f;
       background:#eee8d8;
-      border-bottom:2px solid #29261f;
+      overflow:hidden;
+    }
+    .player-panel{
+      min-width:0;
+      min-height:0;
+      padding:8px;
+      display:grid;
+      grid-template-rows:auto minmax(0,1fr) auto;
+      gap:6px;
+      border-right:2px solid #29261f;
+      background:#eee8d8;
+    }
+    .money-box{
+      min-height:28px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      gap:6px;
+      border:1px solid #8e846f;
+      border-radius:8px;
+      background:#f8f3e8;
+      font-size:12px;
+      font-weight:900;
     }
     .portrait{
+      min-height:0;
       border:2px solid #29261f;
       border-radius:10px;
       background:#f8f3e8;
       display:grid;
       place-items:center;
       overflow:hidden;
-      font-size:13px;
+      font-size:12px;
       font-weight:900;
       color:#746c5f;
     }
     .portrait img{width:100%;height:100%;object-fit:cover;display:block}
-    .stats{display:grid;align-content:center;gap:10px}
-    .stat-row{display:grid;grid-template-columns:44px minmax(0,1fr) 42px;gap:8px;align-items:center;font-size:13px;font-weight:900}
+    .stats{display:grid;gap:4px}
+    .stat-row{
+      display:grid;
+      grid-template-columns:30px minmax(0,1fr) 28px;
+      gap:4px;
+      align-items:center;
+      font-size:10px;
+      font-weight:900;
+    }
     .bar{
-      height:14px;
+      height:9px;
       border:1px solid #29261f;
       border-radius:999px;
       overflow:hidden;
@@ -436,6 +467,60 @@
     }
     .bar-fill{height:100%;width:0%;background:#514a40}
     .stat-num{text-align:right;font-variant-numeric:tabular-nums}
+
+    .quick-panel{
+      min-width:0;
+      min-height:0;
+      display:grid;
+      grid-template-rows:minmax(0,1fr) 48px;
+      background:#e9e1cf;
+      overflow:hidden;
+    }
+    .quick-inventory{
+      min-height:0;
+      padding:8px;
+      display:grid;
+      grid-template-columns:repeat(4,minmax(0,1fr));
+      grid-auto-rows:minmax(44px,1fr);
+      gap:6px;
+      align-content:start;
+      overflow:hidden;
+    }
+    .quick-slot{
+      min-width:0;
+      min-height:0;
+      border:1px solid #9a8f79;
+      border-radius:7px;
+      background:#f8f3e8;
+      display:grid;
+      place-items:center;
+      padding:4px;
+      text-align:center;
+      font-size:10px;
+      font-weight:800;
+      line-height:1.15;
+      overflow:hidden;
+    }
+    .quick-slot.is-empty{
+      color:#a49b89;
+      background:#e3dac7;
+    }
+    .quick-actions{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      border-top:1px solid #afa592;
+      background:#e9e1cf;
+    }
+    .quick-action-btn{
+      border:0;
+      border-right:1px solid #afa592;
+      background:#fffaf0;
+      font-weight:900;
+      font-size:13px;
+    }
+    .quick-action-btn:last-child{border-right:0}
+    .quick-action-btn:active{background:#e0d6be}
+    .quick-action-btn:disabled{opacity:.42}
 
     #saveStatus:empty{display:none}
     #saveStatus{
@@ -474,8 +559,8 @@
     .menu-btn:disabled{opacity:.5}
 
     @media(max-height:700px){
-      .scene-area{grid-template-rows:145px minmax(0,1fr)}
-      .player-panel{grid-template-columns:78px minmax(0,1fr);padding:9px}
+      .utility-panel{height:166px;min-height:166px}
+      .quick-inventory{grid-auto-rows:minmax(38px,1fr);padding:6px;gap:5px}
       .bottom-menu{padding-top:7px}
       .menu-btn,.menu-link{min-height:43px}
     }
@@ -484,7 +569,7 @@
 <body>
 <script>
 (() => {
-  const SHOP_BUILD='20260923-player-top-layout-v1';
+  const SHOP_BUILD='20260923-bottom-workspace-v1';
   const u=new URL(location.href);
   if(u.searchParams.get('build')!==SHOP_BUILD){
     u.searchParams.set('build',SHOP_BUILD);
@@ -528,7 +613,19 @@
     </section>
 
     <main class="scene-area">
-      <section class="player-panel" aria-label="主人公の状態">
+      <section class="town-panel" aria-label="町">
+        <div class="scene-name" id="sceneName"></div>
+        <div class="town-scroll" id="townScroll">
+          <div class="town-strip" id="townStrip">
+            <div class="town-placeholder" id="townPlaceholder"></div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <section class="utility-panel" aria-label="主人公情報と持ち物・行動">
+      <aside class="player-panel" aria-label="主人公の状態">
+        <div class="money-box"><span>所持金</span><span id="moneyText">0</span></div>
         <div class="portrait" id="portrait"></div>
         <div class="stats">
           <div class="stat-row">
@@ -547,17 +644,16 @@
             <span class="stat-num" id="thirstText"></span>
           </div>
         </div>
-      </section>
+      </aside>
 
-      <section class="town-panel" aria-label="町">
-        <div class="scene-name" id="sceneName"></div>
-        <div class="town-scroll" id="townScroll">
-          <div class="town-strip" id="townStrip">
-            <div class="town-placeholder" id="townPlaceholder"></div>
-          </div>
+      <section class="quick-panel" aria-label="持ち物と行動">
+        <div class="quick-inventory" id="quickInventory"></div>
+        <div class="quick-actions">
+          <button type="button" class="quick-action-btn" id="quickBegButton">物乞い</button>
+          <button type="button" class="quick-action-btn" id="quickSellButton">物を売る</button>
         </div>
       </section>
-    </main>
+    </section>
 
     <p id="saveStatus" aria-live="polite"></p>
     <nav class="bottom-menu" id="bottomMenu" aria-label="メニュー"></nav>
@@ -575,7 +671,7 @@
     for (const file of files) {
       await new Promise((resolve, reject) => {
         const script = document.createElement('script');
-        script.src = file + '?v=20260923-player-top-layout-v1&nocache=' + stamp;
+        script.src = file + '?v=20260923-bottom-workspace-v1&nocache=' + stamp;
         script.onload = resolve;
         script.onerror = reject;
         document.body.appendChild(script);
