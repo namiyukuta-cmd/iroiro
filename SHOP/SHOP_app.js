@@ -109,8 +109,13 @@
     const layerFar=document.createElement('div');
     layerFar.className='scene-layer scene-layer-far';
     layerFar.style.backgroundImage='url("' + scene.background + '")';
-    layerFar.style.backgroundPosition='center 62%';
-    layerFar.style.backgroundSize='cover';
+
+    // 背景画像そのものは変更せず、縦長スマホ画面ではJS側で表示範囲を補正する。
+    // 空の余白が広がりすぎないよう、背景だけを拡大して下基準で切り取る。
+    const sceneRatio = strip.clientHeight / Math.max(1, strip.clientWidth);
+    const farZoom = sceneRatio >= 1.15 ? 145 : sceneRatio >= 1 ? 138 : 130;
+    layerFar.style.backgroundPosition='center bottom';
+    layerFar.style.backgroundSize='auto ' + farZoom + '%';
     layerFar.style.backgroundRepeat='no-repeat';
 
     const layerHouse=document.createElement('div');
