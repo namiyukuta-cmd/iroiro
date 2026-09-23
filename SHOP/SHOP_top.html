@@ -45,7 +45,7 @@
     .scene-area{
       min-height:0;
       display:grid;
-      grid-template-rows:minmax(0,1.2fr) minmax(150px,.8fr);
+      grid-template-rows:minmax(150px,.8fr) minmax(0,1.2fr);
       background:#cfc6b3;
     }
 
@@ -411,6 +411,7 @@
       grid-template-columns:92px minmax(0,1fr);
       gap:12px;
       background:#eee8d8;
+      border-bottom:2px solid #29261f;
     }
     .portrait{
       border:2px solid #29261f;
@@ -436,6 +437,7 @@
     .bar-fill{height:100%;width:0%;background:#514a40}
     .stat-num{text-align:right;font-variant-numeric:tabular-nums}
 
+    #saveStatus:empty{display:none}
     #saveStatus{
       min-height:26px;
       margin:0;
@@ -472,7 +474,7 @@
     .menu-btn:disabled{opacity:.5}
 
     @media(max-height:700px){
-      .scene-area{grid-template-rows:minmax(0,1fr) 145px}
+      .scene-area{grid-template-rows:145px minmax(0,1fr)}
       .player-panel{grid-template-columns:78px minmax(0,1fr);padding:9px}
       .bottom-menu{padding-top:7px}
       .menu-btn,.menu-link{min-height:43px}
@@ -482,7 +484,7 @@
 <body>
 <script>
 (() => {
-  const SHOP_BUILD='20260923-middle-all-up-v1';
+  const SHOP_BUILD='20260923-player-top-layout-v1';
   const u=new URL(location.href);
   if(u.searchParams.get('build')!==SHOP_BUILD){
     u.searchParams.set('build',SHOP_BUILD);
@@ -526,15 +528,6 @@
     </section>
 
     <main class="scene-area">
-      <section class="town-panel" aria-label="町">
-        <div class="scene-name" id="sceneName"></div>
-        <div class="town-scroll" id="townScroll">
-          <div class="town-strip" id="townStrip">
-            <div class="town-placeholder" id="townPlaceholder"></div>
-          </div>
-        </div>
-      </section>
-
       <section class="player-panel" aria-label="主人公の状態">
         <div class="portrait" id="portrait"></div>
         <div class="stats">
@@ -552,6 +545,15 @@
             <span id="thirstLabel"></span>
             <div class="bar"><div class="bar-fill" id="thirstBar"></div></div>
             <span class="stat-num" id="thirstText"></span>
+          </div>
+        </div>
+      </section>
+
+      <section class="town-panel" aria-label="町">
+        <div class="scene-name" id="sceneName"></div>
+        <div class="town-scroll" id="townScroll">
+          <div class="town-strip" id="townStrip">
+            <div class="town-placeholder" id="townPlaceholder"></div>
           </div>
         </div>
       </section>
@@ -573,7 +575,7 @@
     for (const file of files) {
       await new Promise((resolve, reject) => {
         const script = document.createElement('script');
-        script.src = file + '?v=20260923-far-layer-shift-v3&nocache=' + stamp;
+        script.src = file + '?v=20260923-player-top-layout-v1&nocache=' + stamp;
         script.onload = resolve;
         script.onerror = reject;
         document.body.appendChild(script);
