@@ -104,13 +104,22 @@
   }
 
   function formalWork() {
-    const p = H.state.progression.support;
-    if (!p.workAccess || H.state.daily.formalWork) return;
-    if (H.state.stats.health < 40 || H.state.stats.fatigue > 75 || H.state.stats.hygiene < 25 || H.state.stats.hunger > 82) {
-      info("日雇い", "今日は条件不足。紹介資格は失われない。");
+    const status = H.canTakeJob?.("warehouse_day");
+    if (!status?.unlocked || status.available === false || H.state.daily.formalWork) {
+      if (status?.reason) info("倉庫の日雇い", status.reason);
       return;
     }
     G.startFormalWork();
+  }
+
+  function referralWork(jobId) {
+    const job = H.getJob?.(jobId);
+    const status = H.canTakeJob?.(jobId);
+    if (!job || !status?.unlocked || status.available === false) {
+      info(job?.name || "仕事", status?.reason || "今日は紹介を受けられない。");
+      return;
+    }
+    G.startReferralWork?.(jobId);
   }
 
   function policeTalk() {
@@ -330,7 +339,7 @@
   }
 
   Object.assign(G, {
-    homelessTalk, sellScrap, recyclerTrial, recyclerWork, formalWork,
+    homelessTalk, sellScrap, recyclerTrial, recyclerWork, formalWork, referralWork,
     policeTalk, supportPersonTalk, thugTalk, thugJob, useItem, sleepAt
   });
 })();
