@@ -32,15 +32,27 @@
 
     timeSystem: Object.freeze({
       prayers: Object.freeze([
-        Object.freeze({id:'fajr', label:'ファジュル', code:'F', minute:300}),
-        Object.freeze({id:'dhuhr', label:'ズフル', code:'D', minute:720}),
-        Object.freeze({id:'asr', label:'アスル', code:'A', minute:930}),
-        Object.freeze({id:'maghrib', label:'マグリブ', code:'M', minute:1080}),
-        Object.freeze({id:'isha', label:'イシャー', code:'I', minute:1170})
+        Object.freeze({id:'fajr', label:'ファジュル', minute:300}),
+        Object.freeze({id:'dhuhr', label:'ズフル', minute:720}),
+        Object.freeze({id:'asr', label:'アスル', minute:930}),
+        Object.freeze({id:'maghrib', label:'マグリブ', minute:1080}),
+        Object.freeze({id:'isha', label:'イシャー', minute:1170})
       ]),
-      fastingStartId: 'fajr',
-      fastingEndId: 'maghrib',
-      lunarCycleDays: 29.53
+      prayerNoticeMinutes: 30,
+      lunarMonths: Object.freeze([
+        Object.freeze({name:'ムハッラム', days:30}),
+        Object.freeze({name:'サファル', days:29}),
+        Object.freeze({name:'ラビー1', days:30}),
+        Object.freeze({name:'ラビー2', days:29}),
+        Object.freeze({name:'ジュマーダ1', days:30}),
+        Object.freeze({name:'ジュマーダ2', days:29}),
+        Object.freeze({name:'ラジャブ', days:30}),
+        Object.freeze({name:'シャアバーン', days:29}),
+        Object.freeze({name:'ラマダーン', days:30}),
+        Object.freeze({name:'シャウワール', days:29}),
+        Object.freeze({name:'ズルカアダ', days:30}),
+        Object.freeze({name:'ズルヒッジャ', days:29})
+      ])
     }),
 
     scenes: Object.freeze({
@@ -140,8 +152,8 @@
     }),
 
     links: Object.freeze({
-      newGame: './SHOP_top.html?new=1&build=20260923-time-rail-clean-v2',
-      continueGame: './SHOP_top.html?continue=1&build=20260923-time-rail-clean-v2',
+      newGame: './SHOP_top.html?new=1&build=20260923-compact-calendar-prayer-v1',
+      continueGame: './SHOP_top.html?continue=1&build=20260923-compact-calendar-prayer-v1',
       backToGames: '../index.html',
       backToShopMenu: './SHOP_index.html'
     })
