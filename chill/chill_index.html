@@ -57,18 +57,38 @@ h1{
 <body>
 <main>
   <h1>Chill</h1>
-  <a class="start" href="chill_top.html?v=20260924-0235">はじめる</a>
+  <a id="startChill" class="start" href="chill_top.html?_nc=20260924-0310">はじめる</a>
 </main>
 <script>
 (()=>{
-  const BUILD_ID='20260924-0235';
+  const pathKey='fresh:'+location.pathname;
   const url=new URL(location.href);
-  if(url.searchParams.get('v')!==BUILD_ID){
-    url.searchParams.set('v',BUILD_ID);
+  const token=url.searchParams.get('_nc');
+  const seen=sessionStorage.getItem(pathKey);
+
+  if(!token || seen===token){
+    const fresh=Date.now().toString();
+    url.searchParams.set('_nc',fresh);
+    sessionStorage.setItem(pathKey,fresh);
     location.replace(url.toString());
     return;
   }
-  window.addEventListener('pageshow',e=>{if(e.persisted)location.reload()});
+  sessionStorage.setItem(pathKey,token);
+
+  window.addEventListener('pageshow',e=>{
+    if(!e.persisted)return;
+    const u=new URL(location.href);
+    const fresh=Date.now().toString();
+    u.searchParams.set('_nc',fresh);
+    sessionStorage.setItem(pathKey,fresh);
+    location.replace(u.toString());
+  });
+
+  const start=document.getElementById('startChill');
+  start?.addEventListener('click',e=>{
+    e.preventDefault();
+    location.href='chill_top.html?_nc='+Date.now();
+  });
 })();
 </script>
 </body>
