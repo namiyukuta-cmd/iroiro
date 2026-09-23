@@ -83,7 +83,8 @@
 
         if (major) {
           const label = document.createElement('span');
-          label.className = 'hour-label';
+          label.className = 'hour-label' +
+            (hour === 0 ? ' edge-start' : hour === 24 ? ' edge-end' : '');
           label.style.left = (hour / 24 * 100) + '%';
           label.textContent = String(hour);
           nodes.push(label);
@@ -99,15 +100,8 @@
         const endPct = minutePercent(fastingEnd.minute);
         band.style.left = startPct + '%';
         band.style.width = Math.max(0, endPct - startPct) + '%';
+        band.textContent = '断食';
         nodes.push(band);
-
-        const fastingStatus = document.createElement('div');
-        fastingStatus.className = 'fasting-status';
-        fastingStatus.textContent =
-          now >= fastingStart.minute && now < fastingEnd.minute
-            ? '断食中'
-            : '断食外';
-        nodes.push(fastingStatus);
       }
 
       prayers.forEach(prayer => {
