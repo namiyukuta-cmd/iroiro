@@ -179,6 +179,10 @@
         regularIncome: false,
         supportBase: false,
         streetNetwork: false
+      },
+      housing: {
+        current: "street_base",
+        target: "transitional_housing"
       }
     },
     story: {
