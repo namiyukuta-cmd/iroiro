@@ -60,29 +60,49 @@
     const key = state.sceneKey && data.scenes[state.sceneKey] ? state.sceneKey : 'outerPoor';
     const scene = data.scenes[key];
     const strip = $('townStrip');
-    if(scene.playerAnchor){
-      strip.dataset.playerLeft=String(scene.playerAnchor.left);
-      strip.dataset.playerBottom=String(scene.playerAnchor.bottom);
-      strip.dataset.playerHeight=String(scene.playerAnchor.height);
-    }else{
-      delete strip.dataset.playerLeft;
-      delete strip.dataset.playerBottom;
-      delete strip.dataset.playerHeight;
-    }
     const placeholder = $('townPlaceholder');
 
     strip.style.minWidth = '0';
     strip.style.width = '100%';
-    strip.style.backgroundImage = 'url("' + scene.background + '")';
-    strip.style.backgroundPosition = 'center 62%';
-    strip.style.backgroundSize = 'cover';
-    strip.style.backgroundRepeat = 'no-repeat';
+    strip.style.backgroundImage = 'none';
 
-    strip.querySelectorAll('.scene-object').forEach(node => node.remove());
+    strip.querySelectorAll('.scene-layer').forEach(node => node.remove());
+
+    // 5層は上下に分割する帯ではなく、同じ画面全面に重なる5枚のレイヤー。
+    const layerFar=document.createElement('div');
+    layerFar.className='scene-layer scene-layer-far';
+    layerFar.style.backgroundImage='url("' + scene.background + '")';
+    layerFar.style.backgroundPosition='center 62%';
+    layerFar.style.backgroundSize='cover';
+    layerFar.style.backgroundRepeat='no-repeat';
+
+    const layerHouse=document.createElement('div');
+    layerHouse.className='scene-layer scene-layer-house';
+
+    const layerBackgroundNpc=document.createElement('div');
+    layerBackgroundNpc.className='scene-layer scene-layer-backgroundNpc';
+
+    const layerInteractive=document.createElement('div');
+    layerInteractive.className='scene-layer scene-layer-interactive';
+
+    const layerPlayer=document.createElement('div');
+    layerPlayer.className='scene-layer scene-layer-player';
+
+    strip.append(layerFar,layerHouse,layerBackgroundNpc,layerInteractive,layerPlayer);
+
+    const layerMap={
+      far:layerFar,
+      house:layerHouse,
+      backgroundNpc:layerBackgroundNpc,
+      interactive:layerInteractive,
+      player:layerPlayer,
+      town:layerHouse,
+      people:layerBackgroundNpc
+    };
 
     scene.objects.forEach(item => {
       const image = document.createElement('img');
-      image.className = 'scene-object layer-' + (item.layer || 'town');
+      image.className = 'scene-object layer-' + (item.layer || 'house');
       if(item.selectable) image.classList.add('is-selectable');
       if(item.selectable && item.selectableType==='npc') image.classList.add('selectable-npc');
 
@@ -105,9 +125,9 @@
       image.style.bottom = (item.bottom || 0) + '%';
       image.style.height = item.height + '%';
       const z = typeof item.layer === 'string' ? data.layers[item.layer] : item.layer;
-      image.style.zIndex = String(z ?? data.layers.town);
+      image.style.zIndex = String(z ?? data.layers.house);
       if (item.flip) image.style.transform = 'scaleX(-1)';
-      strip.appendChild(image);
+      (layerMap[item.layer] || layerHouse).appendChild(image);
     });
 
     placeholder.style.display = 'none';
