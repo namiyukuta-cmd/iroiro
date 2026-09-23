@@ -186,58 +186,56 @@
     .scene-nav-next{right:14px}
 
     .action-screen{
-      position:absolute;
-      inset:0;
-      z-index:500;
+      min-height:0;
       display:none;
-      grid-template-rows:auto 30% minmax(0,1fr);
-      background:#eee8d8;
+      grid-template-rows:minmax(0,1.25fr) minmax(118px,.75fr);
+      background:
+        linear-gradient(180deg,rgba(255,248,224,.34),rgba(176,126,74,.16)),
+        #e5c999;
       overflow:hidden;
+      border-bottom:2px solid #29261f;
     }
+    .app.action-open .scene-area{display:none}
     .action-screen.is-open{display:grid}
 
-    /* 上段：操作帯 */
-    .action-head{
-      position:relative;
-      z-index:20;
-      display:grid;
-      grid-template-columns:auto minmax(0,1fr) auto;
-      align-items:center;
-      gap:8px;
-      padding:max(10px,env(safe-area-inset-top)) 12px 10px;
-      border-bottom:2px solid #29261f;
-      background:#e9e1cf;
-    }
-    .action-back,.action-mode{
-      border:2px solid #29261f;
-      border-radius:9px;
-      background:#fffaf0;
-      font-weight:900;
-      min-height:42px;
-      padding:6px 12px;
-    }
-    .action-head-title{
-      display:block;
-      text-align:center;
-      font-size:16px;
-      font-weight:900;
-      white-space:nowrap;
-    }
-    .action-modes{display:flex;gap:6px}
-    .action-mode[disabled]{opacity:.35}
-
-    /* 中段：人が行き交い、ときどき止まる */
     .passerby-lane{
       position:relative;
+      min-height:0;
       overflow:hidden;
       border-bottom:2px solid #29261f;
-      background:#f8f3e8;
+      background:
+        linear-gradient(180deg,#f3e5c6 0%,#ead1a5 58%,#d7af7f 100%);
+    }
+    .action-back{
+      position:absolute;
+      left:10px;
+      top:10px;
+      z-index:20;
+      min-height:38px;
+      padding:5px 11px;
+      border:2px solid #29261f;
+      border-radius:9px;
+      background:rgba(255,250,240,.92);
+      font-size:12px;
+      font-weight:900;
+    }
+    .action-head-title{
+      position:absolute;
+      right:10px;
+      top:10px;
+      z-index:20;
+      padding:6px 10px;
+      border-radius:7px;
+      background:rgba(255,250,240,.88);
+      font-size:15px;
+      font-weight:900;
+      white-space:nowrap;
     }
     .passerby-sprite{
       position:absolute;
       bottom:0;
       left:-20%;
-      height:92%;
+      height:90%;
       width:auto;
       max-width:none;
       object-fit:contain;
@@ -250,7 +248,7 @@
     }
     .passerby-popup{
       position:absolute;
-      top:10px;
+      top:18%;
       left:50%;
       z-index:8;
       max-width:62%;
@@ -279,146 +277,83 @@
       transform:translateX(-50%) rotate(45deg);
     }
 
-    /* 下部：左に時間、右に物乞い/売り場 */
     .action-body{
       position:relative;
       min-height:0;
-      display:grid;
-      grid-template-columns:62px minmax(0,1fr);
       overflow:hidden;
-      background:#eee8d8;
+      background:
+        linear-gradient(180deg,#dfbd8d 0%,#e7cca2 50%,#dfba87 100%);
     }
-    .time-rail{
-      position:relative;
-      min-height:0;
-      border-right:2px solid #29261f;
-      background:#e7deca;
-      overflow:hidden;
-    }
-    .time-track{
-      position:absolute;
-      left:34px;
-      top:5%;
-      bottom:5%;
-      width:3px;
-      background:#4c463d;
-    }
-    .time-tick{
-      position:absolute;
-      left:-8px;
-      width:19px;
-      height:1px;
-      background:#4c463d;
-      transform:translateY(-50%);
-    }
-    .time-tick.major{
-      left:-12px;
-      width:27px;
-      height:2px;
-    }
-    .time-label{
-      position:absolute;
-      right:34px;
-      transform:translateY(-50%);
-      font-size:9px;
-      font-weight:800;
-      color:#5e574d;
-      white-space:nowrap;
-    }
-    .time-special{
-      position:absolute;
-      left:-15px;
-      width:33px;
-      height:5px;
-      border-radius:999px;
-      background:#29261f;
-      transform:translateY(-50%);
-    }
-    .time-special-label{
-      position:absolute;
-      left:8px;
-      transform:translateY(-50%);
-      font-size:8px;
-      font-weight:900;
-      white-space:nowrap;
-      writing-mode:vertical-rl;
-      letter-spacing:.04em;
-    }
-    .time-now{
-      position:absolute;
-      left:-7px;
-      width:17px;
-      height:17px;
-      border:3px solid #29261f;
-      border-radius:50%;
-      background:#fffaf0;
-      transform:translate(-50%,-50%);
-      z-index:4;
-    }
-
     .action-main{
-      position:relative;
+      position:absolute;
+      inset:0;
       min-width:0;
       min-height:0;
       overflow:hidden;
-      background:#eee8d8;
     }
 
-    /* 物乞い：壺だけ */
+    /* 物乞い：中央の商品欄は出さず、砂地＋壺だけ */
     .beg-pot{
       position:absolute;
-      left:50%;
-      bottom:14%;
+      left:18%;
+      bottom:18%;
       transform:translateX(-50%);
-      width:126px;
-      height:92px;
+      width:84px;
+      height:62px;
       border:3px solid #29261f;
-      border-radius:20px 20px 50% 50%;
-      background:#c6a06b;
+      border-radius:17px 17px 50% 50%;
+      background:#c9a46d;
     }
     .beg-pot::before{
       content:'';
       position:absolute;
-      left:20px;
-      right:20px;
-      top:-20px;
-      height:20px;
+      left:14px;
+      right:14px;
+      top:-14px;
+      height:14px;
       border:3px solid #29261f;
       border-bottom:0;
-      background:#d2b17f;
-      transform:perspective(80px) rotateX(35deg);
+      background:#d6b682;
+      transform:perspective(70px) rotateX(35deg);
     }
 
-    /* 物売り：3×3グリッド */
+    /* 物売り：このモードだけ中央に商品欄を出す */
     .sell-grid{
       position:absolute;
-      left:50%;
-      top:10%;
-      transform:translateX(-50%);
-      width:min(84%,370px);
-      aspect-ratio:1/1;
+      left:53%;
+      top:50%;
+      transform:translate(-50%,-50%);
+      width:min(72%,390px);
+      height:84%;
       display:grid;
-      grid-template-columns:repeat(3,1fr);
-      grid-template-rows:repeat(3,1fr);
-      border:3px solid #29261f;
-      background:#f8f3e8;
+      grid-template-columns:repeat(4,minmax(0,1fr));
+      grid-template-rows:repeat(2,minmax(0,1fr));
+      gap:6px;
+      padding:7px;
+      border:2px solid #6f624f;
+      border-radius:8px;
+      background:rgba(248,243,232,.94);
     }
     .sell-cell{
-      border-right:1px solid #7d7467;
-      border-bottom:1px solid #7d7467;
+      min-width:0;
+      min-height:0;
+      border:1px solid #9a8f79;
+      border-radius:7px;
       display:grid;
       place-items:center;
-      padding:6px;
+      padding:5px;
       text-align:center;
-      font-size:12px;
+      font-size:11px;
       font-weight:800;
+      line-height:1.2;
       background:#fffaf0;
+      overflow:hidden;
     }
-    .sell-cell:nth-child(3n){border-right:0}
-    .sell-cell:nth-last-child(-n+3){border-bottom:0}
-    .sell-cell.empty{color:#aaa}
+    .sell-cell.empty{
+      color:#a49b89;
+      background:#e3dac7;
+    }
 
-    /* 人が止まった時だけ会話を出す */
     .action-dialog{
       position:absolute;
       left:7%;
@@ -433,6 +368,7 @@
       display:none;
     }
     .action-dialog.is-open{display:block}
+
     .town-placeholder{
       position:absolute;
       inset:0;
@@ -624,7 +560,7 @@
 <body>
 <script>
 (() => {
-  const SHOP_BUILD='20260923-split-world-modules-v1';
+  const SHOP_BUILD='20260923-action-sand-workspace-v1';
   const u=new URL(location.href);
   if(u.searchParams.get('build')!==SHOP_BUILD){
     u.searchParams.set('build',SHOP_BUILD);
@@ -642,24 +578,13 @@
     </header>
 
     <section class="action-screen" id="actionScreen" aria-label="行動">
-      <div class="action-head">
-        <button type="button" class="action-back" id="actionBack">戻る</button>
-        <div class="action-head-title" id="actionTitle">行動</div>
-        <div class="action-modes">
-          <button type="button" class="action-mode" id="begModeButton">物乞い</button>
-          <button type="button" class="action-mode" id="sellModeButton">物を売る</button>
-        </div>
-      </div>
-
       <div class="passerby-lane" id="passerbyLane" aria-label="人の行き交い">
+        <button type="button" class="action-back" id="actionBack">戻る</button>
+        <div class="action-head-title" id="actionTitle">物乞い中</div>
         <div class="passerby-popup" id="passerbyPopup" aria-live="polite"></div>
       </div>
 
       <div class="action-body">
-        <aside class="time-rail" aria-label="時間">
-          <div class="time-track" id="timeTrack"></div>
-        </aside>
-
         <div class="action-main">
           <div class="action-dialog" id="actionDialog"></div>
           <div class="beg-pot" id="begPot" aria-label="物乞いの壺"></div>
@@ -731,7 +656,7 @@
     for (const file of files) {
       await new Promise((resolve, reject) => {
         const script = document.createElement('script');
-        script.src = file + '?v=20260923-split-world-modules-v1&nocache=' + stamp;
+        script.src = file + '?v=20260923-action-sand-workspace-v1&nocache=' + stamp;
         script.onload = resolve;
         script.onerror = reject;
         document.body.appendChild(script);
