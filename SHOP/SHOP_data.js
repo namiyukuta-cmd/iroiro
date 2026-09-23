@@ -33,24 +33,21 @@
       outerPoor: Object.freeze({
         name: '小門外・底辺区',
         background: './asset/bg_desert_wall.jpeg',
-
-        // ⑤主人公移動・配置層。まだ主人公画像は置かない。
-        playerArea: Object.freeze({left:8, right:92, bottom:0, top:18}),
-
+        playerArea: Object.freeze({left:6, right:94, bottom:0, top:14}),
         objects: Object.freeze([
           // ② 背景としての家配置層
-          Object.freeze({src:'./asset/house_poor.png', left:-8, bottom:12, height:37, layer:'house'}),
-          Object.freeze({src:'./asset/house_poor.png', left:72, bottom:12, height:37, layer:'house', flip:true}),
-          Object.freeze({src:'./asset/house_poor.png', left:26, bottom:19, height:20, layer:'house', flip:true}),
-          Object.freeze({src:'./asset/house_poor.png', left:56, bottom:19, height:20, layer:'house'}),
+          Object.freeze({src:'./asset/house_poor.png', left:-7, bottom:18, height:31, layer:'house'}),
+          Object.freeze({src:'./asset/house_poor.png', left:74, bottom:18, height:31, layer:'house', flip:true}),
+          Object.freeze({src:'./asset/house_poor.png', left:28, bottom:20, height:16, layer:'house', flip:true}),
+          Object.freeze({src:'./asset/house_poor.png', left:55, bottom:20, height:16, layer:'house'}),
 
-          // ③ 背景としてのNPC配置層（選択不可）
-          Object.freeze({src:'https://raw.githubusercontent.com/namiyukuta-cmd/iroiro/main/SHOP/asset/Npc/npc_oldman_01.png', left:18, bottom:10, height:22, layer:'backgroundNpc'}),
-          Object.freeze({src:'https://raw.githubusercontent.com/namiyukuta-cmd/iroiro/main/SHOP/asset/Npc/npc_porter_01.png', left:82, bottom:10, height:22, layer:'backgroundNpc'}),
+          // ③ 背景としてのNPC配置層
+          Object.freeze({src:'https://raw.githubusercontent.com/namiyukuta-cmd/iroiro/main/SHOP/asset/Npc/npc_oldman_01.png', left:19, bottom:15, height:16, layer:'backgroundNpc'}),
+          Object.freeze({src:'https://raw.githubusercontent.com/namiyukuta-cmd/iroiro/main/SHOP/asset/Npc/npc_porter_01.png', left:81, bottom:15, height:16, layer:'backgroundNpc'}),
 
-          // ④ 選択可能層：ショップと選択可能NPC
-          Object.freeze({src:'./asset/stall.png', left:41, bottom:3, height:31, layer:'interactive', selectable:true, selectableType:'shop'}),
-          Object.freeze({src:'https://raw.githubusercontent.com/namiyukuta-cmd/iroiro/main/SHOP/asset/Npc/npc_beggar_01.png', left:29, bottom:2, height:29, layer:'interactive', selectable:true, selectableType:'npc'})
+          // ④ 選択可能層
+          Object.freeze({src:'./asset/stall.png', left:43, bottom:8, height:22, layer:'interactive', selectable:true, selectableType:'shop'}),
+          Object.freeze({src:'https://raw.githubusercontent.com/namiyukuta-cmd/iroiro/main/SHOP/asset/Npc/npc_beggar_01.png', left:31, bottom:5, height:22, layer:'interactive', selectable:true, selectableType:'npc'})
         ])
       }),
       smallGateOutside: Object.freeze({
@@ -108,8 +105,8 @@
     }),
 
     links: Object.freeze({
-      newGame: './SHOP_top.html?new=1&build=20260923-0910',
-      continueGame: './SHOP_top.html?continue=1&build=20260923-0910',
+      newGame: './SHOP_top.html?new=1&build=20260923-0918',
+      continueGame: './SHOP_top.html?continue=1&build=20260923-0918',
       backToGames: '../index.html',
       backToShopMenu: './SHOP_index.html'
     })
