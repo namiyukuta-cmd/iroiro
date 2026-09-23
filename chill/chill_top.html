@@ -152,7 +152,7 @@ button{
   position:absolute;
   width:24px;
   height:24px;
-  transform:translate(-50%,-50%);
+  transform:none;
   border:1px solid #555;
   background:
     repeating-linear-gradient(
@@ -295,7 +295,7 @@ button{
 <main id="game" aria-label="白い箱庭">
   <div id="ground" class="grid-on">
     <div id="objectLayer"></div>
-    <img id="girl" src="asset/chill_girl_01.png?_nc=20260924-0324" alt="女の子">
+    <img id="girl" src="asset/chill_girl_01.png?_nc=20260924-0338" alt="女の子">
     <div id="hint">土や物を選んで、置きたいマスをタップ</div>
   </div>
 
@@ -457,6 +457,21 @@ function clamp(o){
   o.x=Math.max(24,Math.min(r.width-24,o.x));
   o.y=Math.max(24,Math.min(r.height-24,o.y));
 }
+function gridCellFromPoint(clientX,clientY){
+  const r=ground.getBoundingClientRect();
+  const rawX=Math.max(0,clientX-r.left);
+  const rawY=Math.max(0,clientY-r.top);
+  const col=Math.floor(rawX/GRID);
+  const row=Math.floor(rawY/GRID);
+  return {
+    x:col*GRID,
+    y:row*GRID,
+    col,
+    row,
+    width:r.width,
+    height:r.height
+  };
+}
 soilSlot.addEventListener('click',()=>{
   if(inventory.soil<=0)return;
   selectedInventory=selectedInventory==='soil'?null:'soil';
@@ -483,21 +498,16 @@ document.querySelectorAll('[data-tool]').forEach(b=>{
   });
 });
 ground.addEventListener('click',e=>{
-  const r=ground.getBoundingClientRect();
-  const rawX=e.clientX-r.left;
-  const rawY=e.clientY-r.top;
-  const x=Math.round(rawX/GRID)*GRID;
-  const y=Math.round(rawY/GRID)*GRID;
+  const cell=gridCellFromPoint(e.clientX,e.clientY);
+  const x=cell.x;
+  const y=cell.y;
 
   if(selectedInventory==='soil'){
     if(inventory.soil<=0)return;
+    // Do not place into a clipped partial cell at the right/bottom edge.
+    if(x+GRID>cell.width || y+GRID>cell.height)return;
     if(plots.some(p=>p.x===x&&p.y===y))return;
-    const p={x,y,planted:false};
-    const bounds={x:p.x,y:p.y};
-    clamp(bounds);
-    p.x=bounds.x;p.y=bounds.y;
-    if(plots.some(q=>q.x===p.x&&q.y===p.y))return;
-    plots.push(p);
+    plots.push({x,y,planted:false});
     inventory.soil--;
     if(inventory.soil<=0)selectedInventory=null;
     render();
@@ -516,7 +526,8 @@ ground.addEventListener('click',e=>{
   }
 
   if(currentTool==='select')return;
-  const o={id:nextId++,type:currentTool,x,y};
+  // Furniture uses the center of the selected grid cell.
+  const o={id:nextId++,type:currentTool,x:x+GRID/2,y:y+GRID/2};
   clamp(o);objects.push(o);selectedId=o.id;
   currentTool='select';syncTools();render();
 });
