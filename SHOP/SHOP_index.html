@@ -42,7 +42,19 @@
     <a class="menu" id="continueGameLink"></a>
     <a class="menu back" id="backLink"></a>
   </main>
-  <script src="./SHOP_data.js?v=20260923-1206"></script>
-  <script src="./SHOP_index.js?v=20260923-1206"></script>
+  <script>
+  (async () => {
+    const stamp = Date.now();
+    for (const file of ['./SHOP_data.js','./SHOP_index.js']) {
+      await new Promise((resolve, reject) => {
+        const script = document.createElement('script');
+        script.src = file + '?v=20260923-far-layer-shift-v3&nocache=' + stamp;
+        script.onload = resolve;
+        script.onerror = reject;
+        document.body.appendChild(script);
+      });
+    }
+  })();
+  </script>
 </body>
 </html>
