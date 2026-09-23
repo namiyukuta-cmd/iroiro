@@ -59,7 +59,9 @@
     intimacy: evaluations.intimacy ? {
       mode: evaluations.intimacy.mode,
       score: evaluations.intimacy.score,
-      intimacyDesire: evaluations.intimacy.intimacyDesire
+      intimacyDesire: evaluations.intimacy.intimacyDesire,
+      stageReadiness: evaluations.intimacy.stageReadiness,
+      relationshipReadiness: evaluations.intimacy.relationshipReadiness
     } : null
   });
 
@@ -76,6 +78,93 @@
     if (familiarity >= 5) return { stage: 1, stageName: "興味" };
     return { stage: 0, stageName: "他人" };
   };
+
+  const HISTORY_BACKFILL_VERSION = 1;
+
+  const historyEvidenceForCharacter = (id) => {
+    const characterName = H.CHARACTERS?.[id]?.name || H.DATA?.people?.[id]?.name || "";
+    const history = Array.isArray(H.state?.history) ? H.state.history.map(String) : [];
+    const relevant = characterName ? history.filter((line) => line.includes(characterName)) : [];
+    const recentRelevant = characterName
+      ? history.slice(0, 16).filter((line) => line.includes(characterName))
+      : [];
+    const count = (lines, pattern) => lines.filter((line) => pattern.test(line)).length;
+
+    return {
+      relevantLines: relevant.length,
+      affectionCount: count(relevant, /好意|好き|愛して|惹か|特別/),
+      mutualAffection: relevant.some((line) =>
+        /好意を伝え.*好意を返|互い.*好意|両想い|両思い/.test(line)
+      ),
+      kissCount: count(relevant, /キス/),
+      recentKissCount: count(recentRelevant, /キス/),
+      sharedNightCount: count(relevant, /(?:一緒に|寄り添って).*(?:眠|休|夜を越)|夜を越した.*(?:一緒|寄り添)/),
+      careCount: count(relevant, /パン|水|食事|歯ブラシ|歯磨き|カミソリ|石けん|分け|渡し/)
+    };
+  };
+
+  const backfillPsychologyFromHistory = (id, rel, rawState = {}) => {
+    if ((Number(rawState.historyBackfillVersion) || 0) >= HISTORY_BACKFILL_VERSION) return rawState;
+
+    const next = { ...rawState };
+    const evidence = historyEvidenceForCharacter(id);
+    const floor = (key, value) => {
+      next[key] = Math.max(Number(next[key]) || 0, value);
+    };
+
+    // 段階・現在値では再現できない「すでに成立した関係経験」だけを履歴から補う。
+    // 嫉妬・longing・怒り等の一時感情は、過去にあっただけでは現在値へ持ち越さない。
+    if (evidence.mutualAffection || evidence.affectionCount >= 2) {
+      floor("romanticAwareness", 75);
+      floor("certaintyOfOwnFeelings", 72);
+      floor("perceivedReciprocity", 70);
+      floor("certaintyOfHerAffection", 68);
+      floor("romanticConfidence", 58);
+      floor("relationshipHope", 65);
+      floor("romanticMomentum", 38);
+      floor("emotionalNeed", 35);
+      floor("needForReciprocity", 35);
+      floor("memoryFrequency", 30);
+    }
+
+    if (evidence.kissCount > 0) {
+      floor("kissImpulse", Math.min(55, 30 + evidence.kissCount * 5));
+      floor("embraceImpulse", 28);
+      floor("closenessComfort", 65);
+      floor("passion", 32);
+      floor("privateTimeWish", 30);
+      floor("romanticMomentum", 45);
+    }
+
+    if (evidence.recentKissCount > 0) {
+      floor("kissImpulse", 45);
+      floor("recentAffectionImpact", 18);
+      floor("emotionalActivation", 12);
+    }
+
+    if (evidence.sharedNightCount >= 2 || rel?.flags?.sharedNight) {
+      floor("closenessComfort", evidence.sharedNightCount >= 3 ? 70 : 64);
+      floor("attachment", 68);
+      floor("desireForContact", 62);
+      floor("privateTimeWish", 35);
+      floor("reluctanceToPart", 25);
+      floor("perceivedSafety", 62);
+    }
+
+    if (evidence.careCount >= 2) {
+      floor("tenderness", 30);
+      floor("gratitude", 25);
+      floor("positiveMemorySalience", 65);
+    }
+
+    next.historyBackfillVersion = HISTORY_BACKFILL_VERSION;
+    next.historyBackfillSummary = evidence;
+    next.lastHistoryBackfillReason = "state.historyから確定済みの関係経験を詳細心理へ補完";
+    return next;
+  };
+
+  H.HISTORY_BACKFILL_VERSION = HISTORY_BACKFILL_VERSION;
+  H.backfillPsychologyFromHistory = backfillPsychologyFromHistory;
 
   const EVENT_DELTAS = Object.freeze({
     conversation: Object.freeze({
@@ -208,7 +297,8 @@
       unresolvedEmotion: ""
     };
 
-    return engine?.normalizeState ? engine.normalizeState(raw, id) : raw;
+    const backfilled = backfillPsychologyFromHistory(id, rel, raw);
+    return engine?.normalizeState ? engine.normalizeState(backfilled, id) : backfilled;
   };
 
   H.ensureRelationshipPsychology = (id, rel) => {
@@ -224,6 +314,7 @@
           ...character.psychologyTraits
         };
       }
+      rel.psychology = backfillPsychologyFromHistory(id, rel, rel.psychology);
       if (engine?.normalizeState) rel.psychology = engine.normalizeState(rel.psychology, id);
     }
     if (!Array.isArray(rel.psychologyHistory)) rel.psychologyHistory = [];
