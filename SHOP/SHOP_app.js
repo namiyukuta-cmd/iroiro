@@ -83,6 +83,8 @@
     scene.objects.forEach(item => {
       const image = document.createElement('img');
       image.className = 'scene-object layer-' + (item.layer || 'town');
+      if(item.selectable) image.classList.add('is-selectable');
+      if(item.selectable && item.selectableType==='npc') image.classList.add('selectable-npc');
       image.src = item.src;
       image.alt = '';
       image.draggable = false;
