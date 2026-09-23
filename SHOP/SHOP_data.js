@@ -127,8 +127,8 @@
     }),
 
     links: Object.freeze({
-      newGame: './SHOP_top.html?new=1&build=20260923-1146-exact919',
-      continueGame: './SHOP_top.html?continue=1&build=20260923-1146-exact919',
+      newGame: './SHOP_top.html?new=1&build=20260923-1325-person-up',
+      continueGame: './SHOP_top.html?continue=1&build=20260923-1325-person-up',
       backToGames: '../index.html',
       backToShopMenu: './SHOP_index.html'
     })
