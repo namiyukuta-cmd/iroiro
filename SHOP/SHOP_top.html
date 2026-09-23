@@ -134,68 +134,78 @@
       inset:0;
       z-index:500;
       display:none;
-      grid-template-rows:auto 28% minmax(0,1fr);
+      grid-template-rows:24% minmax(0,1fr);
       background:#eee8d8;
       overflow:hidden;
     }
     .action-screen.is-open{display:grid}
 
-    /* 参考画像と同じ：上に独立した操作帯を置く */
+    /* 戻る・モード切替はレイアウトを押し下げない浮きUI */
     .action-head{
-      display:grid;
-      grid-template-columns:auto minmax(0,1fr) auto;
-      align-items:center;
-      gap:8px;
-      padding:max(10px,env(safe-area-inset-top)) 12px 10px;
-      border-bottom:0;
-      background:#e9e1cf;
+      position:absolute;
+      left:10px;
+      right:10px;
+      top:max(8px,env(safe-area-inset-top));
       z-index:20;
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      pointer-events:none;
     }
     .action-back,.action-mode{
+      pointer-events:auto;
       border:2px solid #29261f;
-      border-radius:9px;
-      background:#fffaf0;
+      border-radius:999px;
+      background:rgba(255,250,240,.92);
       font-weight:900;
-      min-height:42px;
-      padding:6px 12px;
+      min-height:38px;
+      padding:5px 11px;
     }
-    .action-head-title{
-      display:block;
-      text-align:center;
-      font-weight:900;
-      font-size:16px;
-      white-space:nowrap;
-    }
+    .action-head-title{display:none}
     .action-modes{display:flex;gap:6px}
     .action-mode[disabled]{opacity:.35}
 
-    /* 参考画像と同じ：上部には人物の下半身が大きく見える */
+    /* 上部：人の行き交いは足だけ */
     .feet-lane{
       position:relative;
       overflow:hidden;
       border-bottom:2px solid #29261f;
       background:#f8f3e8;
     }
-    .passerby{
+    .feet-pair{
       position:absolute;
-      bottom:3%;
-      height:150%;
-      width:auto;
-      max-width:none;
-      object-fit:contain;
-      object-position:center bottom;
-      user-select:none;
-      -webkit-user-drag:none;
-      pointer-events:none;
-    }
-    .passerby.left{
-      left:27%;
+      top:42%;
+      width:76px;
+      height:68px;
       transform:translateX(-50%);
+      animation:feetPass 7s linear infinite;
     }
-    .passerby.right{
-      left:73%;
-      transform:translateX(-50%) scaleX(-1);
+    .feet-pair.left{left:-12%;animation-delay:0s}
+    .feet-pair.right{left:-12%;animation-delay:3.5s}
+    @keyframes feetPass{
+      from{left:-12%}
+      to{left:112%}
     }
+    .foot{
+      position:absolute;
+      bottom:0;
+      width:30px;
+      height:16px;
+      border-radius:50% 60% 45% 55%;
+      background:#211f1a;
+    }
+    .foot::before{
+      content:'';
+      position:absolute;
+      left:10px;
+      bottom:10px;
+      width:12px;
+      height:42px;
+      background:#211f1a;
+      border-radius:7px 7px 0 0;
+    }
+    .foot.a{left:6px}
+    .foot.b{right:6px}
 
     /* 下部：左に時間、右に物乞い/売り場 */
     .action-body{
@@ -286,8 +296,7 @@
     .beg-pot{
       position:absolute;
       left:50%;
-      top:31%;
-      bottom:auto;
+      bottom:14%;
       transform:translateX(-50%);
       width:126px;
       height:92px;
@@ -457,7 +466,7 @@
 <body>
 <script>
 (() => {
-  const SHOP_BUILD='20260923-1400-action-force';
+  const SHOP_BUILD='20260923-1332-match-reference';
   const u=new URL(location.href);
   if(u.searchParams.get('build')!==SHOP_BUILD){
     u.searchParams.set('build',SHOP_BUILD);
@@ -484,8 +493,8 @@
       </div>
 
       <div class="feet-lane" aria-label="人の行き交い">
-        <img class="passerby left" src="./asset/Npc/npc_beggar_01.png" alt="">
-        <img class="passerby right" src="./asset/Npc/npc_beggar_01.png" alt="">
+        <div class="feet-pair left"><span class="foot a"></span><span class="foot b"></span></div>
+        <div class="feet-pair right"><span class="foot a"></span><span class="foot b"></span></div>
       </div>
 
       <div class="action-body">
@@ -537,10 +546,10 @@
     <nav class="bottom-menu" id="bottomMenu" aria-label="メニュー"></nav>
   </div>
 
-  <script src="./SHOP_data.js?v=20260923-1400-action-force"></script>
-  <script src="./SHOP_items.js?v=20260923-1400-action-force"></script>
-  <script src="./SHOP_action.js?v=20260923-1400-action-force"></script>
-  <script src="./SHOP_save.js?v=20260923-1400-action-force"></script>
-  <script src="./SHOP_app.js?v=20260923-1400-action-force"></script>
+  <script src="./SHOP_data.js?v=20260923-1332-match-reference"></script>
+  <script src="./SHOP_items.js?v=20260923-1332-match-reference"></script>
+  <script src="./SHOP_action.js?v=20260923-1332-match-reference"></script>
+  <script src="./SHOP_save.js?v=20260923-1332-match-reference"></script>
+  <script src="./SHOP_app.js?v=20260923-1332-match-reference"></script>
 </body>
 </html>
