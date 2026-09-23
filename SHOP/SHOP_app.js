@@ -327,6 +327,7 @@
   function render() {
     const state = window.SHOP_STATE;
 
+    if (window.SHOP_TIME) window.SHOP_TIME.syncClimate(state);
     renderScene();
 
     const gameDay = Math.max(1, Number(state.day) || 1);
@@ -354,9 +355,9 @@
     $('hungerBar').style.width = hunger + '%';
     $('thirstBar').style.width = thirst + '%';
 
-    $('hpText').textContent = hp;
-    $('hungerText').textContent = hunger;
-    $('thirstText').textContent = thirst;
+    $('hpText').textContent = Math.round(hp);
+    $('hungerText').textContent = Math.round(hunger);
+    $('thirstText').textContent = Math.round(thirst);
     const moneyText = $('moneyText');
     if (moneyText) {
       moneyText.textContent = window.SHOP_CURRENCY
