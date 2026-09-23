@@ -31,8 +31,8 @@
 
   function drinkAtWell(state){
     if(!state) return {ok:false,message:'状態を読み込めません。'};
-    state.thirst=0;
     advance(state,DIRECT_DRINK_MINUTES,'drink_at_well');
+    state.thirst=0;
     return {ok:true,message:'井戸の水を飲んだ。渇きが癒えた。'};
   }
 
@@ -92,9 +92,9 @@
     }
 
     const recovery=Math.max(0,Number(item.thirstRecovery)||0);
+    advance(state,PORTABLE_DRINK_MINUTES,'drink_carried_water');
     state.thirst=Math.max(0,(Number(state.thirst)||0)-recovery);
     if(item.nextItemId) addItem(state,item.nextItemId,1);
-    advance(state,PORTABLE_DRINK_MINUTES,'drink_carried_water');
 
     return {
       ok:true,
