@@ -74,8 +74,8 @@
     strip.style.minWidth = '0';
     strip.style.width = '100%';
     strip.style.backgroundImage = 'url("' + scene.background + '")';
-    strip.style.backgroundPosition = 'center 70%';
-    strip.style.backgroundSize = '185% auto';
+    strip.style.backgroundPosition = 'center 78%';
+    strip.style.backgroundSize = '150% auto';
     strip.style.backgroundRepeat = 'no-repeat';
 
     strip.querySelectorAll('.scene-object').forEach(node => node.remove());
@@ -87,7 +87,8 @@
       if(item.selectable && item.selectableType==='npc') image.classList.add('selectable-npc');
 
       if(item.layer==='backgroundNpc'){
-        image.style.filter='drop-shadow(2px 3px 3px rgba(0,0,0,.28))';
+        image.style.filter='drop-shadow(1px 2px 2px rgba(0,0,0,.22))';
+        image.style.opacity='0.92';
       }
       if(item.selectable && item.selectableType==='npc'){
         image.style.filter=
@@ -104,8 +105,7 @@
       image.style.bottom = (item.bottom || 0) + '%';
       image.style.height = item.height + '%';
       const z = typeof item.layer === 'string' ? data.layers[item.layer] : item.layer;
-      const depth = Number(item.depth || 0);
-      image.style.zIndex = String((z ?? data.layers.town) + depth);
+      image.style.zIndex = String(z ?? data.layers.town);
       if (item.flip) image.style.transform = 'scaleX(-1)';
       strip.appendChild(image);
     });
