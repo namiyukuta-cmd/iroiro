@@ -260,6 +260,13 @@
     ["desire", "conscience", "malice"].forEach((key) => {
       if (typeof changes[key] === "number") rel[key] = clamp100((Number(rel[key]) || 0) + changes[key]);
     });
+    HMW.applyPsychologyEvent?.(id, "mind_adjust", {
+      reason: "HMW.adjustNpcMind",
+      psychologyChanges: {
+        ...(typeof changes.desire === "number" ? { physicalNeed: changes.desire } : {}),
+        ...(typeof changes.conscience === "number" ? { ethics: changes.conscience } : {})
+      }
+    });
     return HMW.getNpcMind(id);
   };
 
