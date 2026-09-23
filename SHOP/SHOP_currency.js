@@ -20,7 +20,7 @@
 
   function format(totalCopper) {
     const coins = split(totalCopper);
-    return '金 ' + coins.gold + '　銀 ' + coins.silver + '　銅 ' + coins.copper;
+    return '金' + coins.gold + '　銀' + coins.silver + '　銅' + coins.copper;
   }
 
   function add(state, copperAmount) {
@@ -32,9 +32,9 @@
   function formatAmount(copperAmount) {
     const coins = split(copperAmount);
     const parts = [];
-    if (coins.gold) parts.push('金 ' + coins.gold);
-    if (coins.silver) parts.push('銀 ' + coins.silver);
-    if (coins.copper || !parts.length) parts.push('銅 ' + coins.copper);
+    if (coins.gold) parts.push('金' + coins.gold);
+    if (coins.silver) parts.push('銀' + coins.silver);
+    if (coins.copper || !parts.length) parts.push('銅' + coins.copper);
     return parts.join(' ');
   }
 
