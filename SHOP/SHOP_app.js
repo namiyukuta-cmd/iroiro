@@ -80,7 +80,7 @@
       const marker = document.createElement('button');
       marker.type = 'button';
       marker.className = 'pickup-marker';
-      marker.textContent = '◆';
+      marker.textContent = '◇';
       marker.setAttribute('aria-label', '拾う');
       marker.style.left = pickup.left + '%';
       marker.style.bottom = (pickup.bottom || 0) + '%';
@@ -109,11 +109,11 @@
     const layerFar=document.createElement('div');
     layerFar.className='scene-layer scene-layer-far';
     layerFar.style.backgroundImage='url("' + scene.background + '")';
-    layerFar.style.backgroundPosition='center 68%';
+    layerFar.style.backgroundPosition='center 64%';
     layerFar.style.backgroundSize='cover';
     layerFar.style.backgroundRepeat='no-repeat';
-    layerFar.style.transform='scale(1.16)';
-    layerFar.style.transformOrigin='center 70%';
+    layerFar.style.transform='scale(1.04)';
+    layerFar.style.transformOrigin='center 68%';
 
     const layerHouse=document.createElement('div');
     layerHouse.className='scene-layer scene-layer-house';
