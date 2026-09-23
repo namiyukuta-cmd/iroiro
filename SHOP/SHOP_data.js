@@ -36,6 +36,9 @@
     scenes: Object.freeze({
       outerPoor: Object.freeze({
         name: '小門外・底辺区',
+        facilityLinks: Object.freeze([
+          Object.freeze({label:'井戸', sceneKey:'outerWell'})
+        ]),
         begging: Object.freeze({
           stopChance: 0.52,
           outcomes: Object.freeze([
@@ -69,6 +72,9 @@
       }),
       smallGateOutside: Object.freeze({
         name: '小門前',
+        facilityLinks: Object.freeze([
+          Object.freeze({label:'公衆浴場', sceneKey:'smallGateBathhouse'})
+        ]),
         begging: Object.freeze({
           stopChance: 0.48,
           outcomes: Object.freeze([
@@ -93,6 +99,10 @@
 
       cityCommon: Object.freeze({
         name: '市内・庶民街',
+        facilityLinks: Object.freeze([
+          Object.freeze({label:'井戸', sceneKey:'cityWell'}),
+          Object.freeze({label:'小モスク', sceneKey:'cityMosque'})
+        ]),
         begging: Object.freeze({
           stopChance: 0.55,
           outcomes: Object.freeze([
@@ -116,6 +126,62 @@
           Object.freeze({src:'https://raw.githubusercontent.com/namiyukuta-cmd/iroiro/main/SHOP/asset/Npc/npc_child_01.png', left:83, bottom:20, height:13, layer:'backgroundNpc'}),
           Object.freeze({src:'./asset/stall.png', left:47, bottom:13, height:24, layer:'interactive', selectable:true, selectableType:'shop'}),
           Object.freeze({src:'https://raw.githubusercontent.com/namiyukuta-cmd/iroiro/main/SHOP/asset/Npc/npc_traveler_01.png', left:29, bottom:12, height:23, layer:'interactive', selectable:true, selectableType:'npc'})
+        ])
+      }),
+
+      outerWell: Object.freeze({
+        name: '小門外・井戸',
+        returnTo: 'outerPoor',
+        background: './asset/bg_desert_wall.jpeg',
+        pickups: Object.freeze([]),
+        objects: Object.freeze([
+          Object.freeze({
+            src:'./asset/desert_well_01.png',
+            left:50, bottom:12, height:60,
+            layer:'house', centered:true
+          })
+        ])
+      }),
+
+      smallGateBathhouse: Object.freeze({
+        name: '小門前・公衆浴場',
+        returnTo: 'smallGateOutside',
+        background: './asset/bg_desert_wall.jpeg',
+        pickups: Object.freeze([]),
+        objects: Object.freeze([
+          Object.freeze({
+            src:'./asset/desert_bathhouse_01.png',
+            left:50, bottom:8, height:72,
+            layer:'house', centered:true
+          })
+        ])
+      }),
+
+      cityWell: Object.freeze({
+        name: '庶民街・井戸',
+        returnTo: 'cityCommon',
+        background: './asset/bg_desert_wall.jpeg',
+        pickups: Object.freeze([]),
+        objects: Object.freeze([
+          Object.freeze({
+            src:'./asset/desert_well_01.png',
+            left:50, bottom:12, height:60,
+            layer:'house', centered:true
+          })
+        ])
+      }),
+
+      cityMosque: Object.freeze({
+        name: '庶民街・小モスク',
+        returnTo: 'cityCommon',
+        background: './asset/bg_desert_wall.jpeg',
+        pickups: Object.freeze([]),
+        objects: Object.freeze([
+          Object.freeze({
+            src:'./asset/desert_small_mosque01.png',
+            left:50, bottom:8, height:70,
+            layer:'house', centered:true
+          })
         ])
       }),
 
@@ -166,8 +232,8 @@
     }),
 
     links: Object.freeze({
-      newGame: './SHOP_top.html?new=1&build=20260923-upper-area-locked-v1',
-      continueGame: './SHOP_top.html?continue=1&build=20260923-upper-area-locked-v1',
+      newGame: './SHOP_top.html?new=1&build=20260923-facility-places-v1',
+      continueGame: './SHOP_top.html?continue=1&build=20260923-facility-places-v1',
       backToGames: '../index.html',
       backToShopMenu: './SHOP_index.html'
     })
