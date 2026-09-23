@@ -59,14 +59,14 @@
         name: '小門前',
         background: './asset/bg_desert_wall.jpeg',
         pickups: Object.freeze([
-          Object.freeze({id:'gate_wood_01', itemId:'wood', left:24, bottom:7})
+          Object.freeze({id:'gate_wood_01', itemId:'wood', left:24, bottom:17})
         ]),
         objects: Object.freeze([
-          Object.freeze({src:'./asset/house_poor.png', left:-7, bottom:24, height:34, layer:'house'}),
-          Object.freeze({src:'./asset/gate_small.png', left:34, bottom:20, height:32, layer:'house'}),
-          Object.freeze({src:'./asset/house_poor.png', left:76, bottom:24, height:34, layer:'house', flip:true}),
-          Object.freeze({src:'https://raw.githubusercontent.com/namiyukuta-cmd/iroiro/main/SHOP/asset/Npc/npc_man_01.png', left:16, bottom:10, height:18, layer:'backgroundNpc'}),
-          Object.freeze({src:'https://raw.githubusercontent.com/namiyukuta-cmd/iroiro/main/SHOP/asset/Npc/npc_guard_01.png', left:69, bottom:3, height:25, layer:'interactive', selectable:true, selectableType:'npc'})
+          Object.freeze({src:'./asset/house_poor.png', left:-7, bottom:34, height:34, layer:'house'}),
+          Object.freeze({src:'./asset/gate_small.png', left:34, bottom:30, height:32, layer:'house'}),
+          Object.freeze({src:'./asset/house_poor.png', left:76, bottom:34, height:34, layer:'house', flip:true}),
+          Object.freeze({src:'https://raw.githubusercontent.com/namiyukuta-cmd/iroiro/main/SHOP/asset/Npc/npc_man_01.png', left:16, bottom:20, height:18, layer:'backgroundNpc'}),
+          Object.freeze({src:'https://raw.githubusercontent.com/namiyukuta-cmd/iroiro/main/SHOP/asset/Npc/npc_guard_01.png', left:69, bottom:13, height:25, layer:'interactive', selectable:true, selectableType:'npc'})
         ])
       }),
 
@@ -74,18 +74,18 @@
         name: '市内・庶民街',
         background: './asset/bg_desert_wall.jpeg',
         pickups: Object.freeze([
-          Object.freeze({id:'city_bottle_01', itemId:'bottle', left:69, bottom:7}),
-          Object.freeze({id:'city_rag_01', itemId:'rag', left:8, bottom:5})
+          Object.freeze({id:'city_bottle_01', itemId:'bottle', left:69, bottom:17}),
+          Object.freeze({id:'city_rag_01', itemId:'rag', left:8, bottom:15})
         ]),
         objects: Object.freeze([
-          Object.freeze({src:'./asset/house_normal.png', left:-5, bottom:23, height:37, layer:'house'}),
-          Object.freeze({src:'./asset/house_normal.png', left:74, bottom:23, height:37, layer:'house', flip:true}),
-          Object.freeze({src:'./asset/house_normal.png', left:25, bottom:24, height:20, layer:'house', flip:true}),
-          Object.freeze({src:'./asset/house_normal.png', left:56, bottom:24, height:20, layer:'house'}),
-          Object.freeze({src:'https://raw.githubusercontent.com/namiyukuta-cmd/iroiro/main/SHOP/asset/Npc/npc_woman_01.png', left:16, bottom:10, height:18, layer:'backgroundNpc'}),
-          Object.freeze({src:'https://raw.githubusercontent.com/namiyukuta-cmd/iroiro/main/SHOP/asset/Npc/npc_child_01.png', left:83, bottom:10, height:13, layer:'backgroundNpc'}),
-          Object.freeze({src:'./asset/stall.png', left:47, bottom:3, height:24, layer:'interactive', selectable:true, selectableType:'shop'}),
-          Object.freeze({src:'https://raw.githubusercontent.com/namiyukuta-cmd/iroiro/main/SHOP/asset/Npc/npc_traveler_01.png', left:29, bottom:2, height:23, layer:'interactive', selectable:true, selectableType:'npc'})
+          Object.freeze({src:'./asset/house_normal.png', left:-5, bottom:33, height:37, layer:'house'}),
+          Object.freeze({src:'./asset/house_normal.png', left:74, bottom:33, height:37, layer:'house', flip:true}),
+          Object.freeze({src:'./asset/house_normal.png', left:25, bottom:34, height:20, layer:'house', flip:true}),
+          Object.freeze({src:'./asset/house_normal.png', left:56, bottom:34, height:20, layer:'house'}),
+          Object.freeze({src:'https://raw.githubusercontent.com/namiyukuta-cmd/iroiro/main/SHOP/asset/Npc/npc_woman_01.png', left:16, bottom:20, height:18, layer:'backgroundNpc'}),
+          Object.freeze({src:'https://raw.githubusercontent.com/namiyukuta-cmd/iroiro/main/SHOP/asset/Npc/npc_child_01.png', left:83, bottom:20, height:13, layer:'backgroundNpc'}),
+          Object.freeze({src:'./asset/stall.png', left:47, bottom:13, height:24, layer:'interactive', selectable:true, selectableType:'shop'}),
+          Object.freeze({src:'https://raw.githubusercontent.com/namiyukuta-cmd/iroiro/main/SHOP/asset/Npc/npc_traveler_01.png', left:29, bottom:12, height:23, layer:'interactive', selectable:true, selectableType:'npc'})
         ])
       }),
 
@@ -93,15 +93,15 @@
         name: '上級区',
         background: './asset/bg_desert_wall.jpeg',
         pickups: Object.freeze([
-          Object.freeze({id:'upper_scrap_01', itemId:'scrap', left:58, bottom:6})
+          Object.freeze({id:'upper_scrap_01', itemId:'scrap', left:58, bottom:16})
         ]),
         objects: Object.freeze([
-          Object.freeze({src:'./asset/house_upper.png', left:-4, bottom:22, height:40, layer:'house'}),
-          Object.freeze({src:'./asset/house_upper.png', left:70, bottom:22, height:40, layer:'house', flip:true}),
-          Object.freeze({src:'./asset/house_upper.png', left:33, bottom:24, height:22, layer:'house'}),
-          Object.freeze({src:'https://raw.githubusercontent.com/namiyukuta-cmd/iroiro/main/SHOP/asset/Npc/npc_woman_01.png', left:17, bottom:10, height:18, layer:'backgroundNpc'}),
-          Object.freeze({src:'https://raw.githubusercontent.com/namiyukuta-cmd/iroiro/main/SHOP/asset/Npc/npc_guard_01.png', left:82, bottom:10, height:19, layer:'backgroundNpc'}),
-          Object.freeze({src:'https://raw.githubusercontent.com/namiyukuta-cmd/iroiro/main/SHOP/asset/Npc/npc_beggar_01.png', left:36, bottom:2, height:23, layer:'interactive', selectable:true, selectableType:'npc'})
+          Object.freeze({src:'./asset/house_upper.png', left:-4, bottom:32, height:40, layer:'house'}),
+          Object.freeze({src:'./asset/house_upper.png', left:70, bottom:32, height:40, layer:'house', flip:true}),
+          Object.freeze({src:'./asset/house_upper.png', left:33, bottom:34, height:22, layer:'house'}),
+          Object.freeze({src:'https://raw.githubusercontent.com/namiyukuta-cmd/iroiro/main/SHOP/asset/Npc/npc_woman_01.png', left:17, bottom:20, height:18, layer:'backgroundNpc'}),
+          Object.freeze({src:'https://raw.githubusercontent.com/namiyukuta-cmd/iroiro/main/SHOP/asset/Npc/npc_guard_01.png', left:82, bottom:20, height:19, layer:'backgroundNpc'}),
+          Object.freeze({src:'https://raw.githubusercontent.com/namiyukuta-cmd/iroiro/main/SHOP/asset/Npc/npc_beggar_01.png', left:36, bottom:12, height:23, layer:'interactive', selectable:true, selectableType:'npc'})
         ])
       })
     }),
@@ -127,8 +127,8 @@
     }),
 
     links: Object.freeze({
-      newGame: './SHOP_top.html?new=1&build=20260923-scene-arrows-v1',
-      continueGame: './SHOP_top.html?continue=1&build=20260923-scene-arrows-v1',
+      newGame: './SHOP_top.html?new=1&build=20260923-scene-nav-layout-fix-v1',
+      continueGame: './SHOP_top.html?continue=1&build=20260923-scene-nav-layout-fix-v1',
       backToGames: '../index.html',
       backToShopMenu: './SHOP_index.html'
     })
