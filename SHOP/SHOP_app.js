@@ -8,6 +8,9 @@
   const $ = id => document.getElementById(id);
   const status = $('saveStatus');
   const menu = $('bottomMenu');
+  const quickInventory = $('quickInventory');
+  const quickBegButton = $('quickBegButton');
+  const quickSellButton = $('quickSellButton');
 
   function formatTime(totalMinutes) {
     const value = Math.max(0, Number(totalMinutes) || 0) % 1440;
@@ -27,6 +30,40 @@
     button.className = 'menu-btn';
     button.textContent = label;
     return button;
+  }
+
+  function renderQuickInventory() {
+    if (!quickInventory) return;
+    const state = window.SHOP_STATE || {};
+    const inventory = state.inventory || {};
+    const defs = (window.SHOP_ITEMS && window.SHOP_ITEMS.all) || {};
+    const entries = Object.keys(defs).map(id => ({
+      id,
+      name: defs[id].name || id,
+      count: Math.max(0, Number(inventory[id]) || 0)
+    }));
+
+    const slots = [];
+    entries.forEach(item => {
+      const slot = document.createElement('div');
+      slot.className = 'quick-slot' + (item.count > 0 ? '' : ' is-empty');
+      slot.textContent = item.count > 0 ? item.name + ' ×' + item.count : item.name;
+      slots.push(slot);
+    });
+
+    while (slots.length < 8) {
+      const slot = document.createElement('div');
+      slot.className = 'quick-slot is-empty';
+      slot.textContent = '空き';
+      slots.push(slot);
+    }
+    quickInventory.replaceChildren(...slots.slice(0,8));
+
+    const count = window.SHOP_ITEMS && window.SHOP_ITEMS.getInventoryCount
+      ? window.SHOP_ITEMS.getInventoryCount(state)
+      : Object.values(inventory).reduce((sum,n)=>sum + Math.max(0, Number(n)||0),0);
+
+    if (quickSellButton) quickSellButton.disabled = count <= 0;
   }
 
   function buildStaticContent() {
@@ -55,6 +92,21 @@
       if (window.SHOP_ACTION) window.SHOP_ACTION.open(window.SHOP_STATE);
     });
 
+    if (quickBegButton) {
+      quickBegButton.addEventListener('click', () => {
+        if (!window.SHOP_ACTION) return;
+        window.SHOP_ACTION.open(window.SHOP_STATE);
+        window.SHOP_ACTION.setMode('beg');
+      });
+    }
+    if (quickSellButton) {
+      quickSellButton.addEventListener('click', () => {
+        if (!window.SHOP_ACTION) return;
+        window.SHOP_ACTION.open(window.SHOP_STATE);
+        window.SHOP_ACTION.setMode('sell');
+      });
+    }
+
     saveButton.addEventListener('click', () => saveGame(saveButton));
     loadButton.addEventListener('click', () => loadGame(loadButton));
   }
@@ -68,6 +120,7 @@
     state.collectedPickups.push(pickup.id);
     state.inventory[pickup.itemId] = (Number(state.inventory[pickup.itemId]) || 0) + 1;
     if (marker) marker.remove();
+    renderQuickInventory();
   }
 
   function renderPickups(scene, layer) {
@@ -208,6 +261,9 @@
     $('hpText').textContent = hp;
     $('hungerText').textContent = hunger;
     $('thirstText').textContent = thirst;
+    const moneyText = $('moneyText');
+    if (moneyText) moneyText.textContent = Number(state.money || 0);
+    renderQuickInventory();
   }
 
   async function saveGame(button) {
@@ -242,6 +298,7 @@
 
   buildStaticContent();
   render();
+  window.SHOP_RENDER = render;
 
   const params = new URLSearchParams(location.search);
   if (params.get('continue') === '1') {
