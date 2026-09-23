@@ -61,8 +61,9 @@
   }
 
   function hasSellableItems(){
-    return window.SHOP_ITEMS &&
-      window.SHOP_ITEMS.getInventoryCount(stateRef) > 0;
+    return !!(window.SHOP_ITEMS &&
+      window.SHOP_ITEMS.getSellableInventoryCount &&
+      window.SHOP_ITEMS.getSellableInventoryCount(stateRef) > 0);
   }
 
   function ownedSellRows(){
@@ -71,7 +72,7 @@
     return Object.entries(inv)
       .filter(([,count]) => Number(count) > 0)
       .map(([id,count]) => ({item:items[id], count:Number(count)}))
-      .filter(row => row.item)
+      .filter(row => row.item && window.SHOP_ITEMS.isSellable(row.item))
       .slice(0,8);
   }
 
