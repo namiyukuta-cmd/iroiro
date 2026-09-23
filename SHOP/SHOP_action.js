@@ -5,12 +5,9 @@
   const screen = $('actionScreen');
   const title = $('actionTitle');
   const back = $('actionBack');
-  const begButton = $('begModeButton');
-  const sellButton = $('sellModeButton');
   const pot = $('begPot');
   const grid = $('sellGrid');
   const dialog = $('actionDialog');
-  const timeTrack = $('timeTrack');
   const passerbyLane = $('passerbyLane');
   const passerbyPopup = $('passerbyPopup');
 
@@ -18,13 +15,6 @@
   let mode = 'beg';
   let passerbyTimer = null;
   let passerbySprite = null;
-
-  const IMPORTANT_TIMES = Object.freeze([
-    Object.freeze({minutes:360, label:'朝'}),
-    Object.freeze({minutes:720, label:'昼'}),
-    Object.freeze({minutes:1080, label:'アザーン'}),
-    Object.freeze({minutes:1260, label:'夜'})
-  ]);
 
   const PASSERBY_IMAGES = Object.freeze([
     './asset/Npc/npc_man_01.png',
@@ -49,51 +39,6 @@
     '「使えそうな物はあるか？」'
   ]);
 
-  function timeTop(minutes){
-    const m = Math.max(0, Math.min(1439, Number(minutes) || 0));
-    return (m / 1440) * 100;
-  }
-
-  function renderTimeRail(){
-    if(!timeTrack) return;
-    timeTrack.replaceChildren();
-
-    for(let hour=0; hour<24; hour+=2){
-      const minutes=hour*60;
-      const tick=document.createElement('span');
-      tick.className='time-tick' + (hour%6===0 ? ' major' : '');
-      tick.style.top=timeTop(minutes)+'%';
-      timeTrack.appendChild(tick);
-
-      if(hour%6===0){
-        const label=document.createElement('span');
-        label.className='time-label';
-        label.style.top=timeTop(minutes)+'%';
-        label.textContent=String(hour).padStart(2,'0');
-        timeTrack.appendChild(label);
-      }
-    }
-
-    IMPORTANT_TIMES.forEach(mark=>{
-      const bar=document.createElement('span');
-      bar.className='time-special';
-      bar.style.top=timeTop(mark.minutes)+'%';
-      timeTrack.appendChild(bar);
-
-      const label=document.createElement('span');
-      label.className='time-special-label';
-      label.style.top=timeTop(mark.minutes)+'%';
-      label.textContent=mark.label;
-      timeTrack.appendChild(label);
-    });
-
-    const now=document.createElement('span');
-    now.className='time-now';
-    now.style.top=timeTop(stateRef && stateRef.minutes)+'%';
-    now.title='現在時刻';
-    timeTrack.appendChild(now);
-  }
-
   function hasSellableItems(){
     return window.SHOP_ITEMS &&
       window.SHOP_ITEMS.getInventoryCount(stateRef) > 0;
@@ -108,9 +53,9 @@
       .filter(([,count]) => Number(count) > 0)
       .map(([id,count]) => ({item:items[id], count:Number(count)}))
       .filter(row => row.item)
-      .slice(0,9);
+      .slice(0,8);
 
-    for(let i=0;i<9;i++){
+    for(let i=0;i<8;i++){
       const cell=document.createElement('div');
       cell.className='sell-cell';
       const row=owned[i];
@@ -215,29 +160,33 @@
   }
 
   function setMode(next){
-    if(next==='sell' && !hasSellableItems()) return;
+    if(next==='sell' && !hasSellableItems()) return false;
     mode=next;
     dialog.classList.remove('is-open');
     dialog.textContent='';
+    screen.dataset.mode=mode;
 
     if(mode==='beg'){
-      title.textContent='物乞い';
+      title.textContent='物乞い中';
       pot.style.display='block';
       grid.style.display='none';
     }else{
-      title.textContent='物を売る';
+      title.textContent='物売り中';
       pot.style.display='none';
       grid.style.display='grid';
       renderGrid();
     }
+    return true;
   }
 
-  function open(state){
+  function open(state, initialMode='beg'){
     stateRef=state || window.SHOP_STATE || {};
-    sellButton.disabled=!hasSellableItems();
+    const app=document.querySelector('.app');
+    if(app) app.classList.add('action-open');
     screen.classList.add('is-open');
-    renderTimeRail();
-    setMode('beg');
+
+    if(!setMode(initialMode)) setMode('beg');
+
     clearPasserby();
     scheduleNextPasserby(350);
   }
@@ -245,6 +194,9 @@
   function close(){
     clearPasserby();
     screen.classList.remove('is-open');
+    delete screen.dataset.mode;
+    const app=document.querySelector('.app');
+    if(app) app.classList.remove('action-open');
     dialog.classList.remove('is-open');
     if (typeof window.SHOP_RENDER === 'function') window.SHOP_RENDER();
   }
@@ -255,8 +207,6 @@
   }
 
   back.addEventListener('click',close);
-  begButton.addEventListener('click',()=>setMode('beg'));
-  sellButton.addEventListener('click',()=>setMode('sell'));
 
   window.SHOP_ACTION=Object.freeze({
     open,
