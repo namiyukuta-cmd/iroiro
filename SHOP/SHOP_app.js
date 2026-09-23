@@ -156,7 +156,7 @@
     strip.style.width = '100%';
     strip.style.backgroundImage = 'none';
 
-    strip.querySelectorAll('.scene-layer').forEach(node => node.remove());
+    strip.querySelectorAll('.scene-layer,.scene-nav-layer').forEach(node => node.remove());
 
     // 5層は上下に分割する帯ではなく、同じ画面全面に重なる5枚のレイヤー。
     const layerFar=document.createElement('div');
@@ -166,9 +166,11 @@
     layerFar.style.backgroundSize='cover';
     layerFar.style.backgroundRepeat='no-repeat';
 
-    // 現在の見た目の相対配置は変えず、中部全体を同じ量だけ上へ移動する。
-    const farShiftPx = Math.round(strip.clientHeight * 0.10);
-    const commonShiftPx = Math.round(strip.clientHeight * 0.08);
+    // 小門外・底辺区だけは既に見た目を合わせた追加シフトを維持。
+    // 他地区は各sceneの配置値だけで合わせ、追加シフトを重ねない。
+    const isOuterPoor = key === 'outerPoor';
+    const farShiftPx = isOuterPoor ? Math.round(strip.clientHeight * 0.10) : 0;
+    const commonShiftPx = isOuterPoor ? Math.round(strip.clientHeight * 0.08) : 0;
 
     const layerHouse=document.createElement('div');
     layerHouse.className='scene-layer scene-layer-house';
