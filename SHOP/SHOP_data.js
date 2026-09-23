@@ -6,7 +6,7 @@
     subtitle: '砂漠都市で暮らし、商いを始める',
 
     initialState: Object.freeze({
-      version: 2,
+      version: 3,
       day: 1,
       minutes: 360,
       temperature: 24,
@@ -127,8 +127,8 @@
     }),
 
     links: Object.freeze({
-      newGame: './SHOP_top.html?new=1&build=20260923-action-sand-workspace-v1',
-      continueGame: './SHOP_top.html?continue=1&build=20260923-action-sand-workspace-v1',
+      newGame: './SHOP_top.html?new=1&build=20260923-gold-silver-copper-v1',
+      continueGame: './SHOP_top.html?continue=1&build=20260923-gold-silver-copper-v1',
       backToGames: '../index.html',
       backToShopMenu: './SHOP_index.html'
     })
