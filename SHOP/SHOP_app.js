@@ -109,13 +109,16 @@
     const layerFar=document.createElement('div');
     layerFar.className='scene-layer scene-layer-far';
     layerFar.style.backgroundImage='url("' + scene.background + '")';
-    // %指定はcover時に縦方向の余りがないと見た目がほぼ動かない。
-    // 画像の拡大率は変えず、表示位置だけをpxで上へずらす。
-    const farShiftPx = Math.round(strip.clientHeight * 0.10);
-    layerFar.style.backgroundPosition='center -' + farShiftPx + 'px';
+    layerFar.style.backgroundPosition='center center';
     layerFar.style.backgroundSize='cover';
     layerFar.style.backgroundRepeat='no-repeat';
-    layerFar.style.backgroundColor='#6b4a3c';
+
+    // 元画像(2400x720)は横長で、cover時は縦が画面高とほぼ同じになる。
+    // background-positionのY%では見た目が動かないため、背景レイヤー自体を同じ大きさのまま上へ移動する。
+    const farShiftPx = Math.round(strip.clientHeight * 0.10);
+    layerFar.style.transform='translateY(-' + farShiftPx + 'px)';
+    layerFar.style.willChange='transform';
+    strip.style.backgroundColor='#664e44';
 
     const layerHouse=document.createElement('div');
     layerHouse.className='scene-layer scene-layer-house';
