@@ -34,13 +34,15 @@
       s.progression[key] = { ...fresh.progression[key], ...(s.progression[key] || {}) };
     });
     s.progression.stability = { ...fresh.progression.stability, ...(s.progression.stability || {}) };
+    s.progression.jobs = { ...fresh.progression.jobs, ...(s.progression.jobs || {}) };
+    s.progression.jobs.records = { ...(fresh.progression.jobs.records || {}), ...((s.progression.jobs && s.progression.jobs.records) || {}) };
     s.story = { ...fresh.story, ...(s.story || {}) };
     s.story.seen = { ...fresh.story.seen, ...((s.story && s.story.seen) || {}) };
     s.story.counters = { ...fresh.story.counters, ...((s.story && s.story.counters) || {}) };
     s.sleep = { ...fresh.sleep, ...(s.sleep || {}) };
     s.sleep.known = { ...fresh.sleep.known, ...((s.sleep && s.sleep.known) || {}) };
     s.daily = { ...H.createDailyState(), ...(s.daily || {}) };
-    ["beg", "scavenge", "talk", "wash", "rest", "sceneKeys"].forEach((k) => { s.daily[k] = s.daily[k] || {}; });
+    ["beg", "scavenge", "talk", "wash", "rest", "jobs", "sceneKeys"].forEach((k) => { s.daily[k] = s.daily[k] || {}; });
     s.leads = Array.isArray(s.leads) ? s.leads : fresh.leads;
     s.history = Array.isArray(s.history) ? s.history : fresh.history;
     s.stats = { ...fresh.stats, ...(s.stats || {}) };
@@ -60,6 +62,7 @@
     }
     if (!D.locations[s.location]) s.location = "station_front";
     H.state = s;
+    H.ensureJobProgress?.();
     H.clampStats();
   }
 
