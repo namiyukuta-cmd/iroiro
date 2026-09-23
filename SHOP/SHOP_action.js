@@ -194,6 +194,13 @@
       window.SHOP_CURRENCY.formatAmount(price) + 'で1個売れた。';
   }
 
+  function advancePasserbyTime(){
+    if (window.SHOP_TIME && stateRef) {
+      window.SHOP_TIME.advance(stateRef, 10, mode === 'sell' ? 'selling' : 'begging');
+      refreshPersistentUi();
+    }
+  }
+
   function clearPasserby(){
     if(passerbyTimer){
       clearTimeout(passerbyTimer);
@@ -267,6 +274,7 @@
               image.style.left=fromLeft ? '124%' : '-24%';
 
               passerbyTimer=setTimeout(()=>{
+                advancePasserbyTime();
                 clearPasserby();
                 scheduleNextPasserby(650 + Math.round(Math.random()*900));
               },2450);
@@ -277,6 +285,7 @@
           image.style.left=fromLeft ? '124%' : '-24%';
 
           passerbyTimer=setTimeout(()=>{
+            advancePasserbyTime();
             clearPasserby();
             scheduleNextPasserby(500 + Math.round(Math.random()*850));
           },5250);
