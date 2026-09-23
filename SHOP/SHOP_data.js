@@ -16,7 +16,9 @@
       hp: 100,
       hunger: 25,
       thirst: 30,
-      money: 0
+      money: 0,
+      inventory: Object.freeze({}),
+      collectedPickups: Object.freeze([])
     }),
 
     layers: Object.freeze({
@@ -24,7 +26,6 @@
       house: 20,         // ②背景としての家
       backgroundNpc: 40, // ③背景としてのNPC
       interactive: 60,   // ④選択可能：ショップ/NPC
-      player: 100,       // ⑤主人公移動・配置
       town: 20,          // 既存シーン互換
       people: 40         // 既存シーン互換
     }),
@@ -57,7 +58,7 @@
           // ② 背景としての家・門
           Object.freeze({src:'./asset/house_poor.png', left:-7, bottom:24, height:34, layer:'house'}),
           Object.freeze({src:'./asset/gate_small.png', left:34, bottom:20, height:32, layer:'house'}),
-          Object.freeze({src:'./asset/house_poor.png', left:76, bottom:24, height:34, layer:'house', flip:true'}),
+          Object.freeze({src:'./asset/house_poor.png', left:76, bottom:24, height:34, layer:'house', flip:true})),
 
           // ③ 背景NPC
           Object.freeze({src:'https://raw.githubusercontent.com/namiyukuta-cmd/iroiro/main/SHOP/asset/Npc/npc_man_01.png', left:16, bottom:10, height:18, layer:'backgroundNpc'}),
@@ -73,8 +74,8 @@
         objects: Object.freeze([
           // ② 背景としての家
           Object.freeze({src:'./asset/house_normal.png', left:-5, bottom:23, height:37, layer:'house'}),
-          Object.freeze({src:'./asset/house_normal.png', left:74, bottom:23, height:37, layer:'house', flip:true'}),
-          Object.freeze({src:'./asset/house_normal.png', left:25, bottom:24, height:20, layer:'house', flip:true'}),
+          Object.freeze({src:'./asset/house_normal.png', left:74, bottom:23, height:37, layer:'house', flip:true})),
+          Object.freeze({src:'./asset/house_normal.png', left:25, bottom:24, height:20, layer:'house', flip:true})),
           Object.freeze({src:'./asset/house_normal.png', left:56, bottom:24, height:20, layer:'house'}),
 
           // ③ 背景NPC
@@ -93,7 +94,7 @@
         objects: Object.freeze([
           // ② 背景としての上級区の家
           Object.freeze({src:'./asset/house_upper.png', left:-4, bottom:22, height:40, layer:'house'}),
-          Object.freeze({src:'./asset/house_upper.png', left:70, bottom:22, height:40, layer:'house', flip:true'}),
+          Object.freeze({src:'./asset/house_upper.png', left:70, bottom:22, height:40, layer:'house', flip:true})),
           Object.freeze({src:'./asset/house_upper.png', left:33, bottom:24, height:22, layer:'house'}),
 
           // ③ 背景NPC
@@ -127,8 +128,8 @@
     }),
 
     links: Object.freeze({
-      newGame: './SHOP_top.html?new=1&build=20260923-1108',
-      continueGame: './SHOP_top.html?continue=1&build=20260923-1108',
+      newGame: './SHOP_top.html?new=1&build=20260923-1136',
+      continueGame: './SHOP_top.html?continue=1&build=20260923-1136',
       backToGames: '../index.html',
       backToShopMenu: './SHOP_index.html'
     })
