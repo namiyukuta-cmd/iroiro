@@ -10,6 +10,7 @@
       source: "駅前",
       legitimate: true,
       referral: false,
+      countsAsRegularIncome: false,
       description: "書類不要の当日仕事。序盤の現金収入になる。"
     }),
     clerk_cleanup: Object.freeze({
@@ -178,7 +179,9 @@
       H.state.progression.stability.paidWorkDays += 1;
       jobs.reliability += perfect ? 2 : 1;
     }
-    H.state.progression.stability.regularIncome = true;
+    if (job.countsAsRegularIncome !== false) {
+      H.state.progression.stability.regularIncome = true;
+    }
     H.state.daily.jobs = H.state.daily.jobs || {};
     H.state.daily.jobs[id] = true;
     return { job, record, jobs };
