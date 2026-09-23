@@ -30,10 +30,30 @@ main{
   text-align:center;
 }
 h1{
-  margin:0 0 32px;
+  margin:0 0 20px;
   font-size:32px;
   font-weight:500;
   letter-spacing:.12em;
+}
+.monster-wrap{
+  width:150px;
+  height:150px;
+  margin:0 auto 22px;
+  display:grid;
+  place-items:center;
+}
+.monster{
+  width:132px;
+  height:132px;
+  overflow:visible;
+}
+.monster-body{
+  transform-origin:66px 85px;
+  animation:monsterBob 1.8s ease-in-out infinite;
+}
+@keyframes monsterBob{
+  0%,100%{transform:translateY(0)}
+  50%{transform:translateY(-5px)}
 }
 .start{
   display:flex;
@@ -57,7 +77,36 @@ h1{
 <body>
 <main>
   <h1>Chill</h1>
-  <a id="startChill" class="start" href="chill_top.html?_nc=20260924-0310">はじめる</a>
+
+  <div class="monster-wrap" aria-label="モンスター">
+    <svg class="monster" viewBox="0 0 132 132" role="img" aria-label="角のある小さなモンスター">
+      <g class="monster-body" fill="#fff" stroke="#222" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M39 41 L26 19 L49 31" />
+        <path d="M93 41 L106 19 L83 31" />
+
+        <path d="M33 49
+                 C39 34, 52 28, 66 28
+                 C80 28, 93 34, 99 49
+                 C105 63, 104 83, 96 96
+                 C89 108, 78 113, 66 113
+                 C54 113, 43 108, 36 96
+                 C28 83, 27 63, 33 49 Z" />
+
+        <circle cx="51" cy="61" r="4" fill="#222"/>
+        <circle cx="81" cy="61" r="4" fill="#222"/>
+
+        <path d="M56 79 Q66 86 76 79" fill="none"/>
+
+        <path d="M36 78 Q21 82 25 96 Q31 106 42 96" fill="none"/>
+        <path d="M96 78 Q111 82 107 96 Q101 106 90 96" fill="none"/>
+
+        <path d="M50 111 L47 122 L58 122" fill="none"/>
+        <path d="M82 111 L85 122 L74 122" fill="none"/>
+      </g>
+    </svg>
+  </div>
+
+  <a id="startChill" class="start" href="chill_top.html?_nc=20260924-0405">はじめる</a>
 </main>
 <script>
 (()=>{
