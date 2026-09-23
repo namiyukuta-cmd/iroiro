@@ -1027,3 +1027,18 @@
   - 時刻17px、気温17px、天気アイコン24px。
   - 枠内paddingを少し増やし、上下の文字間隔も拡大。
 - build: 20260923-top-text-readable-v1
+
+### 2026-09-23 19:xx 日時・月・気温・天気を専用JSへ分離
+- ユーザーから「日時jsとか月jsとか気温jsとか天気jsとかがあるはず」と指摘。
+- リポジトリを確認し、既存では `DD/DD_time.js` と `AD/DD_time.js` が時間専用JSとして存在していた。
+- SHOPではこれまで日時・月・気温・天気の処理を `SHOP_app.js` / `SHOP_data.js` に混在させていたため、専用モジュールへ分離。
+- 新規追加:
+  - `SHOP/SHOP_time.js`：時刻整形、祈り時刻、現在の礼拝/次の礼拝表示
+  - `SHOP/SHOP_calendar.js`：イスラーム月名とゲーム日数から月日計算
+  - `SHOP/SHOP_temperature.js`：気温の正規化と表示
+  - `SHOP/SHOP_weather.js`：天気文字列からアイコン表示
+- `SHOP_app.js` から上記ロジックを削除し、各専用JSを呼ぶだけに変更。
+- `SHOP_data.js` から timeSystem（月名・祈り時刻設定）を削除。設定は専用JS側へ移動。
+- `SHOP_top.html` の読込順へ4ファイルを追加。`SHOP_app.js` より先に読み込む。
+- 表示内容・町画面・下部UIの仕様は今回変えていない。構造整理のみ。
+- build: 20260923-split-world-modules-v1
