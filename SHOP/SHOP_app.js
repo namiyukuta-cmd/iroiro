@@ -109,7 +109,7 @@
     const layerFar=document.createElement('div');
     layerFar.className='scene-layer scene-layer-far';
     layerFar.style.backgroundImage='url("' + scene.background + '")';
-    layerFar.style.backgroundPosition='center 62%';
+    layerFar.style.backgroundPosition='center 72%';
     layerFar.style.backgroundSize='cover';
     layerFar.style.backgroundRepeat='no-repeat';
 
