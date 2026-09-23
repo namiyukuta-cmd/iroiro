@@ -74,7 +74,6 @@
       : null;
 
     if (marker) marker.remove();
-    status.textContent = (item ? item.name : 'アイテム') + 'を拾いました';
   }
 
   function renderPickups(scene, layer) {
