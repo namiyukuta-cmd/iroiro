@@ -15,6 +15,7 @@
   let mode = 'beg';
   let passerbyTimer = null;
   let passerbySprite = null;
+  let selectedSellItemId = null;
 
   const PASSERBY_IMAGES = Object.freeze([
     './asset/Npc/npc_man_01.png',
@@ -39,39 +40,131 @@
     '「使えそうな物はあるか？」'
   ]);
 
+  function randomItem(list){
+    return list[Math.floor(Math.random()*list.length)];
+  }
+
+  function randomInt(min,max){
+    const low=Math.floor(Number(min)||0);
+    const high=Math.max(low,Math.floor(Number(max)||0));
+    return low + Math.floor(Math.random()*(high-low+1));
+  }
+
+  function refreshPersistentUi(){
+    if(typeof window.SHOP_RENDER==='function') window.SHOP_RENDER();
+  }
+
+  function addMoney(copper){
+    if(!window.SHOP_CURRENCY || !stateRef) return;
+    window.SHOP_CURRENCY.add(stateRef,copper);
+    refreshPersistentUi();
+  }
+
   function hasSellableItems(){
     return window.SHOP_ITEMS &&
       window.SHOP_ITEMS.getInventoryCount(stateRef) > 0;
   }
 
-  function renderGrid(){
-    grid.replaceChildren();
+  function ownedSellRows(){
     const inv = stateRef && stateRef.inventory ? stateRef.inventory : {};
     const items = window.SHOP_ITEMS ? window.SHOP_ITEMS.all : {};
-
-    const owned = Object.entries(inv)
+    return Object.entries(inv)
       .filter(([,count]) => Number(count) > 0)
       .map(([id,count]) => ({item:items[id], count:Number(count)}))
       .filter(row => row.item)
       .slice(0,8);
+  }
+
+  function ensureSelectedSellItem(){
+    const owned=ownedSellRows();
+    if(!owned.length){
+      selectedSellItemId=null;
+      return;
+    }
+    if(!owned.some(row=>row.item.id===selectedSellItemId)){
+      selectedSellItemId=owned[0].item.id;
+    }
+  }
+
+  function renderGrid(){
+    grid.replaceChildren();
+    const owned=ownedSellRows();
+    ensureSelectedSellItem();
 
     for(let i=0;i<8;i++){
-      const cell=document.createElement('div');
-      cell.className='sell-cell';
       const row=owned[i];
+      const cell=document.createElement('button');
+      cell.type='button';
+      cell.className='sell-cell';
+
       if(row){
         cell.textContent=row.item.name + ' ×' + row.count;
         cell.dataset.itemId=row.item.id;
+        if(row.item.id===selectedSellItemId) cell.classList.add('selected');
+        cell.addEventListener('click',()=>{
+          selectedSellItemId=row.item.id;
+          renderGrid();
+        });
       }else{
         cell.classList.add('empty');
-        cell.textContent='';
+        cell.textContent='空き';
+        cell.disabled=true;
       }
       grid.appendChild(cell);
     }
   }
 
-  function randomItem(list){
-    return list[Math.floor(Math.random()*list.length)];
+  function rollBeggingDonation(){
+    const roll=Math.random()*100;
+    if(roll<55) return 0;
+    if(roll<85) return randomInt(1,3);
+    if(roll<97) return 5;
+    return 10;
+  }
+
+  function handleBeggingResult(){
+    const line=randomItem(BEG_LINES);
+    const donation=rollBeggingDonation();
+
+    if(donation<=0){
+      return line + '　何も置かずに去った。';
+    }
+
+    addMoney(donation);
+    return line + '　' + window.SHOP_CURRENCY.formatAmount(donation) + 'を恵んでもらった。';
+  }
+
+  function handleSellingResult(){
+    ensureSelectedSellItem();
+    if(!selectedSellItemId){
+      return randomItem(SELL_LINES) + '　売れる物がない。';
+    }
+
+    const inv=stateRef && stateRef.inventory ? stateRef.inventory : {};
+    const item=window.SHOP_ITEMS && window.SHOP_ITEMS.all
+      ? window.SHOP_ITEMS.all[selectedSellItemId]
+      : null;
+
+    if(!item || Number(inv[selectedSellItemId]||0)<=0){
+      ensureSelectedSellItem();
+      return randomItem(SELL_LINES);
+    }
+
+    if(Math.random()>=0.55){
+      return randomItem(SELL_LINES) + '　今回は買わずに去った。';
+    }
+
+    const price=randomInt(item.sellMinCopper,item.sellMaxCopper);
+    inv[selectedSellItemId]=Math.max(0,Number(inv[selectedSellItemId]||0)-1);
+    if(inv[selectedSellItemId]<=0) delete inv[selectedSellItemId];
+
+    addMoney(price);
+    const soldName=item.name;
+    ensureSelectedSellItem();
+    renderGrid();
+
+    return '「' + soldName + 'をもらおう」　' +
+      window.SHOP_CURRENCY.formatAmount(price) + 'で1個売れた。';
   }
 
   function clearPasserby(){
@@ -96,8 +189,10 @@
 
   function showPasserbyConversation(stopAt){
     if(!passerbyPopup) return;
-    const lines = mode==='sell' ? SELL_LINES : BEG_LINES;
-    passerbyPopup.textContent=randomItem(lines);
+
+    passerbyPopup.textContent =
+      mode==='sell' ? handleSellingResult() : handleBeggingResult();
+
     passerbyPopup.style.left=stopAt+'%';
     passerbyPopup.classList.add('is-open');
   }
@@ -179,7 +274,7 @@
     return true;
   }
 
-  function open(state, initialMode='beg'){
+  function open(state,initialMode='beg'){
     stateRef=state || window.SHOP_STATE || {};
     const app=document.querySelector('.app');
     if(app) app.classList.add('action-open');
@@ -198,7 +293,7 @@
     const app=document.querySelector('.app');
     if(app) app.classList.remove('action-open');
     dialog.classList.remove('is-open');
-    if (typeof window.SHOP_RENDER === 'function') window.SHOP_RENDER();
+    refreshPersistentUi();
   }
 
   function showConversation(text){
