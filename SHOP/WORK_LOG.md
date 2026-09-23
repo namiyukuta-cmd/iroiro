@@ -81,3 +81,13 @@
 - 物乞い: `bottom 2 → 8`
 - 屋台は `bottom 3` のまま変更なし。
 - 目的: 比較画像の9:19画面に近い高さへ人物を移動。
+
+
+### 2026-09-23 人物位置変更が画面に反映されない件
+- GitHub上の `SHOP_data.js` では人物位置変更済みであることを確認。
+  - 老人: `bottom:16`
+  - 運び屋: `bottom:16`
+  - 物乞い: `bottom:8`
+- 画面側が以前のJSを読み続ける可能性があるため、キャッシュ破棄用バージョンを更新。
+- `SHOP_top.html` の `SHOP_BUILD` と各JSの `?v=` を `20260923-1325-person-up` に変更。
+- `SHOP_data.js` の newGame / continueGame の build パラメータも同じ値へ更新。
