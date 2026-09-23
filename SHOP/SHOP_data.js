@@ -127,8 +127,8 @@
     }),
 
     links: Object.freeze({
-      newGame: './SHOP_top.html?new=1&build=20260923-bottom-workspace-v1',
-      continueGame: './SHOP_top.html?continue=1&build=20260923-bottom-workspace-v1',
+      newGame: './SHOP_top.html?new=1&build=20260923-scene-arrows-v1',
+      continueGame: './SHOP_top.html?continue=1&build=20260923-scene-arrows-v1',
       backToGames: '../index.html',
       backToShopMenu: './SHOP_index.html'
     })
