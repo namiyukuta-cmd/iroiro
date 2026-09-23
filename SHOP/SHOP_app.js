@@ -62,72 +62,79 @@
     const strip = $('townStrip');
     const placeholder = $('townPlaceholder');
 
-    strip.style.minWidth = '0';
-    strip.style.width = '100%';
-    strip.style.backgroundImage = 'none';
+    strip.replaceChildren();
 
-    strip.querySelectorAll('.scene-layer').forEach(node => node.remove());
+    // 中部を縦に3等分：
+    // 上1/3 = ①スクロール背景
+    // 中1/3 = ②家 + ③背景NPC + ④選択可能ショップ/NPC
+    // 下1/3 = ⑤主人公配置
+    const backgroundZone = document.createElement('div');
+    backgroundZone.className = 'field-zone field-bg-zone';
 
-    // 5層は上下に分割する帯ではなく、同じ画面全面に重なる5枚のレイヤー。
-    const layerFar=document.createElement('div');
-    layerFar.className='scene-layer scene-layer-far';
-    layerFar.style.backgroundImage='url("' + scene.background + '")';
-    layerFar.style.backgroundPosition='center 62%';
-    layerFar.style.backgroundSize='cover';
-    layerFar.style.backgroundRepeat='no-repeat';
+    const backgroundLayer = document.createElement('div');
+    backgroundLayer.className = 'scroll-background-layer';
+    backgroundLayer.style.backgroundImage = 'url("' + scene.background + '")';
+    backgroundZone.appendChild(backgroundLayer);
 
-    const layerHouse=document.createElement('div');
-    layerHouse.className='scene-layer scene-layer-house';
+    const middleZone = document.createElement('div');
+    middleZone.className = 'field-zone field-middle-zone';
 
-    const layerBackgroundNpc=document.createElement('div');
-    layerBackgroundNpc.className='scene-layer scene-layer-backgroundNpc';
+    const houseLayer = document.createElement('div');
+    houseLayer.className = 'middle-layer middle-house-layer';
 
-    const layerInteractive=document.createElement('div');
-    layerInteractive.className='scene-layer scene-layer-interactive';
+    const backgroundNpcLayer = document.createElement('div');
+    backgroundNpcLayer.className = 'middle-layer middle-background-npc-layer';
 
-    const layerPlayer=document.createElement('div');
-    layerPlayer.className='scene-layer scene-layer-player';
+    const interactiveLayer = document.createElement('div');
+    interactiveLayer.className = 'middle-layer middle-interactive-layer';
 
-    strip.append(layerFar,layerHouse,layerBackgroundNpc,layerInteractive,layerPlayer);
+    middleZone.append(houseLayer, backgroundNpcLayer, interactiveLayer);
 
-    const layerMap={
-      far:layerFar,
-      house:layerHouse,
-      backgroundNpc:layerBackgroundNpc,
-      interactive:layerInteractive,
-      player:layerPlayer,
-      town:layerHouse,
-      people:layerBackgroundNpc
+    const playerZone = document.createElement('div');
+    playerZone.className = 'field-zone field-player-zone';
+    playerZone.dataset.role = 'player-placement-layer';
+
+    strip.append(backgroundZone, middleZone, playerZone);
+
+    const layerMap = {
+      house: houseLayer,
+      backgroundNpc: backgroundNpcLayer,
+      interactive: interactiveLayer,
+      player: playerZone,
+      town: houseLayer,
+      people: backgroundNpcLayer
     };
 
     scene.objects.forEach(item => {
       const image = document.createElement('img');
       image.className = 'scene-object layer-' + (item.layer || 'house');
       if(item.selectable) image.classList.add('is-selectable');
-      if(item.selectable && item.selectableType==='npc') image.classList.add('selectable-npc');
+      if(item.selectable && item.selectableType === 'npc') image.classList.add('selectable-npc');
 
-      if(item.layer==='backgroundNpc'){
-        image.style.filter='drop-shadow(1px 2px 2px rgba(0,0,0,.22))';
-        image.style.opacity='0.92';
-      }
-      if(item.selectable && item.selectableType==='npc'){
-        image.style.filter=
-          'drop-shadow(2px 0 0 #ffe600) '+
-          'drop-shadow(-2px 0 0 #ffe600) '+
-          'drop-shadow(0 2px 0 #ffe600) '+
-          'drop-shadow(0 -2px 0 #ffe600) '+
-          'drop-shadow(3px 3px 3px rgba(0,0,0,.32))';
-      }
       image.src = item.src;
       image.alt = '';
       image.draggable = false;
       image.style.left = item.left + '%';
       image.style.bottom = (item.bottom || 0) + '%';
       image.style.height = item.height + '%';
-      const z = typeof item.layer === 'string' ? data.layers[item.layer] : item.layer;
-      image.style.zIndex = String(z ?? data.layers.house);
-      if (item.flip) image.style.transform = 'scaleX(-1)';
-      (layerMap[item.layer] || layerHouse).appendChild(image);
+
+      if(item.flip) image.style.transform = 'scaleX(-1)';
+
+      if(item.layer === 'backgroundNpc'){
+        image.style.filter = 'drop-shadow(1px 2px 2px rgba(0,0,0,.22))';
+        image.style.opacity = '0.92';
+      }
+
+      if(item.selectable && item.selectableType === 'npc'){
+        image.style.filter =
+          'drop-shadow(2px 0 0 #ffe600) '+
+          'drop-shadow(-2px 0 0 #ffe600) '+
+          'drop-shadow(0 2px 0 #ffe600) '+
+          'drop-shadow(0 -2px 0 #ffe600) '+
+          'drop-shadow(3px 3px 3px rgba(0,0,0,.32))';
+      }
+
+      (layerMap[item.layer] || houseLayer).appendChild(image);
     });
 
     placeholder.style.display = 'none';
