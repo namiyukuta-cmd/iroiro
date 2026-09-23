@@ -116,11 +116,73 @@ button{
   gap:4px;
 }
 .inventory-slot{
+  position:relative;
   aspect-ratio:1/1;
   min-width:0;
+  padding:2px;
   border:1px solid #bdbdbd;
   border-radius:6px;
   background:#fff;
+  display:grid;
+  place-items:center;
+  font-size:11px;
+  line-height:1.05;
+  text-align:center;
+  touch-action:manipulation;
+}
+.inventory-slot.selectable{cursor:pointer}
+.inventory-slot.selected{
+  outline:2px solid #222;
+  outline-offset:-2px;
+}
+.inventory-slot .count{
+  position:absolute;
+  right:3px;
+  bottom:2px;
+  font-size:10px;
+  font-weight:800;
+}
+.inventory-slot .item-mark{
+  display:block;
+  font-size:17px;
+  line-height:1;
+  margin-bottom:1px;
+}
+.farm-plot{
+  position:absolute;
+  width:24px;
+  height:24px;
+  transform:translate(-50%,-50%);
+  border:1px solid #555;
+  background:
+    repeating-linear-gradient(
+      0deg,
+      #fff 0 4px,
+      #d8d8d8 4px 5px
+    );
+  z-index:2;
+  padding:0;
+}
+.farm-plot.planted::before{
+  content:"";
+  position:absolute;
+  left:11px;
+  top:5px;
+  width:2px;
+  height:12px;
+  background:#222;
+}
+.farm-plot.planted::after{
+  content:"";
+  position:absolute;
+  left:7px;
+  top:5px;
+  width:7px;
+  height:5px;
+  border:1px solid #222;
+  border-radius:70% 0 70% 0;
+  background:#fff;
+  transform:rotate(-18deg);
 }
 .toolbar{
   bottom:calc(max(8px,env(safe-area-inset-bottom)) + 58px);
@@ -233,8 +295,8 @@ button{
 <main id="game" aria-label="白い箱庭">
   <div id="ground" class="grid-on">
     <div id="objectLayer"></div>
-    <img id="girl" src="asset/chill_girl_01.png?_nc=20260924-0310" alt="女の子">
-    <div id="hint">物を選んで、置きたいマスをタップ</div>
+    <img id="girl" src="asset/chill_girl_01.png?_nc=20260924-0324" alt="女の子">
+    <div id="hint">土や物を選んで、置きたいマスをタップ</div>
   </div>
 
 
@@ -253,8 +315,12 @@ button{
   </article>
 
   <section class="inventory" aria-label="所持アイテム">
-    <div class="inventory-slot"></div>
-    <div class="inventory-slot"></div>
+    <button id="soilSlot" class="inventory-slot selectable" type="button" aria-label="土">
+      <span><span class="item-mark">▧</span>土</span><span id="soilCount" class="count"></span>
+    </button>
+    <button id="seedSlot" class="inventory-slot selectable" type="button" aria-label="種">
+      <span><span class="item-mark">•</span>種</span><span id="seedCount" class="count"></span>
+    </button>
     <div class="inventory-slot"></div>
     <div class="inventory-slot"></div>
     <div class="inventory-slot"></div>
@@ -319,16 +385,56 @@ const questClose=document.getElementById('questClose');
 const questAccept=document.getElementById('questAccept');
 const questChapter=document.getElementById('questChapter');
 const questStory=document.getElementById('questStory');
+const soilSlot=document.getElementById('soilSlot');
+const seedSlot=document.getElementById('seedSlot');
+const soilCount=document.getElementById('soilCount');
+const seedCount=document.getElementById('seedCount');
 const GRID=24;
 let currentTool='select';
 let selectedId=null;
 let nextId=1;
 let objects=[];
+let inventory={soil:0,seed:0};
+let selectedInventory=null;
+let plots=[];
 
 const artClass={box:'box-art',chair:'chair-art',lamp:'lamp-art',table:'table-art'};
 
+function renderInventory(){
+  soilCount.textContent=inventory.soil>0?'×'+inventory.soil:'';
+  seedCount.textContent=inventory.seed>0?'×'+inventory.seed:'';
+  soilSlot.classList.toggle('selected',selectedInventory==='soil');
+  seedSlot.classList.toggle('selected',selectedInventory==='seed');
+  soilSlot.disabled=inventory.soil<=0;
+  seedSlot.disabled=inventory.seed<=0;
+}
+
+function renderPlots(){
+  layer.querySelectorAll('.farm-plot').forEach(el=>el.remove());
+  plots.forEach((p,i)=>{
+    const el=document.createElement('button');
+    el.type='button';
+    el.className='farm-plot'+(p.planted?' planted':'');
+    el.style.left=p.x+'px';
+    el.style.top=p.y+'px';
+    el.dataset.plotIndex=i;
+    el.setAttribute('aria-label',p.planted?'種を植えた土':'土');
+    el.addEventListener('click',e=>{
+      e.stopPropagation();
+      if(selectedInventory==='seed' && !p.planted && inventory.seed>0){
+        p.planted=true;
+        inventory.seed--;
+        if(inventory.seed<=0)selectedInventory=null;
+        render();
+      }
+    });
+    layer.appendChild(el);
+  });
+}
+
 function render(){
   layer.replaceChildren();
+  renderPlots();
   objects.forEach(o=>{
     const b=document.createElement('button');
     b.type='button';
@@ -351,6 +457,7 @@ function render(){
   });
   const s=objects.find(o=>o.id===selectedId);
   pos.textContent=s?Math.round(s.x)+','+Math.round(s.y):'未選択';
+  renderInventory();
 }
 function syncTools(){
   document.querySelectorAll('[data-tool]').forEach(b=>b.classList.toggle('active',b.dataset.tool===currentTool));
@@ -360,20 +467,65 @@ function clamp(o){
   o.x=Math.max(24,Math.min(r.width-24,o.x));
   o.y=Math.max(24,Math.min(r.height-24,o.y));
 }
+soilSlot.addEventListener('click',()=>{
+  if(inventory.soil<=0)return;
+  selectedInventory=selectedInventory==='soil'?null:'soil';
+  currentTool='select';
+  selectedId=null;
+  syncTools();
+  render();
+});
+seedSlot.addEventListener('click',()=>{
+  if(inventory.seed<=0)return;
+  selectedInventory=selectedInventory==='seed'?null:'seed';
+  currentTool='select';
+  selectedId=null;
+  syncTools();
+  render();
+});
+
 document.querySelectorAll('[data-tool]').forEach(b=>{
   b.addEventListener('click',()=>{
     currentTool=b.dataset.tool;
+    selectedInventory=null;
     if(currentTool!=='select')selectedId=null;
     syncTools();render();
   });
 });
 ground.addEventListener('click',e=>{
-  if(currentTool==='select')return;
   const r=ground.getBoundingClientRect();
   const rawX=e.clientX-r.left;
   const rawY=e.clientY-r.top;
   const x=Math.round(rawX/GRID)*GRID;
   const y=Math.round(rawY/GRID)*GRID;
+
+  if(selectedInventory==='soil'){
+    if(inventory.soil<=0)return;
+    if(plots.some(p=>p.x===x&&p.y===y))return;
+    const p={x,y,planted:false};
+    const bounds={x:p.x,y:p.y};
+    clamp(bounds);
+    p.x=bounds.x;p.y=bounds.y;
+    if(plots.some(q=>q.x===p.x&&q.y===p.y))return;
+    plots.push(p);
+    inventory.soil--;
+    if(inventory.soil<=0)selectedInventory=null;
+    render();
+    return;
+  }
+
+  if(selectedInventory==='seed'){
+    const p=plots.find(p=>p.x===x&&p.y===y);
+    if(p && !p.planted && inventory.seed>0){
+      p.planted=true;
+      inventory.seed--;
+      if(inventory.seed<=0)selectedInventory=null;
+      render();
+    }
+    return;
+  }
+
+  if(currentTool==='select')return;
   const o={id:nextId++,type:currentTool,x,y};
   clamp(o);objects.push(o);selectedId=o.id;
   currentTool='select';syncTools();render();
@@ -402,19 +554,19 @@ window.addEventListener('resize',()=>{
 const questPages=[
   {
     chapter:'QUEST 001',
-    html:'村はずれの古い道に、夜になるとゾンビが現れるらしい。<br>道を通る人が困っている。<br><br>ゾンビを3体倒し、安全を確かめてほしい。',
+    html:'小さな畑を作ってみてほしい。<br><br>土と種はこちらで用意する。<br>空いている場所に土を置き、種を植えてみよう。',
     left:'あとで',
     right:'受ける'
   },
   {
     chapter:'QUEST 001　1',
-    html:'依頼を引き受けた。<br><br>依頼人は、ゾンビが現れるのは日が落ちてからだと教えてくれた。<br>古い道は村の北側にある。',
+    html:'土を3つ、種を3つ受け取った。<br><br>下の所持アイテムから「土」を選び、箱庭の好きなマスをタップして置こう。',
     left:'閉じる',
     right:'進む'
   },
   {
     chapter:'QUEST 001　2',
-    html:'必要なら準備をしてから向かえばいい。<br><br>急ぐ必要はない。<br>村を出れば、古い道へ続く道標がある。',
+    html:'土を置いたら、次は所持アイテムの「種」を選ぶ。<br><br>置いた土のマスをタップすると、そこに種を植えられる。',
     left:'閉じる',
     right:'箱庭へ'
   }
@@ -449,8 +601,12 @@ questBackdrop.addEventListener('click',closeQuest);
 questAccept.addEventListener('click',()=>{
   if(questPage===0){
     questAccepted=true;
+    inventory.soil=3;
+    inventory.seed=3;
+    selectedInventory=null;
     questPage=1;
     renderQuestPage();
+    renderInventory();
     return;
   }
   if(questPage===1){
