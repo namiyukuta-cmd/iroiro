@@ -113,12 +113,9 @@
     layerFar.style.backgroundSize='cover';
     layerFar.style.backgroundRepeat='no-repeat';
 
-    // 元画像(2400x720)は横長で、cover時は縦が画面高とほぼ同じになる。
-    // background-positionのY%では見た目が動かないため、背景レイヤー自体を同じ大きさのまま上へ移動する。
+    // 現在の見た目の相対配置は変えず、中部全体を同じ量だけ上へ移動する。
     const farShiftPx = Math.round(strip.clientHeight * 0.10);
-    layerFar.style.transform='translateY(-' + farShiftPx + 'px)';
-    layerFar.style.willChange='transform';
-    strip.style.backgroundColor='#664e44';
+    const commonShiftPx = Math.round(strip.clientHeight * 0.08);
 
     const layerHouse=document.createElement('div');
     layerHouse.className='scene-layer scene-layer-house';
@@ -132,6 +129,15 @@
     const layerPlayer=document.createElement('div');
     layerPlayer.className='scene-layer scene-layer-player';
 
+    layerFar.style.transform='translateY(-' + (farShiftPx + commonShiftPx) + 'px)';
+    layerFar.style.willChange='transform';
+
+    [layerHouse,layerBackgroundNpc,layerInteractive,layerPlayer].forEach(layer=>{
+      layer.style.transform='translateY(-' + commonShiftPx + 'px)';
+      layer.style.willChange='transform';
+    });
+
+    strip.style.backgroundColor='#664e44';
     strip.append(layerFar,layerHouse,layerBackgroundNpc,layerInteractive,layerPlayer);
 
     const layerMap={
