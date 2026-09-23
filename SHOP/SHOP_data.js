@@ -127,8 +127,8 @@
     }),
 
     links: Object.freeze({
-      newGame: './SHOP_top.html?new=1&build=20260923-1400-action-force',
-      continueGame: './SHOP_top.html?continue=1&build=20260923-1400-action-force',
+      newGame: './SHOP_top.html?new=1&build=20260923-1332-match-reference',
+      continueGame: './SHOP_top.html?continue=1&build=20260923-1332-match-reference',
       backToGames: '../index.html',
       backToShopMenu: './SHOP_index.html'
     })
