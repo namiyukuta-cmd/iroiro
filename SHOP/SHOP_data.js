@@ -39,14 +39,14 @@
           Object.freeze({id:'outer_bottle_01', itemId:'bottle', left:10, bottom:6})
         ]),
         objects: Object.freeze([
-          Object.freeze({src:'./asset/house_poor.png', left:-8, bottom:24, height:38, layer:'house'}),
-          Object.freeze({src:'./asset/house_poor.png', left:76, bottom:24, height:38, layer:'house', flip:true}),
-          Object.freeze({src:'./asset/house_poor.png', left:20, bottom:25, height:21, layer:'house', flip:true}),
-          Object.freeze({src:'./asset/house_poor.png', left:59, bottom:25, height:21, layer:'house'}),
-          Object.freeze({src:'https://raw.githubusercontent.com/namiyukuta-cmd/iroiro/main/SHOP/asset/Npc/npc_oldman_01.png', left:13, bottom:10, height:18, layer:'backgroundNpc'}),
-          Object.freeze({src:'https://raw.githubusercontent.com/namiyukuta-cmd/iroiro/main/SHOP/asset/Npc/npc_porter_01.png', left:84, bottom:10, height:18, layer:'backgroundNpc'}),
-          Object.freeze({src:'./asset/stall.png', left:48, bottom:3, height:26, layer:'interactive', selectable:true, selectableType:'shop'}),
-          Object.freeze({src:'https://raw.githubusercontent.com/namiyukuta-cmd/iroiro/main/SHOP/asset/Npc/npc_beggar_01.png', left:28, bottom:2, height:24, layer:'interactive', selectable:true, selectableType:'npc'})
+          Object.freeze({src:'./asset/house_poor.png', left:-7, bottom:18, height:31, layer:'house'}),
+          Object.freeze({src:'./asset/house_poor.png', left:74, bottom:18, height:31, layer:'house', flip:true}),
+          Object.freeze({src:'./asset/house_poor.png', left:28, bottom:20, height:16, layer:'house', flip:true}),
+          Object.freeze({src:'./asset/house_poor.png', left:55, bottom:20, height:16, layer:'house'}),
+          Object.freeze({src:'https://raw.githubusercontent.com/namiyukuta-cmd/iroiro/main/SHOP/asset/Npc/npc_oldman_01.png', left:19, bottom:15, height:16, layer:'backgroundNpc'}),
+          Object.freeze({src:'https://raw.githubusercontent.com/namiyukuta-cmd/iroiro/main/SHOP/asset/Npc/npc_porter_01.png', left:81, bottom:15, height:16, layer:'backgroundNpc'}),
+          Object.freeze({src:'./asset/stall.png', left:43, bottom:8, height:22, layer:'interactive', selectable:true, selectableType:'shop'}),
+          Object.freeze({src:'https://raw.githubusercontent.com/namiyukuta-cmd/iroiro/main/SHOP/asset/Npc/npc_beggar_01.png', left:31, bottom:5, height:22, layer:'interactive', selectable:true, selectableType:'npc'})
         ])
       }),
 
@@ -122,8 +122,8 @@
     }),
 
     links: Object.freeze({
-      newGame: './SHOP_top.html?new=1&build=20260923-1206',
-      continueGame: './SHOP_top.html?continue=1&build=20260923-1206',
+      newGame: './SHOP_top.html?new=1&build=20260923-1138-layoutfix',
+      continueGame: './SHOP_top.html?continue=1&build=20260923-1138-layoutfix',
       backToGames: '../index.html',
       backToShopMenu: './SHOP_index.html'
     })
