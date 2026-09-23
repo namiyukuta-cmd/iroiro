@@ -37,54 +37,88 @@ button{
   position:absolute;left:50%;bottom:17%;width:min(25vw,108px);height:auto;
   transform:translateX(-50%);user-select:none;-webkit-user-drag:none;pointer-events:none;z-index:5;
 }
+#hint{
+  position:absolute;left:50%;top:12px;transform:translateX(-50%);
+  font-size:11px;color:#777;background:rgba(255,255,255,.9);
+  padding:5px 9px;border-radius:999px;pointer-events:none;z-index:10;white-space:nowrap;
+}
+#sunBtn{
+  position:absolute;left:8px;top:8px;z-index:12;
+  min-width:68px;min-height:38px;border:1px solid #bbb;border-radius:10px;background:#fff;
+  font-size:12px;font-weight:800;
+}
+#sunBtn:active{background:#f2f2f2}
+
 .obj{
   position:absolute;width:48px;height:48px;transform:translate(-50%,-50%);
-  display:grid;place-items:center;z-index:4;touch-action:manipulation;
+  display:grid;place-items:center;z-index:4;
 }
 .obj.selected::after{
   content:"";position:absolute;inset:-5px;border:1px dashed #333;border-radius:8px;pointer-events:none;
 }
-.box-art{
-  width:36px;height:30px;border:2px solid #222;background:#fff;
-  position:relative;
-}
-.box-art::before,.box-art::after{
-  content:"";position:absolute;background:#222;
-}
+.box-art{width:36px;height:30px;border:2px solid #222;background:#fff;position:relative}
+.box-art::before,.box-art::after{content:"";position:absolute;background:#222}
 .box-art::before{left:50%;top:0;bottom:0;width:2px;transform:translateX(-50%)}
 .box-art::after{left:2px;right:2px;top:8px;height:2px}
-.chair-art{
-  width:31px;height:36px;border-left:3px solid #222;border-right:3px solid #222;
-  border-bottom:3px solid transparent;position:relative;
-}
-.chair-art::before{
-  content:"";position:absolute;left:-3px;right:-3px;top:15px;height:3px;background:#222;
-}
-.chair-art::after{
-  content:"";position:absolute;left:2px;right:2px;bottom:-1px;height:17px;
-  border-left:3px solid #222;border-right:3px solid #222;
-}
-.lamp-art{
-  width:28px;height:34px;border:2px solid #222;border-radius:6px 6px 4px 4px;position:relative;background:#fff;
-}
-.lamp-art::before{
-  content:"";position:absolute;left:5px;right:5px;top:-11px;height:12px;
-  border:2px solid #222;border-bottom:0;border-radius:10px 10px 0 0;
-}
-.lamp-art::after{
-  content:"";position:absolute;left:7px;right:7px;top:9px;bottom:6px;
-  border:1px solid #222;border-radius:50% 50% 35% 35%;
-}
-.table-art{
-  width:42px;height:28px;border-top:4px solid #222;position:relative;
-}
-.table-art::before,.table-art::after{
-  content:"";position:absolute;top:0;bottom:0;width:3px;background:#222;
-}
+.chair-art{width:31px;height:36px;border-left:3px solid #222;border-right:3px solid #222;position:relative}
+.chair-art::before{content:"";position:absolute;left:-3px;right:-3px;top:15px;height:3px;background:#222}
+.chair-art::after{content:"";position:absolute;left:2px;right:2px;bottom:-1px;height:17px;border-left:3px solid #222;border-right:3px solid #222}
+.lamp-art{width:28px;height:34px;border:2px solid #222;border-radius:6px;position:relative;background:#fff}
+.lamp-art::before{content:"";position:absolute;left:5px;right:5px;top:-11px;height:12px;border:2px solid #222;border-bottom:0;border-radius:10px 10px 0 0}
+.lamp-art::after{content:"";position:absolute;left:7px;right:7px;top:9px;bottom:6px;border:1px solid #222;border-radius:50% 50% 35% 35%}
+.table-art{width:42px;height:28px;border-top:4px solid #222;position:relative}
+.table-art::before,.table-art::after{content:"";position:absolute;top:0;bottom:0;width:3px;background:#222}
 .table-art::before{left:5px}.table-art::after{right:5px}
 
-.toolbar{
+.farm-plot{
+  position:absolute;width:24px;height:24px;border:1px solid #666;padding:0;z-index:3;
+  background:repeating-linear-gradient(0deg,#fff 0 4px,#d7d7d7 4px 5px);
+}
+.farm-plot.watered{box-shadow:inset 0 0 0 2px #999}
+.farm-plot .plant{position:absolute;inset:0;pointer-events:none}
+.farm-plot.stage1 .plant::before{
+  content:"";position:absolute;width:4px;height:4px;border-radius:50%;background:#222;left:9px;top:10px;
+}
+.farm-plot.stage2 .plant::before{
+  content:"";position:absolute;left:11px;top:7px;width:2px;height:12px;background:#222;
+}
+.farm-plot.stage2 .plant::after{
+  content:"";position:absolute;left:6px;top:7px;width:7px;height:5px;border:1px solid #222;
+  border-radius:70% 0 70% 0;background:#fff;transform:rotate(-20deg);
+}
+.farm-plot.stage3 .plant::before{
+  content:"";position:absolute;left:11px;top:3px;width:2px;height:17px;background:#222;
+}
+.farm-plot.stage3 .plant::after{
+  content:"";position:absolute;left:4px;top:5px;width:15px;height:10px;
+  border-left:6px solid #fff;border-right:6px solid #fff;
+  border-top:5px solid #222;border-bottom:5px solid #222;
+  transform:rotate(-8deg);
+}
+.farm-plot.stage4 .plant::before{
+  content:"";position:absolute;left:11px;top:2px;width:2px;height:18px;background:#222;
+}
+.farm-plot.stage4 .plant::after{
+  content:"✿";position:absolute;left:3px;top:-2px;font-size:18px;line-height:1;color:#222;
+}
+
+.inventory{
   position:absolute;left:8px;right:8px;bottom:max(8px,env(safe-area-inset-bottom));
+  z-index:30;display:grid;grid-template-columns:repeat(8,minmax(0,1fr));gap:4px;
+}
+.inventory-slot{
+  position:relative;aspect-ratio:1/1;min-width:0;padding:2px;border:1px solid #bdbdbd;
+  border-radius:6px;background:#fff;display:grid;place-items:center;
+  font-size:10px;line-height:1.05;text-align:center;
+}
+.inventory-slot.selected{outline:2px solid #222;outline-offset:-2px}
+.inventory-slot:disabled{opacity:.42}
+.inventory-slot .count{position:absolute;right:3px;bottom:2px;font-size:10px;font-weight:800}
+.inventory-slot .item-mark{display:block;font-size:16px;line-height:1;margin-bottom:1px}
+
+.toolbar{
+  position:absolute;left:8px;right:8px;
+  bottom:calc(max(8px,env(safe-area-inset-bottom)) + 58px);
   z-index:20;background:rgba(255,255,255,.96);border:1px solid #ddd;border-radius:14px;padding:8px;
 }
 .palette,.editrow{display:flex;gap:6px;align-items:center}
@@ -95,115 +129,12 @@ button{
 }
 .tool.active{background:#222;color:#fff;border-color:#222}
 #pos{min-width:72px;text-align:center;font:11px ui-monospace,SFMono-Regular,Menlo,monospace;color:#555}
-.nudge{
-  width:42px;min-width:42px;height:42px;border:1px solid #ccc;border-radius:10px;background:#fff;font-size:18px;
-}
-#deleteBtn{font-size:12px}
-#hint{
-  position:absolute;left:50%;top:12px;transform:translateX(-50%);
-  font-size:11px;color:#777;background:rgba(255,255,255,.86);padding:5px 9px;border-radius:999px;
-  pointer-events:none;z-index:10;white-space:nowrap;
-}
-
-.inventory{
-  position:absolute;
-  left:8px;
-  right:8px;
-  bottom:max(8px,env(safe-area-inset-bottom));
-  z-index:30;
-  display:grid;
-  grid-template-columns:repeat(8,minmax(0,1fr));
-  gap:4px;
-}
-.inventory-slot{
-  position:relative;
-  aspect-ratio:1/1;
-  min-width:0;
-  padding:2px;
-  border:1px solid #bdbdbd;
-  border-radius:6px;
-  background:#fff;
-  display:grid;
-  place-items:center;
-  font-size:11px;
-  line-height:1.05;
-  text-align:center;
-  touch-action:manipulation;
-}
-.inventory-slot.selectable{cursor:pointer}
-.inventory-slot.selected{
-  outline:2px solid #222;
-  outline-offset:-2px;
-}
-.inventory-slot .count{
-  position:absolute;
-  right:3px;
-  bottom:2px;
-  font-size:10px;
-  font-weight:800;
-}
-.inventory-slot .item-mark{
-  display:block;
-  font-size:17px;
-  line-height:1;
-  margin-bottom:1px;
-}
-.farm-plot{
-  position:absolute;
-  width:24px;
-  height:24px;
-  transform:none;
-  border:1px solid #555;
-  background:
-    repeating-linear-gradient(
-      0deg,
-      #fff 0 4px,
-      #d8d8d8 4px 5px
-    );
-  z-index:2;
-  padding:0;
-}
-.farm-plot.planted::before{
-  content:"";
-  position:absolute;
-  left:11px;
-  top:5px;
-  width:2px;
-  height:12px;
-  background:#222;
-}
-.farm-plot.planted::after{
-  content:"";
-  position:absolute;
-  left:7px;
-  top:5px;
-  width:7px;
-  height:5px;
-  border:1px solid #222;
-  border-radius:70% 0 70% 0;
-  background:#fff;
-  transform:rotate(-18deg);
-}
-.toolbar{
-  bottom:calc(max(8px,env(safe-area-inset-bottom)) + 58px);
-}
-
+.nudge{width:42px;min-width:42px;height:42px;border:1px solid #ccc;border-radius:10px;background:#fff;font-size:18px}
 
 .quest-peek{
-  position:absolute;
-  right:-10px;
-  top:18%;
-  z-index:40;
-  min-width:76px;
-  min-height:44px;
-  padding:8px 16px 8px 12px;
-  border:1px solid #222;
-  border-radius:12px 0 0 12px;
-  background:#fff;
-  font-size:13px;
-  font-weight:800;
-  transform:translateX(88px);
-  opacity:0;
+  position:absolute;right:-10px;top:18%;z-index:40;min-width:76px;min-height:44px;
+  padding:8px 16px 8px 12px;border:1px solid #222;border-radius:12px 0 0 12px;
+  background:#fff;font-size:13px;font-weight:800;transform:translateX(88px);opacity:0;
   animation:questPeek .48s cubic-bezier(.2,.9,.25,1.25) 1.1s forwards;
 }
 .quest-peek::before{content:"！";margin-right:5px}
@@ -213,98 +144,43 @@ button{
   100%{transform:translateX(0);opacity:1}
 }
 .quest-backdrop{
-  position:absolute;
-  inset:0;
-  z-index:80;
-  background:rgba(255,255,255,.54);
-  backdrop-filter:blur(2px);
-  opacity:0;
-  pointer-events:none;
-  transition:opacity .18s ease;
+  position:absolute;inset:0;z-index:80;background:rgba(255,255,255,.54);
+  backdrop-filter:blur(2px);opacity:0;pointer-events:none;transition:opacity .18s ease;
 }
 .quest-backdrop.open{opacity:1;pointer-events:auto}
 .quest-book{
-  position:absolute;
-  left:50%;
-  top:50%;
-  width:min(86%,360px);
-  max-height:66%;
-  overflow:auto;
-  z-index:90;
-  padding:20px 18px 16px;
-  border:1.5px solid #222;
-  border-radius:10px;
-  background:#fff;
+  position:absolute;left:50%;top:50%;width:min(86%,360px);max-height:66%;overflow:auto;z-index:90;
+  padding:20px 18px 16px;border:1.5px solid #222;border-radius:10px;background:#fff;
   box-shadow:0 12px 34px rgba(0,0,0,.14);
-  transform:translate(58%,-78%) scale(.18) rotate(4deg);
-  transform-origin:100% 0%;
-  opacity:0;
-  pointer-events:none;
+  transform:translate(58%,-78%) scale(.18) rotate(4deg);transform-origin:100% 0%;
+  opacity:0;pointer-events:none;
 }
-.quest-book.open{
-  pointer-events:auto;
-  animation:questFly .34s cubic-bezier(.2,.82,.25,1.08) forwards;
-}
+.quest-book.open{pointer-events:auto;animation:questFly .34s cubic-bezier(.2,.82,.25,1.08) forwards}
 @keyframes questFly{
   from{transform:translate(58%,-78%) scale(.18) rotate(4deg);opacity:.15}
-  to{transform:translate(-50%,-50%) scale(1) rotate(0);opacity:1}
+  to{transform:translate(-50%,-50%) scale(1);opacity:1}
 }
-.quest-book h2{
-  margin:0 0 4px;
-  font-size:20px;
-  text-align:center;
-  letter-spacing:.08em;
-}
-.quest-book .chapter{
-  margin:0 0 14px;
-  text-align:center;
-  font-size:11px;
-  color:#777;
-}
-.quest-book .story{
-  margin:0;
-  padding:14px 4px 18px;
-  border-top:1px solid #ddd;
-  border-bottom:1px solid #ddd;
-  font-size:14px;
-  line-height:1.9;
-}
-.quest-book .choices{
-  display:grid;
-  grid-template-columns:1fr 1fr;
-  gap:8px;
-  margin-top:14px;
-}
-.quest-book .choices button{
-  min-height:44px;
-  border:1px solid #aaa;
-  border-radius:8px;
-  background:#fff;
-  font-weight:800;
-}
-.quest-book .choices .accept{
-  border-color:#222;
-  background:#222;
-  color:#fff;
-}
-.quest-peek.hidden{display:none}
-
+.quest-book h2{margin:0 0 4px;font-size:20px;text-align:center;letter-spacing:.08em}
+.quest-book .chapter{margin:0 0 14px;text-align:center;font-size:11px;color:#777}
+.quest-book .story{margin:0;padding:14px 4px 18px;border-top:1px solid #ddd;border-bottom:1px solid #ddd;font-size:14px;line-height:1.9}
+.quest-book .choices{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:14px}
+.quest-book .choices button{min-height:44px;border:1px solid #aaa;border-radius:8px;background:#fff;font-weight:800}
+.quest-book .choices .accept{border-color:#222;background:#222;color:#fff}
 </style>
 </head>
 <body>
 <main id="game" aria-label="白い箱庭">
   <div id="ground" class="grid-on">
     <div id="objectLayer"></div>
-    <img id="girl" src="asset/chill_girl_01.png?_nc=20260924-0338" alt="女の子">
-    <div id="hint">土や物を選んで、置きたいマスをタップ</div>
+    <img id="girl" src="asset/chill_girl_01.png?_nc=20260924-0418" alt="女の子">
+    <div id="hint">土・種・ジョウロを選んでマスをタップ</div>
+    <button id="sunBtn" type="button">☀︎ 太陽</button>
   </div>
 
-
-  <button id="questPeek" class="quest-peek" type="button" aria-label="新しい依頼">依頼</button>
-
+  <button id="questPeek" class="quest-peek" type="button">依頼</button>
   <div id="questBackdrop" class="quest-backdrop" aria-hidden="true"></div>
 
-  <article id="questBook" class="quest-book" aria-label="依頼書">
+  <article id="questBook" class="quest-book">
     <h2>依頼</h2>
     <p id="questChapter" class="chapter">QUEST 001</p>
     <p id="questStory" class="story"></p>
@@ -315,14 +191,18 @@ button{
   </article>
 
   <section class="inventory" aria-label="所持アイテム">
-    <button id="soilSlot" class="inventory-slot selectable" type="button" aria-label="土">
+    <button id="soilSlot" class="inventory-slot" type="button">
       <span><span class="item-mark">▧</span>土</span><span id="soilCount" class="count"></span>
     </button>
-    <button id="seedSlot" class="inventory-slot selectable" type="button" aria-label="種">
+    <button id="seedSlot" class="inventory-slot" type="button">
       <span><span class="item-mark">•</span>種</span><span id="seedCount" class="count"></span>
     </button>
-    <div class="inventory-slot"></div>
-    <div class="inventory-slot"></div>
+    <button id="canSlot" class="inventory-slot" type="button">
+      <span><span class="item-mark">⌁</span>ジョウロ</span>
+    </button>
+    <div id="waterSlot" class="inventory-slot">
+      <span><span class="item-mark">◒</span>水</span><span id="waterCount" class="count"></span>
+    </div>
     <div class="inventory-slot"></div>
     <div class="inventory-slot"></div>
     <div class="inventory-slot"></div>
@@ -368,6 +248,8 @@ const ground=document.getElementById('ground');
 const layer=document.getElementById('objectLayer');
 const pos=document.getElementById('pos');
 const gridBtn=document.getElementById('gridBtn');
+const sunBtn=document.getElementById('sunBtn');
+
 const questPeek=document.getElementById('questPeek');
 const questBook=document.getElementById('questBook');
 const questBackdrop=document.getElementById('questBackdrop');
@@ -375,76 +257,103 @@ const questClose=document.getElementById('questClose');
 const questAccept=document.getElementById('questAccept');
 const questChapter=document.getElementById('questChapter');
 const questStory=document.getElementById('questStory');
+
 const soilSlot=document.getElementById('soilSlot');
 const seedSlot=document.getElementById('seedSlot');
+const canSlot=document.getElementById('canSlot');
 const soilCount=document.getElementById('soilCount');
 const seedCount=document.getElementById('seedCount');
+const waterCount=document.getElementById('waterCount');
+
 const GRID=24;
 let currentTool='select';
 let selectedId=null;
 let nextId=1;
 let objects=[];
-let inventory={soil:0,seed:0};
-let selectedInventory=null;
 let plots=[];
+let inventory={soil:0,seed:0,can:0,water:0};
+let selectedInventory=null;
 
 const artClass={box:'box-art',chair:'chair-art',lamp:'lamp-art',table:'table-art'};
 
+function gridCellFromPoint(clientX,clientY){
+  const r=ground.getBoundingClientRect();
+  const col=Math.floor(Math.max(0,clientX-r.left)/GRID);
+  const row=Math.floor(Math.max(0,clientY-r.top)/GRID);
+  return {x:col*GRID,y:row*GRID,width:r.width,height:r.height};
+}
+function clamp(o){
+  const r=ground.getBoundingClientRect();
+  o.x=Math.max(24,Math.min(r.width-24,o.x));
+  o.y=Math.max(24,Math.min(r.height-24,o.y));
+}
 function renderInventory(){
   soilCount.textContent=inventory.soil>0?'×'+inventory.soil:'';
   seedCount.textContent=inventory.seed>0?'×'+inventory.seed:'';
-  soilSlot.classList.toggle('selected',selectedInventory==='soil');
-  seedSlot.classList.toggle('selected',selectedInventory==='seed');
+  waterCount.textContent=inventory.water>0?'×'+inventory.water:'';
   soilSlot.disabled=inventory.soil<=0;
   seedSlot.disabled=inventory.seed<=0;
+  canSlot.disabled=inventory.can<=0;
+  soilSlot.classList.toggle('selected',selectedInventory==='soil');
+  seedSlot.classList.toggle('selected',selectedInventory==='seed');
+  canSlot.classList.toggle('selected',selectedInventory==='can');
 }
-
 function renderPlots(){
-  layer.querySelectorAll('.farm-plot').forEach(el=>el.remove());
   plots.forEach((p,i)=>{
     const el=document.createElement('button');
     el.type='button';
-    el.className='farm-plot'+(p.planted?' planted':'');
+    el.className='farm-plot'+
+      (p.stage>0?' stage'+p.stage:'')+
+      (p.watered?' watered':'');
     el.style.left=p.x+'px';
     el.style.top=p.y+'px';
     el.dataset.plotIndex=i;
-    el.setAttribute('aria-label',p.planted?'種を植えた土':'土');
+    const plant=document.createElement('span');
+    plant.className='plant';
+    el.appendChild(plant);
     el.addEventListener('click',e=>{
       e.stopPropagation();
-      if(selectedInventory==='seed' && !p.planted && inventory.seed>0){
-        p.planted=true;
+      if(selectedInventory==='seed' && p.stage===0 && inventory.seed>0){
+        p.stage=1;
         inventory.seed--;
         if(inventory.seed<=0)selectedInventory=null;
+        render();
+        return;
+      }
+      if(selectedInventory==='can' && p.stage>0 && p.stage<4 && !p.watered && inventory.water>0){
+        p.watered=true;
+        inventory.water--;
         render();
       }
     });
     layer.appendChild(el);
   });
 }
-
-function render(){
-  layer.replaceChildren();
-  renderPlots();
+function renderObjects(){
   objects.forEach(o=>{
     const b=document.createElement('button');
     b.type='button';
     b.className='obj'+(o.id===selectedId?' selected':'');
-    b.dataset.id=o.id;
     b.style.left=o.x+'px';
     b.style.top=o.y+'px';
-    b.setAttribute('aria-label',o.type);
     const art=document.createElement('span');
     art.className=artClass[o.type];
     b.appendChild(art);
     b.addEventListener('click',e=>{
       e.stopPropagation();
       selectedId=o.id;
+      selectedInventory=null;
       currentTool='select';
       syncTools();
       render();
     });
     layer.appendChild(b);
   });
+}
+function render(){
+  layer.replaceChildren();
+  renderPlots();
+  renderObjects();
   const s=objects.find(o=>o.id===selectedId);
   pos.textContent=s?Math.round(s.x)+','+Math.round(s.y):'未選択';
   renderInventory();
@@ -452,87 +361,90 @@ function render(){
 function syncTools(){
   document.querySelectorAll('[data-tool]').forEach(b=>b.classList.toggle('active',b.dataset.tool===currentTool));
 }
-function clamp(o){
-  const r=ground.getBoundingClientRect();
-  o.x=Math.max(24,Math.min(r.width-24,o.x));
-  o.y=Math.max(24,Math.min(r.height-24,o.y));
-}
-function gridCellFromPoint(clientX,clientY){
-  const r=ground.getBoundingClientRect();
-  const rawX=Math.max(0,clientX-r.left);
-  const rawY=Math.max(0,clientY-r.top);
-  const col=Math.floor(rawX/GRID);
-  const row=Math.floor(rawY/GRID);
-  return {
-    x:col*GRID,
-    y:row*GRID,
-    col,
-    row,
-    width:r.width,
-    height:r.height
-  };
-}
-soilSlot.addEventListener('click',()=>{
-  if(inventory.soil<=0)return;
-  selectedInventory=selectedInventory==='soil'?null:'soil';
+function selectInventory(type){
+  if(type==='soil'&&inventory.soil<=0)return;
+  if(type==='seed'&&inventory.seed<=0)return;
+  if(type==='can'&&inventory.can<=0)return;
+  selectedInventory=selectedInventory===type?null:type;
   currentTool='select';
   selectedId=null;
   syncTools();
   render();
-});
-seedSlot.addEventListener('click',()=>{
-  if(inventory.seed<=0)return;
-  selectedInventory=selectedInventory==='seed'?null:'seed';
-  currentTool='select';
-  selectedId=null;
-  syncTools();
-  render();
-});
+}
+soilSlot.addEventListener('click',()=>selectInventory('soil'));
+seedSlot.addEventListener('click',()=>selectInventory('seed'));
+canSlot.addEventListener('click',()=>selectInventory('can'));
 
 document.querySelectorAll('[data-tool]').forEach(b=>{
   b.addEventListener('click',()=>{
     currentTool=b.dataset.tool;
     selectedInventory=null;
     if(currentTool!=='select')selectedId=null;
-    syncTools();render();
+    syncTools();
+    render();
   });
 });
+
 ground.addEventListener('click',e=>{
+  if(e.target.closest('#sunBtn'))return;
   const cell=gridCellFromPoint(e.clientX,e.clientY);
-  const x=cell.x;
-  const y=cell.y;
+  const x=cell.x,y=cell.y;
 
   if(selectedInventory==='soil'){
     if(inventory.soil<=0)return;
-    // Do not place into a clipped partial cell at the right/bottom edge.
-    if(x+GRID>cell.width || y+GRID>cell.height)return;
+    if(x+GRID>cell.width||y+GRID>cell.height)return;
     if(plots.some(p=>p.x===x&&p.y===y))return;
-    plots.push({x,y,planted:false});
+    plots.push({x,y,stage:0,watered:false});
     inventory.soil--;
     if(inventory.soil<=0)selectedInventory=null;
     render();
     return;
   }
 
-  if(selectedInventory==='seed'){
+  if(selectedInventory==='seed' || selectedInventory==='can'){
     const p=plots.find(p=>p.x===x&&p.y===y);
-    if(p && !p.planted && inventory.seed>0){
-      p.planted=true;
+    if(!p)return;
+    if(selectedInventory==='seed'&&p.stage===0&&inventory.seed>0){
+      p.stage=1;
       inventory.seed--;
       if(inventory.seed<=0)selectedInventory=null;
+      render();
+    }else if(selectedInventory==='can'&&p.stage>0&&p.stage<4&&!p.watered&&inventory.water>0){
+      p.watered=true;
+      inventory.water--;
       render();
     }
     return;
   }
 
   if(currentTool==='select')return;
-  // Furniture uses the center of the selected grid cell.
   const o={id:nextId++,type:currentTool,x:x+GRID/2,y:y+GRID/2};
-  clamp(o);objects.push(o);selectedId=o.id;
-  currentTool='select';syncTools();render();
+  clamp(o);
+  objects.push(o);
+  selectedId=o.id;
+  currentTool='select';
+  syncTools();
+  render();
 });
+
+sunBtn.addEventListener('click',e=>{
+  e.stopPropagation();
+  let grew=false;
+  plots.forEach(p=>{
+    if(p.stage>0&&p.stage<4&&p.watered){
+      p.stage++;
+      p.watered=false;
+      grew=true;
+    }
+  });
+  sunBtn.textContent=grew?'☀︎ 育った':'☀︎ 太陽';
+  setTimeout(()=>{sunBtn.textContent='☀︎ 太陽'},700);
+  render();
+});
+
 function nudge(dx,dy){
-  const o=objects.find(o=>o.id===selectedId);if(!o)return;
+  const o=objects.find(o=>o.id===selectedId);
+  if(!o)return;
   o.x+=dx;o.y+=dy;clamp(o);render();
 }
 document.getElementById('leftBtn').addEventListener('click',()=>nudge(-1,0));
@@ -542,32 +454,30 @@ document.getElementById('downBtn').addEventListener('click',()=>nudge(0,1));
 document.getElementById('deleteBtn').addEventListener('click',()=>{
   if(selectedId==null)return;
   objects=objects.filter(o=>o.id!==selectedId);
-  selectedId=null;render();
+  selectedId=null;
+  render();
 });
 gridBtn.addEventListener('click',()=>{
   ground.classList.toggle('grid-on');
   gridBtn.classList.toggle('active',ground.classList.contains('grid-on'));
 });
-window.addEventListener('resize',()=>{
-  objects.forEach(clamp);render();
-});
 
 const questPages=[
   {
     chapter:'QUEST 001',
-    html:'小さな畑を作ってみてほしい。<br><br>土と種はこちらで用意する。<br>空いている場所に土を置き、種を植えてみよう。',
+    html:'小さな畑を作ってみてほしい。<br><br>土と種、ジョウロを用意した。<br>水をやって、太陽に当てれば育つ。',
     left:'あとで',
     right:'受ける'
   },
   {
     chapter:'QUEST 001　1',
-    html:'土を3つ、種を3つ受け取った。<br><br>下の所持アイテムから「土」を選び、箱庭の好きなマスをタップして置こう。',
+    html:'土を3つ、種を3つ、ジョウロを1つ、水を9回分受け取った。<br><br>まず土を置き、種を植えよう。',
     left:'閉じる',
     right:'進む'
   },
   {
     chapter:'QUEST 001　2',
-    html:'土を置いたら、次は所持アイテムの「種」を選ぶ。<br><br>置いた土のマスをタップすると、そこに種を植えられる。',
+    html:'種を植えたら「ジョウロ」を選んで畑をタップする。<br><br>水やりのあと「☀︎ 太陽」を押すと、1段階育つ。',
     left:'閉じる',
     right:'箱庭へ'
   }
@@ -576,7 +486,7 @@ let questPage=0;
 let questAccepted=false;
 
 function renderQuestPage(){
-  const p=questPages[questPage]||questPages[0];
+  const p=questPages[questPage];
   questChapter.textContent=p.chapter;
   questStory.innerHTML=p.html;
   questClose.textContent=p.left;
@@ -602,12 +512,10 @@ questBackdrop.addEventListener('click',closeQuest);
 questAccept.addEventListener('click',()=>{
   if(questPage===0){
     questAccepted=true;
-    inventory.soil=3;
-    inventory.seed=3;
-    selectedInventory=null;
+    inventory={soil:3,seed:3,can:1,water:9};
     questPage=1;
     renderQuestPage();
-    renderInventory();
+    render();
     return;
   }
   if(questPage===1){
@@ -618,8 +526,8 @@ questAccept.addEventListener('click',()=>{
   closeQuest();
 });
 renderQuestPage();
-
-objects.forEach(clamp);render();syncTools();
+render();
+syncTools();
 })();
 </script>
 </body>
