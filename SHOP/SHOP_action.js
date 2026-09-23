@@ -246,6 +246,7 @@
     clearPasserby();
     screen.classList.remove('is-open');
     dialog.classList.remove('is-open');
+    if (typeof window.SHOP_RENDER === 'function') window.SHOP_RENDER();
   }
 
   function showConversation(text){
