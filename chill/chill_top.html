@@ -327,16 +327,6 @@ let objects=[];
 
 const artClass={box:'box-art',chair:'chair-art',lamp:'lamp-art',table:'table-art'};
 
-function save(){
-  try{localStorage.setItem('chillSandboxObjects',JSON.stringify(objects))}catch(e){}
-}
-function load(){
-  try{
-    const d=JSON.parse(localStorage.getItem('chillSandboxObjects')||'[]');
-    if(Array.isArray(d))objects=d.filter(o=>o&&artClass[o.type]&&Number.isFinite(o.x)&&Number.isFinite(o.y));
-    nextId=objects.reduce((m,o)=>Math.max(m,Number(o.id)||0),0)+1;
-  }catch(e){objects=[]}
-}
 function render(){
   layer.replaceChildren();
   objects.forEach(o=>{
@@ -386,11 +376,11 @@ ground.addEventListener('click',e=>{
   const y=Math.round(rawY/GRID)*GRID;
   const o={id:nextId++,type:currentTool,x,y};
   clamp(o);objects.push(o);selectedId=o.id;
-  currentTool='select';syncTools();render();save();
+  currentTool='select';syncTools();render();
 });
 function nudge(dx,dy){
   const o=objects.find(o=>o.id===selectedId);if(!o)return;
-  o.x+=dx;o.y+=dy;clamp(o);render();save();
+  o.x+=dx;o.y+=dy;clamp(o);render();
 }
 document.getElementById('leftBtn').addEventListener('click',()=>nudge(-1,0));
 document.getElementById('rightBtn').addEventListener('click',()=>nudge(1,0));
@@ -399,14 +389,14 @@ document.getElementById('downBtn').addEventListener('click',()=>nudge(0,1));
 document.getElementById('deleteBtn').addEventListener('click',()=>{
   if(selectedId==null)return;
   objects=objects.filter(o=>o.id!==selectedId);
-  selectedId=null;render();save();
+  selectedId=null;render();
 });
 gridBtn.addEventListener('click',()=>{
   ground.classList.toggle('grid-on');
   gridBtn.classList.toggle('active',ground.classList.contains('grid-on'));
 });
 window.addEventListener('resize',()=>{
-  objects.forEach(clamp);render();save();
+  objects.forEach(clamp);render();
 });
 
 const questPages=[
@@ -432,14 +422,6 @@ const questPages=[
 let questPage=0;
 let questAccepted=false;
 
-function saveQuest(){
-  try{
-    localStorage.setItem('chillQuest001StateV2',JSON.stringify({
-      page:questPage,
-      accepted:questAccepted
-    }));
-  }catch(e){}
-}
 function renderQuestPage(){
   const p=questPages[questPage]||questPages[0];
   questChapter.textContent=p.chapter;
@@ -468,28 +450,19 @@ questAccept.addEventListener('click',()=>{
   if(questPage===0){
     questAccepted=true;
     questPage=1;
-    saveQuest();
     renderQuestPage();
     return;
   }
   if(questPage===1){
     questPage=2;
-    saveQuest();
     renderQuestPage();
     return;
   }
   closeQuest();
 });
-try{
-  const saved=JSON.parse(localStorage.getItem('chillQuest001StateV2')||'null');
-  if(saved&&Number.isFinite(saved.page)){
-    questPage=Math.max(0,Math.min(2,saved.page));
-    questAccepted=!!saved.accepted;
-  }
-}catch(e){}
 renderQuestPage();
 
-load();objects.forEach(clamp);render();syncTools();
+objects.forEach(clamp);render();syncTools();
 })();
 </script>
 </body>
