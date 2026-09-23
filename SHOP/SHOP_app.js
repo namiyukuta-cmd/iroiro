@@ -42,15 +42,24 @@
     const slots = [];
     entries.forEach(item => {
       const isDrinkable = item.count > 0 && item.def.drinkableWater;
-      const slot = document.createElement(isDrinkable ? 'button' : 'div');
-      if (isDrinkable) slot.type = 'button';
-      slot.className = 'quick-slot' + (item.count > 0 ? '' : ' is-empty') + (isDrinkable ? ' is-usable' : '');
+      const isEdible = item.count > 0 && Number.isFinite(Number(item.def.hungerRecovery));
+      const isUsable = isDrinkable || isEdible;
+      const slot = document.createElement(isUsable ? 'button' : 'div');
+      if (isUsable) slot.type = 'button';
+      slot.className = 'quick-slot' + (item.count > 0 ? '' : ' is-empty') + (isUsable ? ' is-usable' : '');
       slot.textContent = item.count > 0 ? item.name + ' ×' + item.count : item.name;
 
       if (isDrinkable) {
         slot.addEventListener('click', () => {
           if (!window.SHOP_WELL) return;
           const result = window.SHOP_WELL.drinkCarriedWater(state, item.id);
+          if (status) status.textContent = result.message;
+          render();
+        });
+      } else if (isEdible) {
+        slot.addEventListener('click', () => {
+          if (!window.SHOP_FOOD) return;
+          const result = window.SHOP_FOOD.eatInventory(state, item.id);
           if (status) status.textContent = result.message;
           render();
         });
@@ -263,6 +272,20 @@
           if (!window.SHOP_WELL) return;
           window.SHOP_WELL.open(state, () => {
             if (status) status.textContent = '';
+            render();
+          });
+        });
+      }
+
+      if (item.selectable && item.selectableType === 'shop') {
+        image.style.pointerEvents = 'auto';
+        image.style.cursor = 'pointer';
+        image.setAttribute('role', 'button');
+        image.setAttribute('aria-label', '屋台を見る');
+        image.addEventListener('click', event => {
+          event.stopPropagation();
+          if (!window.SHOP_STALL) return;
+          window.SHOP_STALL.open(state, () => {
             render();
           });
         });
