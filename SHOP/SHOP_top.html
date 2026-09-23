@@ -165,47 +165,58 @@
     .action-modes{display:flex;gap:6px}
     .action-mode[disabled]{opacity:.35}
 
-    /* 上部：人の行き交いは足だけ */
-    .feet-lane{
+    /* 上部：人が行き交い、ときどき立ち止まって会話する */
+    .passerby-lane{
       position:relative;
       overflow:hidden;
       border-bottom:2px solid #29261f;
       background:#f8f3e8;
     }
-    .feet-pair{
+    .passerby-sprite{
       position:absolute;
-      top:42%;
-      width:76px;
-      height:68px;
+      bottom:-4%;
+      left:-24%;
+      height:132%;
+      width:auto;
+      max-width:none;
+      object-fit:contain;
+      object-position:center bottom;
+      user-select:none;
+      -webkit-user-drag:none;
+      pointer-events:none;
+      filter:drop-shadow(2px 3px 3px rgba(0,0,0,.22));
+      z-index:2;
+    }
+    .passerby-popup{
+      position:absolute;
+      top:54px;
+      left:50%;
+      z-index:8;
+      max-width:58%;
+      padding:8px 10px;
+      border:2px solid #29261f;
+      border-radius:10px;
+      background:#fffaf0;
+      font-size:12px;
+      font-weight:800;
+      line-height:1.45;
       transform:translateX(-50%);
-      animation:feetPass 7s linear infinite;
+      display:none;
+      pointer-events:none;
     }
-    .feet-pair.left{left:-12%;animation-delay:0s}
-    .feet-pair.right{left:-12%;animation-delay:3.5s}
-    @keyframes feetPass{
-      from{left:-12%}
-      to{left:112%}
-    }
-    .foot{
-      position:absolute;
-      bottom:0;
-      width:30px;
-      height:16px;
-      border-radius:50% 60% 45% 55%;
-      background:#211f1a;
-    }
-    .foot::before{
+    .passerby-popup.is-open{display:block}
+    .passerby-popup::after{
       content:'';
       position:absolute;
-      left:10px;
-      bottom:10px;
+      left:50%;
+      bottom:-8px;
       width:12px;
-      height:42px;
-      background:#211f1a;
-      border-radius:7px 7px 0 0;
+      height:12px;
+      border-right:2px solid #29261f;
+      border-bottom:2px solid #29261f;
+      background:#fffaf0;
+      transform:translateX(-50%) rotate(45deg);
     }
-    .foot.a{left:6px}
-    .foot.b{right:6px}
 
     /* 下部：左に時間、右に物乞い/売り場 */
     .action-body{
@@ -466,7 +477,7 @@
 <body>
 <script>
 (() => {
-  const SHOP_BUILD='20260923-1405-restore-1337';
+  const SHOP_BUILD='20260923-1412-passerby-stop-talk';
   const u=new URL(location.href);
   if(u.searchParams.get('build')!==SHOP_BUILD){
     u.searchParams.set('build',SHOP_BUILD);
@@ -492,9 +503,8 @@
         </div>
       </div>
 
-      <div class="feet-lane" aria-label="人の行き交い">
-        <div class="feet-pair left"><span class="foot a"></span><span class="foot b"></span></div>
-        <div class="feet-pair right"><span class="foot a"></span><span class="foot b"></span></div>
+      <div class="passerby-lane" id="passerbyLane" aria-label="人の行き交い">
+        <div class="passerby-popup" id="passerbyPopup" aria-live="polite"></div>
       </div>
 
       <div class="action-body">
@@ -546,10 +556,10 @@
     <nav class="bottom-menu" id="bottomMenu" aria-label="メニュー"></nav>
   </div>
 
-  <script src="./SHOP_data.js?v=20260923-1405-restore-1337"></script>
-  <script src="./SHOP_items.js?v=20260923-1405-restore-1337"></script>
-  <script src="./SHOP_action.js?v=20260923-1405-restore-1337"></script>
-  <script src="./SHOP_save.js?v=20260923-1405-restore-1337"></script>
-  <script src="./SHOP_app.js?v=20260923-1405-restore-1337"></script>
+  <script src="./SHOP_data.js?v=20260923-1412-passerby-stop-talk"></script>
+  <script src="./SHOP_items.js?v=20260923-1412-passerby-stop-talk"></script>
+  <script src="./SHOP_action.js?v=20260923-1412-passerby-stop-talk"></script>
+  <script src="./SHOP_save.js?v=20260923-1412-passerby-stop-talk"></script>
+  <script src="./SHOP_app.js?v=20260923-1412-passerby-stop-talk"></script>
 </body>
 </html>
