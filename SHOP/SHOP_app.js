@@ -74,8 +74,8 @@
     strip.style.minWidth = '0';
     strip.style.width = '100%';
     strip.style.backgroundImage = 'url("' + scene.background + '")';
-    strip.style.backgroundPosition = 'center bottom';
-    strip.style.backgroundSize = 'cover';
+    strip.style.backgroundPosition = 'center 70%';
+    strip.style.backgroundSize = '185% auto';
     strip.style.backgroundRepeat = 'no-repeat';
 
     strip.querySelectorAll('.scene-object').forEach(node => node.remove());
@@ -85,6 +85,18 @@
       image.className = 'scene-object layer-' + (item.layer || 'town');
       if(item.selectable) image.classList.add('is-selectable');
       if(item.selectable && item.selectableType==='npc') image.classList.add('selectable-npc');
+
+      if(item.layer==='backgroundNpc'){
+        image.style.filter='drop-shadow(2px 3px 3px rgba(0,0,0,.28))';
+      }
+      if(item.selectable && item.selectableType==='npc'){
+        image.style.filter=
+          'drop-shadow(2px 0 0 #ffe600) '+
+          'drop-shadow(-2px 0 0 #ffe600) '+
+          'drop-shadow(0 2px 0 #ffe600) '+
+          'drop-shadow(0 -2px 0 #ffe600) '+
+          'drop-shadow(3px 3px 3px rgba(0,0,0,.32))';
+      }
       image.src = item.src;
       image.alt = '';
       image.draggable = false;
