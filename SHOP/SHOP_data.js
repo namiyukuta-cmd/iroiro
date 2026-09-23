@@ -6,7 +6,7 @@
     subtitle: '砂漠都市で暮らし、商いを始める',
 
     initialState: Object.freeze({
-      version: 3,
+      version: 4,
       day: 1,
       minutes: 360,
       temperature: 24,
@@ -17,6 +17,9 @@
       hunger: 25,
       thirst: 30,
       money: 0,
+      access: Object.freeze({
+        upperArea: false
+      }),
       inventory: Object.freeze({}),
       collectedPickups: Object.freeze([])
     }),
@@ -163,8 +166,8 @@
     }),
 
     links: Object.freeze({
-      newGame: './SHOP_top.html?new=1&build=20260923-begging-by-district-v1',
-      continueGame: './SHOP_top.html?continue=1&build=20260923-begging-by-district-v1',
+      newGame: './SHOP_top.html?new=1&build=20260923-upper-area-locked-v1',
+      continueGame: './SHOP_top.html?continue=1&build=20260923-upper-area-locked-v1',
       backToGames: '../index.html',
       backToShopMenu: './SHOP_index.html'
     })
