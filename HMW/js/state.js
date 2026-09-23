@@ -205,6 +205,11 @@
     },
     daily: createDaily(),
     activeEvent: null,
+    aiGenerationGuard: {
+      required: true,
+      version: 1,
+      lastAudit: null
+    },
     leads: [
       { id: "first_board", text: "駅前で今日使える情報を探す", done: false },
       { id: "food_today", text: "今日の食料を確保する", done: false },
