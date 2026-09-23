@@ -11,6 +11,11 @@
   const quickInventory = $('quickInventory');
   const quickBegButton = $('quickBegButton');
   const quickSellButton = $('quickSellButton');
+  const timeRail = $('timeRail');
+  const moonRail = $('moonRail');
+  const moonPhaseText = $('moonPhaseText');
+  const railPopup = $('railPopup');
+  let railPopupTimer = null;
 
   function formatTime(totalMinutes) {
     const value = Math.max(0, Number(totalMinutes) || 0) % 1440;
@@ -30,6 +35,140 @@
     button.className = 'menu-btn';
     button.textContent = label;
     return button;
+  }
+
+  function minutePercent(minute) {
+    return Math.max(0, Math.min(100, (Number(minute) || 0) / 1440 * 100));
+  }
+
+  function showRailPopup(text) {
+    if (!railPopup) return;
+    railPopup.textContent = String(text || '');
+    railPopup.classList.add('is-open');
+    if (railPopupTimer) clearTimeout(railPopupTimer);
+    railPopupTimer = setTimeout(() => railPopup.classList.remove('is-open'), 2200);
+  }
+
+  function lunarPhaseName(age, cycle) {
+    const p = ((age % cycle) + cycle) % cycle / cycle;
+    if (p < 0.0625 || p >= 0.9375) return '新月';
+    if (p < 0.1875) return '三日月';
+    if (p < 0.3125) return '上弦';
+    if (p < 0.4375) return '十三夜';
+    if (p < 0.5625) return '満月';
+    if (p < 0.6875) return '寝待月';
+    if (p < 0.8125) return '下弦';
+    return '有明月';
+  }
+
+  function renderTimeMoonRails() {
+    const state = window.SHOP_STATE || {};
+    const config = data.timeSystem || {};
+    const prayers = Array.isArray(config.prayers) ? config.prayers : [];
+    const now = Math.max(0, Math.min(1439, Number(state.minutes) || 0));
+
+    if (timeRail) {
+      const nodes = [];
+
+      const track = document.createElement('div');
+      track.className = 'time-track-line';
+      nodes.push(track);
+
+      for (let hour = 0; hour <= 24; hour += 1) {
+        const tick = document.createElement('span');
+        const major = hour % 6 === 0;
+        tick.className = 'hour-tick' + (major ? ' major' : '');
+        tick.style.left = (hour / 24 * 100) + '%';
+        nodes.push(tick);
+
+        if (major) {
+          const label = document.createElement('span');
+          label.className = 'hour-label';
+          label.style.left = (hour / 24 * 100) + '%';
+          label.textContent = String(hour);
+          nodes.push(label);
+        }
+      }
+
+      const fastingStart = prayers.find(item => item.id === config.fastingStartId);
+      const fastingEnd = prayers.find(item => item.id === config.fastingEndId);
+      if (fastingStart && fastingEnd) {
+        const band = document.createElement('div');
+        band.className = 'fasting-band';
+        const startPct = minutePercent(fastingStart.minute);
+        const endPct = minutePercent(fastingEnd.minute);
+        band.style.left = startPct + '%';
+        band.style.width = Math.max(0, endPct - startPct) + '%';
+        nodes.push(band);
+
+        const fastingStatus = document.createElement('div');
+        fastingStatus.className = 'fasting-status';
+        fastingStatus.textContent =
+          now >= fastingStart.minute && now < fastingEnd.minute
+            ? '断食中'
+            : '断食外';
+        nodes.push(fastingStatus);
+      }
+
+      prayers.forEach(prayer => {
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.className = 'prayer-mark';
+        button.style.left = minutePercent(prayer.minute) + '%';
+        button.setAttribute('aria-label', prayer.label + ' ' + formatTime(prayer.minute));
+        const code = document.createElement('span');
+        code.className = 'prayer-code';
+        code.textContent = prayer.code || '';
+        button.appendChild(code);
+        button.addEventListener('click', () => {
+          showRailPopup(prayer.label + '  ' + formatTime(prayer.minute));
+        });
+        nodes.push(button);
+      });
+
+      const nowMarker = document.createElement('div');
+      nowMarker.className = 'time-now-marker';
+      nowMarker.style.left = minutePercent(now) + '%';
+      nodes.push(nowMarker);
+
+      timeRail.replaceChildren(...nodes);
+    }
+
+    if (moonRail) {
+      const nodes = [];
+      const cycle = Math.max(1, Number(config.lunarCycleDays) || 29.53);
+      const day = Math.max(1, Number(state.day) || 1);
+      const age = (day - 1) % cycle;
+      const position = age / cycle * 100;
+
+      const track = document.createElement('div');
+      track.className = 'moon-track-line';
+      nodes.push(track);
+
+      const phaseMarks = [
+        {p:0, symbol:'●', name:'新月'},
+        {p:25, symbol:'◐', name:'上弦'},
+        {p:50, symbol:'○', name:'満月'},
+        {p:75, symbol:'◑', name:'下弦'},
+        {p:100, symbol:'●', name:'新月'}
+      ];
+      phaseMarks.forEach(phase => {
+        const mark = document.createElement('span');
+        mark.className = 'moon-phase-mark';
+        mark.style.left = phase.p + '%';
+        mark.textContent = phase.symbol;
+        mark.setAttribute('aria-label', phase.name);
+        nodes.push(mark);
+      });
+
+      const current = document.createElement('div');
+      current.className = 'moon-now-marker';
+      current.style.left = position + '%';
+      nodes.push(current);
+
+      moonRail.replaceChildren(...nodes);
+      if (moonPhaseText) moonPhaseText.textContent = lunarPhaseName(age, cycle);
+    }
   }
 
   function renderQuickInventory() {
@@ -288,6 +427,7 @@
     $('tempText').textContent = Number(state.temperature || 0) + '℃';
     $('weatherText').textContent = state.weather || '';
     $('sceneName').textContent = state.scene || '';
+    renderTimeMoonRails();
 
     const hp = clampPercent(state.hp);
     const hunger = clampPercent(state.hunger);
