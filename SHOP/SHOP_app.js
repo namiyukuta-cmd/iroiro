@@ -109,9 +109,13 @@
     const layerFar=document.createElement('div');
     layerFar.className='scene-layer scene-layer-far';
     layerFar.style.backgroundImage='url("' + scene.background + '")';
-    layerFar.style.backgroundPosition='center 84%';
+    // %指定はcover時に縦方向の余りがないと見た目がほぼ動かない。
+    // 画像の拡大率は変えず、表示位置だけをpxで上へずらす。
+    const farShiftPx = Math.round(strip.clientHeight * 0.10);
+    layerFar.style.backgroundPosition='center -' + farShiftPx + 'px';
     layerFar.style.backgroundSize='cover';
     layerFar.style.backgroundRepeat='no-repeat';
+    layerFar.style.backgroundColor='#6b4a3c';
 
     const layerHouse=document.createElement('div');
     layerHouse.className='scene-layer scene-layer-house';
