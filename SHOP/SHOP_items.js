@@ -53,6 +53,51 @@
       thirstRecovery:35,
       nextItemId:'small_pot',
       hiddenWhenEmpty:true
+    }),
+
+    food_tharid: Object.freeze({
+      id:'food_tharid',
+      name:'サリード',
+      icon:'./asset/food/food_tharid.png',
+      hungerRecovery:45,
+      portable:false,
+      containerRequired:true,
+      containerType:'bowl',
+      shelfLifeMinutes:360,
+      hiddenWhenEmpty:true
+    }),
+    food_harisa: Object.freeze({
+      id:'food_harisa',
+      name:'ハリーサ',
+      icon:'./asset/food/food_harisa.png',
+      hungerRecovery:50,
+      portable:false,
+      containerRequired:true,
+      containerType:'bowl',
+      shelfLifeMinutes:480,
+      hiddenWhenEmpty:true
+    }),
+    food_sikbaj: Object.freeze({
+      id:'food_sikbaj',
+      name:'シクバージュ',
+      icon:'./asset/food/food_sikbaj.png',
+      hungerRecovery:55,
+      portable:false,
+      containerRequired:true,
+      containerType:'bowl',
+      shelfLifeMinutes:420,
+      hiddenWhenEmpty:true
+    }),
+    food_muhallabiya: Object.freeze({
+      id:'food_muhallabiya',
+      name:'ムハッラビーヤ',
+      icon:'./asset/food/food_muhallabiya.png',
+      hungerRecovery:30,
+      portable:false,
+      containerRequired:true,
+      containerType:'bowl',
+      shelfLifeMinutes:300,
+      hiddenWhenEmpty:true
     })
   });
 
