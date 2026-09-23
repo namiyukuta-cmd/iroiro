@@ -35,6 +35,14 @@
         name: '小門外・底辺区',
         background: './asset/bg_desert_wall.jpeg',
 
+        pickups: Object.freeze([
+          Object.freeze({id:'outer_rag_01', itemId:'rag', left:66, bottom:8}),
+          Object.freeze({id:'outer_bottle_01', itemId:'bottle', left:10, bottom:6})
+        ]),
+        pickups: Object.freeze([
+          Object.freeze({id:'city_bottle_01', itemId:'bottle', left:69, bottom:7}),
+          Object.freeze({id:'city_rag_01', itemId:'rag', left:8, bottom:5})
+        ]),
         objects: Object.freeze([
           // ② 背景としての家配置層
           Object.freeze({src:'./asset/house_poor.png', left:-8, bottom:24, height:38, layer:'house'}),
@@ -54,6 +62,9 @@
       smallGateOutside: Object.freeze({
         name: '小門前',
         background: './asset/bg_desert_wall.jpeg',
+        pickups: Object.freeze([
+          Object.freeze({id:'gate_wood_01', itemId:'wood', left:24, bottom:7})
+        ]),
         objects: Object.freeze([
           // ② 背景としての家・門
           Object.freeze({src:'./asset/house_poor.png', left:-7, bottom:24, height:34, layer:'house'}),
@@ -91,6 +102,9 @@
       upperArea: Object.freeze({
         name: '上級区',
         background: './asset/bg_desert_wall.jpeg',
+        pickups: Object.freeze([
+          Object.freeze({id:'upper_scrap_01', itemId:'scrap', left:58, bottom:6})
+        ]),
         objects: Object.freeze([
           // ② 背景としての上級区の家
           Object.freeze({src:'./asset/house_upper.png', left:-4, bottom:22, height:40, layer:'house'}),
@@ -128,8 +142,8 @@
     }),
 
     links: Object.freeze({
-      newGame: './SHOP_top.html?new=1&build=20260923-1136',
-      continueGame: './SHOP_top.html?continue=1&build=20260923-1136',
+      newGame: './SHOP_top.html?new=1&build=20260923-1158',
+      continueGame: './SHOP_top.html?continue=1&build=20260923-1158',
       backToGames: '../index.html',
       backToShopMenu: './SHOP_index.html'
     })
