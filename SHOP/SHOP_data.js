@@ -152,8 +152,8 @@
     }),
 
     links: Object.freeze({
-      newGame: './SHOP_top.html?new=1&build=20260923-compact-calendar-prayer-v1',
-      continueGame: './SHOP_top.html?continue=1&build=20260923-compact-calendar-prayer-v1',
+      newGame: './SHOP_top.html?new=1&build=20260923-top-text-readable-v1',
+      continueGame: './SHOP_top.html?continue=1&build=20260923-top-text-readable-v1',
       backToGames: '../index.html',
       backToShopMenu: './SHOP_index.html'
     })
