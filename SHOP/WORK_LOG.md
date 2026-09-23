@@ -91,3 +91,16 @@
 - 画面側が以前のJSを読み続ける可能性があるため、キャッシュ破棄用バージョンを更新。
 - `SHOP_top.html` の `SHOP_BUILD` と各JSの `?v=` を `20260923-1325-person-up` に変更。
 - `SHOP_data.js` の newGame / continueGame の build パラメータも同じ値へ更新。
+
+
+### 2026-09-23 比較画像の右側配置へ合わせて再調整
+- 左の現行画面と右の9:19参考画像を画像上で比較。
+- 単純に `bottom` を上げるだけでは一致しないことを確認。
+- 人物は「位置」だけでなく「大きさ」も右画像と異なっていたため、`left` / `bottom` / `height` をまとめて調整。
+- `outerPoor` の変更:
+  - 老人: `left 13 → 15`, `bottom 16 → 20`, `height 18 → 15`
+  - 運び屋: `left 84 → 83`, `bottom 16 → 20`, `height 18 → 15`
+  - 物乞い: `left 28` 維持, `bottom 8 → 16`, `height 24 → 21`
+  - 屋台: `left 48 → 49`, `bottom 3 → 16`, `height 26 → 25`
+- 家・遠景は変更なし。
+- キャッシュ対策として build を `20260923-1332-match-reference` に更新。
