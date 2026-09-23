@@ -88,6 +88,7 @@
     casualOffer: false,
     casualDone: false,
     recyclerTalk: false,
+    jobs: {},
     sceneKeys: {}
   });
 
@@ -183,6 +184,14 @@
       housing: {
         current: "street_base",
         target: "transitional_housing"
+      },
+      jobs: {
+        version: 1,
+        verifiedWorkDays: 0,
+        totalEarnings: 0,
+        reliability: 0,
+        historyBackfillVersion: 0,
+        records: {}
       }
     },
     story: {
