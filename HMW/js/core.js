@@ -10,7 +10,7 @@
     const fresh = H.createInitialState();
     const s = H.state || fresh;
     const oldVersion = Number(s.version) || 1;
-    s.version = 3;
+    s.version = 4;
     s.world = { ...fresh.world, ...(s.world || {}) };
     s.world.locations = s.world.locations || {};
     s.inventory = s.inventory || {};
@@ -18,8 +18,16 @@
     s.knownLocations = { ...fresh.knownLocations, ...(s.knownLocations || {}) };
     s.relationships = s.relationships || {};
     Object.keys(fresh.relationships).forEach((id) => {
-      s.relationships[id] = { ...fresh.relationships[id], ...(s.relationships[id] || {}) };
+      const previous = s.relationships[id] || {};
+      const hadPsychology = !!previous.psychology;
+      const previousPsychologyHistory = Array.isArray(previous.psychologyHistory) ? previous.psychologyHistory : [];
+      s.relationships[id] = { ...fresh.relationships[id], ...previous };
       s.relationships[id].flags = s.relationships[id].flags || {};
+      if (D.people?.[id]?.romance) {
+        if (!hadPsychology) delete s.relationships[id].psychology;
+        s.relationships[id].psychologyHistory = previousPsychologyHistory;
+        H.ensureRelationshipPsychology?.(id, s.relationships[id]);
+      }
     });
     s.progression = s.progression || {};
     Object.keys(fresh.progression).forEach((key) => {
