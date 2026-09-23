@@ -48,6 +48,13 @@
       : String(price);
   }
 
+  function shelfLabel(minutes){
+    const value=Math.max(0,Number(minutes)||0);
+    if(value>=1440 && value%1440===0) return (value/1440)+'日';
+    if(value>=60 && value%60===0) return (value/60)+'時間';
+    return value+'分';
+  }
+
   function removePanel(){
     const old=document.getElementById('stallChoicePanel');
     if(old) old.remove();
@@ -115,7 +122,7 @@
         const price=Math.max(0,Number(item.buyPriceCopper)||0);
 
         actions.appendChild(makeButton(
-          item.name+'　'+fmt(price),
+          item.name+'　'+fmt(price)+' ／ 空腹'+item.hungerRecovery,
           ()=>{
             if(!canPay(state,price)){
               message.textContent='お金が足りない。';
@@ -133,7 +140,7 @@
         const inventory=inv(state);
         if((Number(inventory.bowl)||0)>0){
           actions.appendChild(makeButton(
-            '↳ 椀で持ち帰る　'+fmt(price),
+            '↳ 椀で持ち帰る　'+fmt(price)+' ／ 保存'+shelfLabel(item.shelfLifeMinutes),
             ()=>{
               if(!canPay(state,price)){
                 message.textContent='お金が足りない。';
@@ -166,7 +173,7 @@
         if(!item) return;
         const price=Math.max(0,Number(item.buyPriceCopper)||0);
         actions.appendChild(makeButton(
-          item.name+'　'+fmt(price),
+          item.name+'　'+fmt(price)+' ／ 空腹'+item.hungerRecovery+' ／ 保存'+shelfLabel(item.shelfLifeMinutes),
           ()=>{
             if(!pay(state,price)){
               message.textContent='お金が足りない。';
