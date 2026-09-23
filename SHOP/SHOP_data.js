@@ -127,8 +127,8 @@
     }),
 
     links: Object.freeze({
-      newGame: './SHOP_top.html?new=1&build=20260923-farbg-px-up-v1',
-      continueGame: './SHOP_top.html?continue=1&build=20260923-farbg-px-up-v1',
+      newGame: './SHOP_top.html?new=1&build=20260923-far-layer-shift-v3',
+      continueGame: './SHOP_top.html?continue=1&build=20260923-far-layer-shift-v3',
       backToGames: '../index.html',
       backToShopMenu: './SHOP_index.html'
     })
