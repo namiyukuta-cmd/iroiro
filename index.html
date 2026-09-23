@@ -83,19 +83,39 @@
       <a class="game-button" href="HMW/index.html?v=20260909-1900">HMW（ホームレスウーマン）</a>
       <a class="game-button" href="hotcake-catch.html?v=20260919-1250">ホットケーキキャッチ</a>
       <a class="game-button" href="kenshi/kenshi_index.html?v=20260921-1">Kenshi風</a>
-      <a class="game-button" href="chill/chill_index.html?v=20260924-0206">Chill</a>
+      <a id="chillEntry" class="game-button" href="chill/chill_index.html?_nc=20260924-0310">Chill</a>
     </div>
   </main>
 <script>
 (()=>{
-  const BUILD_ID='20260924-0206';
+  const pathKey='fresh:'+location.pathname;
   const url=new URL(location.href);
-  if(url.searchParams.get('v')!==BUILD_ID){
-    url.searchParams.set('v',BUILD_ID);
+  const token=url.searchParams.get('_nc');
+  const seen=sessionStorage.getItem(pathKey);
+
+  if(!token || seen===token){
+    const fresh=Date.now().toString();
+    url.searchParams.set('_nc',fresh);
+    sessionStorage.setItem(pathKey,fresh);
     location.replace(url.toString());
     return;
   }
-  window.addEventListener('pageshow',e=>{ if(e.persisted) location.reload(); });
+  sessionStorage.setItem(pathKey,token);
+
+  window.addEventListener('pageshow',e=>{
+    if(!e.persisted)return;
+    const u=new URL(location.href);
+    const fresh=Date.now().toString();
+    u.searchParams.set('_nc',fresh);
+    sessionStorage.setItem(pathKey,fresh);
+    location.replace(u.toString());
+  });
+
+  const chill=document.getElementById('chillEntry');
+  chill?.addEventListener('click',e=>{
+    e.preventDefault();
+    location.href='chill/chill_index.html?_nc='+Date.now();
+  });
 })();
 </script>
 </body>
