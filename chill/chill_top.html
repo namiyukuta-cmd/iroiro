@@ -11,67 +11,234 @@
 <style>
 *{box-sizing:border-box}
 html,body{
-  margin:0;
-  width:100%;
-  height:100%;
-  overflow:hidden;
-  background:#fff;
+  margin:0;width:100%;height:100%;overflow:hidden;background:#fff;color:#222;
   font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Yu Gothic",sans-serif;
   -webkit-text-size-adjust:100%;
 }
-#game{
-  position:relative;
-  width:100%;
-  height:100dvh;
-  overflow:hidden;
-  background:#fff;
+button{
+  font:inherit;color:inherit;touch-action:manipulation;
+  -webkit-user-select:none;user-select:none;-webkit-tap-highlight-color:transparent;
 }
+#game{position:relative;width:100%;height:100dvh;overflow:hidden;background:#fff}
 #ground{
-  position:absolute;
-  left:6%;
-  right:6%;
-  top:10%;
-  bottom:9%;
-  border:1px solid #d8d8d8;
-  border-radius:18px;
-  background:#fff;
+  --grid:24px;
+  position:absolute;left:5%;right:5%;top:5%;bottom:132px;
+  border:1px solid #d8d8d8;border-radius:16px;background:#fff;overflow:hidden;
+  touch-action:manipulation;
 }
-#ground::after{
-  content:"";
-  position:absolute;
-  left:0;
-  right:0;
-  bottom:18%;
-  border-top:1px solid #ececec;
+#ground.grid-on{
+  background-image:
+    linear-gradient(to right,#ececec 1px,transparent 1px),
+    linear-gradient(to bottom,#ececec 1px,transparent 1px);
+  background-size:var(--grid) var(--grid);
 }
+#objectLayer{position:absolute;inset:0}
 #girl{
-  position:absolute;
-  left:50%;
-  bottom:20%;
-  width:min(26vw,120px);
-  height:auto;
-  transform:translateX(-50%);
-  user-select:none;
-  -webkit-user-drag:none;
-  pointer-events:none;
+  position:absolute;left:50%;bottom:17%;width:min(25vw,108px);height:auto;
+  transform:translateX(-50%);user-select:none;-webkit-user-drag:none;pointer-events:none;z-index:5;
+}
+.obj{
+  position:absolute;width:48px;height:48px;transform:translate(-50%,-50%);
+  display:grid;place-items:center;z-index:4;touch-action:manipulation;
+}
+.obj.selected::after{
+  content:"";position:absolute;inset:-5px;border:1px dashed #333;border-radius:8px;pointer-events:none;
+}
+.box-art{
+  width:36px;height:30px;border:2px solid #222;background:#fff;
+  position:relative;
+}
+.box-art::before,.box-art::after{
+  content:"";position:absolute;background:#222;
+}
+.box-art::before{left:50%;top:0;bottom:0;width:2px;transform:translateX(-50%)}
+.box-art::after{left:2px;right:2px;top:8px;height:2px}
+.chair-art{
+  width:31px;height:36px;border-left:3px solid #222;border-right:3px solid #222;
+  border-bottom:3px solid transparent;position:relative;
+}
+.chair-art::before{
+  content:"";position:absolute;left:-3px;right:-3px;top:15px;height:3px;background:#222;
+}
+.chair-art::after{
+  content:"";position:absolute;left:2px;right:2px;bottom:-1px;height:17px;
+  border-left:3px solid #222;border-right:3px solid #222;
+}
+.lamp-art{
+  width:28px;height:34px;border:2px solid #222;border-radius:6px 6px 4px 4px;position:relative;background:#fff;
+}
+.lamp-art::before{
+  content:"";position:absolute;left:5px;right:5px;top:-11px;height:12px;
+  border:2px solid #222;border-bottom:0;border-radius:10px 10px 0 0;
+}
+.lamp-art::after{
+  content:"";position:absolute;left:7px;right:7px;top:9px;bottom:6px;
+  border:1px solid #222;border-radius:50% 50% 35% 35%;
+}
+.table-art{
+  width:42px;height:28px;border-top:4px solid #222;position:relative;
+}
+.table-art::before,.table-art::after{
+  content:"";position:absolute;top:0;bottom:0;width:3px;background:#222;
+}
+.table-art::before{left:5px}.table-art::after{right:5px}
+
+.toolbar{
+  position:absolute;left:8px;right:8px;bottom:max(8px,env(safe-area-inset-bottom));
+  z-index:20;background:rgba(255,255,255,.96);border:1px solid #ddd;border-radius:14px;padding:8px;
+}
+.palette,.editrow{display:flex;gap:6px;align-items:center}
+.editrow{margin-top:7px}
+.tool{
+  flex:1;min-width:0;min-height:42px;border:1px solid #ccc;border-radius:10px;background:#fff;
+  font-size:12px;font-weight:700;padding:6px 4px;
+}
+.tool.active{background:#222;color:#fff;border-color:#222}
+#pos{min-width:72px;text-align:center;font:11px ui-monospace,SFMono-Regular,Menlo,monospace;color:#555}
+.nudge{
+  width:42px;min-width:42px;height:42px;border:1px solid #ccc;border-radius:10px;background:#fff;font-size:18px;
+}
+#deleteBtn{font-size:12px}
+#hint{
+  position:absolute;left:50%;top:12px;transform:translateX(-50%);
+  font-size:11px;color:#777;background:rgba(255,255,255,.86);padding:5px 9px;border-radius:999px;
+  pointer-events:none;z-index:10;white-space:nowrap;
 }
 </style>
 </head>
 <body>
 <main id="game" aria-label="白い箱庭">
-  <div id="ground"></div>
-  <img id="girl" src="asset/chill_girl_01.png?v=20260924-0235" alt="女の子">
+  <div id="ground" class="grid-on">
+    <div id="objectLayer"></div>
+    <img id="girl" src="asset/chill_girl_01.png?v=20260924-0242" alt="女の子">
+    <div id="hint">物を選んで、置きたいマスをタップ</div>
+  </div>
+
+  <section class="toolbar" aria-label="箱庭編集">
+    <div class="palette">
+      <button class="tool active" data-tool="select" type="button">選択</button>
+      <button class="tool" data-tool="box" type="button">箱</button>
+      <button class="tool" data-tool="chair" type="button">椅子</button>
+      <button class="tool" data-tool="lamp" type="button">ランプ</button>
+      <button class="tool" data-tool="table" type="button">机</button>
+      <button id="gridBtn" class="tool active" type="button">格子</button>
+    </div>
+    <div class="editrow">
+      <button id="leftBtn" class="nudge" type="button">←</button>
+      <button id="upBtn" class="nudge" type="button">↑</button>
+      <button id="downBtn" class="nudge" type="button">↓</button>
+      <button id="rightBtn" class="nudge" type="button">→</button>
+      <span id="pos">未選択</span>
+      <button id="deleteBtn" class="tool" type="button">削除</button>
+    </div>
+  </section>
 </main>
+
 <script>
 (()=>{
-  const BUILD_ID='20260924-0235';
-  const url=new URL(location.href);
-  if(url.searchParams.get('v')!==BUILD_ID){
-    url.searchParams.set('v',BUILD_ID);
-    location.replace(url.toString());
-    return;
-  }
-  window.addEventListener('pageshow',e=>{if(e.persisted)location.reload()});
+const BUILD_ID='20260924-0242';
+const url=new URL(location.href);
+if(url.searchParams.get('v')!==BUILD_ID){
+  url.searchParams.set('v',BUILD_ID);
+  location.replace(url.toString());
+  return;
+}
+window.addEventListener('pageshow',e=>{if(e.persisted)location.reload()});
+
+const ground=document.getElementById('ground');
+const layer=document.getElementById('objectLayer');
+const pos=document.getElementById('pos');
+const gridBtn=document.getElementById('gridBtn');
+const GRID=24;
+let currentTool='select';
+let selectedId=null;
+let nextId=1;
+let objects=[];
+
+const artClass={box:'box-art',chair:'chair-art',lamp:'lamp-art',table:'table-art'};
+
+function save(){
+  try{localStorage.setItem('chillSandboxObjects',JSON.stringify(objects))}catch(e){}
+}
+function load(){
+  try{
+    const d=JSON.parse(localStorage.getItem('chillSandboxObjects')||'[]');
+    if(Array.isArray(d))objects=d.filter(o=>o&&artClass[o.type]&&Number.isFinite(o.x)&&Number.isFinite(o.y));
+    nextId=objects.reduce((m,o)=>Math.max(m,Number(o.id)||0),0)+1;
+  }catch(e){objects=[]}
+}
+function render(){
+  layer.replaceChildren();
+  objects.forEach(o=>{
+    const b=document.createElement('button');
+    b.type='button';
+    b.className='obj'+(o.id===selectedId?' selected':'');
+    b.dataset.id=o.id;
+    b.style.left=o.x+'px';
+    b.style.top=o.y+'px';
+    b.setAttribute('aria-label',o.type);
+    const art=document.createElement('span');
+    art.className=artClass[o.type];
+    b.appendChild(art);
+    b.addEventListener('click',e=>{
+      e.stopPropagation();
+      selectedId=o.id;
+      currentTool='select';
+      syncTools();
+      render();
+    });
+    layer.appendChild(b);
+  });
+  const s=objects.find(o=>o.id===selectedId);
+  pos.textContent=s?Math.round(s.x)+','+Math.round(s.y):'未選択';
+}
+function syncTools(){
+  document.querySelectorAll('[data-tool]').forEach(b=>b.classList.toggle('active',b.dataset.tool===currentTool));
+}
+function clamp(o){
+  const r=ground.getBoundingClientRect();
+  o.x=Math.max(24,Math.min(r.width-24,o.x));
+  o.y=Math.max(24,Math.min(r.height-24,o.y));
+}
+document.querySelectorAll('[data-tool]').forEach(b=>{
+  b.addEventListener('click',()=>{
+    currentTool=b.dataset.tool;
+    if(currentTool!=='select')selectedId=null;
+    syncTools();render();
+  });
+});
+ground.addEventListener('click',e=>{
+  if(currentTool==='select')return;
+  const r=ground.getBoundingClientRect();
+  const rawX=e.clientX-r.left;
+  const rawY=e.clientY-r.top;
+  const x=Math.round(rawX/GRID)*GRID;
+  const y=Math.round(rawY/GRID)*GRID;
+  const o={id:nextId++,type:currentTool,x,y};
+  clamp(o);objects.push(o);selectedId=o.id;
+  currentTool='select';syncTools();render();save();
+});
+function nudge(dx,dy){
+  const o=objects.find(o=>o.id===selectedId);if(!o)return;
+  o.x+=dx;o.y+=dy;clamp(o);render();save();
+}
+document.getElementById('leftBtn').addEventListener('click',()=>nudge(-1,0));
+document.getElementById('rightBtn').addEventListener('click',()=>nudge(1,0));
+document.getElementById('upBtn').addEventListener('click',()=>nudge(0,-1));
+document.getElementById('downBtn').addEventListener('click',()=>nudge(0,1));
+document.getElementById('deleteBtn').addEventListener('click',()=>{
+  if(selectedId==null)return;
+  objects=objects.filter(o=>o.id!==selectedId);
+  selectedId=null;render();save();
+});
+gridBtn.addEventListener('click',()=>{
+  ground.classList.toggle('grid-on');
+  gridBtn.classList.toggle('active',ground.classList.contains('grid-on'));
+});
+window.addEventListener('resize',()=>{
+  objects.forEach(clamp);render();save();
+});
+load();objects.forEach(clamp);render();syncTools();
 })();
 </script>
 </body>
