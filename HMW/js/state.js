@@ -46,12 +46,15 @@
       if (amount) rel[key] = clamp100((Number(rel[key]) || 0) + amount);
     });
     rel.lastContactDay = HMW.state.day;
+    HMW.applyPsychologyEvent?.(id, type, {
+      reason: `HMW.growRomance:${type}`
+    });
     return rel;
   };
 
   const relationship = (id) => {
     const mind = HMW.DATA?.people?.[id]?.mind || {};
-    return {
+    const rel = {
       familiarity: 0,
       trust: 0,
       goodwill: 0,
@@ -62,6 +65,11 @@
       lastContactDay: 0,
       flags: {}
     };
+    if (HMW.DATA?.people?.[id]?.romance) {
+      rel.psychology = HMW.createPsychologyState?.(id, rel) || null;
+      rel.psychologyHistory = [];
+    }
+    return rel;
   };
 
   const createDaily = () => ({
@@ -84,7 +92,7 @@
   });
 
   HMW.createInitialState = () => ({
-    version: 3,
+    version: 4,
     day: 1,
     slot: 0,
     money: 0,
