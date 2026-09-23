@@ -137,30 +137,38 @@
       inset:0;
       z-index:500;
       display:none;
-      grid-template-rows:auto 28% minmax(0,1fr);
+      grid-template-rows:24% minmax(0,1fr);
       background:#eee8d8;
+      overflow:hidden;
     }
     .action-screen.is-open{display:grid}
+
+    /* 戻る・モード切替はレイアウトを押し下げない浮きUI */
     .action-head{
-      display:grid;
-      grid-template-columns:auto 1fr auto;
+      position:absolute;
+      left:10px;
+      right:10px;
+      top:max(8px,env(safe-area-inset-top));
+      z-index:20;
+      display:flex;
+      justify-content:space-between;
       align-items:center;
-      gap:8px;
-      padding:10px 12px;
-      border-bottom:2px solid #29261f;
-      background:#e9e1cf;
+      pointer-events:none;
     }
     .action-back,.action-mode{
+      pointer-events:auto;
       border:2px solid #29261f;
-      border-radius:9px;
-      background:#fffaf0;
+      border-radius:999px;
+      background:rgba(255,250,240,.92);
       font-weight:900;
-      min-height:42px;
-      padding:6px 12px;
+      min-height:38px;
+      padding:5px 11px;
     }
-    .action-head-title{text-align:center;font-weight:900}
+    .action-head-title{display:none}
     .action-modes{display:flex;gap:6px}
     .action-mode[disabled]{opacity:.35}
+
+    /* 上部：人の行き交いは足だけ */
     .feet-lane{
       position:relative;
       overflow:hidden;
@@ -169,13 +177,18 @@
     }
     .feet-pair{
       position:absolute;
-      top:18%;
+      top:42%;
       width:76px;
       height:68px;
       transform:translateX(-50%);
+      animation:feetPass 7s linear infinite;
     }
-    .feet-pair.left{left:27%}
-    .feet-pair.right{left:73%}
+    .feet-pair.left{left:-12%;animation-delay:0s}
+    .feet-pair.right{left:-12%;animation-delay:3.5s}
+    @keyframes feetPass{
+      from{left:-12%}
+      to{left:112%}
+    }
     .foot{
       position:absolute;
       bottom:0;
@@ -196,11 +209,13 @@
     }
     .foot.a{left:6px}
     .foot.b{right:6px}
+
+    /* 下部：左に時間、右に物乞い/売り場 */
     .action-body{
       position:relative;
       min-height:0;
       display:grid;
-      grid-template-columns:58px minmax(0,1fr);
+      grid-template-columns:62px minmax(0,1fr);
       overflow:hidden;
       background:#eee8d8;
     }
@@ -213,7 +228,7 @@
     }
     .time-track{
       position:absolute;
-      left:30px;
+      left:34px;
       top:5%;
       bottom:5%;
       width:3px;
@@ -234,7 +249,7 @@
     }
     .time-label{
       position:absolute;
-      right:31px;
+      right:34px;
       transform:translateY(-50%);
       font-size:9px;
       font-weight:800;
@@ -271,21 +286,26 @@
       transform:translate(-50%,-50%);
       z-index:4;
     }
+
     .action-main{
       position:relative;
       min-width:0;
       min-height:0;
-      display:grid;
-      place-items:center;
       overflow:hidden;
+      background:#eee8d8;
     }
+
+    /* 物乞い：壺だけ */
     .beg-pot{
-      width:128px;
+      position:absolute;
+      left:50%;
+      bottom:14%;
+      transform:translateX(-50%);
+      width:126px;
       height:92px;
       border:3px solid #29261f;
       border-radius:20px 20px 50% 50%;
       background:#c6a06b;
-      position:relative;
     }
     .beg-pot::before{
       content:'';
@@ -299,12 +319,18 @@
       background:#d2b17f;
       transform:perspective(80px) rotateX(35deg);
     }
+
+    /* 物売り：3×3グリッド */
     .sell-grid{
-      width:min(84%,360px);
-      aspect-ratio:3/2;
+      position:absolute;
+      left:50%;
+      top:10%;
+      transform:translateX(-50%);
+      width:min(84%,370px);
+      aspect-ratio:1/1;
       display:grid;
       grid-template-columns:repeat(3,1fr);
-      grid-template-rows:repeat(2,1fr);
+      grid-template-rows:repeat(3,1fr);
       border:3px solid #29261f;
       background:#f8f3e8;
     }
@@ -322,12 +348,14 @@
     .sell-cell:nth-child(3n){border-right:0}
     .sell-cell:nth-last-child(-n+3){border-bottom:0}
     .sell-cell.empty{color:#aaa}
+
+    /* 人が止まった時だけ会話を出す */
     .action-dialog{
       position:absolute;
       left:7%;
       right:7%;
-      top:8%;
-      z-index:5;
+      top:6%;
+      z-index:10;
       padding:12px;
       border:3px solid #29261f;
       border-radius:12px;
@@ -441,7 +469,7 @@
 <body>
 <script>
 (() => {
-  const SHOP_BUILD='20260923-1214';
+  const SHOP_BUILD='20260923-1226';
   const u=new URL(location.href);
   if(u.searchParams.get('build')!==SHOP_BUILD){
     u.searchParams.set('build',SHOP_BUILD);
@@ -476,6 +504,7 @@
         <aside class="time-rail" aria-label="時間">
           <div class="time-track" id="timeTrack"></div>
         </aside>
+
         <div class="action-main">
           <div class="action-dialog" id="actionDialog"></div>
           <div class="beg-pot" id="begPot" aria-label="物乞いの壺"></div>
@@ -520,10 +549,10 @@
     <nav class="bottom-menu" id="bottomMenu" aria-label="メニュー"></nav>
   </div>
 
-  <script src="./SHOP_data.js?v=20260923-1214"></script>
-  <script src="./SHOP_items.js?v=20260923-1214"></script>
-  <script src="./SHOP_action.js?v=20260923-1214"></script>
-  <script src="./SHOP_save.js?v=20260923-1214"></script>
-  <script src="./SHOP_app.js?v=20260923-1214"></script>
+  <script src="./SHOP_data.js?v=20260923-1226"></script>
+  <script src="./SHOP_items.js?v=20260923-1226"></script>
+  <script src="./SHOP_action.js?v=20260923-1226"></script>
+  <script src="./SHOP_save.js?v=20260923-1226"></script>
+  <script src="./SHOP_app.js?v=20260923-1226"></script>
 </body>
 </html>
