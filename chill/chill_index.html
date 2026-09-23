@@ -61,30 +61,20 @@ h1{
 </main>
 <script>
 (()=>{
-  const pathKey='fresh:'+location.pathname;
   const url=new URL(location.href);
-  const token=url.searchParams.get('_nc');
-  const seen=sessionStorage.getItem(pathKey);
+if(!url.searchParams.has('_nc')){
+  url.searchParams.set('_nc',Date.now().toString());
+  location.replace(url.toString());
+  return;
+}
+window.addEventListener('pageshow',e=>{
+  if(!e.persisted)return;
+  const u=new URL(location.href);
+  u.searchParams.set('_nc',Date.now().toString());
+  location.replace(u.toString());
+});
 
-  if(!token || seen===token){
-    const fresh=Date.now().toString();
-    url.searchParams.set('_nc',fresh);
-    sessionStorage.setItem(pathKey,fresh);
-    location.replace(url.toString());
-    return;
-  }
-  sessionStorage.setItem(pathKey,token);
-
-  window.addEventListener('pageshow',e=>{
-    if(!e.persisted)return;
-    const u=new URL(location.href);
-    const fresh=Date.now().toString();
-    u.searchParams.set('_nc',fresh);
-    sessionStorage.setItem(pathKey,fresh);
-    location.replace(u.toString());
-  });
-
-  const start=document.getElementById('startChill');
+const start=document.getElementById('startChill');
   start?.addEventListener('click',e=>{
     e.preventDefault();
     location.href='chill_top.html?_nc='+Date.now();
