@@ -167,7 +167,7 @@
       onFinish: (pay, score, rounds) => {
         H.state.daily.casualDone = true;
         H.state.money += pay;
-        H.state.progression.stability.paidWorkDays += 1;
+        H.recordJobResult?.("casual_unloading", { pay, score, rounds });
         changeStats({ fatigue: 8, hunger: 4, hygiene: -2 });
         H.completeLead("casual_work");
         advanceTime(1, `荷下ろしを終え${pay}円を受け取った。仕分けは${score}/${rounds}正解だった。`);
@@ -210,8 +210,7 @@
       b.addEventListener("click", () => {
         H.state.daily.clerkWork = true;
         H.state.money += 450;
-        H.state.progression.stability.paidWorkDays += 1;
-        H.state.progression.stability.regularIncome = true;
+        H.recordJobResult?.("clerk_cleanup", { pay: 450, score: 4, rounds: 4 });
         rel("clerk").trust += 1;
         changeStats({ fatigue: 7, hunger: 3, hygiene: -3 });
         closeModal();
@@ -239,8 +238,7 @@
           p.reliability += 1;
         }
         H.state.money += pay;
-        H.state.progression.stability.paidWorkDays += 1;
-        H.state.progression.stability.regularIncome = true;
+        H.recordJobResult?.("recycler_sort", { pay, score, rounds });
         changeStats({ fatigue: trial ? 9 : 10, hunger: 4, hygiene: -6 });
         closeModal();
         advanceTime(1, `回収所の仕分けを終え${pay}円を受け取った。正解 ${score}/${rounds}。`);
@@ -290,8 +288,7 @@
       b.addEventListener("click", () => {
         H.state.daily.formalWork = true;
         H.state.money += pay;
-        H.state.progression.stability.paidWorkDays += 1;
-        H.state.progression.stability.regularIncome = true;
+        H.recordJobResult?.("warehouse_day", { pay, score: rounds, rounds, mistakes });
         changeStats({ fatigue: 16, hunger: 7, hygiene: -7 });
         closeModal();
         advanceTime(2, `倉庫勤務を終え${pay}円を受け取った。`);
@@ -301,11 +298,52 @@
     draw();
   }
 
+  function startReferralWork(jobId) {
+    const configs = {
+      delivery_sort: {
+        title: "配送所の仕分け",
+        rounds: 7,
+        payBase: 720,
+        payPerCorrect: 80,
+        fatigue: 13,
+        hunger: 6,
+        hygiene: -5,
+        time: 2
+      },
+      hotel_linen: {
+        title: "ホテルのリネン作業",
+        rounds: 8,
+        payBase: 760,
+        payPerCorrect: 70,
+        fatigue: 11,
+        hunger: 5,
+        hygiene: -3,
+        time: 2
+      }
+    };
+    const config = configs[jobId];
+    if (!config) return;
+
+    startSortJob({
+      title: config.title,
+      rounds: config.rounds,
+      payBase: config.payBase,
+      payPerCorrect: config.payPerCorrect,
+      onFinish: (pay, score, rounds) => {
+        H.state.money += pay;
+        H.recordJobResult?.(jobId, { pay, score, rounds });
+        changeStats({ fatigue: config.fatigue, hunger: config.hunger, hygiene: config.hygiene });
+        advanceTime(config.time, `${config.title}を終え${pay}円を受け取った。正解 ${score}/${rounds}。`);
+      }
+    });
+  }
+
   Object.assign(G, {
     startScavenge,
     startCasualWork,
     startCleanupWork,
     startRecyclerWork,
-    startFormalWork
+    startFormalWork,
+    startReferralWork
   });
 })();
