@@ -1189,3 +1189,19 @@
 - 水容器・水入り容器は物売り対象から除外。売価はまだ決めていない。
 - 小門外・井戸と庶民街・井戸の井戸画像を `selectableType:'well'` に変更。
 - build: 20260923-well-water-v1
+
+### 2026-09-23 22:2x 食品4種に携帯・容器・保存期限メタデータを追加
+- ユーザー決定: 食品アイテムに `hungerRecovery` / `portable` / `containerRequired` / `containerType` / `shelfLifeMinutes` を持たせる。
+- GitHub上の実ファイル名を確認して登録:
+  - `SHOP/asset/food/food_tharid.png`
+  - `SHOP/asset/food/food_harisa.png`
+  - `SHOP/asset/food/food_sikbaj.png`
+  - `SHOP/asset/food/food_muhallabiya.png`
+- `SHOP_items.js` に追加:
+  - サリード `food_tharid`: hungerRecovery 45 / portable false / bowl必須 / 保存360分
+  - ハリーサ `food_harisa`: hungerRecovery 50 / portable false / bowl必須 / 保存480分
+  - シクバージュ `food_sikbaj`: hungerRecovery 55 / portable false / bowl必須 / 保存420分
+  - ムハッラビーヤ `food_muhallabiya`: hungerRecovery 30 / portable false / bowl必須 / 保存300分
+- 4品とも未所持時はクイック持ち物欄へ空枠表示しないため `hiddenWhenEmpty:true`。
+- 今回は食品メタデータ登録のみ。屋台販売処理・食べる処理・腐敗判定はまだ未接続。
+- build: 20260923-food-metadata-v1
