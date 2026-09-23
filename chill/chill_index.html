@@ -30,29 +30,11 @@ main{
   text-align:center;
 }
 h1{
-  margin:0 0 20px;
+  margin:0 0 32px;
   font-size:32px;
   font-weight:500;
   letter-spacing:.12em;
 }
-.monster-wrap{
-  width:150px;
-  height:150px;
-  margin:0 auto 22px;
-  display:grid;
-  place-items:center;
-}
-.monster{
-  width:132px;
-  height:132px;
-  overflow:visible;
-}
-.monster-body{
-  transform-origin:66px 85px;
-  animation:monsterBob 1.8s ease-in-out infinite;
-}
-@keyframes monsterBob{
-  0%,100%{transform:translateY(0)}
   50%{transform:translateY(-5px)}
 }
 .start{
@@ -77,54 +59,6 @@ h1{
 <body>
 <main>
   <h1>Chill</h1>
-
-  <div class="monster-wrap" aria-label="モンスター">
-    <svg class="monster" viewBox="0 0 132 132" role="img" aria-label="角と尾を持つ獣型モンスター">
-      <g class="monster-body" fill="#fff" stroke="#222" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
-        <!-- long swept horns -->
-        <path d="M45 35 C36 31 27 23 22 12 C31 15 40 20 49 27" />
-        <path d="M87 35 C96 31 105 23 110 12 C101 15 92 20 83 27" />
-
-        <!-- head / mane -->
-        <path d="M39 42
-                 C44 31 54 25 66 25
-                 C78 25 88 31 93 42
-                 L101 51
-                 L95 61
-                 L101 68
-                 L92 75
-                 C88 87 78 94 66 94
-                 C54 94 44 87 40 75
-                 L31 68
-                 L37 61
-                 L31 51 Z" />
-
-        <!-- angular eyes -->
-        <path d="M47 53 L59 50 L55 59 L47 58 Z" fill="#222"/>
-        <path d="M85 53 L73 50 L77 59 L85 58 Z" fill="#222"/>
-
-        <!-- muzzle -->
-        <path d="M58 67 L66 63 L74 67 L70 75 L62 75 Z" />
-        <path d="M61 79 Q66 83 71 79" fill="none"/>
-
-        <!-- armored chest -->
-        <path d="M48 88 L41 105 L51 116 L66 109 L81 116 L91 105 L84 88" />
-        <path d="M53 92 L66 103 L79 92" fill="none"/>
-
-        <!-- fore claws -->
-        <path d="M42 98 L31 105 L34 119 L39 112 L44 120 L47 109" fill="none"/>
-        <path d="M90 98 L101 105 L98 119 L93 112 L88 120 L85 109" fill="none"/>
-
-        <!-- tail -->
-        <path d="M88 94 C106 88 115 96 111 108 C108 116 99 118 94 113 C102 113 105 107 101 103 C98 100 94 101 90 104" fill="none"/>
-
-        <!-- small spikes -->
-        <path d="M51 31 L55 20 L61 29" />
-        <path d="M71 29 L77 20 L81 31" />
-      </g>
-    </svg>
-  </div>
-
   <a id="startChill" class="start" href="chill_top.html?_nc=20260924-0405">はじめる</a>
 </main>
 <script>
