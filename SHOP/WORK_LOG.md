@@ -860,3 +860,16 @@
 - `SHOP_data.js` のnew/continue URLを新buildへ更新。
 - ルート `index.html` のSHOPリンクも新build URLへ更新。
 - build: `20260923-far-layer-shift-v3`
+
+
+### 2026-09-23 15:20 「中部を今の配置状態のまま同じだけ上へ」
+- ユーザーの指示: 現在の人・建物・屋台・拾得物・遠景の相対配置は変えず、中部全体の位置だけ同じ量上へ。
+- 直前の返答でコードだけ渡し、直接作業しなかったのはユーザーの期待に反する対応だった。
+- 今回はGitHubへ直接反映。
+- `SHOP_app.js`:
+  - 現在の遠景の追加上移動 `farShiftPx = 10%` は維持。
+  - さらに `commonShiftPx = 8%` を追加。
+  - 遠景は `farShiftPx + commonShiftPx`、家/NPC/屋台/拾得物/プレイヤーレイヤーは `commonShiftPx` だけ上へ移動。
+  - これにより直前の見た目の相対配置を保ったまま、中部全体だけ同じ量上へ移動。
+- `SHOP_data.js` の個別配置値は変更していない。
+- build: `20260923-middle-all-up-v1`
