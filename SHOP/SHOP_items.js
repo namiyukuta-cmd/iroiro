@@ -8,6 +8,7 @@
       name:'空き瓶',
       sellMinCopper:3,
       sellMaxCopper:5,
+      buyPriceCopper:8,
       waterContainer:true,
       waterCapacity:1
     }),
@@ -19,6 +20,13 @@
       name:'小壺',
       waterContainer:true,
       waterCapacity:3,
+      buyPriceCopper:15,
+      hiddenWhenEmpty:true
+    }),
+    bowl: Object.freeze({
+      id:'bowl',
+      name:'椀',
+      buyPriceCopper:6,
       hiddenWhenEmpty:true
     }),
 
@@ -64,6 +72,8 @@
       containerRequired:true,
       containerType:'bowl',
       shelfLifeMinutes:360,
+      buyPriceCopper:4,
+      returnContainerId:'bowl',
       hiddenWhenEmpty:true
     }),
     food_harisa: Object.freeze({
@@ -75,6 +85,8 @@
       containerRequired:true,
       containerType:'bowl',
       shelfLifeMinutes:480,
+      buyPriceCopper:5,
+      returnContainerId:'bowl',
       hiddenWhenEmpty:true
     }),
     food_sikbaj: Object.freeze({
@@ -86,6 +98,8 @@
       containerRequired:true,
       containerType:'bowl',
       shelfLifeMinutes:420,
+      buyPriceCopper:8,
+      returnContainerId:'bowl',
       hiddenWhenEmpty:true
     }),
     food_muhallabiya: Object.freeze({
@@ -97,6 +111,31 @@
       containerRequired:true,
       containerType:'bowl',
       shelfLifeMinutes:300,
+      buyPriceCopper:5,
+      returnContainerId:'bowl',
+      hiddenWhenEmpty:true
+    }),
+
+    food_flatbread: Object.freeze({
+      id:'food_flatbread',
+      name:'平焼きパン',
+      hungerRecovery:18,
+      portable:true,
+      containerRequired:false,
+      containerType:null,
+      shelfLifeMinutes:2880,
+      buyPriceCopper:6,
+      hiddenWhenEmpty:true
+    }),
+    food_dried_meat: Object.freeze({
+      id:'food_dried_meat',
+      name:'干し肉',
+      hungerRecovery:22,
+      portable:true,
+      containerRequired:false,
+      containerType:null,
+      shelfLifeMinutes:10080,
+      buyPriceCopper:10,
       hiddenWhenEmpty:true
     })
   });
