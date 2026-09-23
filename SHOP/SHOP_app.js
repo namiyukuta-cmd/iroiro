@@ -80,7 +80,7 @@
       const marker = document.createElement('button');
       marker.type = 'button';
       marker.className = 'pickup-marker';
-      marker.textContent = '✴︎';
+      marker.textContent = '◆';
       marker.setAttribute('aria-label', '拾う');
       marker.style.left = pickup.left + '%';
       marker.style.bottom = (pickup.bottom || 0) + '%';
@@ -109,9 +109,11 @@
     const layerFar=document.createElement('div');
     layerFar.className='scene-layer scene-layer-far';
     layerFar.style.backgroundImage='url("' + scene.background + '")';
-    layerFar.style.backgroundPosition='center 62%';
+    layerFar.style.backgroundPosition='center 68%';
     layerFar.style.backgroundSize='cover';
     layerFar.style.backgroundRepeat='no-repeat';
+    layerFar.style.transform='scale(1.16)';
+    layerFar.style.transformOrigin='center 70%';
 
     const layerHouse=document.createElement('div');
     layerHouse.className='scene-layer scene-layer-house';
@@ -144,16 +146,7 @@
       if(item.selectable && item.selectableType==='npc') image.classList.add('selectable-npc');
 
       if(item.layer==='backgroundNpc'){
-        image.style.filter='drop-shadow(1px 2px 2px rgba(0,0,0,.22))';
-        image.style.opacity='0.92';
-      }
-      if(item.selectable && item.selectableType==='npc'){
-        image.style.filter=
-          'drop-shadow(2px 0 0 #ffe600) '+
-          'drop-shadow(-2px 0 0 #ffe600) '+
-          'drop-shadow(0 2px 0 #ffe600) '+
-          'drop-shadow(0 -2px 0 #ffe600) '+
-          'drop-shadow(3px 3px 3px rgba(0,0,0,.32))';
+        image.style.opacity='0.94';
       }
       image.src = item.src;
       image.alt = '';
