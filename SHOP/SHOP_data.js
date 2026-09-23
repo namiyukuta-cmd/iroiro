@@ -6,7 +6,7 @@
     subtitle: '砂漠都市で暮らし、商いを始める',
 
     initialState: Object.freeze({
-      version: 4,
+      version: 5,
       day: 1,
       minutes: 360,
       temperature: 24,
@@ -232,8 +232,8 @@
     }),
 
     links: Object.freeze({
-      newGame: './SHOP_top.html?new=1&build=20260923-facility-places-v1',
-      continueGame: './SHOP_top.html?continue=1&build=20260923-facility-places-v1',
+      newGame: './SHOP_top.html?new=1&build=20260923-time-climate-survival-v1',
+      continueGame: './SHOP_top.html?continue=1&build=20260923-time-climate-survival-v1',
       backToGames: '../index.html',
       backToShopMenu: './SHOP_index.html'
     })
