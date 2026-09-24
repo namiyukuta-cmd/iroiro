@@ -75,16 +75,17 @@ h1{font-size:21px;margin:3px 0 4px;letter-spacing:.03em}
 .controls{
   position:fixed;left:50%;bottom:0;transform:translateX(-50%);width:min(100%,520px);
   padding:9px 12px calc(9px + env(safe-area-inset-bottom));background:rgba(247,243,232,.96);
-  border-top:1px solid #d8d0c5;backdrop-filter:blur(8px);display:grid;grid-template-columns:1fr auto;gap:8px;z-index:20
+  border-top:1px solid #d8d0c5;backdrop-filter:blur(8px);display:grid;grid-template-columns:1fr auto auto;gap:8px;z-index:20
 }
 .primary{
   min-height:54px;border:1px solid #2c2924;border-radius:13px;background:#2c2924;color:#fff;
   font-size:16px;font-weight:900
 }
 .primary:active{transform:translateY(1px)}
-.reset{
+.reset,.auto-toggle{
   min-width:72px;border:1px solid #aaa;border-radius:13px;background:#fffdf8;font-size:12px;font-weight:800
 }
+.auto-toggle.on{background:#2c2924;color:#fff;border-color:#2c2924}
 .stats{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:9px}
 .stat{background:#fffdf8;border:1px solid #d5cec4;border-radius:10px;padding:7px;text-align:center}
 .stat b{display:block;font-size:15px}.stat span{font-size:9px;color:#7a7267}
@@ -141,6 +142,7 @@ h1{font-size:21px;margin:3px 0 4px;letter-spacing:.03em}
 
 <div class="controls">
   <button class="primary" id="drawBtn">最初の一区画を引く</button>
+  <button class="auto-toggle" id="autoBtn">オート OFF</button>
   <button class="reset" id="resetBtn">リセット</button>
 </div>
 
@@ -197,6 +199,8 @@ h1{font-size:21px;margin:3px 0 4px;letter-spacing:.03em}
   let turn=0;
   let currentDraw=null;
   let awaitingAction=false;
+  let autoMode=false;
+  let autoTimer=null;
 
   const el={
     cards:document.getElementById("cards"),
@@ -212,7 +216,8 @@ h1{font-size:21px;margin:3px 0 4px;letter-spacing:.03em}
     actionDesc:document.getElementById("actionDesc"),
     actionGrid:document.getElementById("actionGrid"),
     actionResult:document.getElementById("actionResult"),
-    drawBtn:document.getElementById("drawBtn")
+    drawBtn:document.getElementById("drawBtn"),
+    autoBtn:document.getElementById("autoBtn")
   };
 
   function value(k){return Math.max(0,Number(state[k]||0))}
@@ -333,6 +338,43 @@ h1{font-size:21px;margin:3px 0 4px;letter-spacing:.03em}
     ];
   }
 
+  function autoChooseAction(actions){
+    // オートは完全ランダムではなく、今の状況から少しだけ判断する。
+    const d=value("danger");
+    const weights=actions.map(a=>{
+      let w=10;
+      if(a.id==="fight") w += d<5 ? 8 : -3;
+      if(a.id==="avoid") w += d>=5 ? 10 : 1;
+      if(a.id==="observe") w += value("clue")<5 ? 5 : 1;
+      if(a.id==="talk") w += hasTag("human") ? 9 : 0;
+      if(a.id==="help") w += hasTag("blood") ? 8 : 2;
+      if(a.id==="careful") w += d>=4 ? 10 : 3;
+      if(a.id==="inspect") w += currentLoot().length ? 8 : 4;
+      if(a.id==="force") w += d<=2 ? 4 : -4;
+      if(a.id==="take") w += currentLoot().length ? 12 : 2;
+      if(a.id==="rest") w += d>=4 ? 7 : 2;
+      if(a.id==="leave") w += d>=6 ? 8 : 2;
+      return Math.max(1,w);
+    });
+    const total=weights.reduce((s,w)=>s+w,0);
+    let r=Math.random()*total;
+    for(let i=0;i<actions.length;i++){
+      r-=weights[i];
+      if(r<=0)return actions[i];
+    }
+    return actions[actions.length-1];
+  }
+
+  function runAutoAction(){
+    if(!autoMode || !awaitingAction)return;
+    const actions=actionSet();
+    const chosen=autoChooseAction(actions);
+    const btn=[...el.actionGrid.querySelectorAll("button")]
+      .find(b=>b.dataset.action===chosen.id);
+    if(btn)btn.classList.add("flash");
+    resolveAction(chosen.id,"オート："+chosen.label);
+  }
+
   function showActions(){
     const actions=actionSet();
     el.actionBox.classList.add("show");
@@ -346,10 +388,18 @@ h1{font-size:21px;margin:3px 0 4px;letter-spacing:.03em}
     el.actionGrid.querySelectorAll("button").forEach(btn=>{
       btn.addEventListener("click",()=>resolveAction(btn.dataset.action,btn.textContent));
     });
+
+    if(autoMode){
+      el.actionDesc.textContent="オートが状況を見て対処を選ぶ。手動に戻せば自分で選べる。";
+      clearTimeout(autoTimer);
+      autoTimer=setTimeout(runAutoAction,550);
+    }
   }
 
   function resolveAction(id,label){
     if(!awaitingAction)return;
+    clearTimeout(autoTimer);
+    autoTimer=null;
     awaitingAction=false;
 
     const foundLoot=currentLoot();
@@ -471,6 +521,8 @@ h1{font-size:21px;margin:3px 0 4px;letter-spacing:.03em}
   }
 
   function reset(){
+    clearTimeout(autoTimer);
+    autoTimer=null;
     for(const k of Object.keys(state)) delete state[k];
     loot.length=0;log.length=0;turn=0;currentDraw=null;awaitingAction=false;
     el.cards.innerHTML='<div class="card placeholder">「最初の一区画を引く」で3枚出る</div>';
@@ -482,7 +534,26 @@ h1{font-size:21px;margin:3px 0 4px;letter-spacing:.03em}
     renderState();renderLog();
   }
 
+  function toggleAuto(){
+    autoMode=!autoMode;
+    el.autoBtn.textContent=autoMode?"オート ON":"オート OFF";
+    el.autoBtn.classList.toggle("on",autoMode);
+
+    if(autoMode && awaitingAction){
+      el.actionDesc.textContent="オートが状況を見て対処を選ぶ。手動に戻せば自分で選べる。";
+      clearTimeout(autoTimer);
+      autoTimer=setTimeout(runAutoAction,350);
+    }else if(!autoMode){
+      clearTimeout(autoTimer);
+      autoTimer=null;
+      if(awaitingAction){
+        el.actionDesc.textContent="行動の結果が世界状態に残り、次に出るカードへ影響する。";
+      }
+    }
+  }
+
   document.getElementById("drawBtn").addEventListener("click",explore);
+  document.getElementById("autoBtn").addEventListener("click",toggleAuto);
   document.getElementById("resetBtn").addEventListener("click",reset);
   document.getElementById("backBtn").addEventListener("click",()=>location.href='/iroiro/chill/chill_index.html?_nc='+Date.now());
 
