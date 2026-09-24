@@ -269,8 +269,15 @@
     }
 
     if (has(a.intents, "ask_to_talk") && !distanceBoundary) {
-      if (characterPolicy.willingToTalk !== false) add(meaningIds, "AGREE_REQUEST");
-      else add(meaningIds, "DECLINE_REQUEST");
+      if (conversationContext.canTalkFreely === false) {
+        add(meaningIds, "DECLINE_REQUEST");
+        add(meaningIds, "REQUEST_TIME");
+        reasons.push("conversation_context_blocks_talk");
+      } else if (characterPolicy.willingToTalk !== false) {
+        add(meaningIds, "AGREE_REQUEST");
+      } else {
+        add(meaningIds, "DECLINE_REQUEST");
+      }
       reasons.push("conversation_request_answered");
     }
 
