@@ -3,6 +3,7 @@ on:
   push:
     paths:
       - '.github/workflows/hmw-audit-generation-router-003.yml'
+      - 'HMW/js/dialogue/language/meaning-generation-specs-005-router-gaps.js'
 permissions:
   contents: read
 jobs:
