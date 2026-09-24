@@ -87,7 +87,7 @@
   add("R1371_NO_RECENT_CONCERN",540,{intentAny:["report_condition"],historyRecentNone:["EXPRESS_CONCERN"],historyRecentWindow:4,emotionMin:{fear:45}},["EXPRESS_CONCERN"],"new_concern_not_recent");
   add("R1372_NO_RECENT_SYMPATHY",530,{intentAny:["report_event"],historyRecentNone:["EXPRESS_SYMPATHY"],historyRecentWindow:4,emotionMin:{sadness:45}},["EXPRESS_SYMPATHY"],"new_sympathy_not_recent");
   add("R1373_NO_RECENT_RELIEF",520,{intentAny:["agree","accept_apology"],historyRecentNone:["EXPRESS_RELIEF"],historyRecentWindow:4},["EXPRESS_RELIEF"],"new_relief_not_recent");
-  add("R1374_NO_RECENT_JOY",510,{intentAny:["greet"],historyRecentNone:["EXPRESS_JOY"],historyRecentWindow:4},["EXPRESS_JOY"],"new_joy_not_recent");
+  add("R1374_NO_RECENT_JOY",510,{intentAny:["greet"],emotionMin:{joy:55},historyRecentNone:["EXPRESS_JOY"],historyRecentWindow:4},["EXPRESS_JOY"],"joyful_greeting_not_recent");
   add("R1375_NO_RECENT_REPAIR",590,{intentAny:["apologize"],historyRecentNone:["EXPRESS_REPAIR_DESIRE","ASK_TO_REPAIR"],historyRecentWindow:4},["EXPRESS_REPAIR_DESIRE"],"new_repair_not_recent");
   add("R1376_SUFFIX_UNKNOWN_DETAILS",600,{intentAny:["ask_question"],historySuffix:["ANSWER_UNKNOWN","ASK_FOR_DETAILS"]},["EXPRESS_NEED_CLARITY"],"unknown_then_details");
   add("R1377_SUFFIX_HURT_REPAIR",620,{intentAny:["express_hurt"],historySuffix:["EXPRESS_CONCERN","ASK_TO_REPAIR"]},["EXPRESS_CARE"],"hurt_then_repair");
