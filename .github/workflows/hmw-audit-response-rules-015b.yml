@@ -1,0 +1,100 @@
+name: Audit HMW response rules 015b
+on:
+  push:
+    paths:
+      - '.github/workflows/hmw-audit-response-rules-015b.yml'
+permissions:
+  contents: read
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Audit response rules
+        run: |
+          node <<'NODE'
+          const fs=require('fs'),path=require('path'),vm=require('vm');
+          const root=process.cwd();
+          const ctx={console};ctx.window=ctx;ctx.HMW={};vm.createContext(ctx);
+          const run=p=>vm.runInContext(fs.readFileSync(path.join(root,p),'utf8'),ctx,{filename:p});
+          const files=[
+            'HMW/js/dialogue/dialogue-input.js',
+            'HMW/js/dialogue/analysis-schema.js',
+            'HMW/js/dialogue/claim-rules.js',
+            'HMW/js/dialogue/dialogue-meanings.js',
+            'HMW/js/dialogue/language/lexical-target-rules.js',
+            'HMW/js/dialogue/response-rule-engine.js'
+          ];
+          for(let i=1;i<=15;i++){
+            const n=String(i).padStart(3,'0');
+            const found=fs.readdirSync(path.join(root,'HMW/js/dialogue')).find(name=>name.startsWith('response-rules-'+n+'-')&&name.endsWith('.js'));
+            if(!found) throw new Error('missing response rules file '+n);
+            files.push('HMW/js/dialogue/'+found);
+          }
+          files.push(
+            'HMW/js/dialogue/response-planner.js',
+            'HMW/js/dialogue/response-priority.js',
+            'HMW/js/dialogue/response-selection.js',
+            'HMW/js/dialogue/response-history.js'
+          );
+          files.forEach(run);
+          const D=ctx.HMW.Dialogue;
+          const rules=D.RESPONSE_RULES||[];
+          const ids=rules.map(r=>r.id);
+          const missing=[...new Set(rules.flatMap(r=>r.meanings||[]).filter(id=>!D.MEANINGS[id]))];
+
+          const test=c=>{
+            const plan=D.planResponse(c);
+            const p=D.prioritizeResponseMeanings(plan.meaningIds);
+            const selected=D.selectResponseMeanings(p,{boundaryActive:plan.boundaryActive,maxMeanings:5});
+            return {...plan,selected};
+          };
+
+          const blocked=test({
+            analysis:{intents:['ask_to_talk']},
+            characterPolicy:{willingToTalk:true},
+            relationship:{stage:'close',familiarity:80,trust:80,goodwill:80,conscience:70,desire:30,malice:0,flags:{}},
+            conversationContext:{canTalkFreely:false,privacy:'public'}
+          });
+          const policyDenied=test({
+            analysis:{intents:['ask_to_talk']},
+            characterPolicy:{willingToTalk:false},
+            relationship:{stage:'close',familiarity:80,trust:80,goodwill:80,conscience:70,desire:30,malice:0,flags:{}},
+            conversationContext:{canTalkFreely:true,privacy:'private'}
+          });
+          const reassure=test({
+            analysis:{intents:['request_reassurance'],focusConcepts:['relationship']},
+            characterPolicy:{},
+            psychology:{care:60},
+            relationship:{stage:'partner',familiarity:90,trust:85,goodwill:90,conscience:80,desire:70,malice:0,flags:{}},
+            conversationContext:{privacy:'private',alone:true}
+          });
+          const conflictReassure=test({
+            analysis:{intents:['request_reassurance'],focusConcepts:['relationship']},
+            characterPolicy:{},
+            psychology:{care:60},
+            relationship:{stage:'partner',familiarity:90,trust:85,goodwill:90,conscience:80,desire:70,malice:0,flags:{conflict:true}},
+            conversationContext:{privacy:'private',alone:true}
+          });
+
+          const checks={
+            ruleCount:rules.length===1500,
+            unique:new Set(ids).size===1500,
+            noMissing:missing.length===0,
+            blockedTalk:blocked.selected.includes('DECLINE_REQUEST')&&!blocked.selected.includes('AGREE_REQUEST'),
+            policyDenied:policyDenied.selected.includes('DECLINE_REQUEST')&&!policyDenied.selected.includes('AGREE_REQUEST'),
+            noFalseRepair:!reassure.matchedResponseRuleIds.includes('R1140_HIGH_TRUST_HIGH_CONSCIENCE_REPAIR'),
+            conflictRepair:conflictReassure.matchedResponseRuleIds.includes('R1140_HIGH_TRUST_HIGH_CONSCIENCE_REPAIR')
+          };
+          console.log('AUDIT_RESULT '+JSON.stringify({
+            ruleCount:rules.length,uniqueRuleIds:new Set(ids).size,missingMeaningIds:missing,checks,
+            blocked:{meaningIds:blocked.meaningIds,selected:blocked.selected,matched:blocked.matchedResponseRuleIds},
+            policyDenied:{meaningIds:policyDenied.meaningIds,selected:policyDenied.selected,matched:policyDenied.matchedResponseRuleIds},
+            reassure:{meaningIds:reassure.meaningIds,selected:reassure.selected,matched:reassure.matchedResponseRuleIds},
+            conflictReassure:{meaningIds:conflictReassure.meaningIds,selected:conflictReassure.selected,matched:conflictReassure.matchedResponseRuleIds}
+          }));
+          if(Object.values(checks).some(v=>v!==true)) process.exit(1);
+          NODE
