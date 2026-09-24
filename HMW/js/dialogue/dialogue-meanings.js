@@ -268,6 +268,86 @@
     ASK_IF_COMING_BACK: {
       category: "parting",
       meaningJa: "また戻ってくるか尋ねる"
+    },
+    EXPRESS_NEED_CLARITY: {
+      category: "clarity",
+      meaningJa: "曖昧なままにせず答えや説明が必要だと伝える"
+    },
+    DENY_ABANDONMENT: {
+      category: "closeness",
+      meaningJa: "相手を見捨てるつもりがないことを明確に伝える"
+    },
+    CONFIRM_CHOICE: {
+      category: "commitment",
+      meaningJa: "相手を自分が選んでいることを明確に伝える"
+    },
+    EXPRESS_CARE: {
+      category: "care",
+      meaningJa: "相手を大切に思い気にかけていることを伝える"
+    },
+    EXPRESS_RELIEF: {
+      category: "positive",
+      meaningJa: "安心した、ほっとした気持ちを伝える"
+    },
+    EXPRESS_CONFUSION: {
+      category: "emotion",
+      meaningJa: "状況や相手の言葉を理解しきれず混乱していると伝える"
+    },
+    EXPRESS_UNCERTAINTY: {
+      category: "clarity",
+      meaningJa: "自分の判断や先行きに確信がないことを伝える"
+    },
+    EXPRESS_CERTAINTY: {
+      category: "clarity",
+      meaningJa: "自分の判断や気持ちに確信があることを伝える"
+    },
+    ASK_FOR_TRUST: {
+      category: "trust",
+      meaningJa: "自分を信じてほしいと求める"
+    },
+    ASK_FOR_ANSWER: {
+      category: "clarity",
+      meaningJa: "相手に返答を求める"
+    },
+    RESPECT_BOUNDARY: {
+      category: "boundary",
+      meaningJa: "相手が示した境界を尊重すると伝える"
+    },
+    PROMISE_NOT_FOLLOW: {
+      category: "boundary",
+      meaningJa: "相手を追わないと明確に約束する"
+    },
+    PROMISE_NOT_TOUCH: {
+      category: "boundary",
+      meaningJa: "相手に触れないと明確に約束する"
+    },
+    PROMISE_NOT_KISS: {
+      category: "boundary",
+      meaningJa: "相手にキスしないと明確に約束する"
+    },
+    PROMISE_NOT_HUG: {
+      category: "boundary",
+      meaningJa: "相手を抱きしめないと明確に約束する"
+    },
+    PROMISE_NOT_CONTACT: {
+      category: "boundary",
+      meaningJa: "相手へ連絡しないと明確に約束する"
+    },
+    ASK_TO_REPAIR: {
+      category: "repair",
+      meaningJa: "関係をもう一度修復しようと提案する"
+    },
+    EXPRESS_REPAIR_DESIRE: {
+      category: "repair",
+      meaningJa: "壊れた関係や問題を直したい意思を伝える"
+    },
+    DECLINE_FOR_NOW: {
+      category: "response",
+      meaningJa: "今は受け入れられないと一時的に断る"
+    },
+    ASK_TO_SIT_TOGETHER: {
+      category: "closeness",
+      meaningJa: "一緒に座ってよいか尋ねる"
     }
   };
 })();
