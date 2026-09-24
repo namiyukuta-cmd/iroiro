@@ -363,3 +363,26 @@
 .side-actions{
   gap:12px !important;
 }
+
+/* 2026-09-25 travel destinations: useful from start and easier to press */
+.modal-backdrop.travel-popup .travel-destinations{
+  grid-template-columns:repeat(2,minmax(0,1fr)) !important;
+  gap:9px !important;
+}
+.modal-backdrop.travel-popup .travel-destination{
+  min-height:48px !important;
+  padding:8px 7px !important;
+  font-size:15px !important;
+  border-radius:11px !important;
+}
+@media(max-height:700px){
+  .modal-backdrop.travel-popup .travel-destinations{
+    grid-template-columns:repeat(2,minmax(0,1fr)) !important;
+    gap:6px !important;
+  }
+  .modal-backdrop.travel-popup .travel-destination{
+    min-height:39px !important;
+    padding:5px 4px !important;
+    font-size:13px !important;
+  }
+}
