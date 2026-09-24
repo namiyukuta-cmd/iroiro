@@ -269,6 +269,56 @@
       "Where are you going?",
       "Where are you headed?",
       "Where do you want to go?"
+    ],
+    EXPRESS_SLEEPY: [
+      "I am sleepy.",
+      "I am getting sleepy.",
+      "I need some sleep."
+    ],
+    ASK_TO_REST: [
+      "Let us rest for a while.",
+      "We should rest.",
+      "Can we take a break?"
+    ],
+    ASK_ABOUT_WORK: [
+      "How was work?",
+      "Did you work today?",
+      "What kind of work did you do?"
+    ],
+    EXPRESS_WORK_TIREDNESS: [
+      "Work was tiring today.",
+      "I am tired from work.",
+      "It was a long day at work."
+    ],
+    ASK_ABOUT_MONEY: [
+      "Do you have enough money?",
+      "How much money do you have?",
+      "Can you afford it?"
+    ],
+    EXPRESS_NO_MONEY: [
+      "I do not have any money.",
+      "I am out of money.",
+      "I cannot afford it."
+    ],
+    COMMENT_RAIN: [
+      "It is raining.",
+      "The rain is getting heavier.",
+      "It looks like it will keep raining."
+    ],
+    COMMENT_COLD_WEATHER: [
+      "It is cold today.",
+      "The weather is getting colder.",
+      "It is colder than I expected."
+    ],
+    SAY_GOING_HOME: [
+      "I am going home.",
+      "I should head back.",
+      "I am going back now."
+    ],
+    ASK_IF_COMING_BACK: [
+      "Are you coming back?",
+      "Will you come back later?",
+      "When will you be back?"
     ]
   };
 })();
