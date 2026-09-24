@@ -1,0 +1,83 @@
+name: Audit HMW generation router 003
+on:
+  push:
+    paths:
+      - '.github/workflows/hmw-audit-generation-router-003.yml'
+permissions:
+  contents: read
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Audit semantic generation router
+        run: |
+          node <<'NODE'
+          const fs=require('fs'),path=require('path'),vm=require('vm');
+          const root=process.cwd(), lang=path.join(root,'HMW/js/dialogue/language');
+          const ctx={console};ctx.window=ctx;ctx.HMW={};vm.createContext(ctx);
+          const run=p=>vm.runInContext(fs.readFileSync(path.join(root,p),'utf8'),ctx,{filename:p});
+          const names=fs.readdirSync(lang).sort();
+          const loadPrefix=prefix=>names.filter(n=>n.startsWith(prefix)&&n.endsWith('.js')).forEach(n=>run('HMW/js/dialogue/language/'+n));
+
+          run('HMW/js/dialogue/dialogue-meanings.js');
+          run('HMW/js/dialogue/language/vocabulary-registry.js');
+          loadPrefix('vocabulary-');
+          run('HMW/js/dialogue/language/morphology-rules.js');
+          run('HMW/js/dialogue/language/word-selector.js');
+          loadPrefix('sentence-patterns-');
+          run('HMW/js/dialogue/language/dialogue-composer.js');
+          run('HMW/js/dialogue/language/pattern-slot-filler.js');
+          loadPrefix('meaning-generation-specs-');
+          loadPrefix('meaning-pattern-map-');
+          run('HMW/js/dialogue/language/semantic-generation-router.js');
+
+          const D=ctx.HMW.Dialogue;
+          const meaningIds=Object.keys(D.MEANINGS||{});
+          const allPatternIds=Object.keys(D.SENTENCE_PATTERNS||{});
+          const routedMeanings=[], noRouted=[];
+          const usedPatterns=new Set(), usedWords=new Set(), dynamicEnglish=new Set();
+          const perMeaning={};
+
+          for(const id of meaningIds){
+            const english=new Set(), patterns=new Set(), words=new Set();
+            for(let seed=0;seed<12;seed++){
+              const routes=D.getMeaningGenerationRoutes(id,{variantSeed:seed})||[];
+              for(const r of routes){
+                if(r.english) english.add(r.english);
+                if(r.patternId){patterns.add(r.patternId);usedPatterns.add(r.patternId);}
+                for(const w of Object.values(r.chosenWords||{})){
+                  if(typeof w==='string'&&w.trim()){words.add(w);usedWords.add(w);}
+                }
+              }
+            }
+            english.forEach(x=>dynamicEnglish.add(x));
+            perMeaning[id]={variants:english.size,patterns:patterns.size,words:words.size};
+            if(english.size) routedMeanings.push(id); else noRouted.push(id);
+          }
+
+          const specs=D.GENERATION_SPECS||{};
+          const fixedOnly=noRouted.filter(id=>(specs[id]?.candidates||[]).some(c=>c.surfaceOverride));
+          const noSpec=noRouted.filter(id=>!specs[id]);
+
+          console.log('AUDIT_RESULT '+JSON.stringify({
+            vocabularyCount:D.Vocabulary?.entries?.length||0,
+            patternCount:allPatternIds.length,
+            meaningCount:meaningIds.length,
+            routedMeaningCount:routedMeanings.length,
+            noRoutedCount:noRouted.length,
+            noRouted,
+            fixedOnlyCount:fixedOnly.length,
+            fixedOnly,
+            noSpecCount:noSpec.length,
+            noSpec,
+            usedPatternCount:usedPatterns.size,
+            unusedPatternCount:allPatternIds.length-usedPatterns.size,
+            dynamicEnglishCount:dynamicEnglish.size,
+            usedChosenWordCount:usedWords.size,
+            weakest:Object.entries(perMeaning).sort((a,b)=>a[1].variants-b[1].variants).slice(0,40)
+          }));
+          NODE
