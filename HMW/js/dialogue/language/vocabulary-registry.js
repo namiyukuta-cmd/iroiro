@@ -5,27 +5,46 @@
 
   const store = HMW.Dialogue.Vocabulary || {
     byLemma: {},
+    byKey: {},
     entries: []
   };
 
   store.register = function register(entries = []) {
     for (const entry of entries) {
       if (!entry || !entry.lemma) continue;
+
       const lemma = String(entry.lemma).toLowerCase();
-      const normalized = { ...entry, lemma };
-      this.byLemma[lemma] = normalized;
-      const i = this.entries.findIndex(item => item.lemma === lemma);
-      if (i >= 0) this.entries[i] = normalized;
+      const pos = String(entry.pos || "unknown");
+      const key = lemma + ":" + pos;
+      const normalized = { ...entry, lemma, pos };
+
+      this.byKey[key] = normalized;
+
+      const index = this.entries.findIndex(item =>
+        item.lemma === lemma && item.pos === pos
+      );
+
+      if (index >= 0) this.entries[index] = normalized;
       else this.entries.push(normalized);
+
+      this.byLemma[lemma] = this.entries.filter(item => item.lemma === lemma);
     }
   };
 
-  store.get = function get(lemma) {
-    return this.byLemma[String(lemma || "").toLowerCase()] || null;
+  store.get = function get(lemma, pos = null) {
+    const normalizedLemma = String(lemma || "").toLowerCase();
+    if (pos) {
+      return this.byKey[normalizedLemma + ":" + String(pos)] || null;
+    }
+    return (this.byLemma[normalizedLemma] || [])[0] || null;
   };
 
-  store.has = function has(lemma) {
-    return !!this.get(lemma);
+  store.getAll = function getAll(lemma) {
+    return [...(this.byLemma[String(lemma || "").toLowerCase()] || [])];
+  };
+
+  store.has = function has(lemma, pos = null) {
+    return !!this.get(lemma, pos);
   };
 
   HMW.Dialogue.Vocabulary = store;
