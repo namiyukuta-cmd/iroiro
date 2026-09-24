@@ -1,0 +1,75 @@
+name: Add HMW vocabulary 077
+on:
+  push:
+    paths:
+      - '.github/workflows/hmw-add-vocab-077.yml'
+permissions:
+  contents: write
+jobs:
+  add:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Build 200 unique entries and commit
+        run: |
+          node <<'NODE'
+          const fs=require('fs'),path=require('path'),vm=require('vm'),cp=require('child_process');
+          const lang=path.join(process.cwd(),'HMW/js/dialogue/language');
+          const ctx={console};ctx.window=ctx;ctx.HMW={};vm.createContext(ctx);
+          const run=f=>vm.runInContext(fs.readFileSync(f,'utf8'),ctx,{filename:path.basename(f)});
+          run(path.join(lang,'vocabulary-registry.js'));
+          const files=fs.readdirSync(lang).filter(f=>{const m=f.match(/^vocabulary-(\d{3}).*\.js$/);return m&&Number(m[1])>=1&&Number(m[1])<=76}).sort((a,b)=>Number(a.match(/(\d{3})/)[1])-Number(b.match(/(\d{3})/)[1]));
+          for(const f of files)run(path.join(lang,f));
+          const V=ctx.HMW.Dialogue.Vocabulary;
+
+          const groups={
+            verb:["admire","allocate","amuse","anticipate","applaud","assure","attach","bargain","behave","blink","boast","book","breathe","browse","calculate","categorize","certify","chuckle","classify","collaborate","combine","compare","compliment","concentrate","conclude","confide","consult","contrast","contribute","coordinate","correct","crouch","deduce","delegate","demonstrate","disapprove","discourage","discuss","distinguish","distract","drag","edit","emphasize","evaluate","exaggerate","exhale","fasten","gasp","gesture","giggle","glance","glare","grasp","grumble","hesitate","hum","identify","imply","inhale","inspect","interpret","interview","lean","linger","misjudge","misplace","misquote","misread","misunderstand","mumble","murmur","negotiate","nod","observe","organize","overhear","paraphrase","participate","peer","peek","persuade","pinch","prioritize","protest","quote","reassure","rearrange","reconsider","rephrase","review","rotate","scan","scrape","shrug","sigh","signal","snicker","sob","sort","sprint","stack","stammer","stare","stroll","summarize","tap","tease","tiptoe","tolerate","translate","twist","underline","unfasten","unfold","verify","whine","whisper","wink","yawn","yell",
+            "adapt","administer","advertise","allocate","archive","assemble","audit","backpack","balance","boast","bookmark","broadcast","budget","bundle","calculate","caption","catalog","classify","compile","compress","configure","copy","crop","debug","decode","delete","demonstrate","download","edit","encode","export","filter","format","forward","highlight","import","index","label","log","merge","mute","paste","preview","process","publish","record","rename","restore","save","search","select","sort","stream","sync","tag","transcribe","update","upload","validate","zoom"],
+            noun:["accent","ambiguity","analogy","anecdote","annotation","archive","assertion","assumption","audience","caption","clarity","clause","context","contraction","correction","definition","dialect","dialogue","discourse","emphasis","example","expression","feedback","grammar","headline","idiom","implication","inference","interpretation","jargon","metaphor","misunderstanding","nickname","nuance","paragraph","phrase","pronunciation","quotation","reference","remark","response","sarcasm","sentence","slang","statement","summary","syllable","synonym","tone","translation","vocabulary","wording","viewpoint","perspective","posture","gesture","glance","stare","frown","grin","smirk","shrug","whisper","murmur","mutter","sigh","gasp","sob","chuckle","giggle","hesitation","reluctance","willingness","empathy","hostility","disbelief","distrust","reassurance","compromise","negotiation","reconciliation","resentment","sympathy","gratitude","patience","courage","annoyance","frustration","insecurity","boredom","delight","sorrow","urgency","priority",
+            "adapter","attachment","backup","browser","clipboard","cursor","database","display","download","extension","filename","filter","folder","format","icon","index","interface","keyboard","link","login","logout","network","password","profile","screen","server","setting","shortcut","software","storage","stream","tab","template","upload","username","version","website","wifi","router","modem","printer","scanner","speaker","microphone","headset","charger","socket","outlet","cable","wire","battery","remote","switch","button","panel","menu","toolbar","sidebar","window","notification","alert","archive","document","spreadsheet","presentation","worksheet","cell","column","row","formula","chart","table","field","record","entry","log","report","summary","dashboard","calendar","schedule","deadline","reminder","appointment",
+            "basement","attic","hallway","corridor","doorway","porch","patio","driveway","sidewalk","pavement","crosswalk","curb","railing","stairwell","elevator","escalator","doormat","doorbell","windowsill","faucet","drain","pipe","hose","boiler","heater","radiator","fan","airconditioner","freezer","dishwasher","kettle","toaster","blender","mixer","tray","napkin","sponge","detergent","bucket","broom","dustpan","mop","vacuum","toolbox","workbench","screwdriver","wrench","pliers","drill","ladder","rope","tape","glue","cement","timber","lumber","tile","carpet","rug","cushion","mattress","duvet","pillowcase","curtain","blind","wardrobe","cupboard","cabinet","drawer","countertop","shelf","pantry","cellar","shed","fence","lawn","mailbox","locker","parcel","shipment","voucher","coupon","warranty","invoice","receipt","checkout","aisle","cart","basket","queue","counter","cashier","vendor","clerk","broker","contractor","caretaker","janitor","porter","dispatcher","operator","supervisor","recruiter","applicant","apprentice","technician","mechanic","electrician","plumber","carpenter","mason","welder","gardener","florist","jeweler","tailor","barber","hairdresser","pharmacist","therapist","surgeon","researcher","editor","journalist","architect","engineer","designer","photographer","musician","painter","baker","butcher","chef","bartender","receptionist"],
+            adjective:["articulate","attentive","biased","blunt","cautious","coherent","communicative","compassionate","concise","consistent","contextual","credible","decisive","descriptive","dismissive","empathetic","expressive","flexible","focused","frank","grammatical","idiomatic","impartial","implausible","incoherent","inconsistent","indecisive","insensitive","intentional","literal","metaphorical","neutral","nonverbal","observant","outspoken","passive","plausible","prompt","rational","receptive","responsive","rhetorical","rigid","semantic","sensitive","spontaneous","subtle","tactful","tactless","thoughtful","truthful","unconvincing","unintentional","verbal","voluntary","involuntary","analytical","comparative","persuasive","reassuring","objective","subjective","accurate","inaccurate","valid","invalid","detailed","lengthy","concise","direct","indirect","explicit","implicit","approximate","exact","formal","informal","readable","unreadable","audible","inaudible","visible","invisible","noticeable","hidden","private","public","digital","wireless","portable","electronic","automatic","manual","editable","searchable","downloadable","uploadable","printable","connected","disconnected","secure","insecure","compatible","incompatible","current","outdated","updated","pending","archived","deleted","shared","restricted","unrestricted"],
+            adverb:["articulately","attentively","bluntly","cautiously","coherently","compassionately","concisely","consistently","contextually","decisively","descriptively","dismissively","empathetically","expressively","flexibly","frankly","grammatically","impartially","inconsistently","indecisively","intentionally","literally","metaphorically","neutrally","objectively","passively","plausibly","promptly","rationally","responsively","rhetorically","rigidly","semantically","sensitively","spontaneously","subtly","tactfully","tactlessly","thoughtfully","truthfully","unintentionally","verbally","voluntarily","analytically","comparatively","persuasively","accurately","inaccurately","validly","explicitly","implicitly","approximately","formally","informally","audibly","visibly","digitally","wirelessly","automatically","manually","securely","privately","publicly","currently","recently","previously","eventually","immediately","gradually","regularly","occasionally","frequently","rarely","constantly","temporarily","permanently"]
+          };
+
+          const chosen=[];
+          for(const [pos,lemmas] of Object.entries(groups)){
+            for(const raw of lemmas){
+              const lemma=String(raw).toLowerCase();
+              const key=lemma+":"+pos;
+              if(!V.byKey[key]&&!chosen.some(e=>e.lemma===lemma&&e.pos===pos)){
+                chosen.push({lemma,pos,tags:["conversation","practical","communication","daily","batch077"]});
+                if(chosen.length===200) break;
+              }
+            }
+            if(chosen.length===200) break;
+          }
+          if(chosen.length<200) throw new Error("Only "+chosen.length+" unique candidates available");
+          const byPos={};for(const e of chosen)(byPos[e.pos]||(byPos[e.pos]=[])).push(e.lemma);
+          const lines=[
+            '(() => {','  "use strict";',
+            '  const V = window.HMW?.Dialogue?.Vocabulary;',
+            '  if (!V) throw new Error("Vocabulary registry must load first.");','',
+            '  // Practical communication, interface, household and work vocabulary.',
+            '  const words = '+JSON.stringify(byPos,null,4).replace(/^/gm,'  ')+';','',
+            '  const entries = [];',
+            '  for (const [pos, lemmas] of Object.entries(words)) {',
+            '    for (const lemma of lemmas) {',
+            '      entries.push({ lemma, pos, tags: ["conversation","practical","communication","daily","batch077"] });',
+            '    }','  }','',
+            '  V.register(entries);','})();',''
+          ];
+          const out=path.join(lang,'vocabulary-077-practical-communication.js');
+          fs.writeFileSync(out,lines.join('\n'));
+          for(const e of chosen)V.register([e]);
+          const result={added:chosen.length,uniqueAfter:V.entries.length,remainingTo5000:Math.max(0,5000-V.entries.length),byPos:Object.fromEntries(Object.entries(byPos).map(([k,v])=>[k,v.length]))};
+          console.log('AUDIT_RESULT '+JSON.stringify(result));
+          cp.execSync('git config user.name "github-actions[bot]"');
+          cp.execSync('git config user.email "41898282+github-actions[bot]@users.noreply.github.com"');
+          cp.execSync('git add HMW/js/dialogue/language/vocabulary-077-practical-communication.js');
+          cp.execSync('git commit -m "Add vocabulary batch 077"');
+          cp.execSync('git push');
+          NODE
