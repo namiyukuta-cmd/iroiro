@@ -58,7 +58,7 @@
       return { english: "", slots, source: "meaning_pattern_map" };
     }
 
-    let english = renderTemplate((pattern.tokens || []).join(" "), slots);
+    let english = HMW.Dialogue.renderSentencePattern(choice.pattern, slots);
 
     if (choice.prefix) {
       english = normalizeSpacing(choice.prefix + " " + english);
@@ -85,7 +85,21 @@
   ) {
     const pattern = HMW.Dialogue.SENTENCE_PATTERNS?.[patternId];
     if (!pattern) return "";
-    return renderTemplate((pattern.tokens || []).join(" "), slots);
+    const resolved = { ...slots };
+    const place = String(resolved.PLACE || "").trim();
+    if (patternId === "ANSWER_DESTINATION") {
+      resolved.DIRECTION_PREP = /^(here|there|home|abroad|somewhere|anywhere|everywhere)$/i.test(place) || /^(to|into|toward|towards)\s/i.test(place) ? "" : "to";
+    }
+    if (patternId === "ANSWER_WORK_LOCATION") {
+      resolved.LOCATION_PREP = /^(here|there|abroad|somewhere|anywhere|everywhere)$/i.test(place) || /^(at|in|on|near|outside|inside)\s/i.test(place) ? "" : "at";
+    }
+    if (["ANSWER_IDENTITY_ROLE", "ANSWER_JOB_ROLE"].includes(patternId)) {
+      const role = String(resolved.ROLE || "").trim();
+      resolved.ARTICLE = /^(a|an|the|my|your|his|her|our|their)\s/i.test(role) ? "" :
+        (resolved.ARTICLE || (/^[aeiou]/i.test(role) ? "an" : "a"));
+    }
+    const english = renderTemplate((pattern.tokens || []).join(" "), resolved);
+    return english ? english[0].toUpperCase() + english.slice(1) : "";
   };
 
   HMW.Dialogue.composeMeaning = function composeMeaning(
