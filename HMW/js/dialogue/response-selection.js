@@ -9,6 +9,11 @@
     "PROMISE_NOT_KISS","PROMISE_NOT_HUG","PROMISE_NOT_CONTACT","DECLINE_CONTACT"
   ]);
 
+  const BOUNDARY_RESPONSE = new Set([
+    "DENY_PERMISSION","DECLINE_ACTION_REQUEST","DECLINE_INVITATION",
+    "DECLINE_SUGGESTION","DECLINE_REQUEST","DECLINE_CONTACT"
+  ]);
+
   const DIRECT_ANSWER = new Set([
     "STATE_CURRENT_LOCATION","STATE_AVAILABLE_TIME","STATE_CONDITION",
     "CONFIRM_POSSESSION","DENY_POSSESSION","STATE_QUANTITY",
@@ -123,6 +128,9 @@
     const preferred = [...new Set((preferredMeaningIds || []).filter(id => ordered.includes(id)))];
 
     pushUnique(take(ordered, BOUNDARY, Infinity));
+    if (boundaryActive) {
+      pushUnique(take(ordered, BOUNDARY_RESPONSE, 1));
+    }
     pushUnique(preferred);
     pushUnique(take(ordered, DIRECT_ANSWER, 2));
     pushUnique(take(ordered, CORE_RELATION, 3));
