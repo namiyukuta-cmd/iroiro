@@ -600,6 +600,62 @@
     STATE_HOME: {
       category: "answer",
       meaningJa: "自分の家や寝場所を答える"
+    },
+    STATE_IDENTITY_NAME: {
+      category: "answer",
+      meaningJa: "自分の名前を答える"
+    },
+    STATE_IDENTITY_ROLE: {
+      category: "answer",
+      meaningJa: "自分の職業や役割を答える"
+    },
+    STATE_ORIGIN: {
+      category: "answer",
+      meaningJa: "自分の出身地を答える"
+    },
+    STATE_DESTINATION: {
+      category: "answer",
+      meaningJa: "自分の目的地を答える"
+    },
+    STATE_REASON: {
+      category: "answer",
+      meaningJa: "自分の理由を答える"
+    },
+    STATE_OPINION: {
+      category: "answer",
+      meaningJa: "自分の意見を答える"
+    },
+    STATE_PRICE: {
+      category: "answer",
+      meaningJa: "値段を答える"
+    },
+    STATE_COUNT: {
+      category: "answer",
+      meaningJa: "数量を答える"
+    },
+    STATE_WORK_LOCATION: {
+      category: "answer",
+      meaningJa: "自分の勤務場所を答える"
+    },
+    STATE_JOB_ROLE: {
+      category: "answer",
+      meaningJa: "自分の仕事の種類を答える"
+    },
+    CONFIRM_KNOWLEDGE: {
+      category: "answer",
+      meaningJa: "尋ねられたことを知っていると答える"
+    },
+    DENY_KNOWLEDGE: {
+      category: "answer",
+      meaningJa: "尋ねられたことを知らないと答える"
+    },
+    CONFIRM_FACT: {
+      category: "answer",
+      meaningJa: "尋ねられた事実が正しいと答える"
+    },
+    DENY_FACT: {
+      category: "answer",
+      meaningJa: "尋ねられた事実が正しくないと答える"
     }
   };
 })();
