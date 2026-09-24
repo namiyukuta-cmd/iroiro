@@ -208,7 +208,7 @@
   const LOCATION_POINTS = {
     station_front: [
       { id:"board", label:"掲示板", text:"支援、廃品回収、小仕事など、今日の生活につながる情報が貼られている。" },
-      { id:"loading", label:"駅の搬入口", text:"駅ビルの搬入口で、台車を押す人が何度も出入りしている。欠員が出た日に当日手伝いを募集することがある。" },
+      { id:"loading", label:"駅の搬入口", text:"当日手伝いの募集があるか確認できる。募集が出ていれば、そのまま荷下ろしの仕事を受けられる。" },
       { id:"bench", label:"ベンチ", text:"通勤客の流れから少し外れて座れるベンチ。人の出入りを見ながら休める。" },
       { id:"bin", label:"ゴミ箱", text:"駅前のゴミ箱とその周辺。使える物が残っていることもある。" }
     ],
@@ -277,19 +277,13 @@
 
     const page = Math.max(0, Math.min(pageIndex, pages.length - 1));
     const isLast = page >= pages.length - 1;
-    const body = `<div class="location-intro-text">${esc(pages[page])}</div><div class="location-intro-tap">Tap</div>`;
-
-    openModal(loc.name, body, [{
-      label: "Tap",
-      className: "location-tap-btn",
-      onClick: () => {
-        if (isLast) {
-          closeModal();
-          return;
-        }
-        openLocationIntro(id, page + 1);
-      }
-    }], true);
+    openModal(loc.name, `<div class="location-intro-text">${esc(pages[page])}</div>`, [], true);
+    const backdrop = $("modal-backdrop");
+    backdrop.classList.add("tap-popup");
+    backdrop.onclick = () => {
+      if (isLast) closeModal();
+      else openLocationIntro(id, page + 1);
+    };
   }
 
   function openScenePopup(scene) {
@@ -362,7 +356,12 @@
       openScenePopup(liveScene);
       return;
     }
-    openModal(point.label, `<div class="point-popup-text">${esc(point.text)}</div>`, pointActions(locationId, point.id), true);
+    const actions = pointActions(locationId, point.id);
+    if (actions.length === 1) {
+      actions[0].onClick();
+      return;
+    }
+    openModal(point.label, `<div class="point-popup-text">${esc(point.text)}</div>`, actions, true);
   }
 
   function renderLocationPoints() {
@@ -542,6 +541,7 @@
       </div>`;
 
     openModal("移動", body, [], true);
+    $("modal-backdrop")?.classList.add("travel-popup");
 
     let selectedId = null;
     const hint = $("travel-hint");
