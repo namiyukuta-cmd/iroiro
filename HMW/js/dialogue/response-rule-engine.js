@@ -139,6 +139,24 @@
     if (w.historyAny && !hasAny(recentMeaningIds, w.historyAny)) return false;
     if (w.historyAll && !hasAll(recentMeaningIds, w.historyAll)) return false;
     if (w.historyNone && hasAny(recentMeaningIds, w.historyNone)) return false;
+    if (w.historyLastAny) {
+      const last = recentMeaningIds[recentMeaningIds.length - 1];
+      if (!arr(w.historyLastAny).includes(last)) return false;
+    }
+    if (w.historyLastNone) {
+      const last = recentMeaningIds[recentMeaningIds.length - 1];
+      if (arr(w.historyLastNone).includes(last)) return false;
+    }
+    if (w.historyRecentAny) {
+      const limit = Math.max(1, Number(w.historyRecentWindow) || 3);
+      const slice = recentMeaningIds.slice(-limit);
+      if (!hasAny(slice, w.historyRecentAny)) return false;
+    }
+    if (w.historyRecentNone) {
+      const limit = Math.max(1, Number(w.historyRecentWindow) || 3);
+      const slice = recentMeaningIds.slice(-limit);
+      if (hasAny(slice, w.historyRecentNone)) return false;
+    }
     for (const [id,min] of Object.entries(w.historyCountMin || {})) {
       const count = recentMeaningIds.filter(item => item === id).length;
       if (count < Number(min)) return false;
