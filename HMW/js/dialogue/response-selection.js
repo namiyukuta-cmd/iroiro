@@ -71,6 +71,11 @@
     ["ACCEPT_SUGGESTION","DECLINE_SUGGESTION"],
     ["ACCEPT_APOLOGY","DECLINE_FOR_NOW"],
     ["OFFER_CONTACT","DECLINE_CONTACT"],
+    ["DECLINE_CONTACT","REQUEST_CONTACT"],
+    ["ACCEPT_DISTANCE","OFFER_COMPANY"],
+    ["ACCEPT_DISTANCE","REQUEST_STAY"],
+    ["ACCEPT_DISTANCE","ASK_TO_STAY_CLOSE"],
+    ["ACCEPT_DISTANCE","EXPRESS_WANT_TO_BE_TOGETHER"],
     ["CONFIRM_POSSESSION","DENY_POSSESSION"],
     ["CONFIRM_CAPABILITY","DENY_CAPABILITY"],
     ["CONFIRM_AVAILABLE","DENY_AVAILABLE"],
@@ -133,17 +138,12 @@
       if (!selected.includes(id)) selected.push(id);
     }
 
-    const preferredSet = new Set(preferred);
-    const criticalCount = selected.filter(id =>
-      BOUNDARY.has(id) || DIRECT_ANSWER.has(id) || preferredSet.has(id)
-    ).length;
-
-    const limit = Math.max(
-      criticalCount,
+    const boundaryCount = selected.filter(id => BOUNDARY.has(id)).length;
+    const requestedLimit =
       Number.isFinite(Number(maxMeanings)) && Number(maxMeanings) > 0
         ? Number(maxMeanings)
-        : 5
-    );
+        : 5;
+    const limit = Math.max(boundaryCount, requestedLimit);
 
     return selected.slice(0, limit);
   };
