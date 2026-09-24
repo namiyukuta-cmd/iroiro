@@ -104,6 +104,18 @@
       if (!matched) return false;
     }
 
+    if (w.questionAt) {
+      const spec = w.questionAt;
+      const index = Number(spec.index);
+      const q = Number.isInteger(index) && index >= 0 ? questions[index] : null;
+      if (!q) return false;
+      if (spec.kindAny && !arr(spec.kindAny).includes(q?.kind)) return false;
+      if (spec.actionAny && !arr(spec.actionAny).includes(q?.action)) return false;
+      if (spec.targetAny && !arr(spec.targetAny).includes(q?.target)) return false;
+      if (spec.requestedFieldAny && !arr(spec.requestedFieldAny).includes(q?.requestedField)) return false;
+      if (spec.conceptAny && !arr(spec.conceptAny).includes(q?.concept)) return false;
+    }
+
     if (w.claimConceptAny) {
       const claims = arr(a.claims);
       if (!claims.some(claim => arr(w.claimConceptAny).includes(claim?.concept))) return false;
@@ -154,6 +166,17 @@
         return true;
       });
       if (!matched) return false;
+    }
+
+    if (w.claimAt) {
+      const spec = w.claimAt;
+      const index = Number(spec.index);
+      const claim = Number.isInteger(index) && index >= 0 ? claims[index] : null;
+      if (!claim) return false;
+      if (spec.conceptAny && !arr(spec.conceptAny).includes(claim?.concept)) return false;
+      if (spec.typeAny && !arr(spec.typeAny).includes(claim?.type)) return false;
+      if (spec.certaintyAny && !arr(spec.certaintyAny).includes(claim?.certainty)) return false;
+      if (spec.polarityEq !== undefined && claim?.polarity !== spec.polarityEq) return false;
     }
 
     if (w.lexicalTargetAny && !hasAny(a.lexicalTargets, w.lexicalTargetAny)) return false;
@@ -333,7 +356,12 @@
         if (suppressedMeaningIds.has(id)) continue;
         if (!meaningIds.includes(id)) meaningIds.push(id);
         if (
-          (rule.primary === true || rule.when?.primaryQuestionAny || rule.when?.primaryClaimAny) &&
+          (
+            rule.primary === true ||
+            rule.prefer === true ||
+            rule.when?.primaryQuestionAny ||
+            rule.when?.primaryClaimAny
+          ) &&
           !preferredMeaningIds.includes(id)
         ) {
           preferredMeaningIds.push(id);
