@@ -1,0 +1,262 @@
+name: Audit HMW response rules 026
+on:
+  push:
+    paths:
+      - '.github/workflows/hmw-audit-response-rules-026.yml'
+permissions:
+  contents: read
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Audit response rules
+        run: |
+          node <<'NODE'
+          const fs=require('fs'),path=require('path'),vm=require('vm');
+          const root=process.cwd();
+          const ctx={console};ctx.window=ctx;ctx.HMW={};vm.createContext(ctx);
+          const run=p=>vm.runInContext(fs.readFileSync(path.join(root,p),'utf8'),ctx,{filename:p});
+          const files=[
+            'HMW/js/dialogue/dialogue-input.js',
+            'HMW/js/dialogue/analysis-schema.js',
+            'HMW/js/dialogue/claim-rules.js',
+            'HMW/js/dialogue/dialogue-meanings.js',
+            'HMW/js/dialogue/language/lexical-target-rules.js',
+            'HMW/js/dialogue/response-rule-engine.js'
+          ];
+          for(let i=1;i<=26;i++){
+            const n=String(i).padStart(3,'0');
+            const found=fs.readdirSync(path.join(root,'HMW/js/dialogue'))
+              .find(name=>name.startsWith('response-rules-'+n+'-')&&name.endsWith('.js'));
+            if(!found) throw new Error('missing response rules file '+n);
+            files.push('HMW/js/dialogue/'+found);
+          }
+          files.push(
+            'HMW/js/dialogue/response-planner.js',
+            'HMW/js/dialogue/response-priority.js',
+            'HMW/js/dialogue/response-selection.js',
+            'HMW/js/dialogue/response-history.js',
+            'HMW/js/dialogue/fact-slot-resolver.js'
+          );
+          files.forEach(run);
+
+          const D=ctx.HMW.Dialogue;
+          const rules=D.RESPONSE_RULES||[];
+          const ids=rules.map(r=>r.id);
+          const dupIds=ids.filter((id,i)=>ids.indexOf(id)!==i);
+          const missingMeaningIds=[...new Set(rules.flatMap(r=>r.meanings||[]).filter(id=>!D.MEANINGS[id]))];
+
+          const test=c=>{
+            const plan=D.planResponse(c);
+            const prioritized=D.prioritizeResponseMeanings(plan.meaningIds);
+            const selected=D.selectResponseMeanings(prioritized,{
+              boundaryActive:plan.boundaryActive,
+              maxMeanings:5,
+              preferredMeaningIds:plan.preferredMeaningIds||[]
+            });
+            return {plan,selected};
+          };
+
+          const leaveAlone=test({
+            analysis:{
+              intents:['express_loneliness','ask_to_talk'],
+              focusConcepts:['relationship'],
+              emotions:{loneliness:85},
+              boundaries:['leave_me_alone'],
+              tone:{style:'subdued',hesitation:75}
+            },
+            characterPolicy:{willingToTalk:true},
+            psychology:{care:90,loneliness:90},
+            relationship:{stage:'partner',familiarity:90,trust:90,goodwill:90,desire:90,flags:{}}
+          });
+
+          const stopConversation=test({
+            analysis:{
+              intents:['ask_question','ask_to_talk'],
+              questions:[{kind:'reason'}],
+              boundaries:['stop_conversation']
+            },
+            characterPolicy:{willingToTalk:true},
+            relationship:{stage:'close',familiarity:80,trust:80,goodwill:80,flags:{}}
+          });
+
+          const noWait=test({
+            analysis:{
+              intents:['ask_permission_wait'],
+              boundaries:['do_not_wait'],
+              focusConcepts:['waiting']
+            },
+            characterPolicy:{allowWaiting:true},
+            relationship:{stage:'friend',familiarity:70,trust:70,goodwill:70,flags:{}}
+          });
+
+          const repeatedPermission=test({
+            analysis:{
+              intents:['ask_permission_action'],
+              questions:[{kind:'permission',action:'hug'}]
+            },
+            characterPolicy:{permissions:{hug:true}},
+            relationship:{stage:'partner',familiarity:90,trust:90,goodwill:90,flags:{}},
+            recentMeaningIds:['DENY_PERMISSION']
+          });
+
+          const promiseNoContact=test({
+            analysis:{intents:['request_contact'],focusConcepts:['contact']},
+            characterPolicy:{allowContact:true},
+            relationship:{stage:'partner',familiarity:90,trust:90,goodwill:90,flags:{}},
+            recentMeaningIds:['PROMISE_NOT_CONTACT']
+          });
+
+          const cannotTalk=test({
+            analysis:{
+              intents:['ask_question','ask_to_talk'],
+              questions:[{kind:'relationship_status'}],
+              focusConcepts:['relationship']
+            },
+            characterPolicy:{willingToTalk:true},
+            relationship:{stage:'partner',familiarity:90,trust:90,goodwill:90,flags:{}},
+            conversationContext:{canTalkFreely:false,privacy:'public'}
+          });
+
+          const pricePresent=test({
+            analysis:{intents:['ask_price'],questions:[{kind:'price',target:'apple'}]},
+            characterFacts:{price:5},
+            characterPolicy:{},
+            relationship:{stage:'friend',familiarity:70,trust:70,goodwill:70,flags:{}}
+          });
+
+          const priceAbsent=test({
+            analysis:{intents:['ask_price'],questions:[{kind:'price',target:'apple'}]},
+            characterFacts:{},
+            characterPolicy:{},
+            relationship:{stage:'friend',familiarity:70,trust:70,goodwill:70,flags:{}}
+          });
+
+          const accusationTruth=test({
+            analysis:{
+              intents:['question_affection','accuse_betrayal'],
+              focusConcepts:['love','betrayal'],
+              claims:[
+                {concept:'love',type:'speaker_suspicion',polarity:false,certainty:'high'},
+                {concept:'betrayal',type:'accusation',polarity:true,certainty:'high'}
+              ]
+            },
+            characterFacts:{lovesHeroine:true,intendsBetrayal:false},
+            characterPolicy:{},
+            relationship:{stage:'partner',familiarity:90,trust:80,goodwill:90,flags:{}}
+          });
+
+          const manyQuestions=test({
+            analysis:{
+              intents:['ask_where','ask_when','ask_plan','ask_preference','ask_work'],
+              questions:[
+                {kind:'where',requestedField:'currentLocation'},
+                {kind:'when',requestedField:'returnTime'},
+                {kind:'plan',requestedField:'currentPlan'},
+                {kind:'preference',requestedField:'currentPreference'},
+                {kind:'work',requestedField:'workStatus'}
+              ]
+            },
+            characterFacts:{
+              currentLocation:'Tokyo',
+              returnTime:'21:00',
+              currentPlan:{verb:'work',object:'today'},
+              currentPreference:'tea',
+              workStatus:'busy'
+            },
+            relationship:{stage:'friend',familiarity:70,trust:70,goodwill:70,flags:{}},
+            conversationContext:{timePressure:true}
+          });
+
+          const goodbyeConflict=D.selectResponseMeanings(
+            D.prioritizeResponseMeanings(['SAY_GOODBYE','SAY_GOODBYE_TEMPORARY']),
+            {maxMeanings:5}
+          );
+
+          const checks={
+            ruleCount:rules.length===2600,
+            uniqueRuleIds:new Set(ids).size===2600,
+            noMissingMeanings:missingMeaningIds.length===0,
+            leaveAloneHard:
+              leaveAlone.plan.matchedResponseRuleIds.includes('R2501_LEAVE_ALONE_HARD') &&
+              leaveAlone.plan.suppressedMeaningIds.includes('OFFER_COMPANY') &&
+              leaveAlone.selected.includes('RESPECT_BOUNDARY') &&
+              !leaveAlone.selected.includes('OFFER_COMPANY') &&
+              !leaveAlone.selected.includes('ASK_TO_TALK') &&
+              !leaveAlone.selected.includes('ASK_IF_OKAY'),
+            stopNoFollowup:
+              stopConversation.plan.matchedResponseRuleIds.includes('R2502_STOP_CONVERSATION_HARD') &&
+              stopConversation.plan.suppressedMeaningIds.includes('ASK_TO_TALK') &&
+              stopConversation.selected.includes('RESPECT_BOUNDARY') &&
+              !stopConversation.selected.includes('ASK_TO_TALK') &&
+              !stopConversation.selected.includes('ASK_FOR_DETAILS') &&
+              !stopConversation.selected.includes('EXPRESS_NEED_CLARITY'),
+            noWait:
+              noWait.plan.matchedResponseRuleIds.includes('R2508_DO_NOT_WAIT_HARD') &&
+              noWait.plan.suppressedMeaningIds.includes('ASK_TO_WAIT') &&
+              noWait.selected.includes('RESPECT_BOUNDARY') &&
+              !noWait.selected.includes('ASK_TO_WAIT'),
+            repeatedPermission:
+              repeatedPermission.plan.matchedResponseRuleIds.includes('R2528_HIST_DENY_PERMISSION_REPEAT') &&
+              repeatedPermission.plan.suppressedMeaningIds.includes('GRANT_PERMISSION') &&
+              repeatedPermission.selected.includes('DENY_PERMISSION') &&
+              !repeatedPermission.selected.includes('GRANT_PERMISSION'),
+            promiseNoContact:
+              promiseNoContact.plan.matchedResponseRuleIds.includes('R2527_HIST_PROMISE_NO_CONTACT') &&
+              promiseNoContact.plan.suppressedMeaningIds.includes('ACCEPT_CONTACT') &&
+              promiseNoContact.selected.includes('DECLINE_CONTACT') &&
+              !promiseNoContact.selected.includes('ACCEPT_CONTACT'),
+            cannotTalk:
+              cannotTalk.plan.matchedResponseRuleIds.includes('R2546_CTX_CANNOT_TALK_QUESTION') &&
+              cannotTalk.plan.matchedResponseRuleIds.includes('R2547_CTX_CANNOT_TALK_REL') &&
+              cannotTalk.plan.meaningIds.includes('REQUEST_TIME') &&
+              !cannotTalk.selected.includes('ASK_TO_TALK'),
+            pricePresent:
+              pricePresent.plan.matchedResponseRuleIds.includes('R2566_FACT_OPINION_PRESENT')===false &&
+              pricePresent.plan.matchedResponseRuleIds.includes('R2568_FACT_PRICE_PRESENT') &&
+              pricePresent.selected.includes('STATE_PRICE') &&
+              !pricePresent.selected.includes('ANSWER_UNKNOWN'),
+            priceAbsent:
+              priceAbsent.plan.matchedResponseRuleIds.includes('R2569_FACT_PRICE_ABSENT') &&
+              priceAbsent.selected.includes('ANSWER_UNKNOWN'),
+            accusationTruth:
+              accusationTruth.plan.matchedResponseRuleIds.includes('R2598_FINAL_ACCUSATION_TRUTH_LOVE') &&
+              accusationTruth.plan.matchedResponseRuleIds.includes('R2599_FINAL_ACCUSATION_TRUTH_BETRAY') &&
+              accusationTruth.selected.includes('AFFIRM_LOVE') &&
+              accusationTruth.selected.includes('DENY_BETRAYAL') &&
+              !accusationTruth.selected.includes('DENY_LOVE') &&
+              !accusationTruth.selected.includes('ADMIT_BETRAYAL'),
+            maxFive:
+              manyQuestions.selected.length<=5 &&
+              manyQuestions.plan.matchedResponseRuleIds.includes('R2600_FINAL_MAX_QUESTION_CLARITY'),
+            goodbyeConflict:
+              goodbyeConflict.length===1 &&
+              (goodbyeConflict[0]==='SAY_GOODBYE'||goodbyeConflict[0]==='SAY_GOODBYE_TEMPORARY')
+          };
+
+          console.log('AUDIT_RESULT '+JSON.stringify({
+            ruleCount:rules.length,
+            uniqueRuleIds:new Set(ids).size,
+            dupIds,
+            missingMeaningIds,
+            checks,
+            cases:{
+              leaveAlone:{meaningIds:leaveAlone.plan.meaningIds,suppressed:leaveAlone.plan.suppressedMeaningIds,selected:leaveAlone.selected,matched:leaveAlone.plan.matchedResponseRuleIds},
+              stopConversation:{meaningIds:stopConversation.plan.meaningIds,suppressed:stopConversation.plan.suppressedMeaningIds,selected:stopConversation.selected,matched:stopConversation.plan.matchedResponseRuleIds},
+              noWait:{meaningIds:noWait.plan.meaningIds,suppressed:noWait.plan.suppressedMeaningIds,selected:noWait.selected,matched:noWait.plan.matchedResponseRuleIds},
+              repeatedPermission:{meaningIds:repeatedPermission.plan.meaningIds,suppressed:repeatedPermission.plan.suppressedMeaningIds,selected:repeatedPermission.selected,matched:repeatedPermission.plan.matchedResponseRuleIds},
+              promiseNoContact:{meaningIds:promiseNoContact.plan.meaningIds,suppressed:promiseNoContact.plan.suppressedMeaningIds,selected:promiseNoContact.selected,matched:promiseNoContact.plan.matchedResponseRuleIds},
+              cannotTalk:{meaningIds:cannotTalk.plan.meaningIds,suppressed:cannotTalk.plan.suppressedMeaningIds,selected:cannotTalk.selected,matched:cannotTalk.plan.matchedResponseRuleIds},
+              pricePresent:{meaningIds:pricePresent.plan.meaningIds,slots:pricePresent.plan.slotOverridesByMeaning,selected:pricePresent.selected,matched:pricePresent.plan.matchedResponseRuleIds},
+              priceAbsent:{meaningIds:priceAbsent.plan.meaningIds,selected:priceAbsent.selected,matched:priceAbsent.plan.matchedResponseRuleIds},
+              accusationTruth:{meaningIds:accusationTruth.plan.meaningIds,suppressed:accusationTruth.plan.suppressedMeaningIds,selected:accusationTruth.selected,matched:accusationTruth.plan.matchedResponseRuleIds},
+              manyQuestions:{meaningIds:manyQuestions.plan.meaningIds,selected:manyQuestions.selected,matched:manyQuestions.plan.matchedResponseRuleIds},
+              goodbyeConflict
+            }
+          }));
+          if(Object.values(checks).some(v=>v!==true)) process.exit(1);
+          NODE
