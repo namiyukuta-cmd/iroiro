@@ -51,6 +51,21 @@ h1{font-size:21px;margin:3px 0 4px;letter-spacing:.03em}
 }
 .reason{margin-top:7px;font-size:10px;line-height:1.45;color:#8b5d3b}
 .placeholder{color:#aaa;font-size:13px;display:grid;place-items:center;min-height:70px}
+.action-box{display:none}
+.action-box.show{display:block}
+.action-title{font-size:13px;font-weight:900;margin-bottom:7px}
+.action-desc{font-size:11px;color:#756d62;line-height:1.45;margin-bottom:9px}
+.action-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:7px}
+.action-btn{
+  min-height:48px;border:1px solid #9e9589;border-radius:11px;background:#fff;font-size:12px;font-weight:850;
+  padding:6px 4px
+}
+.action-btn:active{background:#eee8de}
+.action-result{
+  display:none;margin-top:9px;padding:9px 10px;border:1px dashed #b9afa2;border-radius:10px;
+  background:#faf7f0;font-size:12px;line-height:1.55
+}
+.action-result.show{display:block}
 .state-row{display:flex;gap:5px;flex-wrap:wrap;min-height:22px}
 .state-chip strong{margin-left:4px}
 .empty{font-size:11px;color:#958d82}
@@ -85,7 +100,7 @@ h1{font-size:21px;margin:3px 0 4px;letter-spacing:.03em}
   </div>
 
   <h1>因果カードRPG</h1>
-  <p class="sub">場所 → 発見 → 出来事の順で1枚ずつ引く。前に出たタグが、次のカードの出やすさを変える。</p>
+  <p class="sub">場所・発見・出来事の3枚は自動で出る。その組み合わせを見て、どう対処するかを選ぶ。選んだ結果も次の抽選へ残る。</p>
 
   <div class="stats">
     <div class="stat"><b id="dangerStat">0</b><span>危険</span></div>
@@ -98,6 +113,14 @@ h1{font-size:21px;margin:3px 0 4px;letter-spacing:.03em}
     <div id="cards" class="cards">
       <div class="card placeholder">「探索する」で3枚引く</div>
     </div>
+  </section>
+
+  <section class="paper action-box" id="actionBox">
+    <div class="section-title">どうする？</div>
+    <div class="action-title" id="actionTitle">対処を選ぶ</div>
+    <div class="action-desc" id="actionDesc">3枚の組み合わせを見て行動を選ぶ。</div>
+    <div class="action-grid" id="actionGrid"></div>
+    <div class="action-result" id="actionResult"></div>
   </section>
 
   <section class="paper">
@@ -117,7 +140,7 @@ h1{font-size:21px;margin:3px 0 4px;letter-spacing:.03em}
 </main>
 
 <div class="controls">
-  <button class="primary" id="drawBtn">探索する</button>
+  <button class="primary" id="drawBtn">最初の一区画を引く</button>
   <button class="reset" id="resetBtn">リセット</button>
 </div>
 
@@ -172,6 +195,8 @@ h1{font-size:21px;margin:3px 0 4px;letter-spacing:.03em}
   const loot=[];
   const log=[];
   let turn=0;
+  let currentDraw=null;
+  let awaitingAction=false;
 
   const el={
     cards:document.getElementById("cards"),
@@ -181,7 +206,13 @@ h1{font-size:21px;margin:3px 0 4px;letter-spacing:.03em}
     turn:document.getElementById("turnNo"),
     danger:document.getElementById("dangerStat"),
     clue:document.getElementById("clueStat"),
-    lootStat:document.getElementById("lootStat")
+    lootStat:document.getElementById("lootStat"),
+    actionBox:document.getElementById("actionBox"),
+    actionTitle:document.getElementById("actionTitle"),
+    actionDesc:document.getElementById("actionDesc"),
+    actionGrid:document.getElementById("actionGrid"),
+    actionResult:document.getElementById("actionResult"),
+    drawBtn:document.getElementById("drawBtn")
   };
 
   function value(k){return Math.max(0,Number(state[k]||0))}
@@ -227,7 +258,10 @@ h1{font-size:21px;margin:3px 0 4px;letter-spacing:.03em}
 
   function applyCard(card){
     for(const [k,n] of Object.entries(card.effects||{})) add(k,n);
-    if(card.loot && !loot.includes(card.loot)) loot.push(card.loot);
+  }
+
+  function addLoot(item){
+    if(item && !loot.includes(item)) loot.push(item);
   }
 
   function drawSection(cards){
@@ -254,6 +288,137 @@ h1{font-size:21px;margin:3px 0 4px;letter-spacing:.03em}
     '</article>';
   }
 
+  function hasTag(tag){
+    return currentDraw ? currentDraw.some(x=>x.card.tags.includes(tag)) : false;
+  }
+
+  function currentLoot(){
+    if(!currentDraw)return [];
+    return currentDraw.map(x=>x.card.loot).filter(Boolean);
+  }
+
+  function actionSet(){
+    if(hasTag("goblin") || hasTag("beast")){
+      return [
+        {label:"戦う",id:"fight"},
+        {label:"避ける",id:"avoid"},
+        {label:"様子を見る",id:"observe"}
+      ];
+    }
+    if(hasTag("human")){
+      return [
+        {label:"話す",id:"talk"},
+        {label:"助ける",id:"help"},
+        {label:"離れる",id:"leave"}
+      ];
+    }
+    if(hasTag("trap") || (hasTag("danger") && !hasTag("human"))){
+      return [
+        {label:"慎重に進む",id:"careful"},
+        {label:"調べる",id:"inspect"},
+        {label:"強行する",id:"force"}
+      ];
+    }
+    if(hasTag("resource") || hasTag("treasure") || hasTag("herb")){
+      return [
+        {label:"拾う",id:"take"},
+        {label:"調べる",id:"inspect"},
+        {label:"先へ進む",id:"leave"}
+      ];
+    }
+    return [
+      {label:"調べる",id:"inspect"},
+      {label:"休む",id:"rest"},
+      {label:"先へ進む",id:"leave"}
+    ];
+  }
+
+  function showActions(){
+    const actions=actionSet();
+    el.actionBox.classList.add("show");
+    el.actionResult.classList.remove("show");
+    el.actionResult.textContent="";
+    el.actionTitle.textContent="この一区画でどうする？";
+    el.actionDesc.textContent="行動の結果が世界状態に残り、次に出るカードへ影響する。";
+    el.actionGrid.innerHTML=actions.map(a=>
+      '<button class="action-btn" data-action="'+a.id+'">'+a.label+'</button>'
+    ).join("");
+    el.actionGrid.querySelectorAll("button").forEach(btn=>{
+      btn.addEventListener("click",()=>resolveAction(btn.dataset.action,btn.textContent));
+    });
+  }
+
+  function resolveAction(id,label){
+    if(!awaitingAction)return;
+    awaitingAction=false;
+
+    const foundLoot=currentLoot();
+    let result="";
+    const roll=Math.random();
+
+    if(id==="fight"){
+      if(roll<0.68){
+        add("danger",-2); add("clue",1);
+        foundLoot.forEach(addLoot);
+        result="勝った。"+(foundLoot.length?"「"+foundLoot.join("・")+"」を持ち帰る。":"周囲を調べ、痕跡を得た。");
+      }else{
+        add("danger",3);
+        result="押し切れなかった。危険が増した。";
+      }
+    }else if(id==="avoid"){
+      add("danger",-2); add("clue",-1);
+      result="危険を避けて抜けた。戦利品は得なかった。";
+    }else if(id==="observe"){
+      add("clue",2); add("danger",1);
+      result="距離を取って観察した。痕跡を得たが、長居したぶん危険も少し増えた。";
+    }else if(id==="talk"){
+      add("human",2); add("clue",2); add("danger",-1);
+      result="話を聞いた。人の気配と新しい手掛かりが残った。";
+    }else if(id==="help"){
+      add("human",3); add("clue",1); add("danger",1);
+      if(roll<0.55)addLoot("小さなお礼");
+      result="手を貸した。時間はかかったが、人との縁が強くなった。";
+    }else if(id==="careful"){
+      add("danger",-2); add("clue",1);
+      result="慎重に進み、危険を抑えた。";
+    }else if(id==="inspect"){
+      add("clue",2); add("danger",1);
+      if(foundLoot.length && roll<0.75){
+        foundLoot.forEach(addLoot);
+        result="詳しく調べた。「"+foundLoot.join("・")+"」を見つけた。";
+      }else{
+        result="詳しく調べ、次につながる痕跡を得た。";
+      }
+    }else if(id==="force"){
+      if(roll<0.5){
+        add("danger",-1); add("clue",1);
+        result="強引に突破した。今回は通れた。";
+      }else{
+        add("danger",3);
+        result="強行した結果、危険が増した。";
+      }
+    }else if(id==="take"){
+      foundLoot.forEach(addLoot);
+      add("resource",1);
+      result=foundLoot.length?"「"+foundLoot.join("・")+"」を持ち帰ることにした。":"使えそうなものを確保した。";
+    }else if(id==="rest"){
+      add("danger",-2); add("shelter",2);
+      result="少し休んだ。周囲の危険が薄れた。";
+    }else{
+      add("danger",-1);
+      result="深入りせず先へ進むことにした。";
+    }
+
+    log.push('<b>'+turn+'回目の対処</b>　'+label+'<br>'+result);
+    el.actionGrid.querySelectorAll("button").forEach(b=>b.disabled=true);
+    el.actionResult.textContent=result;
+    el.actionResult.classList.add("show");
+    el.drawBtn.disabled=false;
+    el.drawBtn.textContent="次の一区画を引く";
+    renderState();
+    renderLog();
+  }
+
   function renderState(){
     const entries=Object.entries(state).filter(([,v])=>v>0).sort((a,b)=>b[1]-a[1]).slice(0,14);
     el.state.innerHTML=entries.length
@@ -277,17 +442,20 @@ h1{font-size:21px;margin:3px 0 4px;letter-spacing:.03em}
   }
 
   function explore(){
+    if(awaitingAction)return;
     turn++;
     decay();
 
     const loc=drawSection(locationCards);
     const disc=drawSection(discoveryCards);
     const evt=drawSection(eventCards);
+    currentDraw=[loc,disc,evt];
+    awaitingAction=true;
 
     el.cards.innerHTML=cardHTML(loc)+cardHTML(disc)+cardHTML(evt);
 
-    const chain=[loc,disc,evt].map(x=>x.card.name).join(" → ");
-    const cause=[loc,disc,evt]
+    const chain=currentDraw.map(x=>x.card.name).join(" → ");
+    const cause=currentDraw
       .flatMap(x=>x.reasons)
       .filter((v,i,a)=>a.indexOf(v)===i)
       .slice(0,4);
@@ -295,20 +463,28 @@ h1{font-size:21px;margin:3px 0 4px;letter-spacing:.03em}
     log.push('<b>'+turn+'回目</b>　'+chain+
       (cause.length?'<br><span style="color:#8b5d3b">'+cause.join(" / ")+'</span>':""));
 
+    el.drawBtn.disabled=true;
+    el.drawBtn.textContent="対処を選んでください";
+    showActions();
     renderState();
     renderLog();
   }
 
   function reset(){
     for(const k of Object.keys(state)) delete state[k];
-    loot.length=0;log.length=0;turn=0;
-    el.cards.innerHTML='<div class="card placeholder">「探索する」で3枚引く</div>';
+    loot.length=0;log.length=0;turn=0;currentDraw=null;awaitingAction=false;
+    el.cards.innerHTML='<div class="card placeholder">「最初の一区画を引く」で3枚出る</div>';
+    el.actionBox.classList.remove("show");
+    el.actionGrid.innerHTML="";
+    el.actionResult.classList.remove("show");
+    el.drawBtn.disabled=false;
+    el.drawBtn.textContent="最初の一区画を引く";
     renderState();renderLog();
   }
 
   document.getElementById("drawBtn").addEventListener("click",explore);
   document.getElementById("resetBtn").addEventListener("click",reset);
-  document.getElementById("backBtn").addEventListener("click",()=>location.href='chill_index.html?_nc='+Date.now());
+  document.getElementById("backBtn").addEventListener("click",()=>location.href='/iroiro/chill/chill_index.html?_nc='+Date.now());
 
   const u=new URL(location.href);
   if(!u.searchParams.has("_nc")){
