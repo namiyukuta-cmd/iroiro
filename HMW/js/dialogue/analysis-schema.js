@@ -26,6 +26,8 @@
       "ask_permission_enter","ask_permission_wait","ask_return_time","confirm_arrival",
       "confirm_departure","express_disappointment","express_hope","express_pride",
       "ask_possession","ask_capability","ask_availability","ask_quantity",
+      "ask_identity","ask_origin","ask_destination","ask_opinion","ask_price",
+      "ask_work_location","ask_job_role","ask_knowledge","ask_fact",
       "refuse","agree","report_condition","report_event","state_plan","state_preference"
     ],
 
@@ -51,7 +53,9 @@
 
     questionKinds: [
       "generic","where","when","reason","possession","capability","availability",
-      "plan","preference","quantity","health","sleep","food","home","work","money"
+      "plan","preference","quantity","health","sleep","food","home","work","money",
+      "identity","origin","destination","opinion","price","work_location","job_role",
+      "knowledge","fact"
     ],
 
     questionShape: {
