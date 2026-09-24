@@ -49,6 +49,19 @@
 
     if (w.questionKindAny && !questions.some(q => arr(w.questionKindAny).includes(q?.kind))) return false;
 
+    if (w.claimConceptAny) {
+      const claims = arr(a.claims);
+      if (!claims.some(claim => arr(w.claimConceptAny).includes(claim?.concept))) return false;
+    }
+    if (w.claimTypeAny) {
+      const claims = arr(a.claims);
+      if (!claims.some(claim => arr(w.claimTypeAny).includes(claim?.type))) return false;
+    }
+    if (w.claimPolarityEq !== undefined) {
+      const claims = arr(a.claims);
+      if (!claims.some(claim => claim?.polarity === w.claimPolarityEq)) return false;
+    }
+
     for (const [key,min] of Object.entries(w.emotionMin || {})) {
       if (num(a.emotions?.[key]) < Number(min)) return false;
     }
