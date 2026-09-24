@@ -126,10 +126,12 @@
       if (!comparePath(ctx.relationship || {}, path, expected)) return false;
     }
     for (const [key,min] of Object.entries(w.relationshipMin || {})) {
-      if (num(ctx.relationship?.[key]) < Number(min)) return false;
+      const value = ctx.relationship?.[key];
+      if (!Number.isFinite(Number(value)) || Number(value) < Number(min)) return false;
     }
     for (const [key,max] of Object.entries(w.relationshipMax || {})) {
-      if (num(ctx.relationship?.[key]) > Number(max)) return false;
+      const value = ctx.relationship?.[key];
+      if (!Number.isFinite(Number(value)) || Number(value) > Number(max)) return false;
     }
     for (const [path,expected] of Object.entries(w.relationshipFlagEq || {})) {
       if (!comparePath(ctx.relationship?.flags || {}, path, expected)) return false;
