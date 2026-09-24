@@ -706,6 +706,127 @@
       expectedMeaningIds: ["STATE_FEELINGS_TOWARD_HEROINE"],
       forbiddenMeaningIds: ["ASK_FEELINGS","ANSWER_UNKNOWN"],
       expectedEnglishIncludes: ["attracted to you"]
+    },
+    {
+      id: "permission_action_001",
+      sourceJa: "キスしていい？",
+      analysis: {
+        analysisVersion: 2,
+        rawText: "キスしていい？",
+        emotions: {},
+        intents: ["ask_permission_action"],
+        focusConcepts: [],
+        lexicalTargets: ["kiss"],
+        boundaries: [],
+        claims: [],
+        questions: [
+          {
+            kind: "permission",
+            concept: "permission",
+            target: "npc",
+            action: "kiss",
+            text: "キスしていい？"
+          }
+        ]
+      },
+      characterFacts: {},
+      characterPolicy: {
+        permissions: { kiss: true }
+      },
+      psychology: {},
+      expectedMeaningIds: ["GRANT_PERMISSION"],
+      forbiddenMeaningIds: ["DENY_PERMISSION","ANSWER_UNKNOWN"],
+      expectedEnglishIncludes: ["yes"]
+    },
+    {
+      id: "request_action_001",
+      sourceJa: "ここで待ってて",
+      analysis: {
+        analysisVersion: 2,
+        rawText: "ここで待ってて",
+        emotions: {},
+        intents: ["request_action"],
+        focusConcepts: ["waiting"],
+        lexicalTargets: ["wait"],
+        boundaries: [],
+        claims: [],
+        questions: [
+          {
+            kind: "request_action",
+            concept: "waiting",
+            target: "here",
+            action: "wait",
+            text: "ここで待ってて"
+          }
+        ]
+      },
+      characterFacts: {},
+      characterPolicy: {
+        requestResponses: { wait: false }
+      },
+      psychology: {},
+      expectedMeaningIds: ["DECLINE_ACTION_REQUEST"],
+      forbiddenMeaningIds: ["ACCEPT_ACTION_REQUEST","ANSWER_UNKNOWN"]
+    },
+    {
+      id: "invitation_action_001",
+      sourceJa: "一緒に食べる？",
+      analysis: {
+        analysisVersion: 2,
+        rawText: "一緒に食べる？",
+        emotions: {},
+        intents: ["invite_action"],
+        focusConcepts: ["food"],
+        lexicalTargets: ["eat"],
+        boundaries: [],
+        claims: [],
+        questions: [
+          {
+            kind: "invitation",
+            concept: "food",
+            target: "together",
+            action: "eat",
+            text: "一緒に食べる？"
+          }
+        ]
+      },
+      characterFacts: {},
+      characterPolicy: {
+        invitationResponses: { eat: true }
+      },
+      psychology: {},
+      expectedMeaningIds: ["ACCEPT_INVITATION"],
+      forbiddenMeaningIds: ["DECLINE_INVITATION","ANSWER_UNKNOWN"]
+    },
+    {
+      id: "suggestion_action_001",
+      sourceJa: "ここで待とう",
+      analysis: {
+        analysisVersion: 2,
+        rawText: "ここで待とう",
+        emotions: {},
+        intents: ["suggest_action"],
+        focusConcepts: ["waiting"],
+        lexicalTargets: ["wait"],
+        boundaries: [],
+        claims: [],
+        questions: [
+          {
+            kind: "suggestion",
+            concept: "waiting",
+            target: "here",
+            action: "wait",
+            text: "ここで待とう"
+          }
+        ]
+      },
+      characterFacts: {},
+      characterPolicy: {
+        suggestionResponses: { wait: true }
+      },
+      psychology: {},
+      expectedMeaningIds: ["ACCEPT_SUGGESTION"],
+      forbiddenMeaningIds: ["DECLINE_SUGGESTION","ANSWER_UNKNOWN"]
     }
   ];
 
