@@ -7,8 +7,8 @@
   <meta http-equiv="Pragma" content="no-cache" />
   <meta http-equiv="Expires" content="0" />
   <title>HMW</title>
-  <!-- HMW build: dialogue-test-entry-2 -->
-  <link rel="stylesheet" href="css/style.css?v=20260925-travel-destinations-1" />
+  <!-- HMW build: dialogue-json-in-game-1 -->
+  <link rel="stylesheet" href="css/style.css?v=20260925-dialogue-json-1" />
 </head>
 <body>
   <section class="start-screen" id="start-screen" aria-label="開始メニュー">
@@ -55,7 +55,10 @@
 
     <main class="main">
       <section class="scene">
-        <div class="housing-goal-bar" id="housing-goal"></div>
+        <div class="housing-goal-bar" id="housing-goal">
+          <span class="housing-goal-text" id="housing-goal-text"></span>
+          <button class="dialogue-json-inline" id="dialogue-json" type="button">会話JSON</button>
+        </div>
         <button class="location-name-btn" id="location-name" type="button">駅前</button>
         <div class="location-points" id="location-points" aria-label="この場所で調べられるもの"></div>
         <section class="city-scene hidden" id="city-scene"></section>
@@ -103,6 +106,7 @@
   <script src="js/characters/hmw_character_mark_behavior.js?v=20260923-1944"></script>
   <script src="js/characters/hmw_character_leon.js?v=20260923-1944"></script>
   <script src="js/characters/hmw_character_leon_behavior.js?v=20260923-1944"></script>
+  <script src="js/dialogue/dialogue-analysis-paste-runner.js?v=20260925-game-1"></script>
   <script src="js/hmw_psychology_events.js?v=20260923-2010"></script>
   <script src="js/state.js?v=20260925-all-destinations-1"></script>
   <script src="js/housing.js?v=20260923-2230"></script>
@@ -113,7 +117,7 @@
   <script src="js/actions-life.js?v=20260922-2205"></script>
   <script src="js/actions-people.js?v=20260923-1944"></script>
   <script src="js/scenes.js?v=20260922-1148"></script>
-  <script src="js/ui.js?v=20260925-layout-repair-1"></script>
+  <script src="js/ui.js?v=20260925-dialogue-json-1"></script>
   <script src="js/display-names.js?v=20260909-2130"></script>
 </body>
 </html>
