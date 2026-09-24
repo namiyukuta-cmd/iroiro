@@ -6,9 +6,10 @@
   {
     "lemma": "be",
     "pos": "verb",
-    "past": "were",
+    "past": "was",
     "pastParticiple": "been",
-    "ing": "being"
+    "ing": "being",
+    "pastAlt": "were"
   },
   {
     "lemma": "have",
