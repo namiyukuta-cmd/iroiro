@@ -37,14 +37,31 @@
       ? plan.lexicalTargets
       : expandedLexicalTargets;
 
-    const responseMeaningIds =
+    const prioritizedMeaningIds =
       typeof HMW.Dialogue.prioritizeResponseMeanings === "function"
         ? HMW.Dialogue.prioritizeResponseMeanings(plan.meaningIds || [], {
-            maxMeanings: characterPolicy.maxResponseMeanings
+            maxMeanings: null
           })
         : (plan.meaningIds || []);
 
+    const responseMeaningIds =
+      typeof HMW.Dialogue.selectResponseMeanings === "function"
+        ? HMW.Dialogue.selectResponseMeanings(prioritizedMeaningIds, {
+            maxMeanings: characterPolicy.maxResponseMeanings ?? 5,
+            boundaryActive: !!plan.boundaryActive
+          })
+        : prioritizedMeaningIds;
+
+    const resolvedFactSlots =
+      typeof HMW.Dialogue.resolveFactSlots === "function"
+        ? HMW.Dialogue.resolveFactSlots({
+            analysis: normalized,
+            characterFacts
+          })
+        : {};
+
     const mergedSlotOverridesByMeaning = {
+      ...resolvedFactSlots,
       ...(plan.slotOverridesByMeaning || {}),
       ...(slotOverridesByMeaning || {})
     };
@@ -66,7 +83,8 @@
       analysis: normalized,
       plan: {
         ...plan,
-        prioritizedMeaningIds: responseMeaningIds
+        prioritizedMeaningIds,
+        selectedMeaningIds: responseMeaningIds
       },
       composed,
       english: composed.english,
