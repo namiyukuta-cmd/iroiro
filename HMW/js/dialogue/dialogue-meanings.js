@@ -656,6 +656,22 @@
     DENY_FACT: {
       category: "answer",
       meaningJa: "尋ねられた事実が正しくないと答える"
+    },
+    STATE_DESIRE: {
+      category: "answer",
+      meaningJa: "自分が今ほしいものや望んでいることを答える"
+    },
+    STATE_NEED: {
+      category: "answer",
+      meaningJa: "自分が今必要としているものを答える"
+    },
+    STATE_CHOICE: {
+      category: "answer",
+      meaningJa: "自分が選んだものを答える"
+    },
+    STATE_EVENT: {
+      category: "answer",
+      meaningJa: "自分に起きた出来事を答える"
     }
   };
 })();
