@@ -348,6 +348,90 @@
     ASK_TO_SIT_TOGETHER: {
       category: "closeness",
       meaningJa: "一緒に座ってよいか尋ねる"
+    },
+    GREET: {
+      category: "social",
+      meaningJa: "相手へ挨拶する"
+    },
+    RETURN_GREETING: {
+      category: "social",
+      meaningJa: "相手の挨拶へ返す"
+    },
+    SAY_GOODBYE: {
+      category: "parting",
+      meaningJa: "別れの挨拶をする"
+    },
+    ASK_REASON: {
+      category: "clarity",
+      meaningJa: "理由を尋ねる"
+    },
+    ASK_WHERE: {
+      category: "clarity",
+      meaningJa: "場所を尋ねる"
+    },
+    ASK_WHEN: {
+      category: "clarity",
+      meaningJa: "時期や時刻を尋ねる"
+    },
+    ASK_ABOUT_HEALTH: {
+      category: "care",
+      meaningJa: "体調について尋ねる"
+    },
+    ASK_ABOUT_SLEEP: {
+      category: "care",
+      meaningJa: "睡眠について尋ねる"
+    },
+    ASK_ABOUT_FOOD: {
+      category: "care",
+      meaningJa: "食事を取ったか尋ねる"
+    },
+    ASK_ABOUT_HOME: {
+      category: "daily",
+      meaningJa: "帰宅や寝場所について尋ねる"
+    },
+    OFFER_REST: {
+      category: "care",
+      meaningJa: "休むことを提案する"
+    },
+    OFFER_WARMTH: {
+      category: "care",
+      meaningJa: "暖かい場所や暖を取ることを提案する"
+    },
+    OFFER_SHELTER: {
+      category: "care",
+      meaningJa: "雨風を避ける場所を提案する"
+    },
+    STATE_PLAN: {
+      category: "daily",
+      meaningJa: "自分のこれからの予定を伝える"
+    },
+    STATE_PREFERENCE: {
+      category: "daily",
+      meaningJa: "自分の好みや選好を伝える"
+    },
+    ACKNOWLEDGE_EVENT: {
+      category: "response",
+      meaningJa: "相手が話した出来事を受け止めたことを示す"
+    },
+    ASK_FOR_DETAILS: {
+      category: "clarity",
+      meaningJa: "出来事についてさらに詳しく尋ねる"
+    },
+    EXPRESS_SURPRISE: {
+      category: "emotion",
+      meaningJa: "驚きを伝える"
+    },
+    EXPRESS_SYMPATHY: {
+      category: "care",
+      meaningJa: "相手のつらい出来事に同情やいたわりを示す"
+    },
+    EXPRESS_APPROVAL: {
+      category: "response",
+      meaningJa: "相手の案や出来事へ肯定的な反応を示す"
+    },
+    EXPRESS_DISAPPROVAL: {
+      category: "response",
+      meaningJa: "相手の案や出来事へ否定的な反応を示す"
     }
   };
 })();
