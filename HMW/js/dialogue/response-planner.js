@@ -384,6 +384,7 @@
         setSlots("STATE_AVAILABLE_TIME", {
           SUBJECT: "I",
           BE: "am",
+          AVAILABILITY: "available",
           TIME: String(timeValue)
         });
         reasons.push("answer_time");
