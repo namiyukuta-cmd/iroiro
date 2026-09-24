@@ -16,6 +16,10 @@
       ? HMW.Dialogue.normalizeInputAnalysis(analysis || {})
       : (analysis || {});
 
+    const expandedLexicalTargets = HMW.Dialogue.expandLexicalTargets
+      ? HMW.Dialogue.expandLexicalTargets(normalized)
+      : (normalized.lexicalTargets || []);
+
     const plan = HMW.Dialogue.planResponse
       ? HMW.Dialogue.planResponse({
           analysis: normalized,
@@ -23,17 +27,27 @@
           characterPolicy,
           psychology
         })
-      : { meaningIds: [], lexicalTargets: [], reasons: ["NO_RESPONSE_PLANNER"] };
+      : {
+          meaningIds: [],
+          lexicalTargets: expandedLexicalTargets,
+          reasons: ["NO_RESPONSE_PLANNER"]
+        };
+
+    const lexicalTargets = plan.lexicalTargets?.length
+      ? plan.lexicalTargets
+      : expandedLexicalTargets;
 
     const composed = HMW.Dialogue.composeMeanings
       ? HMW.Dialogue.composeMeanings(plan.meaningIds || [], {
           variantSeed,
-          slotOverridesByMeaning
+          slotOverridesByMeaning,
+          lexicalTargets
         })
-      : { english: "", results: [], missingMeaningIds: plan.meaningIds || [] };
+      : { english:"", results:[], missingMeaningIds:plan.meaningIds || [] };
 
-    const matchedLexicalTargets = (plan.lexicalTargets || []).filter(word =>
-      composed.english.toLowerCase().includes(String(word).toLowerCase())
+    const lowerEnglish = composed.english.toLowerCase();
+    const matchedLexicalTargets = lexicalTargets.filter(word =>
+      lowerEnglish.includes(String(word).toLowerCase())
     );
 
     return {
@@ -41,9 +55,9 @@
       plan,
       composed,
       english: composed.english,
-      lexicalTargets: plan.lexicalTargets || [],
+      lexicalTargets,
       matchedLexicalTargets,
-      unmatchedLexicalTargets: (plan.lexicalTargets || []).filter(
+      unmatchedLexicalTargets: lexicalTargets.filter(
         word => !matchedLexicalTargets.includes(word)
       ),
       aiFinalRole: {
@@ -57,7 +71,9 @@
           "change rejection into affection",
           "reverse negation",
           "invent new protagonist actions, consent, thoughts, or feelings",
-          "replace JS-decided facts with the AI's own interpretation"
+          "replace JS-decided facts with the AI's own interpretation",
+          "remove a JS-selected boundary",
+          "invent a new promise or relationship fact"
         ]
       }
     };
