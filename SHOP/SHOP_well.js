@@ -120,6 +120,7 @@
   function open(state,onChange){
     removePanel();
     if(window.SHOP_STALL && window.SHOP_STALL.close) window.SHOP_STALL.close();
+    if(window.SHOP_LIFE && window.SHOP_LIFE.close) window.SHOP_LIFE.close();
 
     const host=document.querySelector('.town-panel');
     if(!host) return;
