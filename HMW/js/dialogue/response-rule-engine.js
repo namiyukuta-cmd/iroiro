@@ -290,11 +290,15 @@
       if (count > Number(max)) return false;
     }
     for (const [key,min] of Object.entries(w.psychologyMin || {})) {
-      if (num(ctx.psychology?.[key]) < Number(min)) return false;
+      const value = ctx.psychology?.[key];
+      if (!Number.isFinite(Number(value)) || Number(value) < Number(min)) return false;
     }
     for (const [key,max] of Object.entries(w.psychologyMax || {})) {
-      if (num(ctx.psychology?.[key]) > Number(max)) return false;
+      const value = ctx.psychology?.[key];
+      if (!Number.isFinite(Number(value)) || Number(value) > Number(max)) return false;
     }
+    if (w.psychologyPresent && !arr(w.psychologyPresent).every(path => hasValueAtPath(ctx.psychology || {}, path))) return false;
+    if (w.psychologyAbsent && !arr(w.psychologyAbsent).every(path => !hasValueAtPath(ctx.psychology || {}, path))) return false;
 
     if (typeof rule.test === "function" && !rule.test(ctx)) return false;
     return true;
