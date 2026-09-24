@@ -881,6 +881,26 @@
       reasons.push("answer_suggestion");
     }
 
+    const rulePlan =
+      typeof HMW.Dialogue.evaluateResponseRules === "function"
+        ? HMW.Dialogue.evaluateResponseRules({
+            analysis: a,
+            characterFacts,
+            characterPolicy,
+            psychology
+          })
+        : null;
+
+    if (rulePlan) {
+      for (const id of rulePlan.meaningIds || []) add(meaningIds, id);
+      for (const reason of rulePlan.reasons || []) {
+        if (reason && !reasons.includes(reason)) reasons.push(reason);
+      }
+      for (const [id, slots] of Object.entries(rulePlan.slotOverridesByMeaning || {})) {
+        setSlots(id, slots);
+      }
+    }
+
     if (meaningIds.length === 0 && has(a.intents, "ask_question")) {
       add(meaningIds, "ANSWER_UNKNOWN");
       reasons.push("generic_question_fallback_unknown");
@@ -900,6 +920,7 @@
       boundaryActive: distanceBoundary || touchBoundary,
       slotOverridesByMeaning,
       claimInterpretation: claimInfo,
+      matchedResponseRuleIds: rulePlan?.matchedRuleIds || [],
       analysis: a
     };
   };
