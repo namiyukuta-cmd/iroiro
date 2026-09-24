@@ -8,6 +8,30 @@
   const arr = value => Array.isArray(value) ? value : [];
   const normalize = value => String(value || "").replace(/\s+/g, " ").trim();
 
+  const CATEGORY_TAGS = {
+    affection:["romance","relationship","attachment","intimacy-safe","emotion"],
+    trust:["relationship","reasoning","communication"],
+    care:["care","health","social","relationship"],
+    emotion:["emotion","expression","relationship"],
+    positive:["emotion","expression","social"],
+    condition:["health","daily"],
+    request:["conversation","communication","interaction"],
+    closeness:["relationship","attachment","social"],
+    clarity:["conversation","reasoning","communication"],
+    daily:["daily","practical","home","work"],
+    environment:["weather","nature","outdoors"],
+    parting:["movement","relationship","social"],
+    contact:["communication","social","technology"],
+    movement:["movement","travel"],
+    answer:["conversation","reasoning","daily"],
+    response:["conversation","communication","social"],
+    boundary:["communication","conflict","relationship"],
+    physical:["interaction","intimacy-safe","relationship"],
+    repair:["repair","conflict","relationship","communication"],
+    commitment:["relationship","attachment","trust"],
+    social:["social","conversation","communication"]
+  };
+
   const patternText = pattern =>
     normalize(arr(pattern?.tokens).join(" ")).toLowerCase();
 
@@ -142,13 +166,20 @@
     return list[Math.abs(Number(seed) || 0) % list.length];
   };
 
-  const chooseLexeme = (items, pos, lexicalTargets = [], seed = 0) => {
+  const chooseLexeme = (items, pos, lexicalTargets = [], seed = 0, semanticTags = []) => {
     const source = [...new Set(arr(items).map(x => String(x || "").toLowerCase()).filter(Boolean))];
-    if (!source.length) return "";
+    const requested = arr(lexicalTargets).map(x => String(x || "").toLowerCase()).filter(Boolean);
 
-    const requested = arr(lexicalTargets).map(x => String(x || "").toLowerCase());
+    for (const word of requested) {
+      const entry = D.Vocabulary?.get?.(word, pos);
+      if (!entry) continue;
+      const tags = arr(entry.tags);
+      if (!semanticTags.length || semanticTags.some(tag => tags.includes(tag))) return entry.lemma;
+    }
+
     const target = source.find(word => requested.includes(word) && D.Vocabulary?.has?.(word, pos));
     if (target) return target;
+    if (!source.length) return "";
 
     const existing = source.filter(word => D.Vocabulary?.has?.(word, pos));
     return choose(existing.length ? existing : source, seed);
@@ -208,6 +239,8 @@
     const candidates = [...specCandidates, ...mappedCandidates];
     if (!candidates.length) return [];
 
+    const semanticCategory = spec?.category || D.MEANINGS?.[id]?.category || "";
+    const semanticTags = CATEGORY_TAGS[String(semanticCategory)] || [];
     const routes = [];
 
     candidates.forEach((candidate, candidateIndex) => {
@@ -218,13 +251,15 @@
         candidate.verbs,
         "verb",
         lexicalTargets,
-        variantSeed + candidateIndex
+        variantSeed + candidateIndex,
+        semanticTags
       );
       const adjective = chooseLexeme(
         candidate.adjectives,
         "adjective",
         lexicalTargets,
-        variantSeed + candidateIndex
+        variantSeed + candidateIndex,
+        semanticTags
       );
 
       const subject = candidate.subject || candidate.slots?.SUBJECT || "I";
@@ -257,6 +292,7 @@
             adjective,
             ...arr(lexicalTargets)
           ].filter(Boolean),
+          vocabularyTags: semanticTags,
           slotOverrides: {
             ...baseSlots,
             ...(slotOverrides || {})
