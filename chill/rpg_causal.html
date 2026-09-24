@@ -26,7 +26,12 @@ body{min-height:100dvh}
 .back{
   border:1px solid #aaa;background:#fffdf8;border-radius:10px;padding:8px 10px;font-size:12px;font-weight:700
 }
-.turn{font-size:12px;color:#665f54}
+.top-right{display:flex;align-items:center;gap:6px}
+.turn{font-size:12px;color:#665f54;white-space:nowrap}
+.help-btn{
+  width:32px;height:32px;border:1px solid #aaa;border-radius:10px;background:#fffdf8;
+  font-size:14px;font-weight:900;padding:0
+}
 h1{font-size:21px;margin:3px 0 4px;letter-spacing:.03em}
 .sub{font-size:12px;color:#736b60;margin:0 0 12px;line-height:1.55}
 .paper{
@@ -36,27 +41,52 @@ h1{font-size:21px;margin:3px 0 4px;letter-spacing:.03em}
 .section-title{font-size:11px;font-weight:800;color:#766c60;letter-spacing:.08em;margin-bottom:8px}
 .cards{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}
 .card{
-  position:relative;overflow:hidden;background:#fff;border:1px solid #a79e91;border-radius:12px;padding:7px 7px 8px;
-  min-height:142px;
+  min-height:52px;border:1px solid #b9b0a4;border-radius:10px;background:#fff;
+  padding:6px 5px;text-align:left;overflow:hidden
 }
-.card::after{
-  content:"";position:absolute;right:-16px;bottom:-20px;width:52px;height:52px;border:1px solid #e2ddd4;
-  border-radius:50%;transform:rotate(-12deg)
+.card .kind{font-size:8px;font-weight:900;color:#7d7468;margin-bottom:3px}
+.card .name{font-size:11px;font-weight:900;line-height:1.25;white-space:normal}
+.card:active{background:#f3eee6}
+.placeholder{grid-column:1/-1;color:#aaa;font-size:12px;display:grid;place-items:center;min-height:52px}
+
+.detail-layer{
+  position:fixed;inset:0;z-index:80;display:none;align-items:center;justify-content:center;
+  padding:18px;background:rgba(35,31,27,.42);backdrop-filter:blur(2px)
 }
-.kind{font-size:9px;font-weight:900;color:#7d7468;margin-bottom:4px}
-.name{font-size:13px;font-weight:900;margin-bottom:5px;line-height:1.25}
-.desc{font-size:10px;line-height:1.45;color:#4d473f;min-height:52px}
-.tags{display:flex;flex-wrap:wrap;gap:3px;margin-top:7px}
+.detail-layer.show{display:flex}
+.detail-card{
+  width:min(92vw,390px);background:#fffdf8;border:1px solid #9f9588;border-radius:18px;
+  padding:18px;box-shadow:0 12px 40px rgba(0,0,0,.22)
+}
+.detail-kind{font-size:11px;font-weight:900;color:#7d7468;margin-bottom:6px}
+.detail-name{font-size:24px;font-weight:900;line-height:1.25;margin-bottom:12px}
+.detail-desc{font-size:15px;line-height:1.65;color:#3f3932;margin-bottom:12px}
+.detail-tags{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:10px}
 .tag,.state-chip{
   display:inline-flex;align-items:center;border:1px solid #d5cec4;border-radius:999px;background:#faf8f3;
   padding:2px 6px;font-size:9px;line-height:1.2
 }
-.reason{margin-top:7px;font-size:8px;line-height:1.4;color:#8b5d3b}
-.placeholder{color:#aaa;font-size:13px;display:grid;place-items:center;min-height:70px}
+.detail-reason{font-size:10px;line-height:1.5;color:#8b5d3b}
+.detail-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:16px}
+.detail-btn{
+  min-width:84px;min-height:42px;border:1px solid #9e9589;border-radius:11px;background:#fff;
+  font-size:12px;font-weight:900
+}
+.detail-btn.primary-mini{background:#2c2924;color:#fff;border-color:#2c2924}
+
+.help-layer{
+  position:fixed;inset:0;z-index:90;display:none;align-items:center;justify-content:center;
+  padding:18px;background:rgba(35,31,27,.42);backdrop-filter:blur(2px)
+}
+.help-layer.show{display:flex}
+.help-card{
+  width:min(92vw,380px);background:#fffdf8;border:1px solid #9f9588;border-radius:18px;
+  padding:18px;box-shadow:0 12px 40px rgba(0,0,0,.22)
+}
+.help-card h2{font-size:17px;margin:0 0 10px}
+.help-card p{font-size:12px;line-height:1.65;margin:7px 0;color:#4f493f}
 .action-box{display:none}
 .action-box.show{display:block}
-.action-title{font-size:13px;font-weight:900;margin-bottom:7px}
-.action-desc{font-size:11px;color:#756d62;line-height:1.45;margin-bottom:9px}
 .action-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:7px}
 .action-btn{
   min-height:48px;border:1px solid #9e9589;border-radius:11px;background:#fff;font-size:12px;font-weight:850;
@@ -88,9 +118,6 @@ h1{font-size:21px;margin:3px 0 4px;letter-spacing:.03em}
   min-width:72px;border:1px solid #aaa;border-radius:13px;background:#fffdf8;font-size:12px;font-weight:800
 }
 .auto-toggle.on{background:#2c2924;color:#fff;border-color:#2c2924}
-.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:9px}
-.stat{background:#fffdf8;border:1px solid #d5cec4;border-radius:10px;padding:7px;text-align:center}
-.stat b{display:block;font-size:15px}.stat span{font-size:9px;color:#7a7267}
 .flash{animation:flash .24s ease}
 @keyframes flash{0%{transform:translateY(4px);opacity:.45}100%{transform:none;opacity:1}}
 </style>
@@ -102,26 +129,21 @@ h1{font-size:21px;margin:3px 0 4px;letter-spacing:.03em}
       <button class="back" id="backBtn">← 戻る</button>
       <div class="top-title">因果カードRPG</div>
     </div>
-    <div class="turn">探索 <b id="turnNo">0</b> 回</div>
-  </div>
-
-  <div class="stats">
-    <div class="stat"><b id="dangerStat">0</b><span>危険</span></div>
-    <div class="stat"><b id="clueStat">0</b><span>痕跡</span></div>
-    <div class="stat"><b id="lootStat">0</b><span>持ち帰り</span></div>
+    <div class="top-right">
+      <div class="turn">探索 <b id="turnNo">0</b> 回</div>
+      <button class="help-btn" id="helpBtn" aria-label="ヘルプ">？</button>
+    </div>
   </div>
 
   <section class="paper">
     <div class="section-title">今回の一区画</div>
     <div id="cards" class="cards">
-      <div class="card placeholder">「探索する」で3枚引く</div>
+      <div class="card placeholder">最初の一区画を引く</div>
     </div>
   </section>
 
   <section class="paper action-box" id="actionBox">
     <div class="section-title">どうする？</div>
-    <div class="action-title" id="actionTitle">対処を選ぶ</div>
-    <div class="action-desc" id="actionDesc">3枚の組み合わせを見て行動を選ぶ。</div>
     <div class="action-grid" id="actionGrid"></div>
     <div class="action-result" id="actionResult"></div>
   </section>
@@ -141,6 +163,30 @@ h1{font-size:21px;margin:3px 0 4px;letter-spacing:.03em}
     <div id="log" class="log"><div class="empty">探索すると、なぜそのカードが出たかを記録します。</div></div>
   </section>
 </main>
+
+<div class="detail-layer" id="detailLayer" aria-hidden="true">
+  <div class="detail-card">
+    <div class="detail-kind" id="detailKind"></div>
+    <div class="detail-name" id="detailName"></div>
+    <div class="detail-desc" id="detailDesc"></div>
+    <div class="detail-tags" id="detailTags"></div>
+    <div class="detail-reason" id="detailReason"></div>
+    <div class="detail-actions">
+      <button class="detail-btn" id="detailCloseBtn">閉じる</button>
+      <button class="detail-btn primary-mini" id="detailNextBtn">次へ</button>
+    </div>
+  </div>
+</div>
+
+<div class="help-layer" id="helpLayer" aria-hidden="true">
+  <div class="help-card">
+    <h2>ヘルプ</h2>
+    <p>場所・発見・出来事の3枚が自動で出ます。最初は1枚ずつ大きく表示され、あとから上の小さなカードを押せば見直せます。</p>
+    <p><b>オート ON</b>では、「どうする？」の選択だけを現在の状況から自動で決めます。オート OFFなら自分で選びます。</p>
+    <p>過去のカードや選択結果は内部状態に残り、次に出るカードの確率へ影響します。</p>
+    <div class="detail-actions"><button class="detail-btn primary-mini" id="helpCloseBtn">閉じる</button></div>
+  </div>
+</div>
 
 <div class="controls">
   <button class="primary" id="drawBtn">最初の一区画を引く</button>
@@ -203,6 +249,8 @@ h1{font-size:21px;margin:3px 0 4px;letter-spacing:.03em}
   let awaitingAction=false;
   let autoMode=false;
   let autoTimer=null;
+  let detailIndex=0;
+  let detailSequence=false;
 
   const el={
     cards:document.getElementById("cards"),
@@ -210,16 +258,20 @@ h1{font-size:21px;margin:3px 0 4px;letter-spacing:.03em}
     loot:document.getElementById("lootRow"),
     log:document.getElementById("log"),
     turn:document.getElementById("turnNo"),
-    danger:document.getElementById("dangerStat"),
-    clue:document.getElementById("clueStat"),
-    lootStat:document.getElementById("lootStat"),
     actionBox:document.getElementById("actionBox"),
-    actionTitle:document.getElementById("actionTitle"),
-    actionDesc:document.getElementById("actionDesc"),
     actionGrid:document.getElementById("actionGrid"),
     actionResult:document.getElementById("actionResult"),
     drawBtn:document.getElementById("drawBtn"),
-    autoBtn:document.getElementById("autoBtn")
+    autoBtn:document.getElementById("autoBtn"),
+    detailLayer:document.getElementById("detailLayer"),
+    detailKind:document.getElementById("detailKind"),
+    detailName:document.getElementById("detailName"),
+    detailDesc:document.getElementById("detailDesc"),
+    detailTags:document.getElementById("detailTags"),
+    detailReason:document.getElementById("detailReason"),
+    detailCloseBtn:document.getElementById("detailCloseBtn"),
+    detailNextBtn:document.getElementById("detailNextBtn"),
+    helpLayer:document.getElementById("helpLayer")
   };
 
   function value(k){return Math.max(0,Number(state[k]||0))}
@@ -281,18 +333,51 @@ h1{font-size:21px;margin:3px 0 4px;letter-spacing:.03em}
     return Number.isInteger(n)?String(n):Number(n).toFixed(1);
   }
 
-  function cardHTML(x){
+  function cardHTML(x,index){
     const c=x.card;
-    const why=x.reasons.length
-      ? "因果："+x.reasons.slice(0,3).join(" / ")
-      : "因果：基礎抽選";
-    return '<article class="card flash">'+
+    return '<button class="card flash" data-card-index="'+index+'">'+
       '<div class="kind">'+c.kind+'</div>'+
       '<div class="name">'+c.name+'</div>'+
-      '<div class="desc">'+c.desc+'</div>'+
-      '<div class="tags">'+c.tags.map(t=>'<span class="tag">'+(LABELS[t]||t)+'</span>').join("")+'</div>'+
-      '<div class="reason">'+why+'</div>'+
-    '</article>';
+    '</button>';
+  }
+
+  function detailWhy(x){
+    return x.reasons.length
+      ? "因果："+x.reasons.slice(0,3).join(" / ")
+      : "因果：基礎抽選";
+  }
+
+  function openDetail(index,sequence=false){
+    if(!currentDraw || !currentDraw[index])return;
+    detailIndex=index;
+    detailSequence=sequence;
+    const x=currentDraw[index];
+    const c=x.card;
+    el.detailKind.textContent=c.kind;
+    el.detailName.textContent=c.name;
+    el.detailDesc.textContent=c.desc;
+    el.detailTags.innerHTML=c.tags.map(t=>'<span class="tag">'+(LABELS[t]||t)+'</span>').join("");
+    el.detailReason.textContent=detailWhy(x);
+    el.detailNextBtn.style.display=detailSequence?"inline-flex":"none";
+    if(detailSequence){
+      el.detailNextBtn.textContent=detailIndex<currentDraw.length-1?"次へ":"決定";
+      el.detailCloseBtn.style.display="none";
+    }else{
+      el.detailCloseBtn.style.display="inline-flex";
+    }
+    el.detailLayer.classList.add("show");
+    el.detailLayer.setAttribute("aria-hidden","false");
+  }
+
+  function closeDetail(){
+    el.detailLayer.classList.remove("show");
+    el.detailLayer.setAttribute("aria-hidden","true");
+  }
+
+  function finishInitialDetails(){
+    detailSequence=false;
+    closeDetail();
+    showActions();
   }
 
   function hasTag(tag){
@@ -382,8 +467,6 @@ h1{font-size:21px;margin:3px 0 4px;letter-spacing:.03em}
     el.actionBox.classList.add("show");
     el.actionResult.classList.remove("show");
     el.actionResult.textContent="";
-    el.actionTitle.textContent="この一区画でどうする？";
-    el.actionDesc.textContent="行動の結果が世界状態に残り、次に出るカードへ影響する。";
     el.actionGrid.innerHTML=actions.map(a=>
       '<button class="action-btn" data-action="'+a.id+'">'+a.label+'</button>'
     ).join("");
@@ -392,7 +475,6 @@ h1{font-size:21px;margin:3px 0 4px;letter-spacing:.03em}
     });
 
     if(autoMode){
-      el.actionDesc.textContent="オートが状況を見て対処を選ぶ。手動に戻せば自分で選べる。";
       clearTimeout(autoTimer);
       autoTimer=setTimeout(runAutoAction,550);
     }
@@ -482,9 +564,6 @@ h1{font-size:21px;margin:3px 0 4px;letter-spacing:.03em}
       : '<span class="empty">まだ何もない</span>';
 
     el.turn.textContent=turn;
-    el.danger.textContent=Math.round(value("danger"));
-    el.clue.textContent=Math.round(value("clue"));
-    el.lootStat.textContent=loot.length;
   }
 
   function renderLog(){
@@ -504,7 +583,10 @@ h1{font-size:21px;margin:3px 0 4px;letter-spacing:.03em}
     currentDraw=[loc,disc,evt];
     awaitingAction=true;
 
-    el.cards.innerHTML=cardHTML(loc)+cardHTML(disc)+cardHTML(evt);
+    el.cards.innerHTML=currentDraw.map((x,i)=>cardHTML(x,i)).join("");
+    el.cards.querySelectorAll("[data-card-index]").forEach(btn=>{
+      btn.addEventListener("click",()=>openDetail(Number(btn.dataset.cardIndex),false));
+    });
 
     const chain=currentDraw.map(x=>x.card.name).join(" → ");
     const cause=currentDraw
@@ -515,19 +597,21 @@ h1{font-size:21px;margin:3px 0 4px;letter-spacing:.03em}
     log.push('<b>'+turn+'回目</b>　'+chain+
       (cause.length?'<br><span style="color:#8b5d3b">'+cause.join(" / ")+'</span>':""));
 
+    el.actionBox.classList.remove("show");
     el.drawBtn.disabled=true;
-    el.drawBtn.textContent="対処を選んでください";
-    showActions();
+    el.drawBtn.textContent="カード確認中";
     renderState();
     renderLog();
+    openDetail(0,true);
   }
 
   function reset(){
     clearTimeout(autoTimer);
     autoTimer=null;
     for(const k of Object.keys(state)) delete state[k];
-    loot.length=0;log.length=0;turn=0;currentDraw=null;awaitingAction=false;
-    el.cards.innerHTML='<div class="card placeholder">「最初の一区画を引く」で3枚出る</div>';
+    loot.length=0;log.length=0;turn=0;currentDraw=null;awaitingAction=false;detailIndex=0;detailSequence=false;
+    closeDetail();
+    el.cards.innerHTML='<div class="card placeholder">最初の一区画を引く</div>';
     el.actionBox.classList.remove("show");
     el.actionGrid.innerHTML="";
     el.actionResult.classList.remove("show");
@@ -541,18 +625,42 @@ h1{font-size:21px;margin:3px 0 4px;letter-spacing:.03em}
     el.autoBtn.textContent=autoMode?"オート ON":"オート OFF";
     el.autoBtn.classList.toggle("on",autoMode);
 
-    if(autoMode && awaitingAction){
-      el.actionDesc.textContent="オートが状況を見て対処を選ぶ。手動に戻せば自分で選べる。";
+    if(autoMode && awaitingAction && !detailSequence){
       clearTimeout(autoTimer);
       autoTimer=setTimeout(runAutoAction,350);
     }else if(!autoMode){
       clearTimeout(autoTimer);
       autoTimer=null;
-      if(awaitingAction){
-        el.actionDesc.textContent="行動の結果が世界状態に残り、次に出るカードへ影響する。";
-      }
     }
   }
+
+  el.detailNextBtn.addEventListener("click",()=>{
+    if(!detailSequence){closeDetail();return;}
+    if(detailIndex<currentDraw.length-1){
+      openDetail(detailIndex+1,true);
+    }else{
+      finishInitialDetails();
+    }
+  });
+  el.detailCloseBtn.addEventListener("click",closeDetail);
+  el.detailLayer.addEventListener("click",e=>{
+    if(e.target===el.detailLayer && !detailSequence)closeDetail();
+  });
+
+  document.getElementById("helpBtn").addEventListener("click",()=>{
+    el.helpLayer.classList.add("show");
+    el.helpLayer.setAttribute("aria-hidden","false");
+  });
+  document.getElementById("helpCloseBtn").addEventListener("click",()=>{
+    el.helpLayer.classList.remove("show");
+    el.helpLayer.setAttribute("aria-hidden","true");
+  });
+  el.helpLayer.addEventListener("click",e=>{
+    if(e.target===el.helpLayer){
+      el.helpLayer.classList.remove("show");
+      el.helpLayer.setAttribute("aria-hidden","true");
+    }
+  });
 
   document.getElementById("drawBtn").addEventListener("click",explore);
   document.getElementById("autoBtn").addEventListener("click",toggleAuto);
