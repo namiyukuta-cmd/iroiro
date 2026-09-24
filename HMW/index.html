@@ -7,7 +7,7 @@
   <meta http-equiv="Pragma" content="no-cache" />
   <meta http-equiv="Expires" content="0" />
   <title>HMW</title>
-  <link rel="stylesheet" href="css/style.css?v=20260924-start-menu" />
+  <link rel="stylesheet" href="css/style.css?v=20260924-icon-status" />
 </head>
 <body>
   <section class="start-screen" id="start-screen" aria-label="開始メニュー">
@@ -22,9 +22,15 @@
 
   <div class="app game-not-started" id="game-app">
     <div class="topbar">
-      <div class="status-box" id="day">DAY<b>1</b></div>
-      <div class="status-box" id="time">TIME<b>朝</b></div>
-      <div class="status-box" id="money">MONEY<b>0</b></div>
+      <div class="status-box icon-status day-status" id="day" aria-label="日数">
+        <span class="calendar-icon" aria-hidden="true"><b id="day-value">1</b></span>
+      </div>
+      <div class="status-box icon-status time-status" id="time" aria-label="時間帯">
+        <span class="alarm-icon" aria-hidden="true"><b id="time-value">朝</b></span>
+      </div>
+      <div class="status-box money-status" id="money" aria-label="所持金">
+        <span class="coin-icon" aria-hidden="true"></span><b id="money-value">0</b>
+      </div>
       <div class="weather-box" id="weather">☀️</div>
       <button class="menu-top-btn" id="nav-menu" aria-label="メニュー">…</button>
     </div>
@@ -50,7 +56,8 @@
       <section class="scene">
         <h1 id="location-name">駅前</h1>
         <p id="location-desc"></p>
-        <div class="message" id="last-message"></div>\n        <div class="housing-goal" id="housing-goal"></div>
+        <div class="message" id="last-message"></div>
+        <div class="housing-goal" id="housing-goal"></div>
         <section class="city-scene hidden" id="city-scene"></section>
       </section>
     </main>
@@ -80,7 +87,8 @@
   <script src="js/data.js?v=20260909-2245"></script>
   <script src="js/items.js?v=20260922-2115"></script>
   <script src="js/hmw_psychology_parameters.js?v=20260923-2010"></script>
-  <script src="js/hmw_ai_generation_guard.js?v=20260924-0225"></script>\n  <script src="js/hmw_romance_rules.js?v=20260923-2010"></script>
+  <script src="js/hmw_ai_generation_guard.js?v=20260924-0225"></script>
+  <script src="js/hmw_romance_rules.js?v=20260923-2010"></script>
   <script src="js/dialogue-loader.js?v=20260924-router-constraints"></script>
   <script src="js/characters/hmw_character_sam.js?v=20260923-1944"></script>
   <script src="js/characters/hmw_character_sam_behavior.js?v=20260923-1944"></script>
@@ -91,7 +99,8 @@
   <script src="js/characters/hmw_character_leon.js?v=20260923-1944"></script>
   <script src="js/characters/hmw_character_leon_behavior.js?v=20260923-1944"></script>
   <script src="js/hmw_psychology_events.js?v=20260923-2010"></script>
-  <script src="js/state.js?v=20260923-1944"></script>\n  <script src="js/housing.js?v=20260923-2230"></script>
+  <script src="js/state.js?v=20260923-1944"></script>
+  <script src="js/housing.js?v=20260923-2230"></script>
   <script src="js/jobs.js?v=20260923-2315"></script>
   <script src="js/save.js?v=20260922-1115"></script>
   <script src="js/core.js?v=20260923-1944"></script>
@@ -99,7 +108,7 @@
   <script src="js/actions-life.js?v=20260922-2205"></script>
   <script src="js/actions-people.js?v=20260923-1944"></script>
   <script src="js/scenes.js?v=20260922-1148"></script>
-  <script src="js/ui.js?v=20260924-start-menu"></script>
+  <script src="js/ui.js?v=20260924-icon-status"></script>
   <script src="js/display-names.js?v=20260909-2130"></script>
 </body>
 </html>
