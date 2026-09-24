@@ -177,7 +177,7 @@
       characterFacts: {},
       characterPolicy: {},
       psychology: {},
-      expectedMeaningIds: ["ASK_IF_OKAY","ASK_ABOUT_HEALTH"],
+      expectedMeaningIds: ["ASK_IF_OKAY"],
       forbiddenMeaningIds: []
     },
     {
@@ -237,6 +237,133 @@
       psychology: {},
       expectedMeaningIds: ["RESPECT_BOUNDARY","PROMISE_NOT_TOUCH"],
       forbiddenMeaningIds: ["ASK_PERMISSION_TOUCH"]
+    },
+    {
+      id: "answer_location_001",
+      sourceJa: "今どこにいるの？",
+      analysis: {
+        analysisVersion: 2,
+        rawText: "今どこにいるの？",
+        emotions: {},
+        intents: ["ask_where"],
+        focusConcepts: ["place"],
+        lexicalTargets: ["market"],
+        boundaries: [],
+        claims: [],
+        questions: [
+          {
+            kind: "where",
+            concept: "place",
+            target: "npc",
+            requestedField: "currentLocation",
+            text: "今どこにいるの？"
+          }
+        ]
+      },
+      characterFacts: {
+        currentLocation: "at the market"
+      },
+      characterPolicy: {},
+      psychology: {},
+      expectedMeaningIds: ["STATE_CURRENT_LOCATION"],
+      forbiddenMeaningIds: ["ASK_WHERE","ASK_FOR_ANSWER"],
+      expectedEnglishIncludes: ["market"]
+    },
+    {
+      id: "answer_possession_001",
+      sourceJa: "水持ってる？",
+      analysis: {
+        analysisVersion: 2,
+        rawText: "水持ってる？",
+        emotions: {},
+        intents: ["ask_possession"],
+        focusConcepts: ["water"],
+        lexicalTargets: ["water"],
+        boundaries: [],
+        claims: [],
+        questions: [
+          {
+            kind: "possession",
+            concept: "water",
+            target: "water",
+            requestedField: "possessions",
+            text: "水持ってる？"
+          }
+        ]
+      },
+      characterFacts: {
+        possessions: {
+          water: true
+        }
+      },
+      characterPolicy: {},
+      psychology: {},
+      expectedMeaningIds: ["CONFIRM_POSSESSION"],
+      forbiddenMeaningIds: ["ASK_FOR_ANSWER"],
+      expectedEnglishIncludes: ["water"]
+    },
+    {
+      id: "answer_capability_001",
+      sourceJa: "手伝える？",
+      analysis: {
+        analysisVersion: 2,
+        rawText: "手伝える？",
+        emotions: {},
+        intents: ["ask_capability"],
+        focusConcepts: [],
+        lexicalTargets: ["help"],
+        boundaries: [],
+        claims: [],
+        questions: [
+          {
+            kind: "capability",
+            concept: "help",
+            target: "help",
+            action: "help",
+            requestedField: "capabilities",
+            text: "手伝える？"
+          }
+        ]
+      },
+      characterFacts: {
+        capabilities: {
+          help: true
+        }
+      },
+      characterPolicy: {},
+      psychology: {},
+      expectedMeaningIds: ["CONFIRM_CAPABILITY"],
+      forbiddenMeaningIds: ["ASK_FOR_ANSWER"],
+      expectedEnglishIncludes: ["help"]
+    },
+    {
+      id: "answer_unknown_001",
+      sourceJa: "いつ戻るの？",
+      analysis: {
+        analysisVersion: 2,
+        rawText: "いつ戻るの？",
+        emotions: {},
+        intents: ["ask_return_time"],
+        focusConcepts: ["return","time"],
+        lexicalTargets: ["return"],
+        boundaries: [],
+        claims: [],
+        questions: [
+          {
+            kind: "when",
+            concept: "return",
+            target: "npc",
+            requestedField: "returnTime",
+            text: "いつ戻るの？"
+          }
+        ]
+      },
+      characterFacts: {},
+      characterPolicy: {},
+      psychology: {},
+      expectedMeaningIds: ["ANSWER_UNKNOWN"],
+      forbiddenMeaningIds: ["ASK_RETURN_TIME","ASK_FOR_ANSWER"],
+      expectedEnglishIncludes: ["know"]
     }
   ];
 
@@ -253,12 +380,20 @@
       const produced = result.plan?.meaningIds || [];
       const missingExpected = (test.expectedMeaningIds || []).filter(id => !produced.includes(id));
       const forbiddenProduced = (test.forbiddenMeaningIds || []).filter(id => produced.includes(id));
+      const englishLower = String(result.english || "").toLowerCase();
+      const missingEnglish = (test.expectedEnglishIncludes || []).filter(
+        text => !englishLower.includes(String(text).toLowerCase())
+      );
 
       return {
         id: test.id,
-        pass: missingExpected.length === 0 && forbiddenProduced.length === 0,
+        pass:
+          missingExpected.length === 0 &&
+          forbiddenProduced.length === 0 &&
+          missingEnglish.length === 0,
         missingExpected,
         forbiddenProduced,
+        missingEnglish,
         meaningIds: produced,
         english: result.english,
         lexicalTargets: result.lexicalTargets,
