@@ -117,3 +117,5 @@ jobs:
           }));
           if(Object.values(checks).some(v=>v!==true)) process.exit(1);
           NODE
+
+# rerun after talk-boundary precedence fix
