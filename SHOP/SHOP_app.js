@@ -106,13 +106,11 @@
     menu.replaceChildren(mapButton, inventoryButton, actionButton, saveButton, loadButton);
 
     actionButton.addEventListener('click', () => {
-      if (!window.SHOP_ACTION) return;
-      const screen = document.getElementById('actionScreen');
-      if (screen && screen.classList.contains('is-open')) {
-        window.SHOP_ACTION.close();
-      } else {
-        window.SHOP_ACTION.open(window.SHOP_STATE, 'beg');
-      }
+      if (!window.SHOP_LIFE) return;
+      window.SHOP_LIFE.open(window.SHOP_STATE, () => {
+        if (status) status.textContent = '';
+        render();
+      });
     });
 
     if (quickBegButton) {
@@ -394,6 +392,7 @@
   function render() {
     const state = window.SHOP_STATE;
 
+    if (window.SHOP_LIFE) window.SHOP_LIFE.ensureState(state);
     if (window.SHOP_TIME) window.SHOP_TIME.syncClimate(state);
     renderScene();
 
@@ -430,6 +429,12 @@
       moneyText.textContent = window.SHOP_CURRENCY
         ? window.SHOP_CURRENCY.format(state.money)
         : String(Number(state.money || 0));
+    }
+    const reputationText = $('reputationText');
+    if (reputationText) {
+      reputationText.textContent = String(
+        window.SHOP_LIFE ? window.SHOP_LIFE.reputation(state) : Math.max(0,Number(state.reputation)||0)
+      );
     }
     renderQuickInventory();
   }
