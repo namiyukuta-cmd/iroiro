@@ -115,7 +115,7 @@
   add("R397_PSY_CONFUSION_QUESTION",590,{psychologyMin:{confusion:60},intentAny:["ask_question"]},["ASK_FOR_DETAILS"],"npc_confusion_question");
   add("R398_PSY_LONELY_GOODBYE",590,{psychologyMin:{loneliness:60},intentAny:["say_goodbye"]},["EXPRESS_MISSING"],"npc_loneliness_goodbye");
   add("R399_PSY_FEARLOSS_GOODBYE",620,{psychologyMin:{fearOfLoss:65},intentAny:["say_goodbye"]},["ASK_NOT_TO_DISAPPEAR"],"npc_fear_loss_goodbye");
-  add("R400_PSY_TENDER_GREETING",540,{psychologyMin:{tenderness:65},intentAny:["greet"]},["EXPRESS_CARE"],"npc_tender_greeting");
+  add("R400_PSY_TENDER_GREETING",540,{psychologyMin:{tenderness:65},intentAny:["greet"]},["RETURN_GREETING"],"npc_tender_greeting");
 
   if (R.length !== 100) throw new Error("Expected 100 response rules, got " + R.length);
   HMW.Dialogue.registerResponseRules(R);
