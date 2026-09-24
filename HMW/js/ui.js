@@ -542,28 +542,48 @@
           <svg class="travel-map-lines" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">${lineHtml}</svg>
           ${nodeHtml}
         </div>
-        <div class="travel-hint" id="travel-hint">行き先を押すと移動</div>
+        <div class="travel-hint" id="travel-hint">行き先を1回押すと地図で確認できます</div>
       </div>`;
 
     openModal("移動", body, [], true);
-    $("modal-backdrop")?.classList.add("travel-popup");
 
-    const goToDestination = (id) => {
-      if (!id || id === current) return;
-      closeModal();
-      travel(id);
-      openLocationIntro(id);
+    let selectedId = null;
+    const hint = $("travel-hint");
+    const buttons = [...document.querySelectorAll(".travel-destination")];
+
+    const selectDestination = (id) => {
+      buttons.forEach((button) => {
+        button.classList.toggle("selected", button.dataset.travelId === id);
+      });
+
+      document.querySelectorAll(".travel-map-node").forEach((node) => {
+        node.classList.toggle("selected", node.dataset.mapId === id);
+      });
+
+      const marker = document.querySelector(`.travel-map-node[data-map-id="${CSS.escape(id)}"]`);
+      if (marker) {
+        marker.classList.remove("ping");
+        void marker.offsetWidth;
+        marker.classList.add("ping");
+      }
     };
 
-    [...document.querySelectorAll(".travel-destination")].forEach((button) => {
-      button.addEventListener("click", () => goToDestination(button.dataset.travelId));
-    });
+    buttons.forEach((button) => {
+      button.addEventListener("click", () => {
+        const id = button.dataset.travelId;
+        if (!id) return;
 
-    [...document.querySelectorAll(".travel-map-node")].forEach((node) => {
-      const id = node.dataset.mapId;
-      if (!id || id === current) return;
-      node.classList.add("clickable");
-      node.addEventListener("click", () => goToDestination(id));
+        if (selectedId === id) {
+          closeModal();
+          travel(id);
+          openLocationIntro(id);
+          return;
+        }
+
+        selectedId = id;
+        selectDestination(id);
+        if (hint) hint.textContent = `${D.locations[id].name}をもう1回押すと移動`;
+      });
     });
   }
 
