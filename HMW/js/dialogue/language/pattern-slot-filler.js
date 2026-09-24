@@ -106,7 +106,8 @@
       vocabularyTags = [],
       subject = "I",
       seed = 0,
-      fillOptional = false
+      fillOptional = false,
+      requireSemanticSlots = false
     } = {}
   ) {
     const pattern = D.SENTENCE_PATTERNS?.[patternId];
@@ -240,6 +241,9 @@
       if (explicitSlots.has(key)) continue;
       if (slots[key] !== undefined && slots[key] !== null && slots[key] !== "") continue;
       if (OPTIONAL.test(rawSlot) && !fillOptional) continue;
+
+      // Routed meanings must provide content; grammar auxiliaries may be derived.
+      if (requireSemanticSlots && !/^(SUBJECT|BE|BE_CAP|BE_PAST|DO_AUX|DO_AUX_CAP|HAVE_AUX|HAVE_AUX_CAP|AUX)$/.test(key)) continue;
 
       let value = values[key];
       if (value === undefined && key === "ARTICLE") value = articleFor(noun);
