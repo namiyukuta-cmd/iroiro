@@ -225,6 +225,7 @@
     $("modal-title").textContent = title;
     $("modal-body").innerHTML = bodyIsHtml || body.includes("<") ? body : `<p>${escapeHtml(body)}</p>`;
     const box = $("modal-actions");
+    box.className = "modal-actions";
     box.innerHTML = "";
     actions.forEach((a) => {
       const b = document.createElement("button");
