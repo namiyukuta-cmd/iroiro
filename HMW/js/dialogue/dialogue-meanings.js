@@ -108,6 +108,46 @@
     ASK_NOT_TO_DISAPPEAR: {
       category: "closeness",
       meaningJa: "何も言わずにいなくならないでほしいと求める"
+    },
+    EXPRESS_GRATITUDE: {
+      category: "positive",
+      meaningJa: "相手への感謝を伝える"
+    },
+    REASSURE_SAFETY: {
+      category: "care",
+      meaningJa: "今は安全だ、または危害を加えないと安心させる"
+    },
+    EXPRESS_MISSING: {
+      category: "closeness",
+      meaningJa: "会えなかった間に相手を恋しく思っていたと伝える"
+    },
+    ASK_TO_MEET: {
+      category: "closeness",
+      meaningJa: "また会いたい、会う時間を作りたいと求める"
+    },
+    EXPRESS_JEALOUSY: {
+      category: "emotion",
+      meaningJa: "嫉妬していることを伝える"
+    },
+    ASK_ABOUT_OTHER_PERSON: {
+      category: "clarity",
+      meaningJa: "話題に出た別の人物について尋ねる"
+    },
+    AGREE_REQUEST: {
+      category: "response",
+      meaningJa: "相手の依頼や提案を受け入れる"
+    },
+    DECLINE_REQUEST: {
+      category: "response",
+      meaningJa: "相手の依頼や提案を断る"
+    },
+    CONFIRM_TRUST: {
+      category: "trust",
+      meaningJa: "相手を信じていることを伝える"
+    },
+    ASK_IF_OKAY: {
+      category: "care",
+      meaningJa: "相手が大丈夫か確認する"
     }
   };
 })();
