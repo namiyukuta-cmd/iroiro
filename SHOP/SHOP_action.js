@@ -10,6 +10,7 @@
   const dialog = $('actionDialog');
   const passerbyLane = $('passerbyLane');
   const passerbyPopup = $('passerbyPopup');
+  const globalStatus = $('saveStatus');
   const speedButtons = Array.from(document.querySelectorAll('[data-action-speed]'));
 
   let stateRef = null;
@@ -17,6 +18,7 @@
   let passerbyTimer = null;
   let passerbySprite = null;
   let selectedSellItemId = null;
+  let beggingSessionStartMinute = null;
 
   const PASSERBY_IMAGES = Object.freeze([
     './asset/Npc/npc_man_01.png',
@@ -76,7 +78,11 @@
     const existing=stateRef.beggingHistory[key];
 
     if(!existing || Number(existing.day)!==day){
-      stateRef.beggingHistory[key]={day,attempts:0};
+      stateRef.beggingHistory[key]={day,attempts:0,strikes:0,blockedUntil:0};
+    }else{
+      if(!Number.isFinite(Number(existing.attempts))) existing.attempts=0;
+      if(!Number.isFinite(Number(existing.strikes))) existing.strikes=0;
+      if(!Number.isFinite(Number(existing.blockedUntil))) existing.blockedUntil=0;
     }
     return stateRef.beggingHistory[key];
   }
@@ -212,6 +218,103 @@
         };
   }
 
+  function absoluteGameMinute(){
+    const day=Math.max(1,Math.floor(Number(stateRef && stateRef.day)||1));
+    const minutes=Math.max(0,Math.floor(Number(stateRef && stateRef.minutes)||0));
+    return (day-1)*1440+minutes;
+  }
+
+  function currentBeggingEnforcement(){
+    const rule=currentBeggingRule();
+    return rule && rule.enforcement ? rule.enforcement : null;
+  }
+
+  function beggingBlockRemaining(){
+    const history=beggingHistoryForScene();
+    return Math.max(0,Math.floor(Number(history.blockedUntil)||0)-absoluteGameMinute());
+  }
+
+  function beggingSessionMinutes(){
+    if(!Number.isFinite(Number(beggingSessionStartMinute))) return 0;
+    return Math.max(0,absoluteGameMinute()-Number(beggingSessionStartMinute));
+  }
+
+  function isBeggingEnforcementActive(rule,history){
+    if(!rule) return false;
+    const attempts=Math.max(0,Math.floor(Number(history.attempts)||0));
+    const minAttempts=Math.max(0,Math.floor(Number(rule.startAfter)||0));
+    const minMinutes=Math.max(0,Math.floor(Number(rule.startAfterMinutes)||0));
+    return attempts>=minAttempts || beggingSessionMinutes()>=minMinutes;
+  }
+
+  function enforcementWarningText(rule,strikes){
+    const authority=String(rule.authority || '見回り');
+    if(strikes<=1){
+      return authority+'「ここに居座るな。少し場所を空けろ」';
+    }
+    return authority+'「まだいるのか。次はここから出すぞ」';
+  }
+
+  function finishForcedRemoval(rule){
+    clearPasserby();
+    screen.classList.remove('is-open');
+    delete screen.dataset.mode;
+    const app=document.querySelector('.app');
+    if(app) app.classList.remove('action-open');
+    dialog.classList.remove('is-open');
+    setTimeSpeed(1);
+
+    if(window.SHOP_TIME && stateRef){
+      window.SHOP_TIME.advance(stateRef,10,'begging_removed');
+    }
+
+    let message='追い立てられた。しばらくここでは物乞いできない。';
+    const forcedScene=rule && rule.forcedScene;
+    if(forcedScene && window.SHOP_DATA && window.SHOP_DATA.scenes && window.SHOP_DATA.scenes[forcedScene]){
+      stateRef.sceneKey=forcedScene;
+      const name=window.SHOP_DATA.scenes[forcedScene].name || forcedScene;
+      message='追い立てられて「'+name+'」へ移された。';
+    }
+
+    beggingSessionStartMinute=null;
+    refreshPersistentUi();
+    if(globalStatus) globalStatus.textContent=message;
+  }
+
+  function maybeHandleBeggingEnforcement(){
+    const rule=currentBeggingEnforcement();
+    if(!rule) return false;
+
+    const history=beggingHistoryForScene();
+    if(!isBeggingEnforcementActive(rule,history)) return false;
+
+    const chance=Math.max(0,Math.min(1,Number(rule.checkChance)||0));
+    if(Math.random()>=chance) return false;
+
+    history.strikes=Math.max(0,Math.floor(Number(history.strikes)||0))+1;
+    const warningsBeforeRemoval=Math.max(0,Math.floor(Number(rule.warningsBeforeRemoval)||0));
+
+    dialog.textContent=enforcementWarningText(rule,history.strikes);
+    dialog.classList.add('is-open');
+
+    if(history.strikes<=warningsBeforeRemoval){
+      passerbyTimer=setTimeout(()=>{
+        dialog.classList.remove('is-open');
+        scheduleNextPasserby(800+Math.round(Math.random()*900));
+      },2600);
+      return true;
+    }
+
+    const cooldown=Math.max(15,Math.floor(Number(rule.cooldownMinutes)||60));
+    history.blockedUntil=absoluteGameMinute()+cooldown;
+    dialog.textContent=String(rule.authority || '見回り')+'「何度言わせる。ここから離れろ」';
+
+    passerbyTimer=setTimeout(()=>{
+      finishForcedRemoval(rule);
+    },2200);
+    return true;
+  }
+
   function rollBeggingOutcome(){
     const rule=currentBeggingRule();
     const outcomes=Array.isArray(rule.outcomes) ? rule.outcomes : [];
@@ -339,6 +442,8 @@
 
     clearPasserby();
 
+    if(mode==='beg' && maybeHandleBeggingEnforcement()) return;
+
     const fromLeft=Math.random()>=0.5;
     const stopChance=mode==='beg'
       ? effectiveBeggingStopChance()
@@ -433,15 +538,38 @@
 
   function open(state,initialMode='beg'){
     stateRef=state || window.SHOP_STATE || {};
+
+    if(initialMode==='beg'){
+      const remaining=beggingBlockRemaining();
+      if(remaining>0){
+        if(globalStatus){
+          globalStatus.textContent='さっき追い立てられた。あと約'+remaining+'分はここで物乞いできない。';
+        }
+        return false;
+      }
+      beggingSessionStartMinute=absoluteGameMinute();
+    }else{
+      beggingSessionStartMinute=null;
+    }
+
     const app=document.querySelector('.app');
     if(app) app.classList.add('action-open');
     screen.classList.add('is-open');
 
-    if(!setMode(initialMode)) setMode('beg');
+    if(!setMode(initialMode)){
+      if(!setMode('beg')){
+        screen.classList.remove('is-open');
+        if(app) app.classList.remove('action-open');
+        return false;
+      }
+      beggingSessionStartMinute=absoluteGameMinute();
+    }
     setTimeSpeed(1);
 
+    if(globalStatus) globalStatus.textContent='';
     clearPasserby();
     scheduleNextPasserby(350);
+    return true;
   }
 
   function close(){
@@ -451,6 +579,7 @@
     const app=document.querySelector('.app');
     if(app) app.classList.remove('action-open');
     dialog.classList.remove('is-open');
+    beggingSessionStartMinute=null;
     setTimeSpeed(1);
     refreshPersistentUi();
   }
