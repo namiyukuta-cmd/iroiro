@@ -242,12 +242,21 @@
     const reasons = [];
     const matchedRuleIds = [];
     const slotOverridesByMeaning = {};
+    const suppressedMeaningIds = new Set();
 
     for (const rule of rules) {
       if (!matches(rule, ctx)) continue;
       matchedRuleIds.push(rule.id);
       if (rule.reason) reasons.push(rule.reason);
+
+      for (const id of arr(rule.suppressMeanings)) {
+        suppressedMeaningIds.add(id);
+        const index = meaningIds.indexOf(id);
+        if (index >= 0) meaningIds.splice(index, 1);
+      }
+
       for (const id of arr(rule.meanings)) {
+        if (suppressedMeaningIds.has(id)) continue;
         if (!meaningIds.includes(id)) meaningIds.push(id);
       }
       if (rule.slots && typeof rule.slots === "object") {
@@ -261,6 +270,12 @@
       if (rule.stop === true) break;
     }
 
-    return { meaningIds, reasons, matchedRuleIds, slotOverridesByMeaning };
+    return {
+      meaningIds,
+      reasons,
+      matchedRuleIds,
+      slotOverridesByMeaning,
+      suppressedMeaningIds:[...suppressedMeaningIds]
+    };
   };
 })();
