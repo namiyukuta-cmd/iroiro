@@ -215,6 +215,102 @@
       reasons.push("agreement_received");
     }
 
+
+    if (has(a.intents, "greet")) {
+      add(meaningIds, "RETURN_GREETING");
+      reasons.push("greeting_received");
+    }
+
+    if (has(a.intents, "say_goodbye")) {
+      add(meaningIds, "SAY_GOODBYE");
+      reasons.push("parting_received");
+    }
+
+    if (has(a.intents, "ask_reason")) {
+      add(meaningIds, "ASK_REASON");
+      reasons.push("reason_requested");
+    }
+
+    if (has(a.intents, "ask_where")) {
+      add(meaningIds, "ASK_WHERE");
+      reasons.push("location_question");
+    }
+
+    if (has(a.intents, "ask_when")) {
+      add(meaningIds, "ASK_WHEN");
+      reasons.push("time_question");
+    }
+
+    if (has(a.intents, "ask_health") || has(a.focusConcepts, "health")) {
+      add(meaningIds, "ASK_ABOUT_HEALTH");
+      reasons.push("health_topic");
+    }
+
+    if (has(a.intents, "ask_sleep") || has(a.focusConcepts, "sleep")) {
+      if (has(a.intents, "ask_sleep")) add(meaningIds, "ASK_ABOUT_SLEEP");
+      reasons.push("sleep_topic");
+    }
+
+    if (has(a.intents, "ask_food")) {
+      add(meaningIds, "ASK_ABOUT_FOOD");
+      reasons.push("food_question");
+    }
+
+    if (has(a.intents, "ask_home") || has(a.focusConcepts, "home")) {
+      if (has(a.intents, "ask_home")) add(meaningIds, "ASK_ABOUT_HOME");
+      reasons.push("home_topic");
+    }
+
+    if (has(a.intents, "offer_help")) {
+      if (has(a.focusConcepts, "sleep")) add(meaningIds, "OFFER_REST");
+      else if (has(a.focusConcepts, "weather")) {
+        add(meaningIds, "OFFER_WARMTH");
+        add(meaningIds, "OFFER_SHELTER");
+      } else {
+        add(meaningIds, "OFFER_HELP");
+      }
+      reasons.push("help_offered");
+    }
+
+    if (has(a.intents, "report_event")) {
+      add(meaningIds, "ACKNOWLEDGE_EVENT");
+      if ((a.emotions?.sadness || 0) >= 45 || (a.emotions?.hurt || 0) >= 45) {
+        add(meaningIds, "EXPRESS_SYMPATHY");
+      } else if ((a.emotions?.joy || 0) >= 45) {
+        add(meaningIds, "EXPRESS_APPROVAL");
+      } else if ((a.emotions?.fear || 0) >= 45) {
+        add(meaningIds, "EXPRESS_CONCERN");
+      } else {
+        add(meaningIds, "ASK_FOR_DETAILS");
+      }
+      reasons.push("event_reported");
+    }
+
+    if (has(a.intents, "state_plan")) {
+      add(meaningIds, "STATE_PLAN");
+      reasons.push("plan_stated");
+    }
+
+    if (has(a.intents, "state_preference")) {
+      add(meaningIds, "STATE_PREFERENCE");
+      reasons.push("preference_stated");
+    }
+
+    if (has(a.intents, "express_surprise")) {
+      add(meaningIds, "EXPRESS_SURPRISE");
+      reasons.push("surprise_topic");
+    }
+
+    if (has(a.intents, "express_approval")) {
+      add(meaningIds, "EXPRESS_APPROVAL");
+      reasons.push("approval_topic");
+    }
+
+    if (has(a.intents, "express_disapproval")) {
+      add(meaningIds, "EXPRESS_DISAPPROVAL");
+      reasons.push("disapproval_topic");
+    }
+
     if (meaningIds.length === 0 && has(a.intents, "ask_question")) {
       add(meaningIds, "ASK_FOR_ANSWER");
       reasons.push("generic_question_fallback");
