@@ -9,6 +9,7 @@
     characterFacts = {},
     characterPolicy = {},
     psychology = {},
+    relationship = {},
     variantSeed = 0,
     slotOverridesByMeaning = {},
     recentMeaningIds = []
@@ -26,7 +27,9 @@
           analysis: normalized,
           characterFacts,
           characterPolicy,
-          psychology
+          psychology,
+          relationship,
+          recentMeaningIds
         })
       : {
           meaningIds: [],
