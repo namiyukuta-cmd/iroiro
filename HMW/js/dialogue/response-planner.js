@@ -235,11 +235,6 @@
       reasons.push("parting_received");
     }
 
-    if (has(a.intents, "ask_reason")) {
-      add(meaningIds, "ANSWER_UNKNOWN");
-      reasons.push("reason_question_requires_explicit_character_fact");
-    }
-
     if (has(a.intents, "ask_where") || firstQuestion?.kind === "where") {
       if (characterFacts.currentLocation) {
         add(meaningIds, "STATE_CURRENT_LOCATION");
@@ -591,6 +586,134 @@
         add(meaningIds, "ANSWER_UNKNOWN");
       }
       reasons.push("answer_availability_question");
+    }
+
+
+    if (has(a.intents, "ask_identity") || firstQuestion?.kind === "identity") {
+      const field = firstQuestion?.requestedField || "name";
+      if (field === "role" || field === "jobRole") {
+        const role = characterFacts.jobRole ?? characterFacts.role;
+        if (role) {
+          add(meaningIds, "STATE_IDENTITY_ROLE");
+          setSlots("STATE_IDENTITY_ROLE", {
+            ARTICLE: "",
+            ROLE: String(role)
+          });
+        } else add(meaningIds, "ANSWER_UNKNOWN");
+      } else {
+        const name = characterFacts.name;
+        if (name) {
+          add(meaningIds, "STATE_IDENTITY_NAME");
+          setSlots("STATE_IDENTITY_NAME", { NAME:String(name) });
+        } else add(meaningIds, "ANSWER_UNKNOWN");
+      }
+      reasons.push("answer_identity_question");
+    }
+
+    if (has(a.intents, "ask_origin") || firstQuestion?.kind === "origin") {
+      const origin = characterFacts.origin;
+      if (origin) {
+        add(meaningIds, "STATE_ORIGIN");
+        setSlots("STATE_ORIGIN", { PLACE:String(origin) });
+      } else add(meaningIds, "ANSWER_UNKNOWN");
+      reasons.push("answer_origin_question");
+    }
+
+    if (has(a.intents, "ask_destination") || firstQuestion?.kind === "destination") {
+      const destination = characterFacts.destination;
+      if (destination) {
+        add(meaningIds, "STATE_DESTINATION");
+        setSlots("STATE_DESTINATION", { PLACE:String(destination) });
+      } else add(meaningIds, "ANSWER_UNKNOWN");
+      reasons.push("answer_destination_question");
+    }
+
+    if (has(a.intents, "ask_reason") || firstQuestion?.kind === "reason") {
+      const key = firstQuestion?.target || firstQuestion?.action || "default";
+      const reason =
+        characterFacts.reasons?.[key] ??
+        characterFacts.reason ??
+        characterFacts.currentReason;
+      if (reason) {
+        add(meaningIds, "STATE_REASON");
+        setSlots("STATE_REASON", {
+          VERB:"did it",
+          OBJECT:"",
+          CLAUSE:String(reason)
+        });
+      } else {
+        add(meaningIds, "ANSWER_UNKNOWN");
+      }
+      reasons.push("answer_reason_question");
+    }
+
+    if (has(a.intents, "ask_opinion") || firstQuestion?.kind === "opinion") {
+      const key = firstQuestion?.target || "default";
+      const opinion = characterFacts.opinions?.[key] ?? characterFacts.opinion;
+      if (opinion) {
+        add(meaningIds, "STATE_OPINION");
+        setSlots("STATE_OPINION", { CLAUSE:String(opinion) });
+      } else add(meaningIds, "ANSWER_UNKNOWN");
+      reasons.push("answer_opinion_question");
+    }
+
+    if (has(a.intents, "ask_price") || firstQuestion?.kind === "price") {
+      const target = firstQuestion?.target || a.lexicalTargets?.[0] || "item";
+      const price = characterFacts.prices?.[target] ?? characterFacts.price;
+      if (price != null) {
+        add(meaningIds, "STATE_PRICE");
+        setSlots("STATE_PRICE", { AMOUNT:String(price) });
+      } else add(meaningIds, "ANSWER_UNKNOWN");
+      reasons.push("answer_price_question");
+    }
+
+    if (has(a.intents, "ask_quantity") || firstQuestion?.kind === "quantity") {
+      const target = firstQuestion?.target || a.lexicalTargets?.[0] || "item";
+      const count = characterFacts.quantities?.[target] ?? characterFacts.quantity;
+      if (count != null) {
+        add(meaningIds, "STATE_COUNT");
+        setSlots("STATE_COUNT", {
+          QUANTITY:String(count),
+          OBJECT:String(target)
+        });
+      } else add(meaningIds, "ANSWER_UNKNOWN");
+      reasons.push("answer_quantity_question");
+    }
+
+    if (has(a.intents, "ask_work_location") || firstQuestion?.kind === "work_location") {
+      const workLocation = characterFacts.workLocation;
+      if (workLocation) {
+        add(meaningIds, "STATE_WORK_LOCATION");
+        setSlots("STATE_WORK_LOCATION", { PLACE:String(workLocation) });
+      } else add(meaningIds, "ANSWER_UNKNOWN");
+      reasons.push("answer_work_location_question");
+    }
+
+    if (has(a.intents, "ask_job_role") || firstQuestion?.kind === "job_role") {
+      const jobRole = characterFacts.jobRole ?? characterFacts.role;
+      if (jobRole) {
+        add(meaningIds, "STATE_JOB_ROLE");
+        setSlots("STATE_JOB_ROLE", { ROLE:String(jobRole) });
+      } else add(meaningIds, "ANSWER_UNKNOWN");
+      reasons.push("answer_job_role_question");
+    }
+
+    if (has(a.intents, "ask_knowledge") || firstQuestion?.kind === "knowledge") {
+      const target = firstQuestion?.target || "default";
+      const knows = characterFacts.knowledge?.[target];
+      if (knows === true) add(meaningIds, "CONFIRM_KNOWLEDGE");
+      else if (knows === false) add(meaningIds, "DENY_KNOWLEDGE");
+      else add(meaningIds, "ANSWER_UNKNOWN");
+      reasons.push("answer_knowledge_question");
+    }
+
+    if (has(a.intents, "ask_fact") || firstQuestion?.kind === "fact") {
+      const target = firstQuestion?.target || "default";
+      const fact = characterFacts.facts?.[target];
+      if (fact === true) add(meaningIds, "CONFIRM_FACT");
+      else if (fact === false) add(meaningIds, "DENY_FACT");
+      else add(meaningIds, "ANSWER_UNKNOWN");
+      reasons.push("answer_fact_question");
     }
 
     if (meaningIds.length === 0 && has(a.intents, "ask_question")) {
