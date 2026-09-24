@@ -123,13 +123,13 @@ jobs:
             uniqueRuleIds:new Set(ids).size===2000,
             noMissingMeanings:missingMeaningIds.length===0,
             inviteBoundary:
-              inviteBoundary.plan.matchedResponseRuleIds.includes('R1943_HUG_INVITE_BOUNDARY') &&
+              inviteBoundary.plan.matchedResponseRuleIds.includes('R1942_HUG_INVITE_BOUNDARY') &&
               inviteBoundary.plan.suppressedMeaningIds.includes('ACCEPT_INVITATION') &&
               !inviteBoundary.plan.meaningIds.includes('ACCEPT_INVITATION') &&
               inviteBoundary.selected.includes('DECLINE_INVITATION') &&
               inviteBoundary.selected.includes('RESPECT_BOUNDARY'),
             suggestBoundary:
-              suggestBoundary.plan.matchedResponseRuleIds.includes('R1957_CALL_SUGGEST_BOUNDARY') &&
+              suggestBoundary.plan.matchedResponseRuleIds.includes('R1954_CALL_SUGGEST_BOUNDARY') &&
               suggestBoundary.plan.suppressedMeaningIds.includes('ACCEPT_SUGGESTION') &&
               !suggestBoundary.plan.meaningIds.includes('ACCEPT_SUGGESTION') &&
               suggestBoundary.selected.includes('DECLINE_SUGGESTION'),
@@ -141,11 +141,11 @@ jobs:
               suggestTrue.plan.matchedResponseRuleIds.includes('R1988_REST_SUGGEST_TRUE') &&
               suggestTrue.selected.includes('ACCEPT_SUGGESTION'),
             secondaryInvite:
-              secondaryInvite.plan.matchedResponseRuleIds.includes('R1961_EAT_INVITE_FALSE') &&
+              secondaryInvite.plan.matchedResponseRuleIds.includes('R1963_EAT_INVITE_FALSE') &&
               secondaryInvite.selected.includes('DECLINE_INVITATION') &&
               secondaryInvite.selected.includes('STATE_CURRENT_LOCATION'),
             secondarySuggestion:
-              secondarySuggestion.plan.matchedResponseRuleIds.includes('R1984_DRINK_SUGGEST_TRUE') &&
+              secondarySuggestion.plan.matchedResponseRuleIds.includes('R1986_DRINK_SUGGEST_TRUE') &&
               secondarySuggestion.selected.includes('ACCEPT_SUGGESTION') &&
               secondarySuggestion.selected.includes('STATE_RETURN_TIME')
           };
@@ -167,3 +167,5 @@ jobs:
           }));
           if(Object.values(checks).some(v=>v!==true)) process.exit(1);
           NODE
+
+# rerun with corrected generated rule IDs
