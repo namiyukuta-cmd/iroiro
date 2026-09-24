@@ -939,7 +939,10 @@
     ) {
       const action = firstQuestion?.action || firstQuestion?.target || "default";
       const value = characterPolicy.invitationResponses?.[action];
-      if (value === true) add(meaningIds, "ACCEPT_INVITATION");
+      if (actionBlockedByBoundary(action)) {
+        add(meaningIds, "DECLINE_INVITATION");
+        reasons.push("invitation_blocked_by_boundary");
+      } else if (value === true) add(meaningIds, "ACCEPT_INVITATION");
       else if (value === false) add(meaningIds, "DECLINE_INVITATION");
       else add(meaningIds, "ANSWER_UNKNOWN");
       reasons.push("answer_invitation");
@@ -951,7 +954,10 @@
     ) {
       const action = firstQuestion?.action || firstQuestion?.target || "default";
       const value = characterPolicy.suggestionResponses?.[action];
-      if (value === true) add(meaningIds, "ACCEPT_SUGGESTION");
+      if (actionBlockedByBoundary(action)) {
+        add(meaningIds, "DECLINE_SUGGESTION");
+        reasons.push("suggestion_blocked_by_boundary");
+      } else if (value === true) add(meaningIds, "ACCEPT_SUGGESTION");
       else if (value === false) add(meaningIds, "DECLINE_SUGGESTION");
       else add(meaningIds, "ANSWER_UNKNOWN");
       reasons.push("answer_suggestion");
