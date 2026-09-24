@@ -304,6 +304,26 @@
   function pointActions(locationId, pointId) {
     const actions = [];
 
+    const peoplePointMap = {
+      charity_center: ["desk"],
+      convenience_store: ["counter"],
+      park: ["bench"],
+      underpass: ["entrance", "pillars"],
+      industrial_street: ["warehouse"],
+      police_station: ["desk"]
+    };
+    if ((peoplePointMap[locationId] || []).includes(pointId)) {
+      peopleActions().filter((a) => !a.disabled).forEach((a) => {
+        actions.push({
+          label: a.label,
+          onClick: () => {
+            closeModal();
+            a.run();
+          }
+        });
+      });
+    }
+
     if (locationId === "station_front" && pointId === "board" && !H.state.knownLocations.charity_center) {
       actions.push({ label:"掲示板を見る", onClick:() => { closeModal(); G.board(); } });
     }
@@ -431,9 +451,12 @@
 
   function openLocationActions() {
     if (H.state.activeEvent) return info("行動", "現在の出来事への対応が先になる。");
-    const list = locationActions();
+    const merged = [...locationActions(), ...peopleActions()];
+    const list = merged.filter((item, index, all) =>
+      all.findIndex((other) => other.label === item.label) === index
+    );
     if (!list.length) return info(D.locations[H.state.location].name, "今ここでできる特別な行動はない。");
-    openModal(D.locations[H.state.location].name, "ここで何をするか選ぶ。", list.map(modalAction));
+    openModal(D.locations[H.state.location].name, "ここでできること。", list.map(modalAction));
   }
 
   function openPeopleHere() {
@@ -546,6 +569,7 @@
       </div>`;
 
     openModal("移動", body, [], true);
+    $("modal-backdrop")?.classList.add("travel-popup");
 
     let selectedId = null;
     const hint = $("travel-hint");
@@ -747,7 +771,6 @@
   document.addEventListener("DOMContentLoaded", () => {
     $("location-name").addEventListener("click", () => openLocationIntro(H.state.location));
     $("side-tasks").addEventListener("click", openTasks);
-    $("side-talk").addEventListener("click", openPeopleHere);
     $("side-move").addEventListener("click", openMap);
     $("side-inventory").addEventListener("click", openInventory);
     $("nav-save").addEventListener("click", openSave);
