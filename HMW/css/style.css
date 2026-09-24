@@ -54,3 +54,25 @@
 .housing-goal-bar{min-height:44px;margin-bottom:9px;padding:8px 10px;border:1px solid #d1c8b7;border-radius:11px;background:#f2eee4;color:#504a40;font-size:14px;font-weight:750;line-height:1.35}
 .side-task-btn{background:#f1e3c9;font-size:14px}
 @media(max-width:380px){.housing-goal-bar{min-height:40px;padding:6px 8px;margin-bottom:7px;font-size:12px}.side-actions{grid-template-rows:38px repeat(4,minmax(0,1fr));gap:5px}.nav-btn{font-size:12px;min-height:35px}}
+
+/* 2026-09-25 popup behavior */
+.modal-backdrop.tap-popup{align-items:center;padding:18px}
+.modal-backdrop.tap-popup .modal{width:min(calc(100% - 24px),520px);max-height:none;border-radius:18px;padding:22px 20px;overflow:hidden}
+.modal-backdrop.tap-popup .modal-actions,.modal-backdrop.tap-popup .close-row{display:none}
+.modal-backdrop.tap-popup .modal h2{margin-bottom:14px}
+.modal-backdrop.tap-popup .location-intro-text{font-size:18px;line-height:1.75}
+
+.modal-backdrop.travel-popup{align-items:center;padding:10px}
+.modal-backdrop.travel-popup .modal{height:min(88dvh,760px);max-height:88dvh;width:min(calc(100% - 12px),540px);border-radius:18px;padding:14px 12px;overflow:hidden;display:flex;flex-direction:column}
+.modal-backdrop.travel-popup #modal-body{min-height:0;flex:1;display:flex}
+.modal-backdrop.travel-popup .travel-window{width:100%;height:100%;grid-template-rows:auto auto minmax(0,1fr) auto;gap:8px}
+.modal-backdrop.travel-popup .travel-map{height:auto;min-height:0}
+.modal-backdrop.travel-popup .close-row{display:none}
+.modal-backdrop.travel-popup .modal-actions{display:none}
+.modal-backdrop.travel-popup .travel-destination{min-height:42px}
+@media(max-height:720px){
+ .modal-backdrop.travel-popup .modal{height:91dvh;max-height:91dvh}
+ .modal-backdrop.travel-popup .travel-destinations{gap:5px}
+ .modal-backdrop.travel-popup .travel-destination{min-height:36px;padding:4px;font-size:13px}
+ .modal-backdrop.travel-popup .travel-map-node small{font-size:9px}
+}
