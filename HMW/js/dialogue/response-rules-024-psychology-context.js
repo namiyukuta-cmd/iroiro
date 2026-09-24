@@ -37,7 +37,7 @@
   add("R2329_EMPATHY_GOODBYE_SAD",620,{"intentAny":["say_goodbye"],"emotionMin":{"sadness":45},"psychologyMin":{"empathy":70}},["EXPRESS_MISSING"],"EMPATHY_GOODBYE_SAD",[]);
   add("R2330_EMPATHY_REASSURE",650,{"intentAny":["request_reassurance","seek_reassurance"],"psychologyMin":{"empathy":70}},["EXPRESS_CONCERN"],"EMPATHY_REASSURE",[]);
   add("R2331_TENDER_AFFECTION",640,{"intentAny":["affirm_affection"],"psychologyMin":{"tenderness":70}},["EXPRESS_CARE"],"TENDER_AFFECTION",[]);
-  add("R2332_TENDER_GREETING",590,{"intentAny":["greet"],"psychologyMin":{"tenderness":70}},["EXPRESS_CARE"],"TENDER_GREETING",[]);
+  add("R2332_TENDER_GREETING",590,{"intentAny":["greet"],"psychologyMin":{"tenderness":70}},["RETURN_GREETING"],"TENDER_GREETING",[]);
   add("R2333_TENDER_GOODBYE",610,{"intentAny":["say_goodbye"],"psychologyMin":{"tenderness":70}},["EXPRESS_MISSING"],"TENDER_GOODBYE",[]);
   add("R2334_TENDER_REASSURE",660,{"intentAny":["request_reassurance","seek_reassurance"],"psychologyMin":{"tenderness":70}},["EXPRESS_CARE"],"TENDER_REASSURE",[]);
   add("R2335_TENDER_RELATIONSHIP",630,{"focusAny":["relationship","love","like"],"psychologyMin":{"tenderness":70}},["EXPRESS_CARE"],"TENDER_RELATIONSHIP",[]);
