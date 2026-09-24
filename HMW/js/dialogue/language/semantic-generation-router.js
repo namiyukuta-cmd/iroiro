@@ -1,0 +1,269 @@
+(() => {
+  "use strict";
+
+  window.HMW = window.HMW || {};
+  HMW.Dialogue = HMW.Dialogue || {};
+  const D = HMW.Dialogue;
+
+  const arr = value => Array.isArray(value) ? value : [];
+  const normalize = value => String(value || "").replace(/\s+/g, " ").trim();
+
+  const patternText = pattern =>
+    normalize(arr(pattern?.tokens).join(" ")).toLowerCase();
+
+  const hasSlot = (pattern, slot) =>
+    arr(pattern?.slots).some(raw => String(raw || "").replace(/\?$/, "") === slot);
+
+  const sameSlots = (pattern, required = []) =>
+    required.every(slot => hasSlot(pattern, slot));
+
+  const familyFor = patternId => {
+    const id = String(patternId || "");
+    const p = D.SENTENCE_PATTERNS?.[id];
+    if (!p) return null;
+    const t = patternText(p);
+
+    if (
+      sameSlots(p, ["VERB_BASE"]) &&
+      /^(can you|could you|would you|would you please|will you|please)\b/.test(t)
+    ) return "request_direct";
+
+    if (
+      sameSlots(p, ["VERB_BASE"]) &&
+      /^(can i|shall i|would you like me to)\b/.test(t)
+    ) return "offer_direct";
+
+    if (
+      (sameSlots(p, ["VERB_BASE"]) || sameSlots(p, ["VERB_ING"])) &&
+      /^(let us|we should|should we|we could|maybe we should)\b/.test(t)
+    ) return "suggest_direct";
+
+    if (
+      (sameSlots(p, ["VERB_BASE"]) || sameSlots(p, ["VERB_ING"])) &&
+      /^(do you want to|would you like to|how about|why not|shall we)\b/.test(t)
+    ) return "invite_direct";
+
+    if (
+      sameSlots(p, ["VERB_BASE"]) &&
+      /^(can i|may i|is it okay if i|do you mind if i|would it be okay if i)\b/.test(t)
+    ) return "permission_ask";
+
+    if (
+      sameSlots(p, ["ADJECTIVE"]) &&
+      /^(\{subject\}|i) (feel|am) \{adjective\}/.test(t)
+    ) return "feeling_adjective";
+
+    if (
+      sameSlots(p, ["SUBJECT","VERB","OBJECT"]) &&
+      /^\{subject\} \{verb\} \{object\??\}$/.test(t)
+    ) return "present_svo";
+
+    if (
+      sameSlots(p, ["SUBJECT","VERB_BASE"]) &&
+      /^\{subject\} (do|does|\{do_aux\}) not \{verb_base\}/.test(t)
+    ) return "present_neg";
+
+    if (
+      sameSlots(p, ["SUBJECT","VERB_PAST"]) &&
+      /^\{subject\} \{verb_past\}/.test(t)
+    ) return "past_svo";
+
+    if (
+      sameSlots(p, ["SUBJECT","VERB_BASE"]) &&
+      /^\{subject\} will \{verb_base\}/.test(t)
+    ) return "future_svo";
+
+    if (
+      sameSlots(p, ["SUBJECT","VERB_BASE"]) &&
+      /^\{subject\} will not \{verb_base\}/.test(t)
+    ) return "future_neg";
+
+    if (
+      sameSlots(p, ["SUBJECT","BE","VERB_ING"]) &&
+      /^\{subject\} \{be\} \{verb_ing\}/.test(t)
+    ) return "present_continuous";
+
+    if (
+      sameSlots(p, ["SUBJECT","VERB_BASE"]) &&
+      /^did \{subject\} \{verb_base\}/.test(t)
+    ) return "past_question";
+
+    if (
+      sameSlots(p, ["SUBJECT","VERB_BASE"]) &&
+      /^when will \{subject\} \{verb_base\}/.test(t)
+    ) return "when_future";
+
+    if (
+      sameSlots(p, ["SUBJECT","VERB_BASE"]) &&
+      /^\{subject\} can \{verb_base\}/.test(t)
+    ) return "modal_can";
+
+    if (
+      sameSlots(p, ["SUBJECT","VERB_BASE"]) &&
+      /^\{subject\} want to \{verb_base\}/.test(t)
+    ) return "want_to";
+
+    return null;
+  };
+
+  const familyCache = new Map();
+
+  const compatiblePatterns = basePatternId => {
+    const baseFamily = familyFor(basePatternId);
+    if (!baseFamily) return [String(basePatternId || "")].filter(Boolean);
+    if (familyCache.has(baseFamily)) return [...familyCache.get(baseFamily)];
+
+    const ids = Object.keys(D.SENTENCE_PATTERNS || {})
+      .filter(id => familyFor(id) === baseFamily);
+
+    const unique = [...new Set(ids.length ? ids : [basePatternId])];
+    familyCache.set(baseFamily, unique);
+    return [...unique];
+  };
+
+  const choose = (items, seed = 0) => {
+    const list = arr(items).filter(Boolean);
+    if (!list.length) return "";
+    return list[Math.abs(Number(seed) || 0) % list.length];
+  };
+
+  const chooseLexeme = (items, pos, lexicalTargets = [], seed = 0) => {
+    const source = [...new Set(arr(items).map(x => String(x || "").toLowerCase()).filter(Boolean))];
+    if (!source.length) return "";
+
+    const requested = arr(lexicalTargets).map(x => String(x || "").toLowerCase());
+    const target = source.find(word => requested.includes(word) && D.Vocabulary?.has?.(word, pos));
+    if (target) return target;
+
+    const existing = source.filter(word => D.Vocabulary?.has?.(word, pos));
+    return choose(existing.length ? existing : source, seed);
+  };
+
+  const forcedVerbSlots = (subject, verb) => {
+    if (!verb) return {};
+    const M = D.Morphology;
+    return {
+      SUBJECT: subject,
+      VERB: /^(he|she|it)$/i.test(subject)
+        ? (M?.verbForm?.(verb, "third") || verb)
+        : verb,
+      VERB_BASE: verb,
+      VERB_PAST: M?.verbForm?.(verb, "past") || verb,
+      VERB_PP: M?.verbForm?.(verb, "pp") || verb,
+      VERB_ING: M?.verbForm?.(verb, "ing") || verb,
+      BE: M?.beFor?.(subject) || "am",
+      DO_AUX: M?.doFor?.(subject) || "do",
+      HAVE_AUX: M?.haveFor?.(subject) || "have"
+    };
+  };
+
+  D.getMeaningGenerationRoutes = function getMeaningGenerationRoutes(
+    meaningId,
+    { lexicalTargets = [], slotOverrides = {}, variantSeed = 0 } = {}
+  ) {
+    const spec = D.GENERATION_SPECS?.[String(meaningId || "")];
+    if (!spec) return [];
+
+    const routes = [];
+
+    arr(spec.candidates).forEach((candidate, candidateIndex) => {
+      if (!candidate?.pattern || candidate.surfaceOverride) return;
+
+      const patterns = compatiblePatterns(candidate.pattern);
+      const verb = chooseLexeme(
+        candidate.verbs,
+        "verb",
+        lexicalTargets,
+        variantSeed + candidateIndex
+      );
+      const adjective = chooseLexeme(
+        candidate.adjectives,
+        "adjective",
+        lexicalTargets,
+        variantSeed + candidateIndex
+      );
+
+      const subject = candidate.subject || candidate.slots?.SUBJECT || "I";
+      const baseSlots = {
+        ...(candidate.slots || {}),
+        ...forcedVerbSlots(subject, verb)
+      };
+
+      if (candidate.object !== undefined) baseSlots.OBJECT = candidate.object;
+      if (candidate.nounPhrase !== undefined) baseSlots.NOUN_PHRASE = candidate.nounPhrase;
+      if (adjective) baseSlots.ADJECTIVE = adjective;
+
+      const slotCandidates = candidate.slotCandidates || {};
+      for (const [slot, values] of Object.entries(slotCandidates)) {
+        if (baseSlots[slot] !== undefined && baseSlots[slot] !== "") continue;
+        baseSlots[slot] = choose(values, variantSeed + candidateIndex);
+      }
+
+      patterns.forEach((patternId, patternIndex) => {
+        const built = D.buildSentenceFromPattern?.(patternId, {
+          subject,
+          seed: variantSeed + candidateIndex + patternIndex,
+          lexicalTargets: [
+            verb,
+            adjective,
+            ...arr(lexicalTargets)
+          ].filter(Boolean),
+          slotOverrides: {
+            ...baseSlots,
+            ...(slotOverrides || {})
+          },
+          fillOptional: false
+        });
+
+        if (!built?.ok || !built.english) return;
+        routes.push({
+          meaningId: String(meaningId || ""),
+          ok: true,
+          patternId,
+          english: built.english,
+          slots: built.slots,
+          chosenWords: built.chosenWords,
+          source: "semantic_router",
+          family: familyFor(patternId),
+          candidateIndex,
+          weight: Math.max(1, Number(candidate.weight) || 1)
+        });
+      });
+    });
+
+    const seen = new Set();
+    return routes.filter(route => {
+      const key = normalize(route.english).toLowerCase();
+      if (!key || seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    });
+  };
+
+  D.buildRoutedMeaning = function buildRoutedMeaning(
+    meaningId,
+    {
+      lexicalTargets = [],
+      slotOverrides = {},
+      variantSeed = 0
+    } = {}
+  ) {
+    const routes = D.getMeaningGenerationRoutes(meaningId, {
+      lexicalTargets,
+      slotOverrides,
+      variantSeed
+    });
+    if (!routes.length) return null;
+    return routes[Math.abs(Number(variantSeed) || 0) % routes.length];
+  };
+
+  D.getMeaningGenerationCapacity = function getMeaningGenerationCapacity(meaningId) {
+    const routes = D.getMeaningGenerationRoutes(meaningId, { variantSeed: 0 });
+    return {
+      meaningId: String(meaningId || ""),
+      routedVariants: routes.length,
+      patternIds: [...new Set(routes.map(x => x.patternId))],
+      families: [...new Set(routes.map(x => x.family).filter(Boolean))]
+    };
+  };
+})();
