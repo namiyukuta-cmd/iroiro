@@ -106,19 +106,34 @@
     return null;
   };
 
-  const familyCache = new Map();
+  const EQUIVALENT_PATTERN_GROUPS = [
+    ["DECLARATIVE_SVO","PRESENT_SIMPLE_SVO"],
+    ["NEGATIVE_DO_SVO","PRESENT_SIMPLE_NEG"],
+    ["PAST_SVO","PAST_SIMPLE_SVO"],
+    ["FUTURE_WILL","FUTURE_SIMPLE"],
+    ["FUTURE_WILL_NOT","FUTURE_NEG"],
+    ["FEEL_ADJECTIVE","G17_FEELING_I_FEEL_ADJ"],
+    ["REQUEST_CAN_YOU","G17_REQUEST_CAN_YOU","POLITE_REQUEST_CAN_YOU"],
+    ["REQUEST_COULD_YOU","G17_REQUEST_COULD_YOU","POLITE_REQUEST_COULD_YOU"],
+    ["REQUEST_WOULD_YOU","G17_REQUEST_WOULD_YOU","POLITE_REQUEST_WOULD_YOU"],
+    ["REQUEST_WILL_YOU","G17_REQUEST_WILL_YOU"],
+    ["REQUEST_PLEASE","REQUEST_PLEASE_ACTION","G17_REQUEST_PLEASE"],
+    ["OFFER_CAN_I","OFFER_SHALL_I","OFFER_SHALL_I_ACTION","OFFER_WOULD_YOU_LIKE_ME_TO"],
+    ["SUGGEST_LETS","SUGGEST_LETS_ACTION","G17_INVITE_LETS","G17_INVITE_SHALL_WE","G17_INVITE_WE_COULD"],
+    ["PERMISSION_CAN_I","PERMISSION_MAY_I","ASK_PERMISSION_CAN_I","ASK_PERMISSION_MAY_I","ASK_IF_OKAY_TO","ASK_DO_YOU_MIND_IF","ASK_WOULD_IT_BE_OKAY"]
+  ];
+
+  const equivalentPatternIndex = new Map();
+  for (const group of EQUIVALENT_PATTERN_GROUPS) {
+    for (const id of group) equivalentPatternIndex.set(id, group);
+  }
 
   const compatiblePatterns = basePatternId => {
-    const baseFamily = familyFor(basePatternId);
-    if (!baseFamily) return [String(basePatternId || "")].filter(Boolean);
-    if (familyCache.has(baseFamily)) return [...familyCache.get(baseFamily)];
-
-    const ids = Object.keys(D.SENTENCE_PATTERNS || {})
-      .filter(id => familyFor(id) === baseFamily);
-
-    const unique = [...new Set(ids.length ? ids : [basePatternId])];
-    familyCache.set(baseFamily, unique);
-    return [...unique];
+    const id = String(basePatternId || "");
+    if (!id) return [];
+    const group = equivalentPatternIndex.get(id);
+    const candidates = group || [id];
+    return [...new Set(candidates.filter(patternId => D.SENTENCE_PATTERNS?.[patternId]))];
   };
 
   const choose = (items, seed = 0) => {
