@@ -582,6 +582,68 @@
       },
       expectedMeaningIds: ["REJECT_DEATH_WISH_CLAIM"],
       forbiddenMeaningIds: []
+    },
+    {
+      id: "answer_relationship_status_001",
+      sourceJa: "私たちって何？",
+      analysis: {
+        analysisVersion: 2,
+        rawText: "私たちって何？",
+        emotions: {},
+        intents: ["ask_relationship_status"],
+        focusConcepts: ["relationship"],
+        lexicalTargets: ["relationship"],
+        boundaries: [],
+        claims: [],
+        questions: [
+          {
+            kind: "relationship_status",
+            concept: "relationship",
+            target: "npc",
+            requestedField: "relationshipStatus",
+            text: "私たちって何？"
+          }
+        ]
+      },
+      characterFacts: {
+        relationshipStatus: "partners"
+      },
+      characterPolicy: {},
+      psychology: {},
+      expectedMeaningIds: ["STATE_RELATIONSHIP_STATUS"],
+      forbiddenMeaningIds: ["ASK_RELATIONSHIP_STATUS","ANSWER_UNKNOWN"],
+      expectedEnglishIncludes: ["partners"]
+    },
+    {
+      id: "answer_feelings_001",
+      sourceJa: "私のことどう思ってる？",
+      analysis: {
+        analysisVersion: 2,
+        rawText: "私のことどう思ってる？",
+        emotions: {},
+        intents: ["ask_feelings"],
+        focusConcepts: ["relationship"],
+        lexicalTargets: ["love"],
+        boundaries: [],
+        claims: [],
+        questions: [
+          {
+            kind: "feelings",
+            concept: "relationship",
+            target: "heroine",
+            requestedField: "feelingsTowardHeroine",
+            text: "私のことどう思ってる？"
+          }
+        ]
+      },
+      characterFacts: {
+        feelingsTowardHeroine: "love"
+      },
+      characterPolicy: {},
+      psychology: {},
+      expectedMeaningIds: ["STATE_FEELINGS_TOWARD_HEROINE"],
+      forbiddenMeaningIds: ["ASK_FEELINGS","ANSWER_UNKNOWN"],
+      expectedEnglishIncludes: ["love"]
     }
   ];
 
