@@ -733,7 +733,7 @@
 <body>
 <script>
 (() => {
-  const SHOP_BUILD='20260924-life-route-v1';
+  const SHOP_BUILD='20260924-trade-route-v1';
   const u=new URL(location.href);
   if(u.searchParams.get('build')!==SHOP_BUILD){
     u.searchParams.set('build',SHOP_BUILD);
@@ -833,6 +833,7 @@
       './SHOP_well.js',
       './SHOP_stall.js',
       './SHOP_society.js',
+      './SHOP_trade.js',
       './SHOP_life.js',
       './SHOP_action.js',
       './SHOP_save.js',
@@ -841,7 +842,7 @@
     for (const file of files) {
       await new Promise((resolve, reject) => {
         const script = document.createElement('script');
-        script.src = file + '?v=20260924-life-route-v1&nocache=' + stamp;
+        script.src = file + '?v=20260924-trade-route-v1&nocache=' + stamp;
         script.onload = resolve;
         script.onerror = reject;
         document.body.appendChild(script);
