@@ -20,7 +20,16 @@
 
     const meaningIds = [];
     const reasons = [];
+    const slotOverridesByMeaning = {};
+    const setSlots = (id, slots) => {
+      slotOverridesByMeaning[id] = {
+        ...(slotOverridesByMeaning[id] || {}),
+        ...(slots || {})
+      };
+    };
     const boundaryList = Array.isArray(a.boundaries) ? a.boundaries : [];
+    const questions = Array.isArray(a.questions) ? a.questions : [];
+    const firstQuestion = questions[0] || null;
 
     const distanceBoundary =
       has(boundaryList, "leave_me_alone") ||
@@ -170,14 +179,15 @@
     }
 
     if (has(a.intents, "ask_to_meet") && !distanceBoundary) {
-      if (characterPolicy.willingToMeet !== false) add(meaningIds, "ASK_TO_MEET");
+      if (characterPolicy.willingToMeet !== false) add(meaningIds, "AGREE_REQUEST");
       else add(meaningIds, "DECLINE_REQUEST");
-      reasons.push("meeting_request");
+      reasons.push("meeting_request_answered");
     }
 
     if (has(a.intents, "ask_to_talk") && !distanceBoundary) {
-      add(meaningIds, "ASK_TO_TALK");
-      reasons.push("conversation_requested");
+      if (characterPolicy.willingToTalk !== false) add(meaningIds, "AGREE_REQUEST");
+      else add(meaningIds, "DECLINE_REQUEST");
+      reasons.push("conversation_request_answered");
     }
 
     if (has(a.intents, "ask_for_help")) {
@@ -189,7 +199,6 @@
     if (has(a.intents, "request_stay") && !distanceBoundary) {
       if (characterPolicy.willingToStay === true) {
         add(meaningIds, "AGREE_REQUEST");
-        add(meaningIds, "REQUEST_STAY");
       } else if (characterPolicy.willingToStay === false) {
         add(meaningIds, "DECLINE_REQUEST");
       } else {
@@ -227,38 +236,84 @@
     }
 
     if (has(a.intents, "ask_reason")) {
-      add(meaningIds, "ASK_REASON");
-      reasons.push("reason_requested");
+      add(meaningIds, "ANSWER_UNKNOWN");
+      reasons.push("reason_question_requires_explicit_character_fact");
     }
 
-    if (has(a.intents, "ask_where")) {
-      add(meaningIds, "ASK_WHERE");
-      reasons.push("location_question");
+    if (has(a.intents, "ask_where") || firstQuestion?.kind === "where") {
+      if (characterFacts.currentLocation) {
+        add(meaningIds, "STATE_CURRENT_LOCATION");
+        setSlots("STATE_CURRENT_LOCATION", {
+          SUBJECT: "I",
+          BE: "am",
+          LOCATION: String(characterFacts.currentLocation)
+        });
+        reasons.push("answer_current_location");
+      } else {
+        add(meaningIds, "ANSWER_UNKNOWN");
+        reasons.push("current_location_unknown");
+      }
     }
 
-    if (has(a.intents, "ask_when")) {
-      add(meaningIds, "ASK_WHEN");
-      reasons.push("time_question");
+    if (has(a.intents, "ask_when") || firstQuestion?.kind === "when") {
+      const requestedField = firstQuestion?.requestedField;
+      const timeValue =
+        (requestedField && characterFacts[requestedField] != null
+          ? characterFacts[requestedField]
+          : null) ??
+        characterFacts.availableTime ??
+        characterFacts.returnTime;
+      if (timeValue != null) {
+        add(meaningIds, "STATE_AVAILABLE_TIME");
+        setSlots("STATE_AVAILABLE_TIME", {
+          SUBJECT: "I",
+          BE: "am",
+          TIME: String(timeValue)
+        });
+        reasons.push("answer_time");
+      } else {
+        add(meaningIds, "ANSWER_UNKNOWN");
+        reasons.push("time_unknown");
+      }
     }
 
-    if (has(a.intents, "ask_health") || has(a.focusConcepts, "health")) {
-      add(meaningIds, "ASK_ABOUT_HEALTH");
-      reasons.push("health_topic");
+    if (has(a.intents, "ask_health")) {
+      if (characterFacts.healthStatus) {
+        add(meaningIds, "STATE_CONDITION");
+        setSlots("STATE_CONDITION", {
+          SUBJECT: "I",
+          BE: "am",
+          ADJECTIVE: String(characterFacts.healthStatus)
+        });
+      } else {
+        add(meaningIds, "ANSWER_UNKNOWN");
+      }
+      reasons.push("answer_health_question");
     }
 
-    if (has(a.intents, "ask_sleep") || has(a.focusConcepts, "sleep")) {
-      if (has(a.intents, "ask_sleep")) add(meaningIds, "ASK_ABOUT_SLEEP");
-      reasons.push("sleep_topic");
+    if (has(a.intents, "ask_sleep")) {
+      if (characterFacts.sleptWell === true) add(meaningIds, "STATE_SLEEP_STATUS_GOOD");
+      else if (characterFacts.sleptWell === false) add(meaningIds, "STATE_SLEEP_STATUS_BAD");
+      else add(meaningIds, "ANSWER_UNKNOWN");
+      reasons.push("answer_sleep_question");
     }
 
     if (has(a.intents, "ask_food")) {
-      add(meaningIds, "ASK_ABOUT_FOOD");
-      reasons.push("food_question");
+      if (characterFacts.hasEaten === true) add(meaningIds, "STATE_FOOD_STATUS_EATEN");
+      else if (characterFacts.hasEaten === false) add(meaningIds, "STATE_FOOD_STATUS_NOT_EATEN");
+      else add(meaningIds, "ANSWER_UNKNOWN");
+      reasons.push("answer_food_question");
     }
 
-    if (has(a.intents, "ask_home") || has(a.focusConcepts, "home")) {
-      if (has(a.intents, "ask_home")) add(meaningIds, "ASK_ABOUT_HOME");
-      reasons.push("home_topic");
+    if (has(a.intents, "ask_home")) {
+      const home = characterFacts.homeLocation ?? characterFacts.currentShelter;
+      if (home) {
+        add(meaningIds, "STATE_HOME");
+        setSlots("STATE_HOME", { SUBJECT:"I", LOCATION:String(home) });
+      } else {
+        add(meaningIds, "ANSWER_UNKNOWN");
+      }
+      reasons.push("answer_home_question");
     }
 
     if (has(a.intents, "offer_help")) {
@@ -312,39 +367,98 @@
     }
 
 
-    if (has(a.intents, "ask_plan")) {
-      add(meaningIds, "ASK_PLAN");
-      reasons.push("plan_question");
+    if (has(a.intents, "ask_plan") || firstQuestion?.kind === "plan") {
+      const plan = characterFacts.currentPlan;
+      if (plan && typeof plan === "object" && plan.verb) {
+        add(meaningIds, "STATE_CURRENT_PLAN");
+        setSlots("STATE_CURRENT_PLAN", {
+          SUBJECT: "I",
+          VERB_BASE: String(plan.verb),
+          OBJECT: String(plan.object || ""),
+          TIME: String(plan.time || "")
+        });
+      } else {
+        add(meaningIds, "ANSWER_UNKNOWN");
+      }
+      reasons.push("answer_plan_question");
     }
 
-    if (has(a.intents, "ask_preference")) {
-      add(meaningIds, "ASK_PREFERENCE");
-      reasons.push("preference_question");
+    if (has(a.intents, "ask_preference") || firstQuestion?.kind === "preference") {
+      const preference = characterFacts.currentPreference ??
+        characterFacts.preferences?.[firstQuestion?.target || ""];
+      if (preference != null) {
+        add(meaningIds, "STATE_CURRENT_PREFERENCE");
+        setSlots("STATE_CURRENT_PREFERENCE", {
+          SUBJECT: "I",
+          OBJECT: String(preference)
+        });
+      } else {
+        add(meaningIds, "ANSWER_UNKNOWN");
+      }
+      reasons.push("answer_preference_question");
     }
 
     if (has(a.intents, "ask_work")) {
-      add(meaningIds, "ASK_WORK_STATUS");
-      reasons.push("work_status_question");
+      if (characterFacts.workStatus) {
+        add(meaningIds, "STATE_WORK_STATUS");
+        setSlots("STATE_WORK_STATUS", {
+          BE: "is",
+          ADJECTIVE: String(characterFacts.workStatus)
+        });
+      } else {
+        add(meaningIds, "ANSWER_UNKNOWN");
+      }
+      reasons.push("answer_work_status_question");
     }
 
     if (has(a.intents, "ask_money")) {
-      add(meaningIds, "ASK_MONEY_STATUS");
-      reasons.push("money_status_question");
+      if (characterFacts.hasEnoughMoney === false) {
+        add(meaningIds, "STATE_NO_MONEY");
+      } else if (characterFacts.moneyAmount != null || characterFacts.hasEnoughMoney === true) {
+        add(meaningIds, "STATE_MONEY_STATUS");
+        setSlots("STATE_MONEY_STATUS", {
+          SUBJECT: "I",
+          AMOUNT: characterFacts.moneyAmount != null
+            ? String(characterFacts.moneyAmount)
+            : "enough money"
+        });
+      } else {
+        add(meaningIds, "ANSWER_UNKNOWN");
+      }
+      reasons.push("answer_money_status_question");
     }
 
     if (has(a.intents, "ask_hunger")) {
-      add(meaningIds, "ASK_HUNGER");
-      reasons.push("hunger_question");
+      if (typeof characterFacts.hungry === "boolean") {
+        add(meaningIds, "STATE_CONDITION");
+        setSlots("STATE_CONDITION", {
+          SUBJECT:"I", BE:"am",
+          ADJECTIVE:characterFacts.hungry ? "hungry" : "not hungry"
+        });
+      } else add(meaningIds, "ANSWER_UNKNOWN");
+      reasons.push("answer_hunger_question");
     }
 
     if (has(a.intents, "ask_thirst")) {
-      add(meaningIds, "ASK_THIRST");
-      reasons.push("thirst_question");
+      if (typeof characterFacts.thirsty === "boolean") {
+        add(meaningIds, "STATE_CONDITION");
+        setSlots("STATE_CONDITION", {
+          SUBJECT:"I", BE:"am",
+          ADJECTIVE:characterFacts.thirsty ? "thirsty" : "not thirsty"
+        });
+      } else add(meaningIds, "ANSWER_UNKNOWN");
+      reasons.push("answer_thirst_question");
     }
 
     if (has(a.intents, "ask_tiredness")) {
-      add(meaningIds, "ASK_TIREDNESS");
-      reasons.push("tiredness_question");
+      if (typeof characterFacts.tired === "boolean") {
+        add(meaningIds, "STATE_CONDITION");
+        setSlots("STATE_CONDITION", {
+          SUBJECT:"I", BE:"am",
+          ADJECTIVE:characterFacts.tired ? "tired" : "not tired"
+        });
+      } else add(meaningIds, "ANSWER_UNKNOWN");
+      reasons.push("answer_tiredness_question");
     }
 
     if (has(a.intents, "offer_company") && !distanceBoundary) {
@@ -368,13 +482,19 @@
     }
 
     if (has(a.intents, "ask_permission_enter")) {
-      add(meaningIds, "ASK_PERMISSION_ENTER");
-      reasons.push("entry_permission_question");
+      add(
+        meaningIds,
+        characterPolicy.allowEntry === false ? "DECLINE_REQUEST" : "AGREE_REQUEST"
+      );
+      reasons.push("entry_permission_answered");
     }
 
     if (has(a.intents, "ask_permission_wait")) {
-      add(meaningIds, "ASK_PERMISSION_WAIT");
-      reasons.push("wait_permission_question");
+      add(
+        meaningIds,
+        characterPolicy.allowWaiting === false ? "DECLINE_REQUEST" : "AGREE_REQUEST"
+      );
+      reasons.push("wait_permission_answered");
     }
 
     if (has(a.intents, "express_disappointment")) {
@@ -403,13 +523,79 @@
     }
 
     if (has(a.intents, "ask_return_time")) {
-      add(meaningIds, "ASK_RETURN_TIME");
-      reasons.push("return_time_question");
+      if (characterFacts.returnTime != null) {
+        add(meaningIds, "STATE_RETURN_TIME");
+        setSlots("STATE_RETURN_TIME", {
+          SUBJECT:"I",
+          TIME:String(characterFacts.returnTime)
+        });
+      } else {
+        add(meaningIds, "ANSWER_UNKNOWN");
+      }
+      reasons.push("answer_return_time_question");
+    }
+
+    if (has(a.intents, "ask_possession") || firstQuestion?.kind === "possession") {
+      const target = firstQuestion?.target || a.lexicalTargets?.[0] || "it";
+      const value = characterFacts.possessions?.[target];
+      if (typeof value === "number") {
+        add(meaningIds, "STATE_QUANTITY");
+        setSlots("STATE_QUANTITY", {
+          SUBJECT:"I", QUANTITY:String(value), OBJECT:String(target)
+        });
+      } else if (value === true) {
+        add(meaningIds, "CONFIRM_POSSESSION");
+        setSlots("CONFIRM_POSSESSION", { SUBJECT:"I", OBJECT:String(target) });
+      } else if (value === false) {
+        add(meaningIds, "DENY_POSSESSION");
+        setSlots("DENY_POSSESSION", { SUBJECT:"I", OBJECT:String(target) });
+      } else {
+        add(meaningIds, "ANSWER_UNKNOWN");
+      }
+      reasons.push("answer_possession_question");
+    }
+
+    if (has(a.intents, "ask_capability") || firstQuestion?.kind === "capability") {
+      const action = firstQuestion?.action || firstQuestion?.target || a.lexicalTargets?.[0] || "do";
+      const value = characterFacts.capabilities?.[action];
+      if (value === true) {
+        add(meaningIds, "CONFIRM_CAPABILITY");
+        setSlots("CONFIRM_CAPABILITY", {
+          SUBJECT:"I", VERB_BASE:String(action), OBJECT:""
+        });
+      } else if (value === false) {
+        add(meaningIds, "DENY_CAPABILITY");
+        setSlots("DENY_CAPABILITY", {
+          SUBJECT:"I", VERB_BASE:String(action), OBJECT:""
+        });
+      } else {
+        add(meaningIds, "ANSWER_UNKNOWN");
+      }
+      reasons.push("answer_capability_question");
+    }
+
+    if (has(a.intents, "ask_availability") || firstQuestion?.kind === "availability") {
+      if (characterFacts.available === true) {
+        add(meaningIds, "CONFIRM_AVAILABLE");
+        setSlots("CONFIRM_AVAILABLE", {
+          SUBJECT:"I", BE:"am", AVAILABILITY:"available",
+          TIME:String(characterFacts.availableTime || "")
+        });
+      } else if (characterFacts.available === false) {
+        add(meaningIds, "DENY_AVAILABLE");
+        setSlots("DENY_AVAILABLE", {
+          SUBJECT:"I", BE:"am", AVAILABILITY:"not available",
+          TIME:String(characterFacts.availableTime || "")
+        });
+      } else {
+        add(meaningIds, "ANSWER_UNKNOWN");
+      }
+      reasons.push("answer_availability_question");
     }
 
     if (meaningIds.length === 0 && has(a.intents, "ask_question")) {
-      add(meaningIds, "ASK_FOR_ANSWER");
-      reasons.push("generic_question_fallback");
+      add(meaningIds, "ANSWER_UNKNOWN");
+      reasons.push("generic_question_fallback_unknown");
     }
 
     if (meaningIds.length === 0) {
@@ -424,6 +610,7 @@
         ? HMW.Dialogue.expandLexicalTargets(a)
         : (Array.isArray(a.lexicalTargets) ? [...a.lexicalTargets] : []),
       boundaryActive: distanceBoundary || touchBoundary,
+      slotOverridesByMeaning,
       analysis: a
     };
   };
