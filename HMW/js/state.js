@@ -115,6 +115,10 @@
     knownLocations: {
       station_front: true,
       shopping_street: true,
+      convenience_store: true,
+      public_toilet: true,
+      charity_center: true,
+      labor_office: true,
       park: true,
       police_station: true
     },
