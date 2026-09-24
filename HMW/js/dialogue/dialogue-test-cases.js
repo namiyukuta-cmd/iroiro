@@ -133,6 +133,110 @@
       psychology: {},
       expectedMeaningIds: ["DENY_LOVE"],
       forbiddenMeaningIds: ["AFFIRM_LOVE"]
+    },
+    {
+      id: "greeting_001",
+      sourceJa: "こんにちは",
+      analysis: {
+        analysisVersion: 2,
+        rawText: "こんにちは",
+        emotions: {},
+        intents: ["greet"],
+        focusConcepts: [],
+        lexicalTargets: [],
+        boundaries: [],
+        claims: []
+      },
+      characterFacts: {},
+      characterPolicy: {},
+      psychology: {},
+      expectedMeaningIds: ["RETURN_GREETING"],
+      forbiddenMeaningIds: []
+    },
+    {
+      id: "condition_health_001",
+      sourceJa: "ちょっと具合悪い",
+      analysis: {
+        analysisVersion: 2,
+        rawText: "ちょっと具合悪い",
+        emotions: {},
+        intents: ["report_condition"],
+        focusConcepts: ["health"],
+        lexicalTargets: ["sick"],
+        boundaries: [],
+        claims: [
+          {
+            concept: "health",
+            type: "speaker_fact",
+            polarity: true,
+            certainty: "explicit",
+            text: "具合悪い"
+          }
+        ]
+      },
+      characterFacts: {},
+      characterPolicy: {},
+      psychology: {},
+      expectedMeaningIds: ["ASK_IF_OKAY","ASK_ABOUT_HEALTH"],
+      forbiddenMeaningIds: []
+    },
+    {
+      id: "sad_event_001",
+      sourceJa: "仕事を失った",
+      analysis: {
+        analysisVersion: 2,
+        rawText: "仕事を失った",
+        emotions: {
+          sadness: 80
+        },
+        intents: ["report_event"],
+        focusConcepts: ["work","job"],
+        lexicalTargets: ["job","work"],
+        boundaries: [],
+        claims: [
+          {
+            concept: "job",
+            type: "speaker_fact",
+            polarity: true,
+            certainty: "explicit",
+            text: "仕事を失った"
+          }
+        ]
+      },
+      characterFacts: {},
+      characterPolicy: {},
+      psychology: {},
+      expectedMeaningIds: ["ACKNOWLEDGE_EVENT","EXPRESS_SYMPATHY"],
+      forbiddenMeaningIds: []
+    },
+    {
+      id: "touch_boundary_001",
+      sourceJa: "触らないで",
+      analysis: {
+        analysisVersion: 2,
+        rawText: "触らないで",
+        emotions: {
+          anger: 50
+        },
+        intents: ["refuse"],
+        focusConcepts: ["distance"],
+        lexicalTargets: ["touch"],
+        boundaries: ["do_not_touch"],
+        claims: [
+          {
+            concept: "touch",
+            type: "boundary",
+            polarity: false,
+            certainty: "explicit",
+            text: "触らないで"
+          }
+        ]
+      },
+      characterFacts: {},
+      characterPolicy: {},
+      psychology: {},
+      expectedMeaningIds: ["RESPECT_BOUNDARY","PROMISE_NOT_TOUCH"],
+      forbiddenMeaningIds: ["ASK_PERMISSION_TOUCH"]
     }
   ];
 
