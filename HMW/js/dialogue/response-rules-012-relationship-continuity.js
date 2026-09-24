@@ -49,7 +49,7 @@
   add("R1137_HIGH_GOODWILL_HIGH_CONSCIENCE",620,{intentAny:["express_hurt"],relationshipMin:{goodwill:70,conscience:70}},["EXPRESS_CONCERN"],"goodwill_conscience_hurt");
   add("R1138_HIGH_FAM_HIGH_GOODWILL_REPORT",570,{intentAny:["report_event"],relationshipMin:{familiarity:70,goodwill:70}},["ACKNOWLEDGE_EVENT","EXPRESS_CARE"],"familiar_goodwill_report");
   add("R1139_HIGH_FAM_HIGH_GOODWILL_LONELY",610,{intentAny:["express_loneliness"],relationshipMin:{familiarity:70,goodwill:70},boundaryNone:["leave_me_alone"]},["OFFER_COMPANY"],"familiar_goodwill_loneliness");
-  add("R1140_HIGH_TRUST_HIGH_CONSCIENCE_REPAIR",660,{focusAny:["apology","relationship"],relationshipMin:{trust:70,conscience:70}},["ASK_TO_REPAIR"],"trust_conscience_repair");
+  add("R1140_HIGH_TRUST_HIGH_CONSCIENCE_REPAIR",660,{focusAny:["apology","relationship"],relationshipMin:{trust:70,conscience:70},relationshipFlagEq:{conflict:true}},["ASK_TO_REPAIR"],"trust_conscience_repair");
 
   // Last-response-sensitive continuity.
   add("R1141_LAST_AFFIRM_LOVE",650,{intentAny:["question_affection"],historyLastAny:["AFFIRM_LOVE"]},["EXPRESS_CARE"],"last_was_love_confirmation");
