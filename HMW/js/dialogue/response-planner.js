@@ -33,6 +33,8 @@
     const boundaryList = Array.isArray(a.boundaries) ? a.boundaries : [];
     const questions = Array.isArray(a.questions) ? a.questions : [];
     const firstQuestion = questions[0] || null;
+    const questionOfKind = kind =>
+      questions.find(question => question?.kind === kind) || null;
 
     const claimInfo = HMW.Dialogue.interpretClaims
       ? HMW.Dialogue.interpretClaims(a.claims || [])
@@ -905,9 +907,10 @@
 
     if (
       has(a.intents, "ask_permission_action") ||
-      firstQuestion?.kind === "permission"
+      questionOfKind("permission")
     ) {
-      const action = firstQuestion?.action || firstQuestion?.target || "default";
+      const actionQuestion = questionOfKind("permission");
+      const action = actionQuestion?.action || actionQuestion?.target || "default";
       const value = characterPolicy.permissions?.[action];
       if (actionBlockedByBoundary(action)) {
         add(meaningIds, "DENY_PERMISSION");
@@ -920,9 +923,10 @@
 
     if (
       has(a.intents, "request_action") ||
-      firstQuestion?.kind === "request_action"
+      questionOfKind("request_action")
     ) {
-      const action = firstQuestion?.action || firstQuestion?.target || "default";
+      const actionQuestion = questionOfKind("request_action");
+      const action = actionQuestion?.action || actionQuestion?.target || "default";
       const value = characterPolicy.requestResponses?.[action];
       if (actionBlockedByBoundary(action)) {
         add(meaningIds, "DECLINE_ACTION_REQUEST");
@@ -935,9 +939,10 @@
 
     if (
       has(a.intents, "invite_action") ||
-      firstQuestion?.kind === "invitation"
+      questionOfKind("invitation")
     ) {
-      const action = firstQuestion?.action || firstQuestion?.target || "default";
+      const actionQuestion = questionOfKind("invitation");
+      const action = actionQuestion?.action || actionQuestion?.target || "default";
       const value = characterPolicy.invitationResponses?.[action];
       if (actionBlockedByBoundary(action)) {
         add(meaningIds, "DECLINE_INVITATION");
@@ -950,9 +955,10 @@
 
     if (
       has(a.intents, "suggest_action") ||
-      firstQuestion?.kind === "suggestion"
+      questionOfKind("suggestion")
     ) {
-      const action = firstQuestion?.action || firstQuestion?.target || "default";
+      const actionQuestion = questionOfKind("suggestion");
+      const action = actionQuestion?.action || actionQuestion?.target || "default";
       const value = characterPolicy.suggestionResponses?.[action];
       if (actionBlockedByBoundary(action)) {
         add(meaningIds, "DECLINE_SUGGESTION");
