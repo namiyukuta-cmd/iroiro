@@ -188,6 +188,46 @@
     ASK_PERMISSION_KISS: {
       category: "physical",
       meaningJa: "キスしてよいか確認する"
+    },
+    EXPRESS_TIRED: {
+      category: "condition",
+      meaningJa: "疲れていることを伝える"
+    },
+    EXPRESS_HUNGRY: {
+      category: "condition",
+      meaningJa: "空腹であることを伝える"
+    },
+    EXPRESS_COLD: {
+      category: "condition",
+      meaningJa: "寒さを感じていることを伝える"
+    },
+    OFFER_HELP: {
+      category: "care",
+      meaningJa: "相手を助けることを申し出る"
+    },
+    ASK_FOR_HELP: {
+      category: "request",
+      meaningJa: "相手に助けを求める"
+    },
+    OFFER_FOOD: {
+      category: "care",
+      meaningJa: "食べ物を差し出す、または食事を勧める"
+    },
+    OFFER_DRINK: {
+      category: "care",
+      meaningJa: "飲み物を差し出す、または飲むことを勧める"
+    },
+    ASK_TO_WAIT: {
+      category: "request",
+      meaningJa: "少し待ってほしいと求める"
+    },
+    ASK_TO_GO_TOGETHER: {
+      category: "closeness",
+      meaningJa: "一緒に行こうと誘う"
+    },
+    ASK_DESTINATION: {
+      category: "clarity",
+      meaningJa: "相手がどこへ行くのか尋ねる"
     }
   };
 })();
