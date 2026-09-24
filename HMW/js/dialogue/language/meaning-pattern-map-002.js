@@ -143,7 +143,7 @@
     {
       "pattern": "QUESTION_WHO_IS",
       "slots": {
-        "SUBJECT": "that person"
+        "SUBJECT_COMPLEMENT": "that person"
       },
       "weight": 4
     },
