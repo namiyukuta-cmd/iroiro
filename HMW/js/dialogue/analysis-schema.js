@@ -21,8 +21,11 @@
       "express_fear","express_loneliness","express_jealousy","express_surprise",
       "express_approval","express_disapproval","apologize","accept_apology",
       "reject_apology","ask_relationship_status","ask_feelings","ask_to_meet",
-      "ask_to_talk","refuse","agree","report_condition","report_event",
-      "state_plan","state_preference"
+      "ask_to_talk","ask_plan","ask_preference","ask_work","ask_money","ask_hunger",
+      "ask_thirst","ask_tiredness","offer_company","offer_contact","request_contact",
+      "ask_permission_enter","ask_permission_wait","ask_return_time","confirm_arrival",
+      "confirm_departure","express_disappointment","express_hope","express_pride",
+      "refuse","agree","report_condition","report_event","state_plan","state_preference"
     ],
 
     focusConcepts: [
@@ -30,7 +33,8 @@
       "death","harm","relationship","jealousy","other_person","apology","promise",
       "work","money","food","water","sleep","health","weather","home","meeting",
       "time","place","travel","job","rent","shelter","injury","illness","family",
-      "friend","contact","future","past","plan","preference"
+      "friend","contact","future","past","plan","preference","arrival","departure","return",
+      "company","entry","waiting","hunger","thirst","tiredness"
     ],
 
     boundaries: [
