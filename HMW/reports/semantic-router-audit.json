@@ -1,0 +1,1546 @@
+{
+  "meanings": 177,
+  "vocabularyEntries": 5073,
+  "registeredPatterns": 1000,
+  "sampledRoutes": 4278,
+  "usedPatterns": 128,
+  "eligiblePatterns": 190,
+  "observedDictionarySlotValues": 126,
+  "ineligiblePatterns": [
+    "DECLARATIVE_BE_NOUN",
+    "NEGATIVE_BE_ADJ",
+    "MODAL_SHOULD_NOT",
+    "PRESENT_PERFECT",
+    "WH_WHAT_DO",
+    "WH_WHERE_BE",
+    "WH_HOW_FEEL",
+    "LET_ME",
+    "CONDITIONAL_IF",
+    "REASON_BECAUSE",
+    "CONTRAST_BUT",
+    "SEQUENCE_AND",
+    "SVO_ADVERB",
+    "SVC_PREP",
+    "SVO_TO_INF",
+    "SV_TO_INF",
+    "SV_GERUND",
+    "BE_NOT_GOING_TO",
+    "PAST_BE_ADJ",
+    "PRESENT_PERFECT_NEGATIVE",
+    "QUESTION_HAVE_YOU",
+    "QUESTION_WHY_ARE",
+    "QUESTION_WHERE_DID",
+    "IMPERATIVE_PLEASE_END",
+    "NEVER_IMPERATIVE",
+    "LET_ME_VERB",
+    "THERE_IS",
+    "THERE_ARE",
+    "IT_IS_ADJ_TO",
+    "IT_IS_ADJ_THAT",
+    "I_DONT_THINK_CLAUSE",
+    "I_KNOW_CLAUSE",
+    "BECAUSE_CLAUSE",
+    "SO_CLAUSE",
+    "IF_THEN",
+    "WHEN_CLAUSE",
+    "EVEN_IF_CLAUSE",
+    "ALTHOUGH_CLAUSE",
+    "NOT_BECAUSE_BUT",
+    "BOTH_AND",
+    "EITHER_OR",
+    "NEITHER_NOR",
+    "DECLARATIVE_WITH_THAT",
+    "DECLARATIVE_WITH_IF",
+    "DECLARATIVE_WITH_WHAT",
+    "DECLARATIVE_WITH_WHY",
+    "DECLARATIVE_WITH_HOW",
+    "DECLARATIVE_TOO_ADJ_TO",
+    "DECLARATIVE_ADJ_ENOUGH_TO",
+    "WOULD_LIKE_TO",
+    "WOULD_NOT_LIKE_TO",
+    "WOULD_RATHER",
+    "HAD_BETTER",
+    "USED_TO",
+    "NOT_USED_TO",
+    "GET_USED_TO",
+    "NEED_SOMEONE_TO",
+    "ASK_SOMEONE_TO",
+    "TELL_SOMEONE_TO",
+    "TELL_SOMEONE_NOT_TO",
+    "PROMISE_TO",
+    "TRY_NOT_TO",
+    "DECIDE_TO",
+    "REFUSE_TO",
+    "AGREE_TO",
+    "SEEM_TO",
+    "APPEAR_TO",
+    "KEEP_GERUND",
+    "STOP_GERUND",
+    "START_GERUND",
+    "FINISH_GERUND",
+    "MIND_GERUND",
+    "QUESTION_DO_YOU_MIND",
+    "QUESTION_WHY_DONT_WE",
+    "QUESTION_SHOULD_I",
+    "QUESTION_SHOULD_WE",
+    "QUESTION_WHAT_HAPPENED_TO",
+    "QUESTION_HOW_LONG",
+    "QUESTION_HOW_MUCH",
+    "QUESTION_HOW_MANY",
+    "QUESTION_WHICH",
+    "QUESTION_WHO_DO_YOU",
+    "COMPARATIVE_THAN",
+    "AS_ADJ_AS",
+    "MORE_NOUN_THAN",
+    "LESS_NOUN_THAN",
+    "THE_MORE_THE_MORE",
+    "AS_SOON_AS",
+    "UNTIL_CLAUSE",
+    "PRESENT_SIMPLE_SV",
+    "FUTURE_QUESTION",
+    "PRESENT_CONTINUOUS_NEG",
+    "PRESENT_CONTINUOUS_QUESTION",
+    "PRESENT_PERFECT_SIMPLE",
+    "PRESENT_PERFECT_QUESTION",
+    "MODAL_MUST",
+    "MODAL_MUST_NOT",
+    "MODAL_MAY",
+    "MODAL_MIGHT",
+    "MODAL_WOULD",
+    "MODAL_COULD",
+    "QUESTION_WHAT_DID",
+    "QUESTION_WHERE_WERE",
+    "QUESTION_WHERE_WILL",
+    "QUESTION_WHEN_DID",
+    "QUESTION_HOW_DID",
+    "LOOK_ADJECTIVE",
+    "BECAUSE_REASON",
+    "IF_CONDITION",
+    "UNTIL_TIME",
+    "QUESTION_WHAT_ARE_YOU_DOING",
+    "QUESTION_WHAT_WERE_YOU_DOING",
+    "QUESTION_WHAT_HAVE_YOU_DONE",
+    "QUESTION_WHERE_ARE_YOU_GOING",
+    "QUESTION_WHERE_HAVE_YOU_BEEN",
+    "QUESTION_WHEN_ARE_YOU",
+    "QUESTION_WHO_ARE_YOU_WITH",
+    "QUESTION_WHO_WERE_YOU_WITH",
+    "QUESTION_WHO_DO_YOU_TRUST",
+    "QUESTION_IS_THERE",
+    "QUESTION_ARE_THERE",
+    "QUESTION_IS_SOMETHING",
+    "QUESTION_HAVE_YOU_EVER",
+    "QUESTION_HAVE_YOU_YET",
+    "QUESTION_DO_YOU_STILL",
+    "QUESTION_DID_YOU_STILL",
+    "DECLARATIVE_STILL_VERB",
+    "DECLARATIVE_ALREADY_VERB",
+    "DECLARATIVE_JUST_VERB",
+    "DECLARATIVE_NEVER_VERB",
+    "DECLARATIVE_ALWAYS_VERB",
+    "DECLARATIVE_SOMETIMES_VERB",
+    "DECLARATIVE_PROBABLY_WILL",
+    "DECLARATIVE_MAYBE_WILL",
+    "DECLARATIVE_USED_TO",
+    "DECLARATIVE_NO_LONGER",
+    "DECLARATIVE_NOT_ANYMORE",
+    "DECLARATIVE_NOT_YET",
+    "DECLARATIVE_FOR_TIME",
+    "DECLARATIVE_SINCE_TIME",
+    "CONDITIONAL_IF_CAN",
+    "CONDITIONAL_IF_WANT",
+    "CONDITIONAL_IF_NEED",
+    "CONDITIONAL_UNLESS",
+    "CONDITIONAL_AS_LONG_AS",
+    "PURPOSE_TO",
+    "PURPOSE_SO_THAT",
+    "REASON_SINCE",
+    "CONTRAST_ALTHOUGH",
+    "CONTRAST_EVEN_THOUGH",
+    "CONTRAST_HOWEVER",
+    "ADDITION_ALSO",
+    "ADDITION_BESIDES",
+    "RESULT_THEREFORE",
+    "SEQUENCE_FIRST_THEN",
+    "SEQUENCE_BEFORE_AFTER",
+    "POLITE_WOULD_LIKE",
+    "POLITE_WOULD_LIKE_TO",
+    "QUESTION_DOES_SV",
+    "QUESTION_COULD_SUBJECT",
+    "QUESTION_WOULD_SUBJECT",
+    "QUESTION_HAS_SUBJECT",
+    "QUESTION_HAVE_SUBJECT",
+    "QUESTION_IS_SUBJECT_ADJ",
+    "QUESTION_ARE_SUBJECT_ADJ",
+    "QUESTION_WHERE_DOES",
+    "QUESTION_WHERE_CAN",
+    "QUESTION_WHEN_DOES",
+    "QUESTION_WHEN_CAN",
+    "QUESTION_WHO_DID",
+    "QUESTION_WHICH_ONE",
+    "QUESTION_HOW_FAR",
+    "QUESTION_HOW_LONG_WILL",
+    "QUESTION_HOW_LONG_HAVE",
+    "QUESTION_HOW_MUCH_NEED",
+    "HAS_NOUN",
+    "DOES_NOT_HAVE_NOUN",
+    "MUST_VERB",
+    "MUST_NOT_VERB",
+    "SHOULD_NOT_VERB",
+    "MAY_VERB",
+    "MIGHT_VERB",
+    "PREFERENCE_WOULD_RATHER",
+    "ALREADY_PAST",
+    "NOT_YET_PERFECT",
+    "JUST_PAST",
+    "ANSWER_OPINION_DIRECT",
+    "ANSWER_QUANTITY_THERE_ARE",
+    "ANSWER_NEED_QUANTITY",
+    "ANSWER_AVAILABILITY_TIME",
+    "ANSWER_RETURN_TIME",
+    "ANSWER_DEPARTURE_TIME",
+    "ANSWER_ARRIVAL_TIME",
+    "ANSWER_HOME_LOCATION",
+    "ANSWER_STAY_LOCATION",
+    "ANSWER_MONEY_AMOUNT",
+    "ANSWER_PREFERENCE",
+    "ANSWER_PLAN_WILL",
+    "ANSWER_PLAN_GOING_TO",
+    "QUESTION_IDENTITY_NAME",
+    "QUESTION_IDENTITY_ROLE",
+    "QUESTION_ORIGIN",
+    "QUESTION_DESTINATION",
+    "QUESTION_REASON",
+    "QUESTION_OPINION",
+    "QUESTION_PRICE",
+    "QUESTION_QUANTITY",
+    "QUESTION_AVAILABILITY",
+    "QUESTION_RETURN_TIME",
+    "QUESTION_DEPARTURE_TIME",
+    "QUESTION_ARRIVAL_TIME",
+    "QUESTION_WORK_LOCATION",
+    "QUESTION_JOB_ROLE",
+    "PASSIVE_PRESENT",
+    "PASSIVE_PAST",
+    "PASSIVE_FUTURE",
+    "PASSIVE_MODAL",
+    "RELATIVE_WHO",
+    "RELATIVE_WHICH",
+    "RELATIVE_THAT",
+    "RELATIVE_WHERE",
+    "RELATIVE_WHEN",
+    "EMBEDDED_WHAT",
+    "EMBEDDED_WHERE",
+    "EMBEDDED_WHEN",
+    "EMBEDDED_WHY",
+    "EMBEDDED_HOW",
+    "REPORTED_SAID_THAT",
+    "REPORTED_TOLD_OBJECT",
+    "REPORTED_ASKED_IF",
+    "REPORTED_ASKED_WH",
+    "CONDITIONAL_ZERO",
+    "CONDITIONAL_FIRST",
+    "CONDITIONAL_SECOND",
+    "CONDITIONAL_WOULD_IF",
+    "UNLESS_CONDITION",
+    "IN_CASE_CONDITION",
+    "AS_LONG_AS_CONDITION",
+    "BECAUSE_OF_NOUN",
+    "DUE_TO_NOUN",
+    "SO_RESULT",
+    "THEREFORE_RESULT",
+    "SO_ADJ_THAT",
+    "TOO_ADJ_TO",
+    "ADJ_ENOUGH_TO",
+    "MORE_ADJ_THAN",
+    "LESS_ADJ_THAN",
+    "NOT_AS_ADJ_AS",
+    "BEFORE_CLAUSE",
+    "AFTER_CLAUSE",
+    "WHILE_CLAUSE",
+    "BY_THE_TIME",
+    "IN_ORDER_TO",
+    "SO_THAT_PURPOSE",
+    "WITHOUT_GERUND",
+    "BY_GERUND",
+    "INSTEAD_OF_GERUND",
+    "PRESENT_PERFECT_CONTINUOUS",
+    "PAST_PERFECT",
+    "PAST_PERFECT_NEG",
+    "FUTURE_PERFECT",
+    "FUTURE_CONTINUOUS",
+    "BE_ABOUT_TO",
+    "BE_SUPPOSED_TO",
+    "BE_ALLOWED_TO",
+    "BE_NOT_ALLOWED_TO",
+    "HAVE_GOT_TO",
+    "OUGHT_TO",
+    "MIGHT_HAVE",
+    "MUST_HAVE",
+    "COULD_HAVE",
+    "SHOULD_HAVE",
+    "SHOULD_NOT_HAVE",
+    "WISH_PAST",
+    "EXPECT_OBJECT_TO",
+    "ALLOW_OBJECT_TO",
+    "ASK_OBJECT_TO",
+    "TELL_OBJECT_TO",
+    "HELP_OBJECT_VERB",
+    "MAKE_OBJECT_VERB",
+    "LET_OBJECT_VERB",
+    "ENJOY_GERUND",
+    "AVOID_GERUND",
+    "MIND_GERUND_QUESTION",
+    "THANK_FOR_GERUND",
+    "APOLOGIZE_FOR_GERUND",
+    "BE_INTERESTED_IN_GERUND",
+    "BE_AFRAID_OF_GERUND",
+    "THERE_WAS",
+    "THERE_WERE",
+    "QUESTION_TAG_POSITIVE",
+    "QUESTION_TAG_NEGATIVE",
+    "EXCLAMATION_HOW_ADJ",
+    "EXCLAMATION_WHAT_NOUN",
+    "NOT_ONLY_BUT_ALSO",
+    "LIKE_OBJECT",
+    "DISLIKE_OBJECT",
+    "LOVE_OBJECT",
+    "CARE_ABOUT_OBJECT",
+    "TRUST_OBJECT",
+    "MISS_OBJECT",
+    "NEED_OBJECT_SIMPLE",
+    "WANT_OBJECT_SIMPLE",
+    "CHOOSE_OBJECT",
+    "PREFER_OBJECT_OVER",
+    "WOULD_RATHER_THAN",
+    "ASK_CHOICE_BETWEEN",
+    "ASK_FEELING_ABOUT",
+    "ASK_OPINION_ABOUT",
+    "ASK_REASON_FOR",
+    "DENY_PERMISSION",
+    "SUGGEST_WHY_DONT_WE",
+    "SUGGEST_HOW_ABOUT_GERUND",
+    "CORRECT_FACT",
+    "CLARIFY_MEANING",
+    "ADD_DETAIL",
+    "CONTRAST_YET",
+    "REASON_THATS_WHY",
+    "UNCERTAIN_MAYBE",
+    "UNCERTAIN_PROBABLY",
+    "CERTAIN_DEFINITELY",
+    "TIME_AT",
+    "TIME_ON",
+    "TIME_IN",
+    "PLACE_AT",
+    "PLACE_IN",
+    "PLACE_NEAR",
+    "FREQUENCY_ALWAYS",
+    "FREQUENCY_OFTEN",
+    "FREQUENCY_SOMETIMES",
+    "FREQUENCY_NEVER",
+    "ANSWER_FEELINGS_TOWARD_HEROINE",
+    "PERMISSION_DENY_CANNOT",
+    "REQUEST_ACCEPT_CAN",
+    "REQUEST_DECLINE_CANNOT",
+    "INVITE_DO_YOU_WANT_TO",
+    "INVITE_WOULD_YOU_LIKE_TO",
+    "SUGGEST_SHOULD_WE",
+    "REQUEST_DONT_ACTION",
+    "ANSWER_YES_SIMPLE",
+    "ANSWER_NO_SIMPLE",
+    "ANSWER_NOT_NOW",
+    "ANSWER_MAYBE_LATER",
+    "OFFER_ACCEPT",
+    "G13_ZERO_CONDITIONAL",
+    "G13_FIRST_CONDITIONAL",
+    "G13_FIRST_CONDITIONAL_NEG",
+    "G13_SECOND_CONDITIONAL",
+    "G13_THIRD_CONDITIONAL",
+    "G13_MIXED_CONDITIONAL_PAST_PRESENT",
+    "G13_UNLESS_CONDITION",
+    "G13_AS_LONG_AS_CONDITION",
+    "G13_EVEN_IF_CONDITION",
+    "G13_IN_CASE_CONDITION",
+    "G13_PRESENT_SIMPLE_PASSIVE",
+    "G13_PAST_SIMPLE_PASSIVE",
+    "G13_FUTURE_PASSIVE",
+    "G13_PRESENT_PERFECT_PASSIVE",
+    "G13_MODAL_CAN_PASSIVE",
+    "G13_MODAL_MUST_PASSIVE",
+    "G13_MODAL_SHOULD_PASSIVE",
+    "G13_GET_PASSIVE",
+    "G13_PASSIVE_BY_AGENT",
+    "G13_PASSIVE_NEGATIVE",
+    "G13_REPORT_SAY_THAT",
+    "G13_REPORT_TELL_OBJECT_THAT",
+    "G13_REPORT_ASK_IF",
+    "G13_REPORT_ASK_WH",
+    "G13_REPORT_PROMISE_TO",
+    "G13_REPORT_ADVISE_TO",
+    "G13_REPORT_WARN_NOT_TO",
+    "G13_REPORT_REQUEST_TO",
+    "G13_REPORT_THINK_THAT",
+    "G13_REPORT_BELIEVE_THAT",
+    "G13_RELATIVE_WHO",
+    "G13_RELATIVE_WHICH",
+    "G13_RELATIVE_THAT",
+    "G13_RELATIVE_WHERE",
+    "G13_RELATIVE_WHEN",
+    "G13_RELATIVE_WHOSE",
+    "G13_NONDEFINING_WHO",
+    "G13_NONDEFINING_WHICH",
+    "G13_RELATIVE_PREPOSITION_WHOM",
+    "G13_REDUCED_RELATIVE_ING",
+    "G13_COMPARATIVE_THAN",
+    "G13_SUPERLATIVE_IN",
+    "G13_AS_ADJ_AS",
+    "G13_NOT_AS_ADJ_AS",
+    "G13_THE_MORE_THE_MORE",
+    "G13_MUCH_COMPARATIVE",
+    "G13_SLIGHTLY_COMPARATIVE",
+    "G13_PREFER_A_TO_B",
+    "G13_WOULD_RATHER_A_THAN_B",
+    "G13_WOULD_PREFER_TO_VERB",
+    "G13_BECAUSE_CLAUSE",
+    "G13_SINCE_REASON",
+    "G13_AS_REASON",
+    "G13_SO_RESULT",
+    "G13_THEREFORE_RESULT",
+    "G13_SO_THAT_PURPOSE",
+    "G13_IN_ORDER_TO",
+    "G13_SO_AS_TO",
+    "G13_TOO_ADJ_TO",
+    "G13_ADJ_ENOUGH_TO",
+    "G13_DESPITE_NOUN",
+    "G13_IN_SPITE_OF_GERUND",
+    "G13_ALTHOUGH_CONCESSION",
+    "G13_EVEN_THOUGH_CONCESSION",
+    "G13_WHILE_CONTRAST",
+    "G13_WHEREAS_CONTRAST",
+    "G13_DUE_TO_NOUN",
+    "G13_BECAUSE_OF_NOUN",
+    "G13_AS_A_RESULT",
+    "G13_FOR_THIS_REASON",
+    "G13_BEFORE_CLAUSE",
+    "G13_AFTER_CLAUSE",
+    "G13_WHILE_CLAUSE",
+    "G13_WHEN_CLAUSE",
+    "G13_UNTIL_CLAUSE",
+    "G13_AS_SOON_AS",
+    "G13_ONCE_CLAUSE",
+    "G13_BY_THE_TIME",
+    "G13_FIRST_THEN",
+    "G13_EVENTUALLY_CLAUSE",
+    "G13_HOW_LONG_QUESTION",
+    "G13_HOW_OFTEN_QUESTION",
+    "G13_HOW_MUCH_QUESTION",
+    "G13_HOW_MANY_QUESTION",
+    "G13_WHAT_KIND_OF",
+    "G13_WHICH_ONE_QUESTION",
+    "G13_WHO_DO_QUESTION",
+    "G13_WHAT_HAPPENED",
+    "G13_IS_THERE_QUESTION",
+    "G13_ARE_THERE_QUESTION",
+    "G13_DO_YOU_MEAN",
+    "G13_ARE_YOU_SAYING",
+    "G13_IF_I_UNDERSTAND",
+    "G13_LET_ME_CLARIFY",
+    "G13_FROM_MY_POINT_OF_VIEW",
+    "G13_AS_FAR_AS_I_KNOW",
+    "G13_I_AM_NOT_SURE_WHETHER",
+    "G13_IT_SEEMS_THAT",
+    "G13_IT_DEPENDS_ON",
+    "G13_WHAT_MATTERS_IS",
+    "G14_MODAL_MAY",
+    "G14_MODAL_MIGHT",
+    "G14_MODAL_MUST",
+    "G14_MODAL_SHOULD_NOT",
+    "G14_MODAL_COULD",
+    "G14_MODAL_WOULD",
+    "G14_MODAL_NEED_NOT",
+    "G14_CAUSE_HAVE_OBJECT_PP",
+    "G14_CAUSE_GET_OBJECT_TO",
+    "G14_CAUSE_MAKE_OBJECT_ADJ",
+    "G14_KEEP_OBJECT_ADJ",
+    "G14_LEAVE_OBJECT_ADJ",
+    "G14_FIND_OBJECT_ADJ",
+    "G14_SEE_OBJECT_VERB",
+    "G14_HEAR_OBJECT_VERB",
+    "G14_WATCH_OBJECT_ING",
+    "G14_NOTICE_OBJECT_ING",
+    "G14_NOUN_CLAUSE_THAT",
+    "G14_NOUN_CLAUSE_WHAT",
+    "G14_NOUN_CLAUSE_WHETHER",
+    "G14_NOUN_CLAUSE_IF",
+    "G14_NOUN_CLAUSE_WHY",
+    "G14_NOUN_CLAUSE_HOW",
+    "G14_NOUN_CLAUSE_WHEN",
+    "G14_NOUN_CLAUSE_WHERE",
+    "G14_NOUN_CLAUSE_WHO",
+    "G14_NOUN_CLAUSE_WHICH",
+    "G14_PLAN_TO",
+    "G14_DECIDE_TO",
+    "G14_HOPE_TO",
+    "G14_PROMISE_TO",
+    "G14_REFUSE_TO",
+    "G14_AGREE_TO",
+    "G14_MANAGE_TO",
+    "G14_FAIL_TO",
+    "G14_KEEP_GERUND",
+    "G14_STOP_GERUND",
+    "G14_CONSIDER_GERUND",
+    "G14_SUGGEST_GERUND",
+    "G14_RECOMMEND_GERUND",
+    "G14_PRACTICE_GERUND",
+    "G14_MISS_GERUND",
+    "G14_IMAGINE_GERUND",
+    "G14_DELAY_GERUND",
+    "G14_RISK_GERUND",
+    "G14_DISCOURSE_IN_FACT",
+    "G14_DISCOURSE_FOR_EXAMPLE",
+    "G14_DISCOURSE_IN_OTHER_WORDS",
+    "G14_DISCOURSE_ON_THE_OTHER_HAND",
+    "G14_DISCOURSE_AT_LEAST",
+    "G14_DISCOURSE_AFTER_ALL",
+    "G14_DISCOURSE_BY_THE_WAY",
+    "G14_DISCOURSE_INSTEAD",
+    "G14_DISCOURSE_OTHERWISE",
+    "G14_DISCOURSE_MEANWHILE",
+    "G14_POLITE_COULD_I",
+    "G14_POLITE_WOULD_IT_BE_POSSIBLE",
+    "G14_POLITE_ID_APPRECIATE_IF",
+    "G14_POLITE_IF_YOU_DONT_MIND",
+    "G14_POLITE_PLEASE_LET_ME_KNOW",
+    "G14_POLITE_COULD_YOU_TELL_ME",
+    "G14_POLITE_MAY_I_ASK",
+    "G14_POLITE_ID_LIKE_TO",
+    "G14_POLITE_WOULD_YOU_LIKE",
+    "G14_UNCERTAIN_I_DONT_THINK",
+    "G14_UNCERTAIN_I_GUESS",
+    "G14_UNCERTAIN_I_SUPPOSE",
+    "G14_UNCERTAIN_IT_MIGHT_BE",
+    "G14_UNCERTAIN_THERE_MAY_BE",
+    "G14_UNCERTAIN_IM_NOT_CERTAIN",
+    "G14_UNCERTAIN_AS_FAR_AS_I_CAN_TELL",
+    "G14_UNCERTAIN_IT_LOOKS_LIKE",
+    "G14_UNCERTAIN_IT_SOUNDS_LIKE",
+    "G14_EMPHASIS_DO_VERB",
+    "G14_EMPHASIS_DID_VERB",
+    "G14_EMPHASIS_REALLY",
+    "G14_EMPHASIS_ACTUALLY",
+    "G14_EMPHASIS_EVEN",
+    "G14_EMPHASIS_ONLY",
+    "G14_EMPHASIS_JUST",
+    "G14_EMPHASIS_ALL_I_WANT",
+    "G14_EMPHASIS_WHAT_I_NEED",
+    "G14_EMPHASIS_THE_THING_IS",
+    "G14_SHORT_ME_TOO",
+    "G14_SHORT_ME_NEITHER",
+    "G14_SHORT_SO_DO_I",
+    "G14_SHORT_NEITHER_DO_I",
+    "G14_SHORT_I_THINK_SO",
+    "G14_SHORT_I_DONT_THINK_SO",
+    "G14_SHORT_I_HOPE_NOT",
+    "G14_SHORT_NOT_YET",
+    "G14_SHORT_NOT_ANYMORE",
+    "G15_TIME_PRESENT_BEFORE_NOW",
+    "G15_TIME_PRESENT_ALREADY",
+    "G15_TIME_PRESENT_JUST",
+    "G15_TIME_PRESENT_YET_Q",
+    "G15_TIME_PRESENT_NOT_YET",
+    "G15_TIME_EVER_Q",
+    "G15_TIME_NEVER",
+    "G15_TIME_SINCE",
+    "G15_TIME_FOR",
+    "G15_TIME_RECENTLY",
+    "G15_FUTURE_GOING_TO_NEG",
+    "G15_FUTURE_GOING_TO_Q",
+    "G15_FUTURE_WILL_Q",
+    "G15_FUTURE_LIKELY_TO",
+    "G15_FUTURE_UNLIKELY_TO",
+    "G15_FUTURE_EXPECTED_TO",
+    "G15_FUTURE_DUE_TO",
+    "G15_QUESTION_WHAT_DO",
+    "G15_QUESTION_WHAT_DID",
+    "G15_QUESTION_WHAT_WILL",
+    "G15_QUESTION_WHERE_DO",
+    "G15_QUESTION_WHERE_DID",
+    "G15_QUESTION_WHERE_WILL",
+    "G15_QUESTION_WHEN_DO",
+    "G15_QUESTION_WHEN_DID",
+    "G15_QUESTION_WHY_DO",
+    "G15_QUESTION_WHY_WILL",
+    "G15_QUESTION_HOW_DO",
+    "G15_QUESTION_HOW_DID",
+    "G15_QUESTION_HOW_WILL",
+    "G15_QUESTION_WHO_IS",
+    "G15_QUESTION_WHO_WAS",
+    "G15_QUESTION_WHICH_IS",
+    "G15_QUESTION_WHICH_ARE",
+    "G15_QUESTION_WHOSE_IS",
+    "G15_NEGATION_DONT",
+    "G15_NEGATION_DOESNT",
+    "G15_NEGATION_MUSTNT",
+    "G15_NEGATION_MAY_NOT",
+    "G15_NEGATION_MIGHT_NOT",
+    "G15_NEGATION_WOULDNT",
+    "G15_NEGATION_COULDNT",
+    "G15_EXIST_THERE_MIGHT_BE",
+    "G15_EXIST_THERE_MAY_BE",
+    "G15_EXIST_THERE_WILL_BE",
+    "G15_EXIST_THERE_HAS_BEEN",
+    "G15_EXIST_THERE_HAVE_BEEN",
+    "G15_EXIST_THERE_SEEMS_TO_BE",
+    "G15_EXIST_THERE_USED_TO_BE",
+    "G15_EXIST_IS_THERE_ANY",
+    "G15_EXIST_ARE_THERE_ANY",
+    "G15_EXIST_THERE_IS_NO",
+    "G15_QUANTITY_SOME",
+    "G15_QUANTITY_ANY_Q",
+    "G15_QUANTITY_ANY_NEG",
+    "G15_QUANTITY_MANY",
+    "G15_QUANTITY_MUCH",
+    "G15_QUANTITY_FEW",
+    "G15_QUANTITY_A_FEW",
+    "G15_QUANTITY_LITTLE",
+    "G15_QUANTITY_A_LITTLE",
+    "G15_QUANTITY_ENOUGH",
+    "G15_DETERMINER_THIS",
+    "G15_DETERMINER_THAT",
+    "G15_DETERMINER_THESE",
+    "G15_DETERMINER_THOSE",
+    "G15_DETERMINER_EACH",
+    "G15_DETERMINER_EVERY",
+    "G15_DETERMINER_EITHER",
+    "G15_DETERMINER_NEITHER",
+    "G15_DETERMINER_ANOTHER",
+    "G15_DETERMINER_OTHER",
+    "G15_PREP_WITH",
+    "G15_PREP_WITHOUT",
+    "G15_PREP_FOR",
+    "G15_PREP_FROM",
+    "G15_PREP_TO",
+    "G15_PREP_ABOUT",
+    "G15_PREP_AGAINST",
+    "G15_PREP_BETWEEN",
+    "G15_PREP_AMONG",
+    "G15_PREP_THROUGH",
+    "G15_RESPONSE_THATS_RIGHT",
+    "G15_RESPONSE_THATS_WRONG",
+    "G15_RESPONSE_EXACTLY",
+    "G15_RESPONSE_NOT_EXACTLY",
+    "G15_RESPONSE_OF_COURSE",
+    "G15_RESPONSE_I_SEE",
+    "G15_RESPONSE_I_UNDERSTAND",
+    "G15_RESPONSE_I_DONT_UNDERSTAND",
+    "G15_RESPONSE_THAT_MAKES_SENSE",
+    "G15_RESPONSE_THAT_DOESNT_MAKE_SENSE",
+    "G16_INVERSION_NEVER",
+    "G16_INVERSION_RARELY",
+    "G16_INVERSION_SELDOM",
+    "G16_INVERSION_HARDLY",
+    "G16_INVERSION_NO_SOONER",
+    "G16_INVERSION_NOT_ONLY",
+    "G16_INVERSION_ONLY_THEN",
+    "G16_INVERSION_ONLY_IF",
+    "G16_INVERSION_UNDER_NO_CIRCUMSTANCES",
+    "G16_INVERSION_LITTLE_DID",
+    "G16_PARTICIPLE_PRESENT",
+    "G16_PARTICIPLE_PAST",
+    "G16_PARTICIPLE_HAVING_PP",
+    "G16_PARTICIPLE_WHILE_ING",
+    "G16_PARTICIPLE_WHEN_PP",
+    "G16_PARTICIPLE_IF_PP",
+    "G16_PARTICIPLE_UNLESS_PP",
+    "G16_PARTICIPLE_ON_ING",
+    "G16_PARTICIPLE_AFTER_ING",
+    "G16_PARTICIPLE_BEFORE_ING",
+    "G16_CLEFT_IT_IS_THAT",
+    "G16_CLEFT_IT_WAS_THAT",
+    "G16_CLEFT_WHAT_IS",
+    "G16_CLEFT_WHAT_WAS",
+    "G16_CLEFT_THE_REASON_IS",
+    "G16_CLEFT_THE_THING_I_NEED",
+    "G16_CLEFT_ALL_I_CAN_DO",
+    "G16_CLEFT_WHERE_I_WANT",
+    "G16_CLEFT_WHEN_I_NEED",
+    "G16_CLEFT_WHO_I_MEAN",
+    "G16_EMBEDDED_WHAT",
+    "G16_EMBEDDED_WHERE",
+    "G16_EMBEDDED_WHEN",
+    "G16_EMBEDDED_WHY",
+    "G16_EMBEDDED_HOW",
+    "G16_EMBEDDED_WHO",
+    "G16_EMBEDDED_IF",
+    "G16_EMBEDDED_WONDER_WHAT",
+    "G16_EMBEDDED_WONDER_WHETHER",
+    "G16_EMBEDDED_TELL_ME_WHERE",
+    "G16_CONCESSION_NO_MATTER_WHAT",
+    "G16_CONCESSION_NO_MATTER_WHO",
+    "G16_CONCESSION_NO_MATTER_WHERE",
+    "G16_CONCESSION_NO_MATTER_WHEN",
+    "G16_CONCESSION_NO_MATTER_HOW",
+    "G16_CONCESSION_WHATEVER",
+    "G16_CONCESSION_WHOEVER",
+    "G16_CONCESSION_WHEREVER",
+    "G16_CONCESSION_WHENEVER",
+    "G16_CONCESSION_HOWEVER_ADJ",
+    "G16_CORRELATIVE_SO_THAT",
+    "G16_CORRELATIVE_SUCH_THAT",
+    "G16_CORRELATIVE_TOO_TO",
+    "G16_CORRELATIVE_ENOUGH_TO",
+    "G16_CORRELATIVE_AS_IF",
+    "G16_CORRELATIVE_AS_THOUGH",
+    "G16_CORRELATIVE_RATHER_THAN",
+    "G16_CORRELATIVE_NOT_BUT",
+    "G16_CORRELATIVE_BOTH_AND_VERB",
+    "G16_CORRELATIVE_WHETHER_OR",
+    "G16_DEGREE_SO_ADJ",
+    "G16_DEGREE_TOO_ADJ",
+    "G16_DEGREE_VERY_ADJ",
+    "G16_DEGREE_QUITE_ADJ",
+    "G16_DEGREE_RATHER_ADJ",
+    "G16_DEGREE_FAIRLY_ADJ",
+    "G16_DEGREE_EXTREMELY_ADJ",
+    "G16_DEGREE_NOT_VERY_ADJ",
+    "G16_DEGREE_ALMOST_ADJ",
+    "G16_DEGREE_NEARLY_ADJ",
+    "G16_OPINION_AS_I_SEE_IT",
+    "G16_OPINION_IN_MY_VIEW",
+    "G16_OPINION_TO_ME",
+    "G16_OPINION_I_BELIEVE",
+    "G16_OPINION_I_FEEL_THAT",
+    "G16_OPINION_IT_APPEARS",
+    "G16_OPINION_I_ASSUME",
+    "G16_OPINION_I_EXPECT",
+    "G16_OPINION_I_SUSPECT",
+    "G16_OPINION_I_DOUBT",
+    "G16_SEQUENCE_TO_BEGIN_WITH",
+    "G16_SEQUENCE_FIRST_OF_ALL",
+    "G16_SEQUENCE_SECONDLY",
+    "G16_SEQUENCE_THEN",
+    "G16_SEQUENCE_AFTER_THAT",
+    "G16_SEQUENCE_NEXT",
+    "G16_SEQUENCE_FINALLY",
+    "G16_SEQUENCE_IN_THE_END",
+    "G16_SEQUENCE_SOON_AFTER",
+    "G16_SEQUENCE_FROM_THEN_ON",
+    "G16_BOUNDARY_I_DONT_WANT_TO",
+    "G16_BOUNDARY_ID_RATHER_NOT",
+    "G16_BOUNDARY_PLEASE_DONT",
+    "G16_BOUNDARY_STOP_GERUND",
+    "G16_BOUNDARY_NOT_COMFORTABLE",
+    "G16_BOUNDARY_NEED_SPACE",
+    "G16_BOUNDARY_NOT_OKAY",
+    "G16_BOUNDARY_DONT_DO_THAT",
+    "G16_BOUNDARY_LEAVE_ME_ALONE",
+    "G16_BOUNDARY_I_SAID_NO",
+    "G17_REQUEST_DONT_FORGET",
+    "G17_REQUEST_REMEMBER_TO",
+    "G17_REQUEST_MAKE_SURE",
+    "G17_REQUEST_LET_ME",
+    "G17_REQUEST_HELP_ME",
+    "G17_INVITE_WANT_TO",
+    "G17_INVITE_WOULD_YOU_LIKE_TO",
+    "G17_INVITE_HOW_ABOUT",
+    "G17_INVITE_WHY_NOT",
+    "G17_INVITE_ID_LIKE_YOU_TO",
+    "G17_INVITE_JOIN_ME",
+    "G17_PLAN_IM_PLANNING_TO",
+    "G17_PLAN_IM_THINKING_OF",
+    "G17_PLAN_I_INTEND_TO",
+    "G17_PLAN_I_MIGHT",
+    "G17_PLAN_I_WILL_PROBABLY",
+    "G17_PLAN_I_HAVE_TO",
+    "G17_PLAN_I_NEED_TO",
+    "G17_PLAN_IM_SUPPOSED_TO",
+    "G17_PLAN_IM_ABOUT_TO",
+    "G17_PLAN_I_DECIDED_TO",
+    "G17_REACTION_REALLY_Q",
+    "G17_REACTION_ARE_YOU_SURE",
+    "G17_REACTION_THATS_SURPRISING",
+    "G17_REACTION_THATS_GOOD",
+    "G17_REACTION_THATS_BAD",
+    "G17_REACTION_THATS_INTERESTING",
+    "G17_REACTION_THATS_UNFORTUNATE",
+    "G17_REACTION_I_DIDNT_EXPECT_THAT",
+    "G17_REACTION_I_KNEW_IT",
+    "G17_REACTION_THAT_EXPLAINS_IT",
+    "G17_AGREEMENT_I_AGREE",
+    "G17_AGREEMENT_I_DONT_AGREE",
+    "G17_AGREEMENT_YOURE_RIGHT",
+    "G17_AGREEMENT_IM_NOT_SURE",
+    "G17_AGREEMENT_THATS_TRUE",
+    "G17_AGREEMENT_NOT_NECESSARILY",
+    "G17_AGREEMENT_I_SEE_YOUR_POINT",
+    "G17_AGREEMENT_I_DISAGREE",
+    "G17_AGREEMENT_THATS_FAIR",
+    "G17_AGREEMENT_FAIR_ENOUGH",
+    "G17_CLARIFY_WHAT_DO_YOU_MEAN",
+    "G17_CLARIFY_CAN_YOU_REPEAT",
+    "G17_CLARIFY_CAN_YOU_SAY_AGAIN",
+    "G17_CLARIFY_DID_YOU_MEAN",
+    "G17_CLARIFY_TO_BE_CLEAR",
+    "G17_CLARIFY_WHAT_I_MEAN",
+    "G17_CLARIFY_MORE_SPECIFICALLY",
+    "G17_FEELING_YOU_SEEM_ADJ",
+    "G17_FEELING_I_AM_GLAD_THAT",
+    "G17_FEELING_I_AM_SORRY_THAT",
+    "G17_FEELING_I_AM_WORRIED_THAT",
+    "G17_FEELING_I_AM_AFRAID_THAT",
+    "G17_FEELING_I_AM_HAPPY_TO",
+    "G17_FEELING_I_AM_RELIEVED_THAT",
+    "G17_FEELING_IT_BOTHERS_ME",
+    "G17_MEMORY_I_REMEMBER",
+    "G17_MEMORY_I_REMEMBER_THAT",
+    "G17_MEMORY_I_FORGOT_TO",
+    "G17_MEMORY_DONT_FORGET",
+    "G17_MEMORY_DO_YOU_REMEMBER",
+    "G17_MEMORY_IT_REMINDS_ME_OF",
+    "G17_MEMORY_AS_I_RECALL",
+    "G17_MEMORY_IF_I_REMEMBER",
+    "G17_MEMORY_I_CANT_REMEMBER",
+    "G17_MEMORY_I_WONT_FORGET",
+    "G17_POSSIBILITY_ITS_POSSIBLE",
+    "G17_POSSIBILITY_ITS_UNLIKELY",
+    "G17_POSSIBILITY_THERES_A_CHANCE",
+    "G17_POSSIBILITY_THERES_NO_WAY",
+    "G17_POSSIBILITY_IT_COULD_BE",
+    "G17_POSSIBILITY_IT_MAY_HAVE",
+    "G17_POSSIBILITY_IT_MIGHT_HAVE",
+    "G17_POSSIBILITY_IT_CANT_BE",
+    "G17_POSSIBILITY_IT_MUST_BE",
+    "G17_POSSIBILITY_PROBABLY",
+    "G17_DECISION_IVE_DECIDED",
+    "G17_DECISION_I_HAVENT_DECIDED",
+    "G17_DECISION_LET_ME_THINK",
+    "G17_DECISION_GIVE_ME_A_MOMENT",
+    "G17_DECISION_ILL_CHOOSE",
+    "G17_DECISION_ID_CHOOSE"
+  ],
+  "failures": [],
+  "samples": {
+    "AFFIRM_LOVE": [
+      "I love you.",
+      "I adore you.",
+      "Yes, I love you."
+    ],
+    "DENY_LOVE": [
+      "I do not love you."
+    ],
+    "ASK_AFFECTION_REASON": [
+      "Why did you think I do not love you?"
+    ],
+    "DENY_BETRAYAL": [
+      "I will not betray you.",
+      "I do not want to betray you."
+    ],
+    "ADMIT_BETRAYAL": [
+      "I betrayed you."
+    ],
+    "PROMISE_LOYALTY": [
+      "I will stay loyal to you."
+    ],
+    "ACCEPT_DISTANCE": [
+      "I will give you some space."
+    ],
+    "REFUSE_DISTANCE": [
+      "I cannot leave you alone.",
+      "I do not want to leave you alone."
+    ],
+    "ASK_DISTANCE_REASON": [
+      "Why do you want me to leave you alone?"
+    ],
+    "TEMPORARY_STEP_BACK": [
+      "I will give you some space for now."
+    ],
+    "EXPRESS_CONCERN": [
+      "I feel worried.",
+      "I am worried about you.",
+      "I feel anxious."
+    ],
+    "EXPRESS_FEAR_OF_LOSS": [
+      "I do not want to lose you."
+    ],
+    "REJECT_DEATH_WISH_CLAIM": [
+      "I do not want you to die."
+    ],
+    "ASK_WHAT_HAPPENED": [
+      "Can you explain what happened?"
+    ],
+    "ASK_FOR_HONEST_ANSWER": [
+      "Tell me the truth."
+    ],
+    "REQUEST_STAY": [
+      "Please stay with me.",
+      "Can you stay with me?",
+      "Will you stay with me?",
+      "Would you stay with me?",
+      "Would you mind staying with me?",
+      "Could you stay with me?",
+      "Can you please stay with me?",
+      "Could you please stay with me?",
+      "Would you please stay with me?",
+      "I want to stay with you.",
+      "Please stay.",
+      "Can you stay?",
+      "Will you stay?",
+      "Would you stay?",
+      "Would you mind staying?",
+      "Could you stay?",
+      "Can you please stay?",
+      "Could you please stay?",
+      "Would you please stay?",
+      "I want you to stay."
+    ],
+    "APOLOGIZE": [
+      "I am sorry."
+    ],
+    "ACCEPT_APOLOGY": [
+      "I accept your apology.",
+      "All right, I hear you."
+    ],
+    "EXPRESS_HURT": [
+      "That hurt me."
+    ],
+    "EXPRESS_ANGER": [
+      "I feel angry.",
+      "I am angry.",
+      "I feel upset."
+    ],
+    "REASSURE_NOT_LEAVING": [
+      "I am not leaving you.",
+      "I am still here."
+    ],
+    "ASK_TO_TALK": [
+      "Can you talk to me?",
+      "Can you please talk to me?",
+      "Please talk to me.",
+      "Will you talk to me?",
+      "Would you talk to me?",
+      "Would you mind talking to me?",
+      "Could you talk to me?",
+      "Could you please talk to me?",
+      "Would you please talk to me?",
+      "Can we talk about this?"
+    ],
+    "REQUEST_TIME": [
+      "Please give me some time.",
+      "Can you give me some time?",
+      "Will you give me some time?",
+      "Would you give me some time?",
+      "Would you mind giving me some time?",
+      "Could you give me some time?",
+      "Can you please give me some time?",
+      "Could you please give me some time?",
+      "Would you please give me some time?"
+    ],
+    "SAY_GOODBYE_TEMPORARY": [
+      "I have to go for now.",
+      "I will see you later."
+    ],
+    "PROMISE_RETURN": [
+      "I will come back.",
+      "I will return."
+    ],
+    "ASK_NOT_TO_DISAPPEAR": [
+      "Do not disappear without telling me."
+    ],
+    "EXPRESS_GRATITUDE": [
+      "I appreciate it."
+    ],
+    "REASSURE_SAFETY": [
+      "You are safe with me.",
+      "I will not hurt you."
+    ],
+    "EXPRESS_MISSING": [
+      "I missed you."
+    ],
+    "ASK_TO_MEET": [
+      "Can I see you again?",
+      "I want to see you again."
+    ],
+    "EXPRESS_JEALOUSY": [
+      "I feel jealous.",
+      "I am jealous."
+    ],
+    "ASK_ABOUT_OTHER_PERSON": [
+      "Who is that person?",
+      "Do you know that person well?"
+    ],
+    "AGREE_REQUEST": [
+      "Yes, I can do that.",
+      "All right, I will do it."
+    ],
+    "DECLINE_REQUEST": [
+      "I cannot do that.",
+      "I do not want to do that."
+    ],
+    "CONFIRM_TRUST": [
+      "I believe you.",
+      "I trust you."
+    ],
+    "ASK_IF_OKAY": [
+      "Are you all right?"
+    ],
+    "EXPRESS_JOY": [
+      "I am glad.",
+      "I am happy to see you."
+    ],
+    "EXPRESS_LONELINESS": [
+      "I feel alone.",
+      "I was lonely.",
+      "I feel lonely."
+    ],
+    "EXPRESS_ANXIETY": [
+      "I am worried."
+    ],
+    "ASK_RELATIONSHIP_STATUS": [
+      "What is our relationship?",
+      "What do you think we are?"
+    ],
+    "ASK_FEELINGS": [
+      "What do you think of me?",
+      "Do you have feelings for me?"
+    ],
+    "EXPRESS_WANT_TO_BE_TOGETHER": [
+      "I want to be with you."
+    ],
+    "ASK_TO_STAY_CLOSE": [
+      "Stay close to me."
+    ],
+    "ASK_PERMISSION_TOUCH": [
+      "Can I touch you?"
+    ],
+    "ASK_PERMISSION_HUG": [
+      "Can I hug you?"
+    ],
+    "ASK_PERMISSION_KISS": [
+      "Can I kiss you?"
+    ],
+    "EXPRESS_TIRED": [
+      "I feel tired.",
+      "I am tired."
+    ],
+    "EXPRESS_HUNGRY": [
+      "I feel hungry.",
+      "I am hungry."
+    ],
+    "EXPRESS_COLD": [
+      "I feel cold.",
+      "I am cold."
+    ],
+    "OFFER_HELP": [
+      "Can I help you?",
+      "Shall I help you?",
+      "Would you like me to help you?"
+    ],
+    "ASK_FOR_HELP": [
+      "Can you help me?",
+      "Can you please help me?",
+      "Please help me.",
+      "Will you help me?",
+      "Would you help me?",
+      "Would you mind helping me?",
+      "Could you help me?",
+      "Could you please help me?",
+      "Would you please help me?"
+    ],
+    "OFFER_FOOD": [
+      "Would you like something to eat?",
+      "You should eat something."
+    ],
+    "OFFER_DRINK": [
+      "Would you like something to drink?",
+      "Do you want some water?"
+    ],
+    "ASK_TO_WAIT": [
+      "Please wait for me.",
+      "Can you wait for me?",
+      "Will you wait for me?",
+      "Would you wait for me?",
+      "Would you mind waiting for me?",
+      "Could you wait for me?",
+      "Can you please wait for me?",
+      "Could you please wait for me?",
+      "Would you please wait for me?",
+      "Wait for me."
+    ],
+    "ASK_TO_GO_TOGETHER": [
+      "Let us go together.",
+      "Shall we go together?",
+      "We could go together.",
+      "We should go together.",
+      "Maybe we should go together."
+    ],
+    "ASK_DESTINATION": [
+      "Where are you going?"
+    ],
+    "EXPRESS_SLEEPY": [
+      "I am sleepy.",
+      "I need to sleep."
+    ],
+    "ASK_TO_REST": [
+      "Let us rest for a while.",
+      "We should rest."
+    ],
+    "ASK_ABOUT_WORK": [
+      "How was work?",
+      "Did you work today?",
+      "What do you do for work?"
+    ],
+    "EXPRESS_WORK_TIREDNESS": [
+      "I am tired from work."
+    ],
+    "ASK_ABOUT_MONEY": [
+      "Do you have enough money?",
+      "Can you afford it?"
+    ],
+    "EXPRESS_NO_MONEY": [
+      "I do not have any money.",
+      "I cannot afford it."
+    ],
+    "COMMENT_RAIN": [
+      "It is raining."
+    ],
+    "COMMENT_COLD_WEATHER": [
+      "It is cold today."
+    ],
+    "SAY_GOING_HOME": [
+      "I am going home."
+    ],
+    "ASK_IF_COMING_BACK": [
+      "Are you coming back?",
+      "Will you come back later?"
+    ],
+    "EXPRESS_NEED_CLARITY": [
+      "I need an answer.",
+      "I need to know the truth."
+    ],
+    "DENY_ABANDONMENT": [
+      "I will not leave you.",
+      "I am still here.",
+      "I will not abandon you."
+    ],
+    "CONFIRM_CHOICE": [
+      "I choose you.",
+      "I still choose you."
+    ],
+    "EXPRESS_CARE": [
+      "I care about you.",
+      "You matter to me."
+    ],
+    "EXPRESS_RELIEF": [
+      "I feel glad.",
+      "I am relieved.",
+      "I am glad you are here.",
+      "I feel relieved."
+    ],
+    "EXPRESS_CONFUSION": [
+      "I am confused.",
+      "I do not understand this."
+    ],
+    "EXPRESS_UNCERTAINTY": [
+      "I am not sure.",
+      "I do not know if this will work."
+    ],
+    "EXPRESS_CERTAINTY": [
+      "I am sure."
+    ],
+    "ASK_FOR_TRUST": [
+      "Trust me.",
+      "I want you to believe me."
+    ],
+    "ASK_FOR_ANSWER": [
+      "Answer me.",
+      "I want an answer."
+    ],
+    "RESPECT_BOUNDARY": [
+      "I respect that."
+    ],
+    "PROMISE_NOT_FOLLOW": [
+      "I will not follow you."
+    ],
+    "PROMISE_NOT_TOUCH": [
+      "I will not touch you."
+    ],
+    "PROMISE_NOT_KISS": [
+      "I will not kiss you."
+    ],
+    "PROMISE_NOT_HUG": [
+      "I will not hug you."
+    ],
+    "PROMISE_NOT_CONTACT": [
+      "I will not contact you."
+    ],
+    "ASK_TO_REPAIR": [
+      "Can you try again with me?",
+      "Can you please try again with me?",
+      "Please try again with me.",
+      "Will you try again with me?",
+      "Would you try again with me?",
+      "Would you mind trying again with me?",
+      "Could you try again with me?",
+      "Could you please try again with me?",
+      "Would you please try again with me?",
+      "Can you work this out with me?",
+      "Can you please work this out with me?",
+      "Please work this out with me.",
+      "Will you work this out with me?",
+      "Would you work this out with me?",
+      "Would you mind working this out with me?",
+      "Could you work this out with me?",
+      "Could you please work this out with me?",
+      "Would you please work this out with me?"
+    ],
+    "EXPRESS_REPAIR_DESIRE": [
+      "I want to fix this.",
+      "I do not want to end this."
+    ],
+    "DECLINE_FOR_NOW": [
+      "I cannot do that right now."
+    ],
+    "ASK_TO_SIT_TOGETHER": [
+      "Can I sit with you?"
+    ],
+    "GREET": [
+      "I wish you a good day."
+    ],
+    "RETURN_GREETING": [
+      "I wish you a good day too."
+    ],
+    "SAY_GOODBYE": [
+      "I will see you later."
+    ],
+    "ASK_REASON": [
+      "Why do you say that?"
+    ],
+    "ASK_WHERE": [
+      "Where are you?"
+    ],
+    "ASK_WHEN": [
+      "When will you come back?"
+    ],
+    "ASK_ABOUT_HEALTH": [
+      "How do you feel?",
+      "How are you?"
+    ],
+    "ASK_ABOUT_SLEEP": [
+      "Did you sleep well?"
+    ],
+    "ASK_ABOUT_FOOD": [
+      "Did you eat anything?"
+    ],
+    "ASK_ABOUT_HOME": [
+      "Where are you staying?"
+    ],
+    "OFFER_REST": [
+      "We should rest for a while.",
+      "Let us rest for a while.",
+      "Shall we rest for a while?",
+      "We could rest for a while.",
+      "Maybe we should rest for a while."
+    ],
+    "OFFER_WARMTH": [
+      "We should get somewhere warm.",
+      "Let us get somewhere warm.",
+      "Shall we get somewhere warm?",
+      "We could get somewhere warm.",
+      "Maybe we should get somewhere warm."
+    ],
+    "OFFER_SHELTER": [
+      "Let us find shelter.",
+      "Shall we find shelter?",
+      "We could find shelter.",
+      "We should find shelter.",
+      "Maybe we should find shelter."
+    ],
+    "STATE_PLAN": [
+      "I am going to go home."
+    ],
+    "STATE_PREFERENCE": [
+      "I prefer this."
+    ],
+    "ACKNOWLEDGE_EVENT": [
+      "I understand that."
+    ],
+    "ASK_FOR_DETAILS": [
+      "Can you tell me more?",
+      "Can you please tell me more?",
+      "Please tell me more.",
+      "Will you tell me more?",
+      "Would you tell me more?",
+      "Would you mind telling me more?",
+      "Could you tell me more?",
+      "Could you please tell me more?",
+      "Would you please tell me more?",
+      "Can you explain that?",
+      "Can you please explain that?",
+      "Please explain that.",
+      "Will you explain that?",
+      "Would you explain that?",
+      "Would you mind explaining that?",
+      "Could you explain that?",
+      "Could you please explain that?",
+      "Would you please explain that?"
+    ],
+    "EXPRESS_SURPRISE": [
+      "I did not expect that."
+    ],
+    "EXPRESS_SYMPATHY": [
+      "I feel sorry."
+    ],
+    "EXPRESS_APPROVAL": [
+      "That sounds good.",
+      "That sounds reasonable."
+    ],
+    "EXPRESS_DISAPPROVAL": [
+      "I do not like that."
+    ],
+    "ASK_PLAN": [
+      "What will you do?"
+    ],
+    "ASK_PREFERENCE": [
+      "Do you prefer this or that?"
+    ],
+    "ASK_WORK_STATUS": [
+      "How was work?"
+    ],
+    "ASK_MONEY_STATUS": [
+      "Do you have enough money?"
+    ],
+    "ASK_HUNGER": [
+      "Are you hungry?"
+    ],
+    "ASK_THIRST": [
+      "Are you thirsty?"
+    ],
+    "ASK_TIREDNESS": [
+      "Are you tired?"
+    ],
+    "OFFER_COMPANY": [
+      "I can stay with you."
+    ],
+    "OFFER_CONTACT": [
+      "I can call you later.",
+      "I can send you a message later."
+    ],
+    "REQUEST_CONTACT": [
+      "Please call me later.",
+      "Can you call me later?",
+      "Will you call me later?",
+      "Would you call me later?",
+      "Would you mind calling me later?",
+      "Could you call me later?",
+      "Can you please call me later?",
+      "Could you please call me later?",
+      "Would you please call me later?",
+      "Please message me.",
+      "Can you message me?",
+      "Will you message me?",
+      "Would you message me?",
+      "Would you mind messaging me?",
+      "Could you message me?",
+      "Can you please message me?",
+      "Could you please message me?",
+      "Would you please message me?"
+    ],
+    "ACCEPT_CONTACT": [
+      "I will call you.",
+      "I will contact you."
+    ],
+    "DECLINE_CONTACT": [
+      "I will not call you.",
+      "I will not contact you."
+    ],
+    "ASK_PERMISSION_ENTER": [
+      "Can I come in?",
+      "May I come in?",
+      "Is it okay if I come in?",
+      "Do you mind if I come in?",
+      "Would it be okay if I come in?"
+    ],
+    "ASK_PERMISSION_WAIT": [
+      "Can I wait here?",
+      "May I wait here?",
+      "Is it okay if I wait here?",
+      "Do you mind if I wait here?",
+      "Would it be okay if I wait here?"
+    ],
+    "EXPRESS_DISAPPOINTMENT": [
+      "I feel disappointed."
+    ],
+    "EXPRESS_HOPE": [
+      "I hope things get better.",
+      "I hope so."
+    ],
+    "EXPRESS_PRIDE": [
+      "I am proud."
+    ],
+    "CONFIRM_ARRIVAL": [
+      "I arrived."
+    ],
+    "CONFIRM_DEPARTURE": [
+      "I am leaving now.",
+      "I am going now."
+    ],
+    "ASK_RETURN_TIME": [
+      "When will you come back?",
+      "When will you return?"
+    ],
+    "STATE_CURRENT_LOCATION": [
+      "I am here."
+    ],
+    "STATE_AVAILABLE_TIME": [
+      "I am free now."
+    ],
+    "STATE_CONDITION": [
+      "I am fine."
+    ],
+    "CONFIRM_POSSESSION": [
+      "I have it."
+    ],
+    "DENY_POSSESSION": [
+      "I do not have it."
+    ],
+    "STATE_QUANTITY": [
+      "I have one item."
+    ],
+    "CONFIRM_CAPABILITY": [
+      "I can do that."
+    ],
+    "DENY_CAPABILITY": [
+      "I cannot do that."
+    ],
+    "STATE_CURRENT_PLAN": [
+      "I will go home later."
+    ],
+    "STATE_CURRENT_PREFERENCE": [
+      "I prefer this."
+    ],
+    "CONFIRM_AVAILABLE": [
+      "I am available now."
+    ],
+    "DENY_AVAILABLE": [
+      "I am not available now."
+    ],
+    "ANSWER_UNKNOWN": [
+      "I do not know that."
+    ],
+    "STATE_RETURN_TIME": [
+      "I will return later."
+    ],
+    "STATE_WORK_STATUS": [
+      "Work is fine."
+    ],
+    "STATE_MONEY_STATUS": [
+      "I have enough money."
+    ],
+    "STATE_NO_MONEY": [
+      "I do not have enough money."
+    ],
+    "STATE_SLEEP_STATUS_GOOD": [
+      "I slept well."
+    ],
+    "STATE_SLEEP_STATUS_BAD": [
+      "I did not sleep well."
+    ],
+    "STATE_FOOD_STATUS_EATEN": [
+      "I already ate."
+    ],
+    "STATE_FOOD_STATUS_NOT_EATEN": [
+      "I have not eaten yet."
+    ],
+    "STATE_HOME": [
+      "I stay at home."
+    ],
+    "STATE_IDENTITY_NAME": [
+      "My name is unknown."
+    ],
+    "STATE_IDENTITY_ROLE": [
+      "I am a worker."
+    ],
+    "STATE_ORIGIN": [
+      "I am from here."
+    ],
+    "STATE_DESTINATION": [
+      "I am going there."
+    ],
+    "STATE_REASON": [
+      "I did it because I had to."
+    ],
+    "STATE_OPINION": [
+      "I think it is fine."
+    ],
+    "STATE_PRICE": [
+      "It costs 0."
+    ],
+    "STATE_COUNT": [
+      "I have 0 items."
+    ],
+    "STATE_WORK_LOCATION": [
+      "I work here."
+    ],
+    "STATE_JOB_ROLE": [
+      "I work as a worker."
+    ],
+    "CONFIRM_KNOWLEDGE": [
+      "I know that."
+    ],
+    "DENY_KNOWLEDGE": [
+      "I do not know that."
+    ],
+    "CONFIRM_FACT": [
+      "Yes, that is true."
+    ],
+    "DENY_FACT": [
+      "No, that is not true."
+    ],
+    "STATE_DESIRE": [
+      "I want that."
+    ],
+    "STATE_NEED": [
+      "I need that."
+    ],
+    "STATE_CHOICE": [
+      "I choose this."
+    ],
+    "STATE_EVENT": [
+      "Something happened."
+    ],
+    "STATE_RELATIONSHIP_STATUS": [
+      "We are close."
+    ],
+    "STATE_FEELINGS_TOWARD_HEROINE": [
+      "I feel affection toward you."
+    ],
+    "GRANT_PERMISSION": [
+      "Yes, you can do that."
+    ],
+    "DENY_PERMISSION": [
+      "No, please do not do that."
+    ],
+    "ACCEPT_ACTION_REQUEST": [
+      "Yes, I will do that."
+    ],
+    "DECLINE_ACTION_REQUEST": [
+      "No, I will not do that."
+    ],
+    "ACCEPT_INVITATION": [
+      "Yes, I would like to join you."
+    ],
+    "DECLINE_INVITATION": [
+      "No, thank you.",
+      "Maybe another time."
+    ],
+    "ACCEPT_SUGGESTION": [
+      "Yes, let us do that.",
+      "That sounds good."
+    ],
+    "DECLINE_SUGGESTION": [
+      "I do not think we should do that.",
+      "No, I would rather not."
+    ]
+  },
+  "scope": "12 seeds per meaning, composer integration, semantic constraints and targeted grammar regressions. Not exhaustive English quality certification."
+}
