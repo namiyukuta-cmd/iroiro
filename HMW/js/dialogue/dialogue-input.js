@@ -60,6 +60,20 @@
     return [];
   };
 
+  const normalizeQuestions = value => {
+    if (!Array.isArray(value)) return [];
+    return value
+      .filter(item => item && typeof item === "object")
+      .map(item => ({
+        kind: String(item.kind || "generic"),
+        concept: String(item.concept || ""),
+        target: String(item.target || ""),
+        action: String(item.action || ""),
+        requestedField: String(item.requestedField || ""),
+        text: String(item.text || "")
+      }));
+  };
+
   HMW.Dialogue.normalizeInputAnalysis = function normalizeInputAnalysis(raw = {}) {
     const emotions = {};
     for (const [key, value] of Object.entries(raw.emotions || {})) {
@@ -74,6 +88,7 @@
       lexicalTargets: uniqueStrings(raw.lexicalTargets),
       boundaries: normalizeBoundaries(raw.boundaries),
       claims: normalizeClaims(raw.claims),
+      questions: normalizeQuestions(raw.questions),
       references: Array.isArray(raw.references) ? [...raw.references] : [],
       tone: raw.tone && typeof raw.tone === "object" ? { ...raw.tone } : {},
       analysisVersion: Number(raw.analysisVersion) || 1
