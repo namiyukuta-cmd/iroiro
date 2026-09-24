@@ -189,7 +189,12 @@
         ...forcedVerbSlots(subject, verb)
       };
 
-      if (candidate.object !== undefined) baseSlots.OBJECT = candidate.object;
+      if (candidate.object !== undefined) {
+        baseSlots.OBJECT =
+          verb === "return" && String(candidate.object).trim().toLowerCase() === "back"
+            ? ""
+            : candidate.object;
+      }
       if (candidate.nounPhrase !== undefined) baseSlots.NOUN_PHRASE = candidate.nounPhrase;
       if (adjective) baseSlots.ADJECTIVE = adjective;
 
