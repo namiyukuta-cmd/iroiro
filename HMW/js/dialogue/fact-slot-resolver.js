@@ -59,6 +59,18 @@
       set("STATE_WORK_LOCATION", { PLACE: text(characterFacts.workLocation) });
     }
 
+    if (characterFacts.relationshipStatus) {
+      set("STATE_RELATIONSHIP_STATUS", {
+        RELATIONSHIP: text(characterFacts.relationshipStatus)
+      });
+    }
+
+    if (characterFacts.feelingsTowardHeroine) {
+      set("STATE_FEELINGS_TOWARD_HEROINE", {
+        FEELINGS: text(characterFacts.feelingsTowardHeroine)
+      });
+    }
+
     if (characterFacts.returnTime !== undefined) {
       set("STATE_RETURN_TIME", {
         SUBJECT: "I",
