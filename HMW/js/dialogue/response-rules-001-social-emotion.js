@@ -59,7 +59,7 @@
 
   // Focus concepts.
   add("R045_FOCUS_LOVE",700,{focusAny:["love","like"]},["ASK_AFFECTION_REASON"],"affection_topic");
-  add("R046_FOCUS_TRUST",700,{focusAny:["trust"]},["CONFIRM_TRUST"],"trust_topic");
+  add("R046_FOCUS_TRUST",700,{focusAny:["trust"]},["EXPRESS_NEED_CLARITY"],"trust_topic");
   add("R047_FOCUS_BETRAYAL",720,{focusAny:["betrayal"]},["EXPRESS_NEED_CLARITY"],"betrayal_topic");
   add("R048_FOCUS_ABANDONMENT",720,{focusAny:["abandonment"]},["EXPRESS_CARE"],"abandonment_topic");
   add("R049_FOCUS_SAFETY",690,{focusAny:["safety"]},["REASSURE_SAFETY"],"safety_topic");
