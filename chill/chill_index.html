@@ -35,8 +35,6 @@ h1{
   font-weight:500;
   letter-spacing:.12em;
 }
-  50%{transform:translateY(-5px)}
-}
 .start{
   display:flex;
   align-items:center;
@@ -59,7 +57,8 @@ h1{
 <body>
 <main>
   <h1>Chill</h1>
-  <a id="startChill" class="start" href="rpg_causal.html?_nc=20260924-2016">因果カードRPGを試す</a>\n  <a id="oldChill" class="start" style="margin-top:10px;font-size:13px;font-weight:600;min-height:44px" href="chill_top.html?_nc=20260924-2016">旧サンドボックス</a>
+  <a id="startChill" class="start" href="/iroiro/chill/rpg_causal.html?_nc=20260924-2016">因果カードRPGを試す</a>
+  <a id="oldChill" class="start" style="margin-top:10px;font-size:13px;font-weight:600;min-height:44px" href="/iroiro/chill/chill_top.html?_nc=20260924-2016">旧サンドボックス</a>
 </main>
 <script>
 (()=>{
@@ -79,7 +78,7 @@ window.addEventListener('pageshow',e=>{
 const start=document.getElementById('startChill');
   start?.addEventListener('click',e=>{
     e.preventDefault();
-    location.href='rpg_causal.html?_nc='+Date.now();
+    location.href='/iroiro/chill/rpg_causal.html?_nc='+Date.now();
   });
 })();
 </script>
