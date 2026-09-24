@@ -56,7 +56,7 @@
       "generic","where","when","reason","possession","capability","availability",
       "plan","preference","quantity","health","sleep","food","home","work","money",
       "identity","origin","destination","opinion","price","work_location","job_role",
-      "knowledge","fact","desire","need","choice","certainty","event"
+      "knowledge","fact","desire","need","choice","certainty","event","relationship_status","feelings"
     ],
 
     questionShape: {
