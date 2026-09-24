@@ -487,6 +487,101 @@
       expectedMeaningIds: ["RESPECT_BOUNDARY","PROMISE_NOT_TOUCH","AFFIRM_LOVE"],
       forbiddenMeaningIds: [],
       expectedFirstMeaningId: "RESPECT_BOUNDARY"
+    },
+    {
+      id: "claim_only_love_suspicion_001",
+      sourceJa: "私のこと好きじゃないんでしょ",
+      analysis: {
+        analysisVersion: 2,
+        rawText: "私のこと好きじゃないんでしょ",
+        emotions: { anxiety: 70, hurt: 60 },
+        intents: [],
+        focusConcepts: [],
+        lexicalTargets: ["love"],
+        boundaries: [],
+        claims: [
+          {
+            concept: "love",
+            type: "speaker_suspicion",
+            polarity: false,
+            certainty: "high",
+            text: "私のこと好きじゃないんでしょ"
+          }
+        ],
+        questions: []
+      },
+      characterFacts: {
+        lovesHeroine: true
+      },
+      characterPolicy: {},
+      psychology: {},
+      expectedMeaningIds: ["AFFIRM_LOVE"],
+      forbiddenMeaningIds: ["DENY_LOVE"]
+    },
+    {
+      id: "claim_only_betrayal_fear_001",
+      sourceJa: "裏切るんでしょ",
+      analysis: {
+        analysisVersion: 2,
+        rawText: "裏切るんでしょ",
+        emotions: { fear: 80, distrust: 75 },
+        intents: [],
+        focusConcepts: [],
+        lexicalTargets: ["betray"],
+        boundaries: [],
+        claims: [
+          {
+            concept: "betrayal",
+            type: "speaker_fear",
+            polarity: true,
+            certainty: "high",
+            text: "裏切るんでしょ"
+          }
+        ],
+        questions: []
+      },
+      characterFacts: {
+        intendsBetrayal: false,
+        loyalToHeroine: true
+      },
+      characterPolicy: {},
+      psychology: {},
+      expectedMeaningIds: ["DENY_BETRAYAL","PROMISE_LOYALTY"],
+      forbiddenMeaningIds: ["ADMIT_BETRAYAL"]
+    },
+    {
+      id: "claim_only_death_suspicion_001",
+      sourceJa: "死んでほしいんでしょ",
+      analysis: {
+        analysisVersion: 2,
+        rawText: "死んでほしいんでしょ",
+        emotions: { fear: 90, hurt: 85 },
+        intents: [],
+        focusConcepts: [],
+        lexicalTargets: ["die"],
+        boundaries: [],
+        claims: [
+          {
+            concept: "death",
+            type: "speaker_suspicion",
+            polarity: true,
+            certainty: "high",
+            text: "死んでほしいんでしょ"
+          }
+        ],
+        questions: []
+      },
+      characterFacts: {
+        wantsHeroineDead: false,
+        wantsToHarmHeroine: false
+      },
+      characterPolicy: {},
+      psychology: {
+        care: 60,
+        fearOfLoss: 65
+      },
+      expectedMeaningIds: ["REJECT_DEATH_WISH_CLAIM"],
+      forbiddenMeaningIds: []
     }
   ];
 
