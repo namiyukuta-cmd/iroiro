@@ -238,7 +238,11 @@
     $("modal-backdrop").classList.add("open");
   }
 
-  function closeModal() { $("modal-backdrop").classList.remove("open"); }
+  function closeModal() {
+    $("modal-backdrop").classList.remove("open");
+    $("modal-backdrop").classList.remove("tap-popup", "travel-popup");
+    $("modal-backdrop").onclick = null;
+  }
   function info(title, text) { openModal(title, `<p>${escapeHtml(text)}</p>`, [], true); }
 
   Object.assign(G, {
