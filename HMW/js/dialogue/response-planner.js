@@ -972,7 +972,12 @@
       lexicalTargets: HMW.Dialogue.expandLexicalTargets
         ? HMW.Dialogue.expandLexicalTargets(a)
         : (Array.isArray(a.lexicalTargets) ? [...a.lexicalTargets] : []),
-      boundaryActive: distanceBoundary || touchBoundary,
+      boundaryActive:
+        distanceBoundary ||
+        touchBoundary ||
+        meaningIds.includes("RESPECT_BOUNDARY") ||
+        meaningIds.includes("ACCEPT_DISTANCE") ||
+        meaningIds.includes("DECLINE_CONTACT"),
       slotOverridesByMeaning,
       claimInterpretation: claimInfo,
       matchedResponseRuleIds: rulePlan?.matchedRuleIds || [],
