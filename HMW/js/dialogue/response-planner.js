@@ -971,7 +971,15 @@
         : null;
 
     if (rulePlan) {
-      for (const id of rulePlan.meaningIds || []) add(meaningIds, id);
+      const suppressed = new Set(rulePlan.suppressedMeaningIds || []);
+      if (suppressed.size) {
+        for (let i = meaningIds.length - 1; i >= 0; i--) {
+          if (suppressed.has(meaningIds[i])) meaningIds.splice(i, 1);
+        }
+      }
+      for (const id of rulePlan.meaningIds || []) {
+        if (!suppressed.has(id)) add(meaningIds, id);
+      }
       for (const reason of rulePlan.reasons || []) {
         if (reason && !reasons.includes(reason)) reasons.push(reason);
       }
@@ -1005,6 +1013,7 @@
       slotOverridesByMeaning,
       claimInterpretation: claimInfo,
       matchedResponseRuleIds: rulePlan?.matchedRuleIds || [],
+      suppressedMeaningIds: rulePlan?.suppressedMeaningIds || [],
       relationship,
       conversationContext,
       analysis: a
