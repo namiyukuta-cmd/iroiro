@@ -10,7 +10,8 @@
     characterPolicy = {},
     psychology = {},
     variantSeed = 0,
-    slotOverridesByMeaning = {}
+    slotOverridesByMeaning = {},
+    recentMeaningIds = []
   } = {}) {
     const normalized = HMW.Dialogue.normalizeInputAnalysis
       ? HMW.Dialogue.normalizeInputAnalysis(analysis || {})
@@ -44,13 +45,21 @@
           })
         : (plan.meaningIds || []);
 
+    const nonRepeatedMeaningIds =
+      typeof HMW.Dialogue.filterRepeatedMeanings === "function"
+        ? HMW.Dialogue.filterRepeatedMeanings(prioritizedMeaningIds, {
+            recentMeaningIds,
+            repeatWindow: characterPolicy.repeatMeaningWindow ?? 4
+          })
+        : prioritizedMeaningIds;
+
     const responseMeaningIds =
       typeof HMW.Dialogue.selectResponseMeanings === "function"
-        ? HMW.Dialogue.selectResponseMeanings(prioritizedMeaningIds, {
+        ? HMW.Dialogue.selectResponseMeanings(nonRepeatedMeaningIds, {
             maxMeanings: characterPolicy.maxResponseMeanings ?? 5,
             boundaryActive: !!plan.boundaryActive
           })
-        : prioritizedMeaningIds;
+        : nonRepeatedMeaningIds;
 
     const resolvedFactSlots =
       typeof HMW.Dialogue.resolveFactSlots === "function"
@@ -84,6 +93,7 @@
       plan: {
         ...plan,
         prioritizedMeaningIds,
+        nonRepeatedMeaningIds,
         selectedMeaningIds: responseMeaningIds
       },
       composed,
@@ -93,6 +103,10 @@
       unmatchedLexicalTargets: lexicalTargets.filter(
         word => !matchedLexicalTargets.includes(word)
       ),
+      nextMeaningHistory:
+        typeof HMW.Dialogue.updateMeaningHistory === "function"
+          ? HMW.Dialogue.updateMeaningHistory(recentMeaningIds, responseMeaningIds)
+          : [...recentMeaningIds, ...responseMeaningIds],
       aiFinalRole: {
         allowed: [
           "preserve the JS-decided meaning",
