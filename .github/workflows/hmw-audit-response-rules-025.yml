@@ -1,0 +1,205 @@
+name: Audit HMW response rules 025
+on:
+  push:
+    paths:
+      - '.github/workflows/hmw-audit-response-rules-025.yml'
+permissions:
+  contents: read
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Audit response rules
+        run: |
+          node <<'NODE'
+          const fs=require('fs'),path=require('path'),vm=require('vm');
+          const root=process.cwd();
+          const ctx={console};ctx.window=ctx;ctx.HMW={};vm.createContext(ctx);
+          const run=p=>vm.runInContext(fs.readFileSync(path.join(root,p),'utf8'),ctx,{filename:p});
+          const files=[
+            'HMW/js/dialogue/dialogue-input.js',
+            'HMW/js/dialogue/analysis-schema.js',
+            'HMW/js/dialogue/claim-rules.js',
+            'HMW/js/dialogue/dialogue-meanings.js',
+            'HMW/js/dialogue/language/lexical-target-rules.js',
+            'HMW/js/dialogue/response-rule-engine.js'
+          ];
+          for(let i=1;i<=25;i++){
+            const n=String(i).padStart(3,'0');
+            const found=fs.readdirSync(path.join(root,'HMW/js/dialogue'))
+              .find(name=>name.startsWith('response-rules-'+n+'-')&&name.endsWith('.js'));
+            if(!found) throw new Error('missing response rules file '+n);
+            files.push('HMW/js/dialogue/'+found);
+          }
+          files.push(
+            'HMW/js/dialogue/response-planner.js',
+            'HMW/js/dialogue/response-priority.js',
+            'HMW/js/dialogue/response-selection.js',
+            'HMW/js/dialogue/response-history.js'
+          );
+          files.forEach(run);
+
+          const D=ctx.HMW.Dialogue;
+          const rules=D.RESPONSE_RULES||[];
+          const ids=rules.map(r=>r.id);
+          const dupIds=ids.filter((id,i)=>ids.indexOf(id)!==i);
+          const missingMeaningIds=[...new Set(rules.flatMap(r=>r.meanings||[]).filter(id=>!D.MEANINGS[id]))];
+
+          const test=c=>{
+            const plan=D.planResponse(c);
+            const prioritized=D.prioritizeResponseMeanings(plan.meaningIds);
+            const selected=D.selectResponseMeanings(prioritized,{
+              boundaryActive:plan.boundaryActive,
+              maxMeanings:5,
+              preferredMeaningIds:plan.preferredMeaningIds||[]
+            });
+            return {plan,selected};
+          };
+
+          const missingTone=test({
+            analysis:{intents:['report_condition'],focusConcepts:['health']},
+            characterFacts:{},
+            characterPolicy:{},
+            psychology:{},
+            relationship:{stage:'friend',familiarity:60,trust:60,goodwill:60,flags:{}}
+          });
+
+          const lowTone=test({
+            analysis:{
+              intents:['report_condition'],
+              focusConcepts:['health'],
+              tone:{positivity:75,hesitation:20}
+            },
+            characterFacts:{},
+            characterPolicy:{},
+            psychology:{},
+            relationship:{stage:'friend',familiarity:60,trust:60,goodwill:60,flags:{}}
+          });
+
+          const hesitantOkay=test({
+            analysis:{
+              intents:['report_condition'],
+              focusConcepts:['health'],
+              tone:{positivity:60,hesitation:75,style:'subdued'}
+            },
+            characterFacts:{},
+            characterPolicy:{},
+            psychology:{care:60},
+            relationship:{stage:'close',familiarity:80,trust:80,goodwill:80,flags:{}}
+          });
+
+          const mixedEmotion=test({
+            analysis:{
+              intents:['report_condition'],
+              focusConcepts:['relationship'],
+              emotions:{fear:70,hurt:70}
+            },
+            characterFacts:{},
+            characterPolicy:{},
+            psychology:{},
+            relationship:{stage:'partner',familiarity:90,trust:90,goodwill:90,flags:{}}
+          });
+
+          const missingEmotionNeutral=test({
+            analysis:{intents:['report_event'],focusConcepts:['work']},
+            characterFacts:{},
+            characterPolicy:{},
+            psychology:{},
+            relationship:{stage:'friend',familiarity:70,trust:70,goodwill:70,flags:{}}
+          });
+
+          const explicitNeutral=test({
+            analysis:{
+              intents:['report_event'],
+              focusConcepts:['work'],
+              emotions:{anger:10,hurt:10,fear:10,sadness:10,joy:10,surprise:10,frustration:10}
+            },
+            characterFacts:{},
+            characterPolicy:{},
+            psychology:{},
+            relationship:{stage:'friend',familiarity:70,trust:70,goodwill:70,flags:{}}
+          });
+
+          const lonelyBoundary=test({
+            analysis:{
+              intents:['express_loneliness'],
+              focusConcepts:['relationship'],
+              boundaries:['leave_me_alone'],
+              emotions:{loneliness:80},
+              tone:{style:'subdued',hesitation:70}
+            },
+            characterFacts:{},
+            characterPolicy:{},
+            psychology:{care:80},
+            relationship:{stage:'partner',familiarity:90,trust:90,goodwill:90,flags:{}}
+          });
+
+          const coldRelationship=test({
+            analysis:{
+              focusConcepts:['relationship','trust'],
+              tone:{style:'cold',friendliness:15,negativity:70}
+            },
+            characterFacts:{},
+            characterPolicy:{},
+            psychology:{},
+            relationship:{stage:'partner',familiarity:90,trust:75,goodwill:70,flags:{}}
+          });
+
+          const checks={
+            ruleCount:rules.length===2500,
+            uniqueRuleIds:new Set(ids).size===2500,
+            noMissingMeanings:missingMeaningIds.length===0,
+            missingToneNoMaxLeak:
+              !missingTone.plan.matchedResponseRuleIds.some(id=>
+                ['R2481_LOW_HESITATION_POSITIVE','R2485_LOW_FEAR_HEALTH'].includes(id)
+              ),
+            explicitLowTone:
+              lowTone.plan.matchedResponseRuleIds.includes('R2481_LOW_HESITATION_POSITIVE') &&
+              lowTone.plan.meaningIds.includes('EXPRESS_RELIEF'),
+            hesitantPositive:
+              hesitantOkay.plan.matchedResponseRuleIds.includes('R2403_REPORT_POSITIVE_HESITANT') &&
+              hesitantOkay.plan.matchedResponseRuleIds.includes('R2423_STYLE_SUBDUED_CONDITION') &&
+              hesitantOkay.plan.meaningIds.includes('EXPRESS_CONCERN') &&
+              hesitantOkay.plan.meaningIds.includes('ASK_IF_OKAY'),
+            emotionMixture:
+              mixedEmotion.plan.matchedResponseRuleIds.includes('R2441_FEAR_HURT_COMBO') &&
+              mixedEmotion.plan.meaningIds.includes('EXPRESS_CONCERN'),
+            missingEmotionNoNeutralLeak:
+              !missingEmotionNeutral.plan.matchedResponseRuleIds.some(id=>
+                ['R152_REPORT_EVENT_NEUTRAL','R380_REPORT_NEUTRAL','R821_WORK_REPORT_NEUTRAL'].includes(id)
+              ),
+            explicitNeutral:
+              explicitNeutral.plan.matchedResponseRuleIds.includes('R152_REPORT_EVENT_NEUTRAL') &&
+              explicitNeutral.plan.matchedResponseRuleIds.includes('R821_WORK_REPORT_NEUTRAL'),
+            lonelyBoundary:
+              lonelyBoundary.selected.includes('RESPECT_BOUNDARY') &&
+              !lonelyBoundary.selected.includes('OFFER_COMPANY'),
+            coldRelationship:
+              coldRelationship.plan.matchedResponseRuleIds.includes('R246?')===false &&
+              coldRelationship.plan.matchedResponseRuleIds.includes('R2473_PARTNER_COLD_REL') &&
+              coldRelationship.plan.meaningIds.includes('ASK_TO_TALK')
+          };
+
+          console.log('AUDIT_RESULT '+JSON.stringify({
+            ruleCount:rules.length,
+            uniqueRuleIds:new Set(ids).size,
+            dupIds,
+            missingMeaningIds,
+            checks,
+            cases:{
+              missingTone:{meaningIds:missingTone.plan.meaningIds,matched:missingTone.plan.matchedResponseRuleIds},
+              lowTone:{meaningIds:lowTone.plan.meaningIds,matched:lowTone.plan.matchedResponseRuleIds},
+              hesitantOkay:{meaningIds:hesitantOkay.plan.meaningIds,selected:hesitantOkay.selected,matched:hesitantOkay.plan.matchedResponseRuleIds},
+              mixedEmotion:{meaningIds:mixedEmotion.plan.meaningIds,matched:mixedEmotion.plan.matchedResponseRuleIds},
+              missingEmotionNeutral:{meaningIds:missingEmotionNeutral.plan.meaningIds,matched:missingEmotionNeutral.plan.matchedResponseRuleIds},
+              explicitNeutral:{meaningIds:explicitNeutral.plan.meaningIds,matched:explicitNeutral.plan.matchedResponseRuleIds},
+              lonelyBoundary:{meaningIds:lonelyBoundary.plan.meaningIds,selected:lonelyBoundary.selected,matched:lonelyBoundary.plan.matchedResponseRuleIds},
+              coldRelationship:{meaningIds:coldRelationship.plan.meaningIds,matched:coldRelationship.plan.matchedResponseRuleIds}
+            }
+          }));
+          if(Object.values(checks).some(v=>v!==true)) process.exit(1);
+          NODE
