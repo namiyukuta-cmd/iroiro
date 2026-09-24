@@ -18,7 +18,7 @@
   let passerbyTimer = null;
   let passerbySprite = null;
   let selectedSellItemId = null;
-  let beggingSessionStartMinute = null;
+  let activitySessionStartMinute = null;
 
   const PASSERBY_IMAGES = Object.freeze([
     './asset/Npc/npc_man_01.png',
@@ -69,22 +69,28 @@
     inv[itemId]=(Number(inv[itemId])||0)+Math.max(1,Math.floor(Number(count)||1));
   }
 
-  function beggingHistoryForScene(){
-    if(!stateRef.beggingHistory || typeof stateRef.beggingHistory!=='object'){
-      stateRef.beggingHistory={};
+  function activityHistoryForScene(targetMode=mode){
+    const storeKey=targetMode==='sell' ? 'sellingHistory' : 'beggingHistory';
+    if(!stateRef[storeKey] || typeof stateRef[storeKey]!=='object'){
+      stateRef[storeKey]={};
     }
+
     const key=stateRef.sceneKey || 'outerPoor';
     const day=Math.max(1,Math.floor(Number(stateRef.day)||1));
-    const existing=stateRef.beggingHistory[key];
+    const existing=stateRef[storeKey][key];
 
     if(!existing || Number(existing.day)!==day){
-      stateRef.beggingHistory[key]={day,attempts:0,strikes:0,blockedUntil:0};
+      stateRef[storeKey][key]={day,attempts:0,strikes:0,blockedUntil:0};
     }else{
       if(!Number.isFinite(Number(existing.attempts))) existing.attempts=0;
       if(!Number.isFinite(Number(existing.strikes))) existing.strikes=0;
       if(!Number.isFinite(Number(existing.blockedUntil))) existing.blockedUntil=0;
     }
-    return stateRef.beggingHistory[key];
+    return stateRef[storeKey][key];
+  }
+
+  function beggingHistoryForScene(){
+    return activityHistoryForScene('beg');
   }
 
   function beggingFatigueMultiplier(attempts){
@@ -94,15 +100,6 @@
     if(n<15) return 0.6;
     if(n<25) return 0.45;
     return 0.3;
-  }
-
-  function prayerCharityMultiplier(){
-    if(!window.SHOP_TIME || !Array.isArray(window.SHOP_TIME.prayers) || !stateRef) return 1;
-    const now=((Number(stateRef.minutes)||0)%1440+1440)%1440;
-    const nearPrayer=window.SHOP_TIME.prayers.some(prayer=>
-      now>=prayer.minute-20 && now<prayer.minute+30
-    );
-    return nearPrayer ? 1.35 : 1;
   }
 
   function timeOfDayBeggingMultiplier(){
@@ -126,12 +123,33 @@
   function effectiveBeggingStopChance(){
     const rule=currentBeggingRule();
     const history=beggingHistoryForScene();
+    const charity=window.SHOP_SOCIETY && window.SHOP_SOCIETY.charityMultiplier
+      ? window.SHOP_SOCIETY.charityMultiplier(stateRef)
+      : 1;
     const chance=(Number(rule.stopChance)||0) *
       beggingFatigueMultiplier(history.attempts) *
       timeOfDayBeggingMultiplier() *
-      prayerCharityMultiplier() *
+      charity *
       weatherBeggingMultiplier();
     return Math.max(0.03,Math.min(0.75,chance));
+  }
+
+  function weatherSellingMultiplier(){
+    const weather=String(stateRef && stateRef.weather || '');
+    if(weather.includes('砂')) return 0.72;
+    if(weather.includes('雨')) return 0.78;
+    return 1;
+  }
+
+  function effectiveSellingStopChance(){
+    const rule=currentSellingRule();
+    const interest=window.SHOP_SOCIETY && window.SHOP_SOCIETY.sellingInterestMultiplier
+      ? window.SHOP_SOCIETY.sellingInterestMultiplier(stateRef)
+      : 1;
+    const chance=(Number(rule.stopChance)||0.32) *
+      interest *
+      weatherSellingMultiplier();
+    return Math.max(0.03,Math.min(0.70,chance));
   }
 
   function refreshPersistentUi(){
@@ -218,44 +236,82 @@
         };
   }
 
+  function currentSellingRule(){
+    const key = stateRef && stateRef.sceneKey ? stateRef.sceneKey : 'outerPoor';
+    const scene = window.SHOP_DATA && window.SHOP_DATA.scenes
+      ? window.SHOP_DATA.scenes[key]
+      : null;
+
+    return scene && scene.selling
+      ? scene.selling
+      : {stopChance:0.32,enforcement:null};
+  }
+
+  function currentActivityRule(targetMode=mode){
+    return targetMode==='sell' ? currentSellingRule() : currentBeggingRule();
+  }
+
   function absoluteGameMinute(){
     const day=Math.max(1,Math.floor(Number(stateRef && stateRef.day)||1));
     const minutes=Math.max(0,Math.floor(Number(stateRef && stateRef.minutes)||0));
     return (day-1)*1440+minutes;
   }
 
-  function currentBeggingEnforcement(){
-    const rule=currentBeggingRule();
+  function currentActivityEnforcement(targetMode=mode){
+    const rule=currentActivityRule(targetMode);
     return rule && rule.enforcement ? rule.enforcement : null;
   }
 
-  function beggingBlockRemaining(){
-    const history=beggingHistoryForScene();
+  function activityBlockRemaining(targetMode=mode){
+    const history=activityHistoryForScene(targetMode);
     return Math.max(0,Math.floor(Number(history.blockedUntil)||0)-absoluteGameMinute());
   }
 
-  function beggingSessionMinutes(){
-    if(!Number.isFinite(Number(beggingSessionStartMinute))) return 0;
-    return Math.max(0,absoluteGameMinute()-Number(beggingSessionStartMinute));
+  function activitySessionMinutes(){
+    if(!Number.isFinite(Number(activitySessionStartMinute))) return 0;
+    return Math.max(0,absoluteGameMinute()-Number(activitySessionStartMinute));
   }
 
-  function isBeggingEnforcementActive(rule,history){
+  function isActivityEnforcementActive(rule,history){
     if(!rule) return false;
     const attempts=Math.max(0,Math.floor(Number(history.attempts)||0));
     const minAttempts=Math.max(0,Math.floor(Number(rule.startAfter)||0));
     const minMinutes=Math.max(0,Math.floor(Number(rule.startAfterMinutes)||0));
-    return attempts>=minAttempts || beggingSessionMinutes()>=minMinutes;
+    return attempts>=minAttempts || activitySessionMinutes()>=minMinutes;
   }
 
-  function enforcementWarningText(rule,strikes){
+  function enforcementModifiers(targetMode=mode){
+    if(window.SHOP_SOCIETY && window.SHOP_SOCIETY.enforcementModifiers){
+      return window.SHOP_SOCIETY.enforcementModifiers(stateRef,targetMode);
+    }
+    return {need:'normal',checkChanceMultiplier:1,extraWarnings:0};
+  }
+
+  function enforcementWarningText(rule,strikes,targetMode,modifiers){
     const authority=String(rule.authority || '見回り');
+    const need=modifiers && modifiers.need ? modifiers.need : 'normal';
+    const distressed=need==='severe' || need==='critical';
+
+    if(targetMode==='sell'){
+      if(distressed && strikes<=1){
+        return authority+'「事情は分かるが、ここで商いを続けるな。場所を空けろ」';
+      }
+      if(strikes<=1){
+        return authority+'「ここで勝手に商いを広げるな。場所を空けろ」';
+      }
+      return authority+'「まだ売っているのか。次はここから出すぞ」';
+    }
+
+    if(distressed && strikes<=1){
+      return authority+'「ひどい有様だな……。だが、ここには居座るな」';
+    }
     if(strikes<=1){
       return authority+'「ここに居座るな。少し場所を空けろ」';
     }
     return authority+'「まだいるのか。次はここから出すぞ」';
   }
 
-  function finishForcedRemoval(rule){
+  function finishForcedRemoval(rule,targetMode){
     clearPasserby();
     screen.classList.remove('is-open');
     delete screen.dataset.mode;
@@ -265,10 +321,15 @@
     setTimeSpeed(1);
 
     if(window.SHOP_TIME && stateRef){
-      window.SHOP_TIME.advance(stateRef,10,'begging_removed');
+      window.SHOP_TIME.advance(
+        stateRef,
+        10,
+        targetMode==='sell' ? 'selling_removed' : 'begging_removed'
+      );
     }
 
-    let message='追い立てられた。しばらくここでは物乞いできない。';
+    const activityName=targetMode==='sell' ? '物売り' : '物乞い';
+    let message='追い立てられた。しばらくここでは'+activityName+'できない。';
     const forcedScene=rule && rule.forcedScene;
     if(forcedScene && window.SHOP_DATA && window.SHOP_DATA.scenes && window.SHOP_DATA.scenes[forcedScene]){
       stateRef.sceneKey=forcedScene;
@@ -276,25 +337,35 @@
       message='追い立てられて「'+name+'」へ移された。';
     }
 
-    beggingSessionStartMinute=null;
+    activitySessionStartMinute=null;
     refreshPersistentUi();
     if(globalStatus) globalStatus.textContent=message;
   }
 
-  function maybeHandleBeggingEnforcement(){
-    const rule=currentBeggingEnforcement();
+  function maybeHandleActivityEnforcement(){
+    const rule=currentActivityEnforcement(mode);
     if(!rule) return false;
 
-    const history=beggingHistoryForScene();
-    if(!isBeggingEnforcementActive(rule,history)) return false;
+    const history=activityHistoryForScene(mode);
+    if(!isActivityEnforcementActive(rule,history)) return false;
 
-    const chance=Math.max(0,Math.min(1,Number(rule.checkChance)||0));
+    const modifiers=enforcementModifiers(mode);
+    const chance=Math.max(
+      0,
+      Math.min(
+        1,
+        (Number(rule.checkChance)||0) *
+          Math.max(0,Number(modifiers.checkChanceMultiplier)||1)
+      )
+    );
     if(Math.random()>=chance) return false;
 
     history.strikes=Math.max(0,Math.floor(Number(history.strikes)||0))+1;
-    const warningsBeforeRemoval=Math.max(0,Math.floor(Number(rule.warningsBeforeRemoval)||0));
+    const warningsBeforeRemoval=
+      Math.max(0,Math.floor(Number(rule.warningsBeforeRemoval)||0)) +
+      Math.max(0,Math.floor(Number(modifiers.extraWarnings)||0));
 
-    dialog.textContent=enforcementWarningText(rule,history.strikes);
+    dialog.textContent=enforcementWarningText(rule,history.strikes,mode,modifiers);
     dialog.classList.add('is-open');
 
     if(history.strikes<=warningsBeforeRemoval){
@@ -307,10 +378,13 @@
 
     const cooldown=Math.max(15,Math.floor(Number(rule.cooldownMinutes)||60));
     history.blockedUntil=absoluteGameMinute()+cooldown;
-    dialog.textContent=String(rule.authority || '見回り')+'「何度言わせる。ここから離れろ」';
+    dialog.textContent=String(rule.authority || '見回り')+
+      (mode==='sell'
+        ? '「その品を片付けろ。ここから離れろ」'
+        : '「何度言わせる。ここから離れろ」');
 
     passerbyTimer=setTimeout(()=>{
-      finishForcedRemoval(rule);
+      finishForcedRemoval(rule,mode);
     },2200);
     return true;
   }
@@ -442,18 +516,16 @@
 
     clearPasserby();
 
-    if(mode==='beg' && maybeHandleBeggingEnforcement()) return;
+    if(maybeHandleActivityEnforcement()) return;
 
     const fromLeft=Math.random()>=0.5;
     const stopChance=mode==='beg'
       ? effectiveBeggingStopChance()
-      : 0.48;
+      : effectiveSellingStopChance();
     const willStop=Math.random()<stopChance;
 
-    if(mode==='beg'){
-      const history=beggingHistoryForScene();
-      history.attempts=Math.max(0,Math.floor(Number(history.attempts)||0))+1;
-    }
+    const history=activityHistoryForScene(mode);
+    history.attempts=Math.max(0,Math.floor(Number(history.attempts)||0))+1;
     const stopAt=38 + Math.round(Math.random()*24);
 
     const image=document.createElement('img');
@@ -538,31 +610,35 @@
 
   function open(state,initialMode='beg'){
     stateRef=state || window.SHOP_STATE || {};
+    const requestedMode=initialMode==='sell' ? 'sell' : 'beg';
 
-    if(initialMode==='beg'){
-      const remaining=beggingBlockRemaining();
-      if(remaining>0){
-        if(globalStatus){
-          globalStatus.textContent='さっき追い立てられた。あと約'+remaining+'分はここで物乞いできない。';
-        }
-        return false;
-      }
-      beggingSessionStartMinute=absoluteGameMinute();
-    }else{
-      beggingSessionStartMinute=null;
+    if(requestedMode==='sell' && !hasSellableItems()){
+      if(globalStatus) globalStatus.textContent='売れる物がない。';
+      return false;
     }
+
+    const remaining=activityBlockRemaining(requestedMode);
+    if(remaining>0){
+      const activityName=requestedMode==='sell' ? '物売り' : '物乞い';
+      if(globalStatus){
+        globalStatus.textContent='さっき追い立てられた。あと約'+remaining+
+          '分はここで'+activityName+'できない。';
+      }
+      return false;
+    }
+
+    mode=requestedMode;
+    activitySessionStartMinute=absoluteGameMinute();
 
     const app=document.querySelector('.app');
     if(app) app.classList.add('action-open');
     screen.classList.add('is-open');
 
-    if(!setMode(initialMode)){
-      if(!setMode('beg')){
-        screen.classList.remove('is-open');
-        if(app) app.classList.remove('action-open');
-        return false;
-      }
-      beggingSessionStartMinute=absoluteGameMinute();
+    if(!setMode(requestedMode)){
+      screen.classList.remove('is-open');
+      if(app) app.classList.remove('action-open');
+      activitySessionStartMinute=null;
+      return false;
     }
     setTimeSpeed(1);
 
@@ -579,7 +655,7 @@
     const app=document.querySelector('.app');
     if(app) app.classList.remove('action-open');
     dialog.classList.remove('is-open');
-    beggingSessionStartMinute=null;
+    activitySessionStartMinute=null;
     setTimeSpeed(1);
     refreshPersistentUi();
   }
