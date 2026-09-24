@@ -45,6 +45,7 @@
     if (w.focusNone && hasAny(a.focusConcepts, w.focusNone)) return false;
 
     if (w.boundaryAny && !hasAny(a.boundaries, w.boundaryAny)) return false;
+    if (w.boundaryAll && !hasAll(a.boundaries, w.boundaryAll)) return false;
     if (w.boundaryNone && hasAny(a.boundaries, w.boundaryNone)) return false;
 
     if (w.questionKindAny && !questions.some(q => arr(w.questionKindAny).includes(q?.kind))) return false;
