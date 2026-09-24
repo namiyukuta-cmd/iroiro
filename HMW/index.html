@@ -7,10 +7,20 @@
   <meta http-equiv="Pragma" content="no-cache" />
   <meta http-equiv="Expires" content="0" />
   <title>HMW</title>
-  <link rel="stylesheet" href="css/style.css?v=20260922-2205" />
+  <link rel="stylesheet" href="css/style.css?v=20260924-start-menu" />
 </head>
 <body>
-  <div class="app">
+  <section class="start-screen" id="start-screen" aria-label="開始メニュー">
+    <div class="start-card">
+      <h1>HMW</h1>
+      <div class="start-actions">
+        <button class="start-btn" id="start-new">初めから</button>
+        <button class="start-btn" id="start-continue">続きから</button>
+      </div>
+    </div>
+  </section>
+
+  <div class="app game-not-started" id="game-app">
     <div class="topbar">
       <div class="status-box" id="day">DAY<b>1</b></div>
       <div class="status-box" id="time">TIME<b>朝</b></div>
@@ -89,7 +99,7 @@
   <script src="js/actions-life.js?v=20260922-2205"></script>
   <script src="js/actions-people.js?v=20260923-1944"></script>
   <script src="js/scenes.js?v=20260922-1148"></script>
-  <script src="js/ui.js?v=20260922-2156"></script>
+  <script src="js/ui.js?v=20260924-start-menu"></script>
   <script src="js/display-names.js?v=20260909-2130"></script>
 </body>
 </html>
