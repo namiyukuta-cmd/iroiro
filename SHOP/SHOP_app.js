@@ -166,6 +166,12 @@
     });
   }
 
+  function advanceTravel(minutes,reason){
+    if(window.SHOP_TIME){
+      window.SHOP_TIME.advance(window.SHOP_STATE,minutes,reason);
+    }
+  }
+
   function canAccessScene(sceneKey,state=window.SHOP_STATE){
     if(sceneKey==='upperArea'){
       return !!(state && state.access && state.access.upperArea);
@@ -315,6 +321,7 @@
       prevButton.setAttribute('aria-label', data.scenes[prevKey].name + 'へ移動');
       prevButton.addEventListener('click', event => {
         event.stopPropagation();
+        advanceTravel(10,'move_district');
         state.sceneKey = prevKey;
         render();
       });
@@ -331,6 +338,7 @@
         nextButton.setAttribute('aria-label', data.scenes[nextKey].name + 'へ移動');
         nextButton.addEventListener('click', event => {
           event.stopPropagation();
+          advanceTravel(10,'move_district');
           state.sceneKey = nextKey;
           render();
         });
@@ -352,6 +360,7 @@
         button.setAttribute('aria-label', data.scenes[link.sceneKey].name + 'へ移動');
         button.addEventListener('click', event => {
           event.stopPropagation();
+          advanceTravel(5,'enter_facility');
           state.sceneKey = link.sceneKey;
           render();
         });
@@ -366,6 +375,7 @@
         backButton.setAttribute('aria-label', data.scenes[scene.returnTo].name + 'へ戻る');
         backButton.addEventListener('click', event => {
           event.stopPropagation();
+          advanceTravel(5,'leave_facility');
           state.sceneKey = scene.returnTo;
           render();
         });
