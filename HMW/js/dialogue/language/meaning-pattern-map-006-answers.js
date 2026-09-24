@@ -15,11 +15,12 @@
   ],
   "STATE_AVAILABLE_TIME": [
     {
-      "pattern": "STATE_BE_TIME",
+      "pattern": "STATE_BE_AVAILABLE_TIME",
       "slots": {
         "SUBJECT": "I",
         "BE": "am",
-        "TIME": "free now"
+        "AVAILABILITY": "available",
+        "TIME": "now"
       },
       "weight": 5
     }
