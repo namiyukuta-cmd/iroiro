@@ -1,0 +1,169 @@
+name: Audit HMW response rules 020
+on:
+  push:
+    paths:
+      - '.github/workflows/hmw-audit-response-rules-020.yml'
+permissions:
+  contents: read
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Audit response rules
+        run: |
+          node <<'NODE'
+          const fs=require('fs'),path=require('path'),vm=require('vm');
+          const root=process.cwd();
+          const ctx={console};ctx.window=ctx;ctx.HMW={};vm.createContext(ctx);
+          const run=p=>vm.runInContext(fs.readFileSync(path.join(root,p),'utf8'),ctx,{filename:p});
+          const files=[
+            'HMW/js/dialogue/dialogue-input.js',
+            'HMW/js/dialogue/analysis-schema.js',
+            'HMW/js/dialogue/claim-rules.js',
+            'HMW/js/dialogue/dialogue-meanings.js',
+            'HMW/js/dialogue/language/lexical-target-rules.js',
+            'HMW/js/dialogue/response-rule-engine.js'
+          ];
+          for(let i=1;i<=20;i++){
+            const n=String(i).padStart(3,'0');
+            const found=fs.readdirSync(path.join(root,'HMW/js/dialogue'))
+              .find(name=>name.startsWith('response-rules-'+n+'-')&&name.endsWith('.js'));
+            if(!found) throw new Error('missing response rules file '+n);
+            files.push('HMW/js/dialogue/'+found);
+          }
+          files.push(
+            'HMW/js/dialogue/response-planner.js',
+            'HMW/js/dialogue/response-priority.js',
+            'HMW/js/dialogue/response-selection.js',
+            'HMW/js/dialogue/response-history.js'
+          );
+          files.forEach(run);
+
+          const D=ctx.HMW.Dialogue;
+          const rules=D.RESPONSE_RULES||[];
+          const ids=rules.map(r=>r.id);
+          const dupIds=ids.filter((id,i)=>ids.indexOf(id)!==i);
+          const missingMeaningIds=[...new Set(rules.flatMap(r=>r.meanings||[]).filter(id=>!D.MEANINGS[id]))];
+
+          const test=c=>{
+            const plan=D.planResponse(c);
+            const prioritized=D.prioritizeResponseMeanings(plan.meaningIds);
+            const selected=D.selectResponseMeanings(prioritized,{
+              boundaryActive:plan.boundaryActive,
+              maxMeanings:5,
+              preferredMeaningIds:plan.preferredMeaningIds||[]
+            });
+            return {plan,selected};
+          };
+
+          const inviteBoundary=test({
+            analysis:{
+              intents:['invite_action'],
+              questions:[{kind:'invitation',action:'hug'}],
+              boundaries:['do_not_hug']
+            },
+            characterPolicy:{invitationResponses:{hug:true}},
+            relationship:{stage:'partner',familiarity:90,trust:90,goodwill:90,flags:{}}
+          });
+
+          const suggestBoundary=test({
+            analysis:{
+              intents:['suggest_action'],
+              questions:[{kind:'suggestion',action:'call'}],
+              boundaries:['do_not_contact']
+            },
+            characterPolicy:{suggestionResponses:{call:true}},
+            relationship:{stage:'partner',familiarity:90,trust:90,goodwill:90,flags:{}}
+          });
+
+          const inviteFalse=test({
+            analysis:{intents:['invite_action'],questions:[{kind:'invitation',action:'visit'}]},
+            characterPolicy:{invitationResponses:{visit:false}},
+            relationship:{stage:'close',familiarity:80,trust:80,goodwill:80,flags:{}}
+          });
+
+          const suggestTrue=test({
+            analysis:{intents:['suggest_action'],questions:[{kind:'suggestion',action:'rest'}]},
+            characterPolicy:{suggestionResponses:{rest:true}},
+            relationship:{stage:'friend',familiarity:70,trust:70,goodwill:70,flags:{}}
+          });
+
+          const secondaryInvite=test({
+            analysis:{
+              intents:['ask_where','invite_action'],
+              questions:[
+                {kind:'where',requestedField:'currentLocation'},
+                {kind:'invitation',action:'eat'}
+              ]
+            },
+            characterFacts:{currentLocation:'Tokyo'},
+            characterPolicy:{invitationResponses:{eat:false}},
+            relationship:{stage:'friend',familiarity:70,trust:70,goodwill:70,flags:{}}
+          });
+
+          const secondarySuggestion=test({
+            analysis:{
+              intents:['ask_when','suggest_action'],
+              questions:[
+                {kind:'when',requestedField:'returnTime'},
+                {kind:'suggestion',action:'drink'}
+              ]
+            },
+            characterFacts:{returnTime:'20:00'},
+            characterPolicy:{suggestionResponses:{drink:true}},
+            relationship:{stage:'friend',familiarity:70,trust:70,goodwill:70,flags:{}}
+          });
+
+          const checks={
+            ruleCount:rules.length===2000,
+            uniqueRuleIds:new Set(ids).size===2000,
+            noMissingMeanings:missingMeaningIds.length===0,
+            inviteBoundary:
+              inviteBoundary.plan.matchedResponseRuleIds.includes('R1943_HUG_INVITE_BOUNDARY') &&
+              inviteBoundary.plan.suppressedMeaningIds.includes('ACCEPT_INVITATION') &&
+              !inviteBoundary.plan.meaningIds.includes('ACCEPT_INVITATION') &&
+              inviteBoundary.selected.includes('DECLINE_INVITATION') &&
+              inviteBoundary.selected.includes('RESPECT_BOUNDARY'),
+            suggestBoundary:
+              suggestBoundary.plan.matchedResponseRuleIds.includes('R1957_CALL_SUGGEST_BOUNDARY') &&
+              suggestBoundary.plan.suppressedMeaningIds.includes('ACCEPT_SUGGESTION') &&
+              !suggestBoundary.plan.meaningIds.includes('ACCEPT_SUGGESTION') &&
+              suggestBoundary.selected.includes('DECLINE_SUGGESTION'),
+            inviteFalse:
+              inviteFalse.plan.matchedResponseRuleIds.includes('R1915_VISIT_INVITE_FALSE') &&
+              !inviteFalse.plan.meaningIds.includes('ACCEPT_INVITATION') &&
+              inviteFalse.selected.includes('DECLINE_INVITATION'),
+            suggestTrue:
+              suggestTrue.plan.matchedResponseRuleIds.includes('R1988_REST_SUGGEST_TRUE') &&
+              suggestTrue.selected.includes('ACCEPT_SUGGESTION'),
+            secondaryInvite:
+              secondaryInvite.plan.matchedResponseRuleIds.includes('R1961_EAT_INVITE_FALSE') &&
+              secondaryInvite.selected.includes('DECLINE_INVITATION') &&
+              secondaryInvite.selected.includes('STATE_CURRENT_LOCATION'),
+            secondarySuggestion:
+              secondarySuggestion.plan.matchedResponseRuleIds.includes('R1984_DRINK_SUGGEST_TRUE') &&
+              secondarySuggestion.selected.includes('ACCEPT_SUGGESTION') &&
+              secondarySuggestion.selected.includes('STATE_RETURN_TIME')
+          };
+
+          console.log('AUDIT_RESULT '+JSON.stringify({
+            ruleCount:rules.length,
+            uniqueRuleIds:new Set(ids).size,
+            dupIds,
+            missingMeaningIds,
+            checks,
+            cases:{
+              inviteBoundary:{meaningIds:inviteBoundary.plan.meaningIds,suppressed:inviteBoundary.plan.suppressedMeaningIds,selected:inviteBoundary.selected,matched:inviteBoundary.plan.matchedResponseRuleIds},
+              suggestBoundary:{meaningIds:suggestBoundary.plan.meaningIds,suppressed:suggestBoundary.plan.suppressedMeaningIds,selected:suggestBoundary.selected,matched:suggestBoundary.plan.matchedResponseRuleIds},
+              inviteFalse:{meaningIds:inviteFalse.plan.meaningIds,selected:inviteFalse.selected,matched:inviteFalse.plan.matchedResponseRuleIds},
+              suggestTrue:{meaningIds:suggestTrue.plan.meaningIds,selected:suggestTrue.selected,matched:suggestTrue.plan.matchedResponseRuleIds},
+              secondaryInvite:{meaningIds:secondaryInvite.plan.meaningIds,selected:secondaryInvite.selected,matched:secondaryInvite.plan.matchedResponseRuleIds},
+              secondarySuggestion:{meaningIds:secondarySuggestion.plan.meaningIds,selected:secondarySuggestion.selected,matched:secondarySuggestion.plan.matchedResponseRuleIds}
+            }
+          }));
+          if(Object.values(checks).some(v=>v!==true)) process.exit(1);
+          NODE
