@@ -363,7 +363,7 @@
   }
 
   function openLog() {
-    openModal("記録", H.state.history.map((x) => `<div class="log-row">${esc(x)}</div>`).join(""), [], true);
+    openModal("ログ", H.state.history.map((x) => `<div class="log-row">${esc(x)}</div>`).join(""), [], true);
   }
 
   function saveSlotActions() {
@@ -424,7 +424,10 @@
   function openMenu() {
     openModal("メニュー", "", [
       { label: "状況・今ある用事", onClick: () => { closeModal(); openTasks(); } },
-      { label: "人物一覧", onClick: () => { closeModal(); openPeople(); } }
+      { label: "人物一覧", onClick: () => { closeModal(); openPeople(); } },
+      { label: "ログ", onClick: () => { closeModal(); openLog(); } },
+      { label: "セーブ", onClick: () => { closeModal(); openSave(); } },
+      { label: "ロード", onClick: () => { closeModal(); openLoad(false); } }
     ]);
   }
 
@@ -468,9 +471,6 @@
     $("side-talk").addEventListener("click", openPeopleHere);
     $("side-move").addEventListener("click", openMap);
     $("side-inventory").addEventListener("click", openInventory);
-    $("nav-log").addEventListener("click", openLog);
-    $("nav-save").addEventListener("click", openSave);
-    $("nav-load").addEventListener("click", () => openLoad(false));
     $("start-new").addEventListener("click", startNewGame);
     $("start-continue").addEventListener("click", continueGame);
     $("modal-close").addEventListener("click", closeModal);
