@@ -144,3 +144,5 @@ jobs:
           }));
           if(Object.values(checks).some(v=>v!==true)) process.exit(1);
           NODE
+
+# rerun after slot-priority merge fix
