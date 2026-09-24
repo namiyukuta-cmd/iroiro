@@ -66,6 +66,8 @@ jobs:
           ];
           const missingDynamic=expectedDynamic.filter(id=>!routed[id]?.length);
 
+          const allMeaningsRouted = routedIds.length === ids.length && noRouted.length === 0;
+
           const checks={
             vocabulary5073:(D.Vocabulary?.entries?.length||0)===5073,
             patterns1000:Object.keys(D.SENTENCE_PATTERNS||{}).length===1000,
@@ -74,11 +76,9 @@ jobs:
             noUnresolved:unresolved.length===0,
             noKnownBadRoutes:suspicious.length===0,
             dynamicBatchComplete:missingDynamic.length===0,
-            routedAtLeast174:routedIds.length>=174
+            routedAtLeast174:routedIds.length>=174,
+            allMeaningsRouted
           };
-
-          const allMeaningsRouted = routedMeanings.length === meaningIds.length && noRouted.length === 0;
-          if (!allMeaningsRouted) process.exitCode = 1;
 
           console.log('AUDIT_RESULT '+JSON.stringify({
             vocabularyCount:D.Vocabulary?.entries?.length||0,
