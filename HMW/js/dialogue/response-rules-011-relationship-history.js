@@ -110,7 +110,14 @@
   add("R1092_FLAG_PROMISED_RETURN",600,{intentAny:["say_goodbye"],relationshipFlagEq:{"promisedReturn":true}},["PROMISE_RETURN"],"promised_return_flag");
   add("R1093_FLAG_TRUST_BROKEN",650,{focusAny:["trust","betrayal"],relationshipFlagEq:{"trustBroken":true}},["ASK_TO_REPAIR"],"trust_broken_flag");
   add("R1094_FLAG_EXCLUSIVE",640,{focusAny:["relationship","other_person"],relationshipFlagEq:{"exclusive":true}},["CONFIRM_CHOICE"],"exclusive_relationship_flag");
-  add("R1095_FLAG_DATING",620,{intentAny:["ask_relationship_status"],relationshipFlagEq:{"dating":true}},["STATE_RELATIONSHIP_STATUS"],"dating_flag");
+  R.push({
+    id:"R1095_FLAG_DATING",
+    priority:620,
+    when:{intentAny:["ask_relationship_status"],relationshipFlagEq:{"dating":true}},
+    meanings:["STATE_RELATIONSHIP_STATUS"],
+    reason:"dating_flag",
+    slots:{STATE_RELATIONSHIP_STATUS:{RELATIONSHIP:"dating"}}
+  });
   add("R1096_FLAG_ROMANTIC",610,{intentAny:["affirm_affection"],relationshipFlagEq:{"romantic":true}},["EXPRESS_CARE"],"romantic_flag");
   add("R1097_FLAG_DISTANCE_REQUESTED",990,{relationshipFlagEq:{"distanceRequested":true},intentAny:["ask_to_meet","request_contact"]},["ACCEPT_DISTANCE"],"distance_requested_flag");
   add("R1098_FLAG_NO_CONTACT",995,{relationshipFlagEq:{"noContact":true},intentAny:["request_contact"]},["DECLINE_CONTACT","RESPECT_BOUNDARY"],"no_contact_flag");
