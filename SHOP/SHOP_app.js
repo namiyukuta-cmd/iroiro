@@ -236,6 +236,9 @@
       image.className = 'scene-object layer-' + (item.layer || 'house');
       if(item.selectable) image.classList.add('is-selectable');
       if(item.selectable && item.selectableType==='npc') image.classList.add('selectable-npc');
+      if(item.selectable && (item.selectableType==='shop' || item.selectableType==='well')){
+        image.classList.add('selectable-place');
+      }
 
       if(item.layer==='backgroundNpc'){
         image.style.filter='drop-shadow(1px 2px 2px rgba(0,0,0,.22))';
