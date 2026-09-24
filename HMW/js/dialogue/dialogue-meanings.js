@@ -228,6 +228,46 @@
     ASK_DESTINATION: {
       category: "clarity",
       meaningJa: "相手がどこへ行くのか尋ねる"
+    },
+    EXPRESS_SLEEPY: {
+      category: "condition",
+      meaningJa: "眠いことを伝える"
+    },
+    ASK_TO_REST: {
+      category: "request",
+      meaningJa: "少し休もうと提案する"
+    },
+    ASK_ABOUT_WORK: {
+      category: "daily",
+      meaningJa: "仕事について尋ねる"
+    },
+    EXPRESS_WORK_TIREDNESS: {
+      category: "daily",
+      meaningJa: "仕事で疲れたことを伝える"
+    },
+    ASK_ABOUT_MONEY: {
+      category: "daily",
+      meaningJa: "お金や支払いについて尋ねる"
+    },
+    EXPRESS_NO_MONEY: {
+      category: "daily",
+      meaningJa: "お金がないことを伝える"
+    },
+    COMMENT_RAIN: {
+      category: "environment",
+      meaningJa: "雨について話す"
+    },
+    COMMENT_COLD_WEATHER: {
+      category: "environment",
+      meaningJa: "寒い天気について話す"
+    },
+    SAY_GOING_HOME: {
+      category: "parting",
+      meaningJa: "家や寝場所へ帰ることを伝える"
+    },
+    ASK_IF_COMING_BACK: {
+      category: "parting",
+      meaningJa: "また戻ってくるか尋ねる"
     }
   };
 })();
