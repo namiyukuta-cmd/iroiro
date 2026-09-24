@@ -311,6 +311,102 @@
       reasons.push("disapproval_topic");
     }
 
+
+    if (has(a.intents, "ask_plan")) {
+      add(meaningIds, "ASK_PLAN");
+      reasons.push("plan_question");
+    }
+
+    if (has(a.intents, "ask_preference")) {
+      add(meaningIds, "ASK_PREFERENCE");
+      reasons.push("preference_question");
+    }
+
+    if (has(a.intents, "ask_work")) {
+      add(meaningIds, "ASK_WORK_STATUS");
+      reasons.push("work_status_question");
+    }
+
+    if (has(a.intents, "ask_money")) {
+      add(meaningIds, "ASK_MONEY_STATUS");
+      reasons.push("money_status_question");
+    }
+
+    if (has(a.intents, "ask_hunger")) {
+      add(meaningIds, "ASK_HUNGER");
+      reasons.push("hunger_question");
+    }
+
+    if (has(a.intents, "ask_thirst")) {
+      add(meaningIds, "ASK_THIRST");
+      reasons.push("thirst_question");
+    }
+
+    if (has(a.intents, "ask_tiredness")) {
+      add(meaningIds, "ASK_TIREDNESS");
+      reasons.push("tiredness_question");
+    }
+
+    if (has(a.intents, "offer_company") && !distanceBoundary) {
+      add(meaningIds, "OFFER_COMPANY");
+      reasons.push("company_offered");
+    }
+
+    if (has(a.intents, "offer_contact") && !has(boundaryList, "do_not_contact")) {
+      add(meaningIds, "OFFER_CONTACT");
+      reasons.push("contact_offered");
+    }
+
+    if (has(a.intents, "request_contact")) {
+      if (characterPolicy.allowContact === false || has(boundaryList, "do_not_contact")) {
+        add(meaningIds, "DECLINE_CONTACT");
+        reasons.push("contact_declined");
+      } else {
+        add(meaningIds, "ACCEPT_CONTACT");
+        reasons.push("contact_accepted");
+      }
+    }
+
+    if (has(a.intents, "ask_permission_enter")) {
+      add(meaningIds, "ASK_PERMISSION_ENTER");
+      reasons.push("entry_permission_question");
+    }
+
+    if (has(a.intents, "ask_permission_wait")) {
+      add(meaningIds, "ASK_PERMISSION_WAIT");
+      reasons.push("wait_permission_question");
+    }
+
+    if (has(a.intents, "express_disappointment")) {
+      add(meaningIds, "EXPRESS_DISAPPOINTMENT");
+      reasons.push("disappointment_expression");
+    }
+
+    if (has(a.intents, "express_hope")) {
+      add(meaningIds, "EXPRESS_HOPE");
+      reasons.push("hope_expression");
+    }
+
+    if (has(a.intents, "express_pride")) {
+      add(meaningIds, "EXPRESS_PRIDE");
+      reasons.push("pride_expression");
+    }
+
+    if (has(a.intents, "confirm_arrival")) {
+      add(meaningIds, "CONFIRM_ARRIVAL");
+      reasons.push("arrival_confirmation");
+    }
+
+    if (has(a.intents, "confirm_departure")) {
+      add(meaningIds, "CONFIRM_DEPARTURE");
+      reasons.push("departure_confirmation");
+    }
+
+    if (has(a.intents, "ask_return_time")) {
+      add(meaningIds, "ASK_RETURN_TIME");
+      reasons.push("return_time_question");
+    }
+
     if (meaningIds.length === 0 && has(a.intents, "ask_question")) {
       add(meaningIds, "ASK_FOR_ANSWER");
       reasons.push("generic_question_fallback");
