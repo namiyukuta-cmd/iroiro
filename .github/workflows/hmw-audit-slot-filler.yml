@@ -1,0 +1,54 @@
+name: Audit HMW pattern slot filler
+on:
+  push:
+    paths:
+      - '.github/workflows/hmw-audit-slot-filler.yml'
+permissions:
+  contents: read
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Audit all vocabulary and sentence patterns
+        run: |
+          node <<'NODE'
+          const fs=require('fs'), path=require('path'), vm=require('vm');
+          const lang=path.join(process.cwd(),'HMW/js/dialogue/language');
+          const ctx={console}; ctx.window=ctx; ctx.HMW={}; vm.createContext(ctx);
+          const run=f=>vm.runInContext(fs.readFileSync(f,'utf8'),ctx,{filename:path.basename(f)});
+          run(path.join(lang,'vocabulary-registry.js'));
+          const vf=fs.readdirSync(lang).filter(f=>/^vocabulary-\d{3}.*\.js$/.test(f)).sort((a,b)=>Number(a.match(/(\d{3})/)[1])-Number(b.match(/(\d{3})/)[1]));
+          for(const f of vf) run(path.join(lang,f));
+          const pf=fs.readdirSync(lang).filter(f=>/^sentence-patterns-.*\.js$/.test(f)).sort();
+          for(const f of pf) run(path.join(lang,f));
+          run(path.join(lang,'morphology-rules.js'));
+          run(path.join(lang,'word-selector.js'));
+          run(path.join(lang,'dialogue-composer.js'));
+          run(path.join(lang,'pattern-slot-filler.js'));
+
+          const D=ctx.HMW.Dialogue;
+          const ids=Object.keys(D.SENTENCE_PATTERNS||{});
+          let ok=0, fail=0, unresolved=0, placeholders=0;
+          const failures=[];
+          for(let i=0;i<ids.length;i++){
+            const id=ids[i];
+            const r=D.buildSentenceFromPattern(id,{seed:i,lexicalTargets:["love","work","home","help","safe"]});
+            if(r.ok) ok++; else {fail++; failures.push({id,reason:r.reason||null,slots:r.unresolvedSlots||[],english:r.english});}
+            unresolved += (r.unresolvedSlots||[]).length;
+            if(/\{[A-Z_]+\??\}/.test(r.english||"")) placeholders++;
+          }
+          const sampleIds=["DECLARATIVE_SVO","PRESENT_PERFECT","G13_FIRST_CONDITIONAL","G14_WANT_TO","G15_QUESTION_WHAT_DO","G16_BOUNDARY_I_DONT_WANT_TO","G17_REQUEST_CAN_YOU"];
+          const samples=sampleIds.map((id,i)=>D.buildSentenceFromPattern(id,{seed:i,lexicalTargets:["help","home","safe"]})).map(x=>({patternId:x.patternId,english:x.english,ok:x.ok}));
+          console.log("AUDIT_RESULT "+JSON.stringify({
+            vocabularyUnique:D.Vocabulary.entries.length,
+            patterns:ids.length,
+            ok,fail,unresolved,placeholders,
+            failures:failures.slice(0,20),
+            samples
+          }));
+          if(fail||unresolved||placeholders) process.exit(1);
+          NODE
