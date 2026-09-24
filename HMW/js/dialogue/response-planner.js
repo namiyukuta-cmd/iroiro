@@ -80,6 +80,10 @@
       if (value === "wait" && has(boundaryList, "do_not_wait")) return true;
       if (value === "visit" && has(boundaryList, "do_not_visit")) return true;
       if (value === "follow" && has(boundaryList, "do_not_follow")) return true;
+      if (
+        (value === "talk" || value === "ask") &&
+        (has(boundaryList, "stop_conversation") || has(boundaryList, "do_not_ask"))
+      ) return true;
       return false;
     };
 
