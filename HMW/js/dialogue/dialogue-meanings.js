@@ -680,6 +680,38 @@
     STATE_FEELINGS_TOWARD_HEROINE: {
       category: "answer",
       meaningJa: "主人公に対する自分の気持ちを答える"
+    },
+    GRANT_PERMISSION: {
+      category: "response",
+      meaningJa: "相手が求めた許可を与える"
+    },
+    DENY_PERMISSION: {
+      category: "response",
+      meaningJa: "相手が求めた許可を与えない"
+    },
+    ACCEPT_ACTION_REQUEST: {
+      category: "response",
+      meaningJa: "相手から求められた行動を引き受ける"
+    },
+    DECLINE_ACTION_REQUEST: {
+      category: "response",
+      meaningJa: "相手から求められた行動を断る"
+    },
+    ACCEPT_INVITATION: {
+      category: "response",
+      meaningJa: "相手からの誘いを受け入れる"
+    },
+    DECLINE_INVITATION: {
+      category: "response",
+      meaningJa: "相手からの誘いを断る"
+    },
+    ACCEPT_SUGGESTION: {
+      category: "response",
+      meaningJa: "相手からの提案に同意する"
+    },
+    DECLINE_SUGGESTION: {
+      category: "response",
+      meaningJa: "相手からの提案に同意しない"
     }
   };
 })();
