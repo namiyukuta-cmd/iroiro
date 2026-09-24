@@ -32,21 +32,19 @@ jobs:
             adverb:["adequately","appreciatively","assertively","automatically","confidentially","conveniently","credibly","dependably","digitally","efficiently","flexibly","fluently","hospitably","interactively","optimistically","punctually","reliably","responsively","securely","transparently","wirelessly","accessibly","affordably","accurately","inaccurately","coherently","incoherently","consistently","inconsistently","objectively","subjectively","neutrally","specifically","generally","briefly","concisely","explicitly","implicitly","plausibly","logically","illogically","relevantly","validly","decisively","indecisively","attentively","dismissively","receptively","persuasively","convincingly","formally","informally","verbally","literally","figuratively","rhetorically","contextually","semantically","grammatically","analytically","comparatively","descriptively","tactfully","thoughtfully","empathetically","sympathetically","compassionately","supportively","cooperatively","aggressively","forgivingly","apologetically","trustfully","suspiciously","sincerely","frankly","patiently","impatiently","responsibly","irresponsibly","voluntarily","involuntarily","intentionally","unintentionally","spontaneously","steadily","subtly","obviously","openly","privately","publicly","professionally","socially","emotionally","mentally","physically","carefully","carelessly","quickly","slowly","smoothly","roughly","deeply","lightly","heavily","widely","narrowly","highly","closely","regularly","occasionally","frequently","rarely","constantly","temporarily","permanently","currently","recently","previously","eventually","gradually","immediately"]
           };
 
-          const quotas={verb:50,noun:50,adjective:50,adverb:50};
           const chosen=[];
           for(const [pos,lemmas] of Object.entries(groups)){
-            let count=0;
             for(const raw of lemmas){
               const lemma=String(raw).toLowerCase();
               const key=lemma+":"+pos;
               if(!V.byKey[key]&&!chosen.some(e=>e.lemma===lemma&&e.pos===pos)){
                 chosen.push({lemma,pos,tags:["conversation","general","practical","technology","reasoning","batch080"]});
-                count++;
-                if(count===quotas[pos]) break;
+                if(chosen.length===200) break;
               }
             }
-            if(count<quotas[pos]) throw new Error(pos+" only "+count+" unique candidates available");
+            if(chosen.length===200) break;
           }
+          if(chosen.length<200) throw new Error("Only "+chosen.length+" unique candidates available");
           const byPos={};for(const e of chosen)(byPos[e.pos]||(byPos[e.pos]=[])).push(e.lemma);
           const lines=[
             '(() => {','  "use strict";',
