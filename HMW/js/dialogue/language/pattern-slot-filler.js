@@ -106,6 +106,7 @@
 
     const M = D.Morphology;
     const slots = { ...slotOverrides };
+    const explicitSlots = new Set(Object.keys(slotOverrides || {}));
 
     const verb = pickLexeme("verb", { lexicalTargets, seed });
     const remainingForNoun = (lexicalTargets || []).filter(
@@ -223,6 +224,7 @@
     const requested = Array.isArray(pattern.slots) ? pattern.slots : [];
     for (const rawSlot of requested) {
       const key = bare(rawSlot);
+      if (explicitSlots.has(key)) continue;
       if (slots[key] !== undefined && slots[key] !== null && slots[key] !== "") continue;
       if (OPTIONAL.test(rawSlot) && !fillOptional) continue;
 
@@ -236,6 +238,7 @@
     const unresolvedSlots = requested
       .filter(rawSlot => {
         const key = bare(rawSlot);
+        if (explicitSlots.has(key)) return false;
         if (OPTIONAL.test(rawSlot) && !fillOptional) return false;
         return slots[key] === undefined || slots[key] === null || slots[key] === "";
       })
