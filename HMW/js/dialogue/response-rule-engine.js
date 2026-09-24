@@ -23,12 +23,22 @@
     return map[String(value || "").toLowerCase()] ?? value;
   };
 
-  const comparePath = (root, path, expected) => {
+  const pathValue = (root, path) => {
     const parts = String(path || "").split(".").filter(Boolean);
     let value = root;
     for (const part of parts) value = value?.[part];
+    return value;
+  };
+
+  const comparePath = (root, path, expected) => {
+    const value = pathValue(root, path);
     if (Array.isArray(expected)) return expected.includes(value);
     return value === expected;
+  };
+
+  const hasValueAtPath = (root, path) => {
+    const value = pathValue(root, path);
+    return value !== undefined && value !== null && value !== "";
   };
 
   const matches = (rule, ctx) => {
@@ -119,9 +129,13 @@
     for (const [path,expected] of Object.entries(w.factEq || {})) {
       if (!comparePath(ctx.characterFacts || {}, path, expected)) return false;
     }
+    if (w.factPresent && !arr(w.factPresent).every(path => hasValueAtPath(ctx.characterFacts || {}, path))) return false;
+    if (w.factAbsent && !arr(w.factAbsent).every(path => !hasValueAtPath(ctx.characterFacts || {}, path))) return false;
     for (const [path,expected] of Object.entries(w.policyEq || {})) {
       if (!comparePath(ctx.characterPolicy || {}, path, expected)) return false;
     }
+    if (w.policyPresent && !arr(w.policyPresent).every(path => hasValueAtPath(ctx.characterPolicy || {}, path))) return false;
+    if (w.policyAbsent && !arr(w.policyAbsent).every(path => !hasValueAtPath(ctx.characterPolicy || {}, path))) return false;
     for (const [path,expected] of Object.entries(w.relationshipEq || {})) {
       if (!comparePath(ctx.relationship || {}, path, expected)) return false;
     }
@@ -136,6 +150,8 @@
     for (const [path,expected] of Object.entries(w.relationshipFlagEq || {})) {
       if (!comparePath(ctx.relationship?.flags || {}, path, expected)) return false;
     }
+    if (w.relationshipPresent && !arr(w.relationshipPresent).every(path => hasValueAtPath(ctx.relationship || {}, path))) return false;
+    if (w.relationshipAbsent && !arr(w.relationshipAbsent).every(path => !hasValueAtPath(ctx.relationship || {}, path))) return false;
 
     for (const [path,expected] of Object.entries(w.contextEq || {})) {
       if (!comparePath(ctx.conversationContext || {}, path, expected)) return false;
@@ -148,6 +164,8 @@
       const value = ctx.conversationContext?.[key];
       if (!Number.isFinite(Number(value)) || Number(value) > Number(max)) return false;
     }
+    if (w.contextPresent && !arr(w.contextPresent).every(path => hasValueAtPath(ctx.conversationContext || {}, path))) return false;
+    if (w.contextAbsent && !arr(w.contextAbsent).every(path => !hasValueAtPath(ctx.conversationContext || {}, path))) return false;
 
     const recentMeaningIds = arr(ctx.recentMeaningIds);
     if (w.historyAny && !hasAny(recentMeaningIds, w.historyAny)) return false;
