@@ -358,3 +358,8 @@
   border-radius:5px !important;
   font-size:9px !important;
 }
+
+/* 2026-09-25 right-bottom control spacing */
+.side-actions{
+  gap:12px !important;
+}
