@@ -11,6 +11,7 @@
   const CATEGORY_TAGS = {
     affection:["romance","relationship","attachment","intimacy-safe","emotion"],
     trust:["relationship","reasoning","communication"],
+    distance:["relationship","communication","movement"],
     care:["care","health","social","relationship"],
     emotion:["emotion","expression","relationship"],
     positive:["emotion","expression","social"],
@@ -152,6 +153,21 @@
     for (const id of group) equivalentPatternIndex.set(id, group);
   }
 
+  const speechAct = patternId => {
+    const text = patternText(D.SENTENCE_PATTERNS?.[patternId]).replace(/[?.!]$/, "");
+    const action = "\\{verb_base\\}(?: \\{object\\??\\})?";
+    const gerund = "\\{verb_ing\\}(?: \\{object\\??\\})?";
+    if (new RegExp("^(?:(?:can|could|would|will) you(?: please)?|please) " + action + "$" ).test(text) ||
+        new RegExp("^would you mind " + gerund + "$" ).test(text)) return "request";
+    if (new RegExp("^(?:let us|shall we|we could|maybe we should|we should) " + action + "$" ).test(text)) return "suggestion";
+    if (new RegExp("^(?:may i|is it okay if i|do you mind if i|would it be okay if i) " + action + "$" ).test(text)) return "permission";
+    if (new RegExp("^(?:shall i|would you like me to) " + action + "$" ).test(text)) return "offer";
+    if (new RegExp("^can i " + action + "$" ).test(text)) {
+      return /permission/i.test(patternId) ? "permission" : "offer";
+    }
+    return null;
+  };
+
   const compatiblePatterns = basePatternId => {
     const id = String(basePatternId || "");
     if (!id) return [];
@@ -159,9 +175,12 @@
     const candidates = [...(group || [id])];
     // Identical templates preserve polarity, tense and participant roles.
     const signature = patternText(D.SENTENCE_PATTERNS?.[id]);
+    // A question about ability is not a request, even when both use "can you".
+    const act = /^(REQUEST_|POLITE_REQUEST_|G17_REQUEST_|PLEASE_IMPERATIVE$|SUGGEST_|OFFER_|PERMISSION_|ASK_PERMISSION_)/.test(id)
+      ? speechAct(id) : null;
     if (signature) {
       for (const [patternId, pattern] of Object.entries(D.SENTENCE_PATTERNS || {})) {
-        if (patternText(pattern) === signature) candidates.push(patternId);
+        if (patternText(pattern) === signature || (act && speechAct(patternId) === act)) candidates.push(patternId);
       }
     }
     return [...new Set(candidates.filter(patternId => D.SENTENCE_PATTERNS?.[patternId]))];
@@ -192,8 +211,52 @@
     if (target) return target;
     if (!source.length) return "";
 
-    const existing = source.filter(word => D.Vocabulary?.has?.(word, pos));
-    return choose(existing.length ? existing : source, seed);
+    const allowed = new Set(source);
+    const existing = arr(D.Vocabulary?.entries)
+      .filter(entry => entry.pos === pos && allowed.has(entry.lemma))
+      .map(entry => entry.lemma);
+    return choose(existing, seed);
+  };
+
+  const candidatesFor = meaningId => {
+    const spec = D.GENERATION_SPECS?.[meaningId];
+    const mapped = arr(D.MEANING_PATTERN_MAP?.[meaningId]);
+    return [
+      ...arr(spec?.candidates).map(candidate => ({ ...candidate, routeSource: "generation_spec" })),
+      ...mapped.filter(choice => choice?.pattern && !choice.surfaceOverride).map(choice => {
+        const slots = { ...(choice.slots || {}) };
+        const verb = slots.VERB_BASE || slots.VERB;
+        return {
+          ...choice, slots,
+          verbs: D.Vocabulary?.has?.(verb, "verb") ? [verb] : [],
+          adjectives: D.Vocabulary?.has?.(slots.ADJECTIVE, "adjective") ? [slots.ADJECTIVE] : [],
+          routeSource: "meaning_pattern_map"
+        };
+      })
+    ].filter(candidate => candidate?.pattern && !candidate.surfaceOverride);
+  };
+
+  D.getMeaningGenerationConstraints = function getMeaningGenerationConstraints(meaningId) {
+    const category = D.GENERATION_SPECS?.[meaningId]?.category || D.MEANINGS?.[meaningId]?.category || "";
+    return {
+      meaningId, category, semanticTags: CATEGORY_TAGS[category] || [],
+      candidates: candidatesFor(meaningId).map(candidate => ({
+        basePatternId: candidate.pattern,
+        speechAct: speechAct(candidate.pattern),
+        patternIds: compatiblePatterns(candidate.pattern),
+        lexical: [
+          { pos: "verb", lemmas: arr(candidate.verbs) },
+          { pos: "adjective", lemmas: arr(candidate.adjectives) }
+        ].filter(rule => rule.lemmas.length),
+        fixedSlots: {
+          ...(candidate.slots || {}),
+          ...(candidate.subject ? { SUBJECT: candidate.subject } : {}),
+          ...(candidate.object !== undefined ? { OBJECT: candidate.object } : {}),
+          ...(candidate.nounPhrase !== undefined ? { NOUN_PHRASE: candidate.nounPhrase } : {})
+        },
+        slotCandidates: candidate.slotCandidates || {}
+      }))
+    };
   };
 
   const forcedVerbSlots = (subject, verb) => {
@@ -220,34 +283,7 @@
   ) {
     const id = String(meaningId || "");
     const spec = D.GENERATION_SPECS?.[id];
-    const mapped = arr(D.MEANING_PATTERN_MAP?.[id]);
-
-    const specCandidates = arr(spec?.candidates).map(candidate => ({
-      ...candidate,
-      routeSource: "generation_spec"
-    }));
-
-    const mappedCandidates = mapped
-      .filter(choice => choice?.pattern && !choice.surfaceOverride)
-      .map(choice => {
-        const slots = { ...(choice.slots || {}) };
-        const baseVerb = slots.VERB_BASE && D.Vocabulary?.has?.(slots.VERB_BASE, "verb")
-          ? [slots.VERB_BASE]
-          : [];
-        const adjective = slots.ADJECTIVE && D.Vocabulary?.has?.(slots.ADJECTIVE, "adjective")
-          ? [slots.ADJECTIVE]
-          : [];
-        return {
-          pattern: choice.pattern,
-          slots,
-          verbs: baseVerb,
-          adjectives: adjective,
-          weight: choice.weight,
-          routeSource: "meaning_pattern_map"
-        };
-      });
-
-    const candidates = [...specCandidates, ...mappedCandidates];
+    const candidates = candidatesFor(id);
     if (!candidates.length) return [];
 
     const semanticCategory = spec?.category || D.MEANINGS?.[id]?.category || "";
@@ -272,8 +308,9 @@
         variantSeed + candidateIndex,
         semanticTags
       );
+      if ((arr(candidate.verbs).length && !verb) || (arr(candidate.adjectives).length && !adjective)) return;
 
-      const subject = candidate.subject || candidate.slots?.SUBJECT || "I";
+      const subject = slotOverrides.SUBJECT || candidate.subject || candidate.slots?.SUBJECT || "I";
       const baseSlots = {
         ...(candidate.slots || {}),
         ...forcedVerbSlots(subject, verb)
@@ -301,17 +338,19 @@
           lexicalTargets: [
             verb,
             adjective,
-            ...arr(lexicalTargets)
+            // Other requested words cannot supply an unrelated predicate.
           ].filter(Boolean),
           vocabularyTags: semanticTags,
           slotOverrides: {
             ...baseSlots,
             ...(slotOverrides || {})
           },
-          fillOptional: false
+          fillOptional: false,
+          requireSemanticSlots: true
         });
 
         if (!built?.ok || !built.english) return;
+        if (candidate.prefix) built.english = normalize(candidate.prefix + " " + built.english);
         routes.push({
           meaningId: id,
           ok: true,
