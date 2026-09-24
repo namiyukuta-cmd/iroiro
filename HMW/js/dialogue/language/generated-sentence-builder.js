@@ -17,8 +17,19 @@
   const chooseWord=(list,lexicalTargets=[])=>{
     const words=Array.isArray(list)?list:[];
     if(!words.length) return "";
-    const target=words.find(w=>lexicalTargets.includes(w));
+    const normalizedTargets=(lexicalTargets||[]).map(x=>String(x).toLowerCase());
+    const target=words.find(w=>normalizedTargets.includes(String(w).toLowerCase()));
     return target || words[0];
+  };
+
+  const applySlotCandidates=(slots,candidate,lexicalTargets)=>{
+    const groups=candidate?.slotCandidates || {};
+    for(const [slot,options] of Object.entries(groups)){
+      if(slots[slot] === undefined || slots[slot] === null || slots[slot] === ""){
+        slots[slot]=chooseWord(options,lexicalTargets);
+      }
+    }
+    return slots;
   };
 
   HMW.Dialogue.buildGeneratedMeaning=function buildGeneratedMeaning(
@@ -28,42 +39,62 @@
     if(!spec) return null;
     const candidate=choose(spec.candidates||[],variantSeed);
     if(!candidate) return null;
+
     if(candidate.surfaceOverride){
-      return {meaningId,ok:true,patternId:candidate.pattern||null,english:candidate.surfaceOverride,source:"generation_spec"};
+      return {
+        meaningId,
+        ok:true,
+        patternId:candidate.pattern||null,
+        english:candidate.surfaceOverride,
+        slots:{...(candidate.slots||{})},
+        source:"generation_spec"
+      };
     }
 
     const verb=chooseWord(candidate.verbs,lexicalTargets);
     const adjective=chooseWord(candidate.adjectives,lexicalTargets);
-    const subject=candidate.subject||"I";
+    const subject=candidate.subject||candidate.slots?.SUBJECT||"I";
     const M=HMW.Dialogue.Morphology;
-    let slots={};
+    let slots={...(candidate.slots||{})};
 
     if(verb){
       const pattern=candidate.pattern||"PRESENT_SIMPLE_SVO";
+      let verbSlots={};
       if(pattern==="PRESENT_SIMPLE_SVO"){
-        slots=HMW.Dialogue.fillVerbSlots({subject,verb,object:candidate.object||"",tense:"present"});
+        verbSlots=HMW.Dialogue.fillVerbSlots({subject,verb,object:candidate.object||slots.OBJECT||"",tense:"present"});
       }else if(pattern==="PRESENT_SIMPLE_NEG"){
-        slots=HMW.Dialogue.fillVerbSlots({subject,verb,object:candidate.object||"",tense:"present",negative:true});
+        verbSlots=HMW.Dialogue.fillVerbSlots({subject,verb,object:candidate.object||slots.OBJECT||"",tense:"present",negative:true});
       }else if(pattern==="PAST_SIMPLE_SVO"){
-        slots=HMW.Dialogue.fillVerbSlots({subject,verb,object:candidate.object||"",tense:"past"});
+        verbSlots=HMW.Dialogue.fillVerbSlots({subject,verb,object:candidate.object||slots.OBJECT||"",tense:"past"});
       }else if(pattern==="PAST_SIMPLE_QUESTION"){
-        slots={SUBJECT:subject,VERB_BASE:verb,OBJECT:candidate.object||""};
+        verbSlots={SUBJECT:subject,VERB_BASE:verb,OBJECT:candidate.object||slots.OBJECT||""};
       }else if(pattern==="PRESENT_CONTINUOUS"){
-        slots=HMW.Dialogue.fillVerbSlots({subject,verb,object:candidate.object||"",tense:"continuous"});
+        verbSlots=HMW.Dialogue.fillVerbSlots({subject,verb,object:candidate.object||slots.OBJECT||"",tense:"continuous"});
       }else if(pattern==="FUTURE_SIMPLE" || pattern==="FUTURE_NEG"){
-        slots=HMW.Dialogue.fillVerbSlots({subject,verb,object:candidate.object||"",tense:"future"});
+        verbSlots=HMW.Dialogue.fillVerbSlots({subject,verb,object:candidate.object||slots.OBJECT||"",tense:"future"});
       }else{
-        slots={SUBJECT:subject,VERB_BASE:verb,VERB:verb,OBJECT:candidate.object||""};
+        verbSlots={
+          SUBJECT:subject,
+          VERB_BASE:verb,
+          VERB:verb,
+          OBJECT:candidate.object||slots.OBJECT||""
+        };
       }
+      slots={...slots,...verbSlots};
     }
 
     if(adjective){
-      slots.SUBJECT=subject;
+      slots.SUBJECT=slots.SUBJECT||subject;
       slots.ADJECTIVE=adjective;
-      slots.BE=M?.beFor?.(subject)||"am";
+      slots.BE=slots.BE||M?.beFor?.(subject)||"am";
     }
 
-    if(candidate.nounPhrase) slots.NOUN_PHRASE=candidate.nounPhrase;
+    if(candidate.nounPhrase && !slots.NOUN_PHRASE){
+      slots.NOUN_PHRASE=candidate.nounPhrase;
+    }
+
+    applySlotCandidates(slots,candidate,lexicalTargets);
+
     const english=HMW.Dialogue.renderSentencePattern?.(candidate.pattern,slots)||"";
     return {
       meaningId,
