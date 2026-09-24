@@ -53,6 +53,19 @@
     if (w.questionTargetAny && !questions.some(q => arr(w.questionTargetAny).includes(q?.target))) return false;
     if (w.questionRequestedFieldAny && !questions.some(q => arr(w.questionRequestedFieldAny).includes(q?.requestedField))) return false;
 
+    if (w.questionAny) {
+      const spec = w.questionAny;
+      const matched = questions.some(q => {
+        if (spec.kindAny && !arr(spec.kindAny).includes(q?.kind)) return false;
+        if (spec.actionAny && !arr(spec.actionAny).includes(q?.action)) return false;
+        if (spec.targetAny && !arr(spec.targetAny).includes(q?.target)) return false;
+        if (spec.requestedFieldAny && !arr(spec.requestedFieldAny).includes(q?.requestedField)) return false;
+        if (spec.conceptAny && !arr(spec.conceptAny).includes(q?.concept)) return false;
+        return true;
+      });
+      if (!matched) return false;
+    }
+
     if (w.claimConceptAny) {
       const claims = arr(a.claims);
       if (!claims.some(claim => arr(w.claimConceptAny).includes(claim?.concept))) return false;
@@ -65,6 +78,22 @@
       const claims = arr(a.claims);
       if (!claims.some(claim => claim?.polarity === w.claimPolarityEq)) return false;
     }
+
+    if (w.claimAny) {
+      const spec = w.claimAny;
+      const claims = arr(a.claims);
+      const matched = claims.some(claim => {
+        if (spec.conceptAny && !arr(spec.conceptAny).includes(claim?.concept)) return false;
+        if (spec.typeAny && !arr(spec.typeAny).includes(claim?.type)) return false;
+        if (spec.certaintyAny && !arr(spec.certaintyAny).includes(claim?.certainty)) return false;
+        if (spec.polarityEq !== undefined && claim?.polarity !== spec.polarityEq) return false;
+        return true;
+      });
+      if (!matched) return false;
+    }
+
+    if (w.lexicalTargetAny && !hasAny(a.lexicalTargets, w.lexicalTargetAny)) return false;
+    if (w.lexicalTargetAll && !hasAll(a.lexicalTargets, w.lexicalTargetAll)) return false;
 
     for (const [key,min] of Object.entries(w.emotionMin || {})) {
       if (num(a.emotions?.[key]) < Number(min)) return false;
