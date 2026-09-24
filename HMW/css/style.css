@@ -96,3 +96,14 @@
 .cycle-head b{font-size:12px}
 .cycle-day{height:14px;font-size:8px}
 .side-actions{grid-template-rows:42px repeat(3,minmax(0,1fr))}
+
+/* 2026-09-25 direct travel: one tap, no confirmation step */
+.modal-backdrop.travel-popup .travel-destinations{grid-template-columns:repeat(4,minmax(0,1fr));gap:5px}
+.modal-backdrop.travel-popup .travel-destination{min-height:34px;padding:4px 3px;font-size:13px;border-radius:9px}
+.modal-backdrop.travel-popup .travel-map-node.clickable{pointer-events:auto;cursor:pointer}
+.modal-backdrop.travel-popup .travel-map-node.clickable span{box-shadow:0 0 0 4px rgba(228,161,38,.10)}
+.modal-backdrop.travel-popup .travel-hint{min-height:18px;font-size:12px}
+@media(max-width:380px){
+ .modal-backdrop.travel-popup .travel-destinations{grid-template-columns:repeat(4,minmax(0,1fr));gap:4px}
+ .modal-backdrop.travel-popup .travel-destination{min-height:32px;padding:3px 2px;font-size:12px}
+}
