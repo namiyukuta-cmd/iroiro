@@ -386,3 +386,72 @@
     font-size:13px !important;
   }
 }
+
+
+/* 2026-09-25 in-game dialogue JSON */
+.housing-goal-bar{
+  display:flex;
+  align-items:center;
+  gap:8px;
+}
+.housing-goal-text{
+  flex:1 1 auto;
+  min-width:0;
+}
+.dialogue-json-inline{
+  flex:0 0 auto;
+  min-width:78px;
+  min-height:38px;
+  border:1px solid #6f6a61;
+  border-radius:9px;
+  background:#fff;
+  color:#24231f;
+  padding:5px 8px;
+  font-size:13px;
+  font-weight:800;
+}
+.dialogue-json-inline:active{transform:translateY(1px)}
+.game-dialogue-json{display:grid;gap:8px}
+.dialogue-json-label{font-size:15px;font-weight:800}
+.dialogue-json-select{
+  width:100%;
+  min-height:44px;
+  border:1px solid #999188;
+  border-radius:9px;
+  background:#fff;
+  padding:7px 9px;
+  font-size:16px;
+}
+.dialogue-json-textarea{
+  width:100%;
+  min-height:150px;
+  max-height:34dvh;
+  border:1px solid #999188;
+  border-radius:9px;
+  background:#fff;
+  padding:9px;
+  font:16px/1.45 ui-monospace,SFMono-Regular,Menlo,monospace;
+  resize:vertical;
+  -webkit-text-size-adjust:100%;
+}
+.dialogue-json-result{display:grid;gap:8px;margin-top:2px}
+.dialogue-json-result.hidden{display:none}
+.dialogue-json-output,.dialogue-json-proof{
+  border:1px solid #d0cabf;
+  border-radius:9px;
+  background:#fff;
+  padding:9px;
+}
+.dialogue-json-english{margin-top:6px;font-size:17px;font-weight:800;line-height:1.5}
+.dialogue-json-english.error{color:#a40000}
+.dialogue-json-output pre,.dialogue-json-proof pre{
+  margin:6px 0 0;
+  white-space:pre-wrap;
+  word-break:break-word;
+  font:12px/1.45 ui-monospace,SFMono-Regular,Menlo,monospace;
+}
+.dialogue-json-proof summary{font-weight:800;cursor:pointer}
+@media(max-width:380px){
+  .housing-goal-bar{gap:5px}
+  .dialogue-json-inline{min-width:72px;min-height:36px;padding:4px 6px;font-size:12px}
+}
