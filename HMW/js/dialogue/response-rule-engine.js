@@ -371,10 +371,12 @@
         if (
           rule.primary === true ||
           rule.prefer === true ||
-          rule.when?.primaryQuestionAny ||
-          rule.when?.primaryClaimAny ||
           rule.when?.questionAt ||
-          rule.when?.claimAt
+          rule.when?.claimAt ||
+          (
+            (rule.when?.primaryQuestionAny || rule.when?.primaryClaimAny) &&
+            Number(rule.priority || 0) >= 900
+          )
         ) {
           const rank = rulePreferenceRank(rule);
           const existing = preferredMeaningMeta.get(id);
