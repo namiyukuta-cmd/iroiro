@@ -408,6 +408,8 @@
   function renderScene() {
     const loc = D.locations[H.state.location];
     $("location-name").textContent = loc.name;
+    const housingGoal = $("housing-goal");
+    if (housingGoal) housingGoal.textContent = H.getHousingGoalText?.() || "";
     renderLocationPoints();
     renderCityScene();
   }
@@ -703,16 +705,6 @@
     openModal(fromStart ? "続きから" : "ロード", "読み込むスロットを選ぶ。", actions);
   }
 
-  function openMenu() {
-    openModal("メニュー", "", [
-      { label: "状況・今ある用事", onClick: () => { closeModal(); openTasks(); } },
-      { label: "人物一覧", onClick: () => { closeModal(); openPeople(); } },
-      { label: "ログ", onClick: () => { closeModal(); openLog(); } },
-      { label: "セーブ", onClick: () => { closeModal(); openSave(); } },
-      { label: "ロード", onClick: () => { closeModal(); openLoad(false); } }
-    ]);
-  }
-
   function refresh() {
     renderStatus();
     renderScene();
@@ -749,12 +741,16 @@
   G.refresh = refresh;
 
   document.addEventListener("DOMContentLoaded", () => {
-    $("nav-menu").addEventListener("click", openMenu);
     $("location-name").addEventListener("click", () => openLocationIntro(H.state.location));
+    $("side-tasks").addEventListener("click", openTasks);
     $("side-action").addEventListener("click", openLocationActions);
     $("side-talk").addEventListener("click", openPeopleHere);
     $("side-move").addEventListener("click", openMap);
     $("side-inventory").addEventListener("click", openInventory);
+    $("nav-save").addEventListener("click", openSave);
+    $("nav-load").addEventListener("click", () => openLoad(false));
+    $("nav-log").addEventListener("click", openLog);
+    $("nav-people").addEventListener("click", openPeople);
     $("start-new").addEventListener("click", startNewGame);
     $("start-continue").addEventListener("click", continueGame);
     $("modal-close").addEventListener("click", closeModal);
