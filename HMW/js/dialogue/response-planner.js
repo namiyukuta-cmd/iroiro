@@ -1017,6 +1017,7 @@
       claimInterpretation: claimInfo,
       matchedResponseRuleIds: rulePlan?.matchedRuleIds || [],
       suppressedMeaningIds: rulePlan?.suppressedMeaningIds || [],
+      preferredMeaningIds: rulePlan?.preferredMeaningIds || [],
       relationship,
       conversationContext,
       analysis: a
