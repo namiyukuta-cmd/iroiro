@@ -156,9 +156,18 @@
     const id = String(basePatternId || "");
     if (!id) return [];
     const group = equivalentPatternIndex.get(id);
-    const candidates = group || [id];
+    const candidates = [...(group || [id])];
+    // Identical templates preserve polarity, tense and participant roles.
+    const signature = patternText(D.SENTENCE_PATTERNS?.[id]);
+    if (signature) {
+      for (const [patternId, pattern] of Object.entries(D.SENTENCE_PATTERNS || {})) {
+        if (patternText(pattern) === signature) candidates.push(patternId);
+      }
+    }
     return [...new Set(candidates.filter(patternId => D.SENTENCE_PATTERNS?.[patternId]))];
   };
+
+  D.getCompatibleGenerationPatterns = compatiblePatterns;
 
   const choose = (items, seed = 0) => {
     const list = arr(items).filter(Boolean);
@@ -171,6 +180,8 @@
     const requested = arr(lexicalTargets).map(x => String(x || "").toLowerCase()).filter(Boolean);
 
     for (const word of requested) {
+      // Topic tags alone do not make two words interchangeable (love/hate).
+      if (!source.includes(word)) continue;
       const entry = D.Vocabulary?.get?.(word, pos);
       if (!entry) continue;
       const tags = arr(entry.tags);
