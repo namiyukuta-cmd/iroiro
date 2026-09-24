@@ -62,20 +62,6 @@
 .modal-backdrop.tap-popup .modal h2{margin-bottom:14px}
 .modal-backdrop.tap-popup .location-intro-text{font-size:18px;line-height:1.75}
 
-.modal-backdrop.travel-popup{align-items:center;padding:10px}
-.modal-backdrop.travel-popup .modal{height:min(88dvh,760px);max-height:88dvh;width:min(calc(100% - 12px),540px);border-radius:18px;padding:14px 12px;overflow:hidden;display:flex;flex-direction:column}
-.modal-backdrop.travel-popup #modal-body{min-height:0;flex:1;display:flex}
-.modal-backdrop.travel-popup .travel-window{width:100%;height:100%;grid-template-rows:auto auto minmax(0,1fr) auto;gap:8px}
-.modal-backdrop.travel-popup .travel-map{height:auto;min-height:0}
-.modal-backdrop.travel-popup .close-row{display:none}
-.modal-backdrop.travel-popup .modal-actions{display:none}
-.modal-backdrop.travel-popup .travel-destination{min-height:42px}
-@media(max-height:720px){
- .modal-backdrop.travel-popup .modal{height:91dvh;max-height:91dvh}
- .modal-backdrop.travel-popup .travel-destinations{gap:5px}
- .modal-backdrop.travel-popup .travel-destination{min-height:36px;padding:4px;font-size:13px}
- .modal-backdrop.travel-popup .travel-map-node small{font-size:9px}
-}
 
 /* 2026-09-25 compact header + no redundant action rail */
 .topbar{gap:4px}
@@ -97,16 +83,6 @@
 .cycle-day{height:14px;font-size:8px}
 .side-actions{grid-template-rows:42px repeat(3,minmax(0,1fr))}
 
-/* 2026-09-25 direct travel: one tap, no confirmation step */
-.modal-backdrop.travel-popup .travel-destinations{grid-template-columns:repeat(4,minmax(0,1fr));gap:5px}
-.modal-backdrop.travel-popup .travel-destination{min-height:34px;padding:4px 3px;font-size:13px;border-radius:9px}
-.modal-backdrop.travel-popup .travel-map-node.clickable{pointer-events:auto;cursor:pointer}
-.modal-backdrop.travel-popup .travel-map-node.clickable span{box-shadow:0 0 0 4px rgba(228,161,38,.10)}
-.modal-backdrop.travel-popup .travel-hint{min-height:18px;font-size:12px}
-@media(max-width:380px){
- .modal-backdrop.travel-popup .travel-destinations{grid-template-columns:repeat(4,minmax(0,1fr));gap:4px}
- .modal-backdrop.travel-popup .travel-destination{min-height:32px;padding:3px 2px;font-size:12px}
-}
 
 /* 2026-09-25 genuinely compact status header */
 .app{grid-template-rows:auto auto auto minmax(0,1fr) auto;gap:3px;padding-top:max(3px,env(safe-area-inset-top))}
