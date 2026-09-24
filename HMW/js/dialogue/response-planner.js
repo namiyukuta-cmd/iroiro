@@ -263,13 +263,24 @@
     }
 
     if (has(a.intents, "ask_to_meet") && !distanceBoundary) {
-      if (characterPolicy.willingToMeet !== false) add(meaningIds, "AGREE_REQUEST");
-      else add(meaningIds, "DECLINE_REQUEST");
+      if (conversationContext.availableNow === false || conversationContext.mustLeaveNow === true) {
+        add(meaningIds, "DECLINE_REQUEST");
+        add(meaningIds, "REQUEST_TIME");
+        reasons.push("conversation_context_blocks_meeting");
+      } else if (characterPolicy.willingToMeet !== false) {
+        add(meaningIds, "AGREE_REQUEST");
+      } else {
+        add(meaningIds, "DECLINE_REQUEST");
+      }
       reasons.push("meeting_request_answered");
     }
 
     if (has(a.intents, "ask_to_talk") && !distanceBoundary) {
-      if (conversationContext.canTalkFreely === false) {
+      if (
+        conversationContext.canTalkFreely === false ||
+        conversationContext.mustLeaveNow === true ||
+        conversationContext.timePressure === true
+      ) {
         add(meaningIds, "DECLINE_REQUEST");
         add(meaningIds, "REQUEST_TIME");
         reasons.push("conversation_context_blocks_talk");
@@ -288,7 +299,11 @@
     }
 
     if (has(a.intents, "request_stay") && !distanceBoundary) {
-      if (characterPolicy.willingToStay === true) {
+      if (conversationContext.mustLeaveNow === true) {
+        add(meaningIds, "DECLINE_REQUEST");
+        add(meaningIds, "REQUEST_TIME");
+        reasons.push("conversation_context_blocks_stay");
+      } else if (characterPolicy.willingToStay === true) {
         add(meaningIds, "AGREE_REQUEST");
       } else if (characterPolicy.willingToStay === false) {
         add(meaningIds, "DECLINE_REQUEST");
