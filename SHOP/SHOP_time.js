@@ -11,6 +11,12 @@
 
   const PRAYER_NOTICE_MINUTES = 30;
 
+  const REALTIME_TICK_MS = 2000;
+  const REALTIME_GAME_MINUTES = 1;
+  const REALTIME_SPEEDS = Object.freeze([1,2,4]);
+  let realtimeTimer = null;
+  let realtimeMultiplier = 1;
+
   function format(totalMinutes) {
     const value = Math.max(0, Number(totalMinutes) || 0) % 1440;
     const hour = Math.floor(value / 60);
@@ -84,12 +90,57 @@
     return state;
   }
 
+  function setRealtimeMultiplier(value) {
+    const next = Number(value);
+    realtimeMultiplier = REALTIME_SPEEDS.includes(next) ? next : 1;
+    return realtimeMultiplier;
+  }
+
+  function getRealtimeMultiplier() {
+    return realtimeMultiplier;
+  }
+
+  function stopRealtime() {
+    if (realtimeTimer) {
+      clearInterval(realtimeTimer);
+      realtimeTimer = null;
+    }
+  }
+
+  function startRealtime(getState, onTick) {
+    stopRealtime();
+
+    realtimeTimer = setInterval(() => {
+      if (document.visibilityState !== 'visible') return;
+
+      const state = typeof getState === 'function' ? getState() : getState;
+      if (!state) return;
+
+      advance(
+        state,
+        REALTIME_GAME_MINUTES * realtimeMultiplier,
+        'realtime'
+      );
+
+      if (typeof onTick === 'function') onTick(state);
+    }, REALTIME_TICK_MS);
+
+    return realtimeTimer;
+  }
+
   window.SHOP_TIME = Object.freeze({
     prayers: PRAYERS,
     prayerNoticeMinutes: PRAYER_NOTICE_MINUTES,
+    realtimeTickMs: REALTIME_TICK_MS,
+    realtimeGameMinutes: REALTIME_GAME_MINUTES,
+    realtimeSpeeds: REALTIME_SPEEDS,
     format,
     getPrayerStatus,
     syncClimate,
-    advance
+    advance,
+    setRealtimeMultiplier,
+    getRealtimeMultiplier,
+    startRealtime,
+    stopRealtime
   });
 })();
