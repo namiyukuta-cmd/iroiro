@@ -77,6 +77,20 @@
       if (!matched) return false;
     }
 
+    if (w.questionCountMin !== undefined && questions.length < Number(w.questionCountMin)) return false;
+    if (w.questionCountMax !== undefined && questions.length > Number(w.questionCountMax)) return false;
+
+    if (w.primaryQuestionAny) {
+      const spec = w.primaryQuestionAny;
+      const q = questions[0];
+      if (!q) return false;
+      if (spec.kindAny && !arr(spec.kindAny).includes(q?.kind)) return false;
+      if (spec.actionAny && !arr(spec.actionAny).includes(q?.action)) return false;
+      if (spec.targetAny && !arr(spec.targetAny).includes(q?.target)) return false;
+      if (spec.requestedFieldAny && !arr(spec.requestedFieldAny).includes(q?.requestedField)) return false;
+      if (spec.conceptAny && !arr(spec.conceptAny).includes(q?.concept)) return false;
+    }
+
     if (w.claimConceptAny) {
       const claims = arr(a.claims);
       if (!claims.some(claim => arr(w.claimConceptAny).includes(claim?.concept))) return false;
@@ -101,6 +115,20 @@
         return true;
       });
       if (!matched) return false;
+    }
+
+    const claims = arr(a.claims);
+    if (w.claimCountMin !== undefined && claims.length < Number(w.claimCountMin)) return false;
+    if (w.claimCountMax !== undefined && claims.length > Number(w.claimCountMax)) return false;
+
+    if (w.primaryClaimAny) {
+      const spec = w.primaryClaimAny;
+      const claim = claims[0];
+      if (!claim) return false;
+      if (spec.conceptAny && !arr(spec.conceptAny).includes(claim?.concept)) return false;
+      if (spec.typeAny && !arr(spec.typeAny).includes(claim?.type)) return false;
+      if (spec.certaintyAny && !arr(spec.certaintyAny).includes(claim?.certainty)) return false;
+      if (spec.polarityEq !== undefined && claim?.polarity !== spec.polarityEq) return false;
     }
 
     if (w.lexicalTargetAny && !hasAny(a.lexicalTargets, w.lexicalTargetAny)) return false;
