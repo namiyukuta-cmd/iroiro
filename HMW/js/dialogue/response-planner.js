@@ -185,24 +185,45 @@
       reasons.push("apology_received");
     }
 
-    if (has(a.intents, "ask_relationship_status")) {
-      if (characterFacts.wantsRelationship === true) {
-        add(meaningIds, "EXPRESS_WANT_TO_BE_TOGETHER");
-        if (characterFacts.choosesHeroine === true) add(meaningIds, "CONFIRM_CHOICE");
-      } else if (characterFacts.wantsRelationship === false) {
-        add(meaningIds, "DENY_LOVE");
+    if (
+      has(a.intents, "ask_relationship_status") ||
+      firstQuestion?.kind === "relationship_status"
+    ) {
+      const status = characterFacts.relationshipStatus;
+      if (status != null && status !== "") {
+        add(meaningIds, "STATE_RELATIONSHIP_STATUS");
+        setSlots("STATE_RELATIONSHIP_STATUS", {
+          RELATIONSHIP: String(status)
+        });
       } else {
-        add(meaningIds, "EXPRESS_UNCERTAINTY");
+        add(meaningIds, "ANSWER_UNKNOWN");
       }
-      reasons.push("relationship_status_question");
+      reasons.push("answer_relationship_status_question");
     }
 
-    if (has(a.intents, "ask_feelings")) {
-      if (characterFacts.lovesHeroine === true) add(meaningIds, "AFFIRM_LOVE");
-      else if (characterFacts.likesHeroine === true) add(meaningIds, "EXPRESS_CARE");
-      else if (characterFacts.lovesHeroine === false && characterFacts.likesHeroine === false) add(meaningIds, "DENY_LOVE");
-      else add(meaningIds, "EXPRESS_UNCERTAINTY");
-      reasons.push("feelings_question");
+    if (
+      has(a.intents, "ask_feelings") ||
+      firstQuestion?.kind === "feelings"
+    ) {
+      const feelings = characterFacts.feelingsTowardHeroine;
+      if (feelings != null && feelings !== "") {
+        add(meaningIds, "STATE_FEELINGS_TOWARD_HEROINE");
+        setSlots("STATE_FEELINGS_TOWARD_HEROINE", {
+          FEELINGS: String(feelings)
+        });
+      } else if (characterFacts.lovesHeroine === true) {
+        add(meaningIds, "AFFIRM_LOVE");
+      } else if (characterFacts.likesHeroine === true) {
+        add(meaningIds, "EXPRESS_CARE");
+      } else if (
+        characterFacts.lovesHeroine === false &&
+        characterFacts.likesHeroine === false
+      ) {
+        add(meaningIds, "DENY_LOVE");
+      } else {
+        add(meaningIds, "ANSWER_UNKNOWN");
+      }
+      reasons.push("answer_feelings_question");
     }
 
     if (has(a.intents, "ask_to_meet") && !distanceBoundary) {
