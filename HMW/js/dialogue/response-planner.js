@@ -14,6 +14,7 @@
     characterPolicy = {},
     psychology = {},
     relationship = {},
+    conversationContext = {},
     recentMeaningIds = []
   } = {}) {
     const a = HMW.Dialogue.normalizeInputAnalysis
@@ -942,6 +943,7 @@
             characterPolicy,
             psychology,
             relationship,
+            conversationContext,
             recentMeaningIds
           })
         : null;
@@ -982,6 +984,7 @@
       claimInterpretation: claimInfo,
       matchedResponseRuleIds: rulePlan?.matchedRuleIds || [],
       relationship,
+      conversationContext,
       analysis: a
     };
   };
