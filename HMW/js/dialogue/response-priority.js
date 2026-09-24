@@ -1,0 +1,107 @@
+(() => {
+  "use strict";
+  window.HMW=window.HMW||{};
+  HMW.Dialogue=HMW.Dialogue||{};
+
+  const PRIORITY = {
+    RESPECT_BOUNDARY: 1000,
+    ACCEPT_DISTANCE: 990,
+    PROMISE_NOT_FOLLOW: 985,
+    PROMISE_NOT_TOUCH: 985,
+    PROMISE_NOT_KISS: 985,
+    PROMISE_NOT_HUG: 985,
+    PROMISE_NOT_CONTACT: 985,
+    DECLINE_CONTACT: 980,
+
+    STATE_CURRENT_LOCATION: 920,
+    STATE_AVAILABLE_TIME: 920,
+    STATE_IDENTITY_NAME: 920,
+    STATE_IDENTITY_ROLE: 920,
+    STATE_ORIGIN: 920,
+    STATE_DESTINATION: 920,
+    STATE_REASON: 920,
+    STATE_OPINION: 920,
+    STATE_PRICE: 920,
+    STATE_COUNT: 920,
+    STATE_WORK_LOCATION: 920,
+    STATE_JOB_ROLE: 920,
+    CONFIRM_POSSESSION: 920,
+    DENY_POSSESSION: 920,
+    STATE_QUANTITY: 920,
+    CONFIRM_CAPABILITY: 920,
+    DENY_CAPABILITY: 920,
+    CONFIRM_AVAILABLE: 920,
+    DENY_AVAILABLE: 920,
+    STATE_CURRENT_PLAN: 920,
+    STATE_CURRENT_PREFERENCE: 920,
+    STATE_RETURN_TIME: 920,
+    STATE_WORK_STATUS: 920,
+    STATE_MONEY_STATUS: 920,
+    STATE_NO_MONEY: 920,
+    STATE_SLEEP_STATUS_GOOD: 920,
+    STATE_SLEEP_STATUS_BAD: 920,
+    STATE_FOOD_STATUS_EATEN: 920,
+    STATE_FOOD_STATUS_NOT_EATEN: 920,
+    STATE_HOME: 920,
+    CONFIRM_KNOWLEDGE: 920,
+    DENY_KNOWLEDGE: 920,
+    CONFIRM_FACT: 920,
+    DENY_FACT: 920,
+    ANSWER_UNKNOWN: 900,
+
+    AFFIRM_LOVE: 850,
+    DENY_LOVE: 850,
+    DENY_BETRAYAL: 850,
+    ADMIT_BETRAYAL: 850,
+    REJECT_DEATH_WISH_CLAIM: 850,
+    DENY_ABANDONMENT: 850,
+    CONFIRM_TRUST: 830,
+    PROMISE_LOYALTY: 820,
+    CONFIRM_CHOICE: 820,
+
+    REASSURE_NOT_LEAVING: 760,
+    EXPRESS_FEAR_OF_LOSS: 750,
+    EXPRESS_CARE: 740,
+    EXPRESS_CONCERN: 730,
+    EXPRESS_SYMPATHY: 720,
+
+    AGREE_REQUEST: 700,
+    DECLINE_REQUEST: 700,
+    ACCEPT_APOLOGY: 690,
+    DECLINE_FOR_NOW: 690,
+    EXPRESS_REPAIR_DESIRE: 680,
+
+    EXPRESS_HURT: 600,
+    EXPRESS_ANGER: 600,
+    EXPRESS_LONELINESS: 600,
+    EXPRESS_JEALOUSY: 600,
+    EXPRESS_ANXIETY: 600,
+    EXPRESS_CONFUSION: 600,
+    EXPRESS_RELIEF: 590,
+    EXPRESS_JOY: 590,
+
+    ASK_FOR_DETAILS: 400,
+    ASK_ABOUT_OTHER_PERSON: 400,
+    ASK_TO_TALK: 390,
+    ASK_FOR_ANSWER: 380,
+    EXPRESS_NEED_CLARITY: 370
+  };
+
+  HMW.Dialogue.RESPONSE_PRIORITY = PRIORITY;
+
+  HMW.Dialogue.prioritizeResponseMeanings=function prioritizeResponseMeanings(
+    meaningIds=[],
+    {maxMeanings=null}={}
+  ){
+    const unique=[...new Set((meaningIds||[]).filter(Boolean))];
+    const ordered=unique
+      .map((id,index)=>({id,index,priority:PRIORITY[id]??500}))
+      .sort((a,b)=>b.priority-a.priority || a.index-b.index)
+      .map(item=>item.id);
+
+    if(Number.isFinite(Number(maxMeanings)) && Number(maxMeanings)>0){
+      return ordered.slice(0,Number(maxMeanings));
+    }
+    return ordered;
+  };
+})();
