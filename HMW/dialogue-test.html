@@ -2,7 +2,7 @@
 <html lang="ja">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
   <title>HMW 会話JS確認</title>
   <style>
     :root{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:#222;background:#f4f2ec}
@@ -16,8 +16,8 @@
     select,button{min-height:44px;border:1px solid #888;border-radius:9px;background:#fff;padding:7px 10px;font-size:16px}
     select{width:100%}
     button{font-weight:700}
-    textarea{width:100%;min-height:260px;font:12px/1.45 ui-monospace,SFMono-Regular,Menlo,monospace;border:1px solid #bbb;border-radius:8px;padding:8px}
-    .buttons{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+    textarea{width:100%;min-height:180px;max-height:42dvh;font:16px/1.45 ui-monospace,SFMono-Regular,Menlo,monospace;border:1px solid #bbb;border-radius:8px;padding:10px;resize:vertical;-webkit-text-size-adjust:100%}
+    .buttons{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px}.buttons button:first-child{grid-column:1/-1;background:#222;color:#fff;border-color:#222}
     .english{font-size:18px;line-height:1.55;font-weight:700;white-space:pre-wrap}
     pre{white-space:pre-wrap;word-break:break-word;margin:0;font:13px/1.5 ui-monospace,SFMono-Regular,Menlo,monospace}
     .error{color:#a40000}
@@ -44,10 +44,10 @@
 
   <div class="card">
     <label for="analysis-input">AIから受け取った分析JSONを貼る</label>
-    <textarea id="analysis-input" spellcheck="false"></textarea>
+    <textarea id="analysis-input" spellcheck="false" autocomplete="off" autocapitalize="off" autocorrect="off" placeholder="ここにChatGPTから受け取った分析JSONを貼る"></textarea>
     <div class="buttons">
       <button id="run-test" type="button">JSで英文生成</button>
-      <button id="load-example" type="button">JSON例</button>
+      <button id="clear-input" type="button">全消去</button>
     </div>
   </div>
 
@@ -82,6 +82,6 @@
 <script src="js/characters/hmw_character_aaron.js?v=20260923-1944"></script>
 <script src="js/characters/hmw_character_mark.js?v=20260923-1944"></script>
 <script src="js/characters/hmw_character_leon.js?v=20260923-1944"></script>
-<script src="js/dialogue/dialogue-analysis-paste-runner.js?v=20260925-1"></script>
+<script src="js/dialogue/dialogue-analysis-paste-runner.js?v=20260925-mobile-2"></script>
 </body>
 </html>
