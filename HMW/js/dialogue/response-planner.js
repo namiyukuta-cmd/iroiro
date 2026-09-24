@@ -832,6 +832,55 @@
       reasons.push("answer_event_question");
     }
 
+
+    if (
+      has(a.intents, "ask_permission_action") ||
+      firstQuestion?.kind === "permission"
+    ) {
+      const action = firstQuestion?.action || firstQuestion?.target || "default";
+      const value = characterPolicy.permissions?.[action];
+      if (value === true) add(meaningIds, "GRANT_PERMISSION");
+      else if (value === false) add(meaningIds, "DENY_PERMISSION");
+      else add(meaningIds, "ANSWER_UNKNOWN");
+      reasons.push("answer_permission_question");
+    }
+
+    if (
+      has(a.intents, "request_action") ||
+      firstQuestion?.kind === "request_action"
+    ) {
+      const action = firstQuestion?.action || firstQuestion?.target || "default";
+      const value = characterPolicy.requestResponses?.[action];
+      if (value === true) add(meaningIds, "ACCEPT_ACTION_REQUEST");
+      else if (value === false) add(meaningIds, "DECLINE_ACTION_REQUEST");
+      else add(meaningIds, "ANSWER_UNKNOWN");
+      reasons.push("answer_action_request");
+    }
+
+    if (
+      has(a.intents, "invite_action") ||
+      firstQuestion?.kind === "invitation"
+    ) {
+      const action = firstQuestion?.action || firstQuestion?.target || "default";
+      const value = characterPolicy.invitationResponses?.[action];
+      if (value === true) add(meaningIds, "ACCEPT_INVITATION");
+      else if (value === false) add(meaningIds, "DECLINE_INVITATION");
+      else add(meaningIds, "ANSWER_UNKNOWN");
+      reasons.push("answer_invitation");
+    }
+
+    if (
+      has(a.intents, "suggest_action") ||
+      firstQuestion?.kind === "suggestion"
+    ) {
+      const action = firstQuestion?.action || firstQuestion?.target || "default";
+      const value = characterPolicy.suggestionResponses?.[action];
+      if (value === true) add(meaningIds, "ACCEPT_SUGGESTION");
+      else if (value === false) add(meaningIds, "DECLINE_SUGGESTION");
+      else add(meaningIds, "ANSWER_UNKNOWN");
+      reasons.push("answer_suggestion");
+    }
+
     if (meaningIds.length === 0 && has(a.intents, "ask_question")) {
       add(meaningIds, "ANSWER_UNKNOWN");
       reasons.push("generic_question_fallback_unknown");
