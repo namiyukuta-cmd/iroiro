@@ -342,9 +342,10 @@
     }
 
     state.market.feePaidDay=day;
+    addReputation(state,1);
     return {
       ok:true,
-      message:'今日の場所代 '+formatMoney(stage.dailyFee)+' を払った。'
+      message:'今日の場所代 '+formatMoney(stage.dailyFee)+' を払い、信用+1。'
     };
   }
 
