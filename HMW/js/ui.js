@@ -25,6 +25,9 @@
         a.push({ label: "中身不明の荷運びを受ける", desc: "900円。警察注意と相手への借りが残る。", run: G.thugJob });
       }
     }
+    if (id === "convenience_store") {
+      a.push({ label: "店員と話す", desc: "同じ店を使った履歴が、小仕事や対応の変化につながる。", run: G.clerkTalk, disabled: !!H.state.daily.talk.clerk });
+    }
     return a;
   }
 
@@ -88,7 +91,6 @@
 
     if (id === "convenience_store") {
       a.push({ label: "買い物をする", desc: "食料・水・衛生用品を買う。", run: G.openShop });
-      a.push({ label: "店員と話す", desc: "同じ店を使った履歴が、小仕事や対応の変化につながる。", run: G.clerkTalk, disabled: !!H.state.daily.talk.clerk });
       if (H.state.progression.clerk.cleanupUnlocked && slot >= 2 && !H.state.daily.clerkWork) {
         a.push({ label: "店の裏を清掃する", desc: "汚れた場所を実際に片付ける小仕事。", run: G.clerkWork });
       }
@@ -276,54 +278,25 @@
   function renderActions() {
     const box = $("action-list");
     box.innerHTML = "";
-    if (H.state.activeEvent) {
-      const e = H.state.activeEvent;
-      const panel = document.createElement("div");
-      panel.className = "event-panel";
-      panel.innerHTML = `<h2>${esc(e.title)}</h2><p>${esc(e.text)}</p>`;
-      const choices = document.createElement("div");
-      choices.className = "action-grid";
-      e.choices.forEach((x) => choices.appendChild(eventButton(x.label, () => G.resolveEvent(x.id), x.disabled)));
-      panel.appendChild(choices);
-      box.appendChild(panel);
-      return;
-    }
-    if (H.state.location === "convenience_store") {
-      box.appendChild(mainButton("買い物", G.openShop));
-      box.appendChild(mainButton("店員と話す", G.clerkTalk));
-      box.appendChild(mainButton("移動", openMap));
-
-      if (H.state.progression.clerk.cleanupUnlocked) {
-        let cleanupHint = "";
-        if (H.state.daily.clerkWork) {
-          cleanupHint = "今日はもう清掃仕事を終えている。次は翌日以降に受けられる。";
-        } else if (H.state.slot < 2) {
-          cleanupHint = "清掃仕事は夕方以降に受けられる。";
-        } else if (H.state.stats.fatigue > 88 || H.state.stats.hunger > 90) {
-          cleanupHint = "清掃仕事は疲労88以下・空腹90以下の時に受けられる。";
-        }
-
-        box.appendChild(mainButton(
-          "清掃仕事を受ける",
-          cleanupHint ? () => info("清掃仕事", cleanupHint) : G.clerkWork,
-          `cleanup-action${cleanupHint ? " cleanup-unavailable" : ""}`
-        ));
-      }
-      return;
-    }
-
-    box.appendChild(mainButton("行動", openLocationActions));
-    box.appendChild(mainButton("人と話す", openPeopleHere));
-    box.appendChild(mainButton("移動", openMap));
+    if (!H.state.activeEvent) return;
+    const e = H.state.activeEvent;
+    const panel = document.createElement("div");
+    panel.className = "event-panel";
+    panel.innerHTML = `<h2>${esc(e.title)}</h2><p>${esc(e.text)}</p>`;
+    const choices = document.createElement("div");
+    choices.className = "action-grid";
+    e.choices.forEach((x) => choices.appendChild(eventButton(x.label, () => G.resolveEvent(x.id), x.disabled)));
+    panel.appendChild(choices);
+    box.appendChild(panel);
   }
 
   function openMap() {
-    if (H.state.activeEvent) return info("マップ", "現在の出来事への対応が先になる。");
+    if (H.state.activeEvent) return info("移動", "現在の出来事への対応が先になる。");
     const current = H.state.location;
     const list = Object.keys(D.locations)
       .filter((id) => H.state.knownLocations[id] && id !== current)
       .map((id) => ({ label: D.locations[id].name, onClick: () => travel(id) }));
-    openModal("マップ", `現在地：${D.locations[current].name}`, list.length ? list : [{ label: "まだ他の場所を知らない", disabled: true }]);
+    openModal("移動", `現在地：${D.locations[current].name}`, list.length ? list : [{ label: "まだ他の場所を知らない", disabled: true }]);
   }
 
   function openInventory() {
@@ -491,8 +464,10 @@
 
   document.addEventListener("DOMContentLoaded", () => {
     $("nav-menu").addEventListener("click", openMenu);
-    $("nav-map").addEventListener("click", openMap);
-    $("nav-inventory").addEventListener("click", openInventory);
+    $("side-action").addEventListener("click", openLocationActions);
+    $("side-talk").addEventListener("click", openPeopleHere);
+    $("side-move").addEventListener("click", openMap);
+    $("side-inventory").addEventListener("click", openInventory);
     $("nav-log").addEventListener("click", openLog);
     $("nav-save").addEventListener("click", openSave);
     $("nav-load").addEventListener("click", () => openLoad(false));
