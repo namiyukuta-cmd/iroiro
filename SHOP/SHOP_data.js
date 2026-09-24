@@ -234,8 +234,8 @@
     }),
 
     links: Object.freeze({
-      newGame: './SHOP_top.html?new=1&build=20260923-simple-stall-v1',
-      continueGame: './SHOP_top.html?continue=1&build=20260923-simple-stall-v1',
+      newGame: './SHOP_top.html?new=1&build=20260924-tappable-place-glow-v1',
+      continueGame: './SHOP_top.html?continue=1&build=20260924-tappable-place-glow-v1',
       backToGames: '../index.html',
       backToShopMenu: './SHOP_index.html'
     })
