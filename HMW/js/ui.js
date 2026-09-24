@@ -207,6 +207,7 @@
 
   const LOCATION_POINTS = {
     station_front: [
+      { id:"street", label:"公道", text:"駅前の公道。人に小銭を頼む、周囲を探すなど、この場所でできる行動を選べる。" },
       { id:"board", label:"掲示板", text:"支援、廃品回収、小仕事など、今日の生活につながる情報が貼られている。" },
       { id:"loading", label:"駅の搬入口", text:"当日手伝いの募集があるか確認できる。募集が出ていれば、そのまま荷下ろしの仕事を受けられる。" },
       { id:"bench", label:"ベンチ", text:"通勤客の流れから少し外れて座れるベンチ。人の出入りを見ながら休める。" },
@@ -350,6 +351,10 @@
   }
 
   function openLocationPoint(locationId, point) {
+    if (locationId === "station_front" && point.id === "street") {
+      openLocationActions();
+      return;
+    }
     const liveScene = G.getCityScene?.();
     if (locationId === "station_front" && point.id === "loading" &&
         liveScene && ["station_morning_work","daily_station_shortage"].includes(liveScene.id)) {
@@ -743,7 +748,6 @@
   document.addEventListener("DOMContentLoaded", () => {
     $("location-name").addEventListener("click", () => openLocationIntro(H.state.location));
     $("side-tasks").addEventListener("click", openTasks);
-    $("side-action").addEventListener("click", openLocationActions);
     $("side-talk").addEventListener("click", openPeopleHere);
     $("side-move").addEventListener("click", openMap);
     $("side-inventory").addEventListener("click", openInventory);
