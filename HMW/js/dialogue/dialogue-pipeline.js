@@ -37,13 +37,20 @@
       ? plan.lexicalTargets
       : expandedLexicalTargets;
 
+    const responseMeaningIds =
+      typeof HMW.Dialogue.prioritizeResponseMeanings === "function"
+        ? HMW.Dialogue.prioritizeResponseMeanings(plan.meaningIds || [], {
+            maxMeanings: characterPolicy.maxResponseMeanings
+          })
+        : (plan.meaningIds || []);
+
     const mergedSlotOverridesByMeaning = {
       ...(plan.slotOverridesByMeaning || {}),
       ...(slotOverridesByMeaning || {})
     };
 
     const composed = HMW.Dialogue.composeMeanings
-      ? HMW.Dialogue.composeMeanings(plan.meaningIds || [], {
+      ? HMW.Dialogue.composeMeanings(responseMeaningIds, {
           variantSeed,
           slotOverridesByMeaning: mergedSlotOverridesByMeaning,
           lexicalTargets
@@ -57,7 +64,10 @@
 
     return {
       analysis: normalized,
-      plan,
+      plan: {
+        ...plan,
+        prioritizedMeaningIds: responseMeaningIds
+      },
       composed,
       english: composed.english,
       lexicalTargets,
