@@ -1,0 +1,86 @@
+name: Audit HMW generation coverage 001
+on:
+  push:
+    paths:
+      - '.github/workflows/hmw-audit-generation-001.yml'
+permissions:
+  contents: read
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Audit generation coverage
+        run: |
+          node <<'NODE'
+          const fs=require('fs'),path=require('path'),vm=require('vm');
+          const root=process.cwd();
+          const ctx={console};ctx.window=ctx;ctx.HMW={};vm.createContext(ctx);
+          const run=p=>vm.runInContext(fs.readFileSync(path.join(root,p),'utf8'),ctx,{filename:p});
+          const langDir=path.join(root,'HMW/js/dialogue/language');
+
+          run('HMW/js/dialogue/dialogue-meanings.js');
+
+          const names=fs.readdirSync(langDir).sort();
+          const loadGroup=prefix=>{
+            for(const name of names){
+              if(name.startsWith(prefix)&&name.endsWith('.js')) run('HMW/js/dialogue/language/'+name);
+            }
+          };
+
+          const exact=[
+            'HMW/js/dialogue/language/morphology-rules.js',
+            'HMW/js/dialogue/language/word-selector.js'
+          ];
+          exact.forEach(p=>{ if(fs.existsSync(path.join(root,p))) run(p); });
+          loadGroup('sentence-patterns-');
+          loadGroup('meaning-pattern-map-');
+          loadGroup('meaning-generation-specs-');
+          run('HMW/js/dialogue/language/generated-sentence-builder.js');
+          run('HMW/js/dialogue/language/dialogue-composer.js');
+
+          const D=ctx.HMW.Dialogue;
+          const meaningIds=Object.keys(D.MEANINGS||{});
+          const covered=meaningIds.filter(id=>
+            (D.MEANING_PATTERN_MAP?.[id]?.length||0)>0 ||
+            (D.GENERATION_SPECS?.[id]?.candidates?.length||0)>0
+          );
+          const missingCoverage=meaningIds.filter(id=>!covered.includes(id));
+
+          const rendered=meaningIds.map((id,index)=>{
+            try{
+              return D.composeMeaning(id,{variantSeed:index,lexicalTargets:[]});
+            }catch(error){
+              return {meaningId:id,ok:false,english:'',reason:String(error)};
+            }
+          });
+          const failed=rendered.filter(x=>!x?.ok||!String(x.english||'').trim());
+          const unresolved=rendered.filter(x=>/[{}]/.test(String(x.english||'')));
+
+          const admit=D.composeMeaning('ADMIT_BETRAYAL',{variantSeed:0});
+          const time=D.composeMeaning('REQUEST_TIME',{variantSeed:0});
+
+          const checks={
+            meaningCount:meaningIds.length===177,
+            fullCoverage:missingCoverage.length===0,
+            allRenderable:failed.length===0,
+            noUnresolvedSlots:unresolved.length===0,
+            admitBetrayal:/betrayed you/i.test(admit.english||''),
+            requestTime:/give me some time/i.test(time.english||'')
+          };
+
+          console.log('AUDIT_RESULT '+JSON.stringify({
+            meaningCount:meaningIds.length,
+            coveredCount:covered.length,
+            missingCoverage,
+            failed,
+            unresolved,
+            admitBetrayal:admit,
+            requestTime:time,
+            checks
+          }));
+          if(Object.values(checks).some(v=>v!==true)) process.exit(1);
+          NODE
