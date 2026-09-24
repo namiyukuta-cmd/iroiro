@@ -37,10 +37,15 @@
       ? plan.lexicalTargets
       : expandedLexicalTargets;
 
+    const mergedSlotOverridesByMeaning = {
+      ...(plan.slotOverridesByMeaning || {}),
+      ...(slotOverridesByMeaning || {})
+    };
+
     const composed = HMW.Dialogue.composeMeanings
       ? HMW.Dialogue.composeMeanings(plan.meaningIds || [], {
           variantSeed,
-          slotOverridesByMeaning,
+          slotOverridesByMeaning: mergedSlotOverridesByMeaning,
           lexicalTargets
         })
       : { english:"", results:[], missingMeaningIds:plan.meaningIds || [] };
