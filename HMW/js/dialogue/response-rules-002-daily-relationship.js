@@ -8,26 +8,26 @@
     R.push({ id, priority, when, meanings, reason });
 
   // Questions and information seeking.
-  add("R101_ASK_REASON",620,{intentAny:["ask_reason"]},["ASK_REASON"],"ask_reason_received");
-  add("R102_ASK_WHERE",620,{intentAny:["ask_where"]},["ASK_WHERE"],"ask_where_received");
-  add("R103_ASK_WHEN",620,{intentAny:["ask_when"]},["ASK_WHEN"],"ask_when_received");
-  add("R104_ASK_HEALTH",630,{intentAny:["ask_health"]},["ASK_ABOUT_HEALTH"],"ask_health_received");
-  add("R105_ASK_SLEEP",610,{intentAny:["ask_sleep"]},["ASK_ABOUT_SLEEP"],"ask_sleep_received");
-  add("R106_ASK_FOOD",610,{intentAny:["ask_food"]},["ASK_ABOUT_FOOD"],"ask_food_received");
-  add("R107_ASK_HOME",600,{intentAny:["ask_home"]},["ASK_ABOUT_HOME"],"ask_home_received");
-  add("R108_ASK_PLAN",600,{intentAny:["ask_plan"]},["ASK_PLAN"],"ask_plan_received");
-  add("R109_ASK_PREFERENCE",600,{intentAny:["ask_preference"]},["ASK_PREFERENCE"],"ask_preference_received");
-  add("R110_ASK_WORK",590,{intentAny:["ask_work"]},["ASK_WORK_STATUS"],"ask_work_received");
-  add("R111_ASK_MONEY",590,{intentAny:["ask_money"]},["ASK_MONEY_STATUS"],"ask_money_received");
-  add("R112_ASK_HUNGER",610,{intentAny:["ask_hunger"]},["ASK_HUNGER"],"ask_hunger_received");
-  add("R113_ASK_THIRST",610,{intentAny:["ask_thirst"]},["ASK_THIRST"],"ask_thirst_received");
-  add("R114_ASK_TIREDNESS",610,{intentAny:["ask_tiredness"]},["ASK_TIREDNESS"],"ask_tiredness_received");
-  add("R115_ASK_RELATIONSHIP_STATUS",690,{intentAny:["ask_relationship_status"]},["ASK_RELATIONSHIP_STATUS"],"ask_relationship_status_received");
-  add("R116_ASK_FEELINGS",690,{intentAny:["ask_feelings"]},["ASK_FEELINGS"],"ask_feelings_received");
+  add("R101_ASK_REASON",620,{intentAny:["ask_reason"]},["ANSWER_UNKNOWN"],"ask_reason_received");
+  add("R102_ASK_WHERE",620,{intentAny:["ask_where"]},["ANSWER_UNKNOWN"],"ask_where_received");
+  add("R103_ASK_WHEN",620,{intentAny:["ask_when"]},["ANSWER_UNKNOWN"],"ask_when_received");
+  add("R104_ASK_HEALTH",630,{intentAny:["ask_health"]},["ANSWER_UNKNOWN"],"ask_health_received");
+  add("R105_ASK_SLEEP",610,{intentAny:["ask_sleep"]},["ANSWER_UNKNOWN"],"ask_sleep_received");
+  add("R106_ASK_FOOD",610,{intentAny:["ask_food"]},["ANSWER_UNKNOWN"],"ask_food_received");
+  add("R107_ASK_HOME",600,{intentAny:["ask_home"]},["ANSWER_UNKNOWN"],"ask_home_received");
+  add("R108_ASK_PLAN",600,{intentAny:["ask_plan"]},["ANSWER_UNKNOWN"],"ask_plan_received");
+  add("R109_ASK_PREFERENCE",600,{intentAny:["ask_preference"]},["ANSWER_UNKNOWN"],"ask_preference_received");
+  add("R110_ASK_WORK",590,{intentAny:["ask_work"]},["ANSWER_UNKNOWN"],"ask_work_received");
+  add("R111_ASK_MONEY",590,{intentAny:["ask_money"]},["ANSWER_UNKNOWN"],"ask_money_received");
+  add("R112_ASK_HUNGER",610,{intentAny:["ask_hunger"]},["ANSWER_UNKNOWN"],"ask_hunger_received");
+  add("R113_ASK_THIRST",610,{intentAny:["ask_thirst"]},["ANSWER_UNKNOWN"],"ask_thirst_received");
+  add("R114_ASK_TIREDNESS",610,{intentAny:["ask_tiredness"]},["ANSWER_UNKNOWN"],"ask_tiredness_received");
+  add("R115_ASK_RELATIONSHIP_STATUS",690,{intentAny:["ask_relationship_status"]},["ANSWER_UNKNOWN"],"ask_relationship_status_received");
+  add("R116_ASK_FEELINGS",690,{intentAny:["ask_feelings"]},["ANSWER_UNKNOWN"],"ask_feelings_received");
   add("R117_ASK_IDENTITY",600,{intentAny:["ask_identity"]},["ANSWER_UNKNOWN"],"ask_identity_received");
   add("R118_ASK_ORIGIN",600,{intentAny:["ask_origin"]},["ANSWER_UNKNOWN"],"ask_origin_received");
-  add("R119_ASK_DESTINATION",600,{intentAny:["ask_destination"]},["ASK_DESTINATION"],"ask_destination_received");
-  add("R120_ASK_OPINION",600,{intentAny:["ask_opinion"]},["EXPRESS_NEED_CLARITY"],"ask_opinion_received");
+  add("R119_ASK_DESTINATION",600,{intentAny:["ask_destination"]},["ANSWER_UNKNOWN"],"ask_destination_received");
+  add("R120_ASK_OPINION",600,{intentAny:["ask_opinion"]},["ANSWER_UNKNOWN"],"ask_opinion_received");
 
   // Requests, offers, invitations and contact.
   add("R121_HELP_REQUEST_ALLOW",730,{intentAny:["ask_for_help"],policyEq:{"willingToHelp":true}},["OFFER_HELP"],"help_request_allowed");
@@ -68,7 +68,7 @@
   add("R154_STATE_PREFERENCE",520,{intentAny:["state_preference"]},["STATE_PREFERENCE"],"preference_stated");
   add("R155_CONFIRM_ARRIVAL",560,{intentAny:["confirm_arrival"]},["CONFIRM_ARRIVAL"],"arrival_confirmed");
   add("R156_CONFIRM_DEPARTURE",560,{intentAny:["confirm_departure"]},["CONFIRM_DEPARTURE"],"departure_confirmed");
-  add("R157_ASK_RETURN_TIME",610,{intentAny:["ask_return_time"]},["ASK_RETURN_TIME"],"return_time_asked");
+  add("R157_ASK_RETURN_TIME",610,{intentAny:["ask_return_time"]},["ANSWER_UNKNOWN"],"return_time_asked");
   add("R158_HOME_AND_TIRED",630,{focusAll:["home","tiredness"]},["OFFER_REST"],"home_tiredness_combination");
   add("R159_WEATHER_AND_HOME",620,{focusAll:["weather","home"]},["OFFER_SHELTER"],"weather_home_combination");
   add("R160_HEALTH_AND_FEAR",660,{focusAny:["health","injury","illness"],emotionMin:{fear:50}},["EXPRESS_CONCERN"],"health_fear_combination");
