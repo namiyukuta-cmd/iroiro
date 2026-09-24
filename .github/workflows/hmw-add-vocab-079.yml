@@ -1,0 +1,76 @@
+name: Add HMW vocabulary 079
+on:
+  push:
+    paths:
+      - '.github/workflows/hmw-add-vocab-079.yml'
+permissions:
+  contents: write
+jobs:
+  add:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Build 200 unique entries and commit
+        run: |
+          node <<'NODE'
+          const fs=require('fs'),path=require('path'),vm=require('vm'),cp=require('child_process');
+          const lang=path.join(process.cwd(),'HMW/js/dialogue/language');
+          const ctx={console};ctx.window=ctx;ctx.HMW={};vm.createContext(ctx);
+          const run=f=>vm.runInContext(fs.readFileSync(f,'utf8'),ctx,{filename:path.basename(f)});
+          run(path.join(lang,'vocabulary-registry.js'));
+          const files=fs.readdirSync(lang).filter(f=>{const m=f.match(/^vocabulary-(\d{3}).*\.js$/);return m&&Number(m[1])>=1&&Number(m[1])<=78}).sort((a,b)=>Number(a.match(/(\d{3})/)[1])-Number(b.match(/(\d{3})/)[1]));
+          for(const f of files)run(path.join(lang,f));
+          const V=ctx.HMW.Dialogue.Vocabulary;
+
+          const groups={
+            noun:["accomplishment","adaptability","alert","approval","assurance","availability","awareness","capability","coincidence","complexity","consistency","credibility","dependence","disclosure","efficiency","enthusiasm","expectancy","flexibility","friendliness","hospitality","independence","initiative","insight","intimacy","leadership","maturity","motivation","openness","outlook","productivity","readiness","reliability","sensitivity","stability","suitability","transparency","usefulness","vulnerability","accountability","admiration","advocacy","affordability","allocation","anticipation","appreciation","assertiveness","compatibility","confidentiality","convenience","dependability","fairness","generosity","helpfulness","modesty","optimism","persistence","resourcefulness","seriousness","sincerity","thoughtfulness","tolerance","trustworthiness","accuracy","brevity","coherence","courtesy","directness","fluency","formality","informality","neutrality","objectivity","precision","relevance","specificity","subjectivity","intonation","miscommunication","misinterpretation","misreading","mishearing","understatement","overstatement","exaggeration","elaboration","acknowledgment","assessment","evaluation","comparison","contrast","classification","criterion","indicator","measurement","calculation","prediction","forecast","hypothesis","theory","principle","framework","sequence","dependency","constraint","limitation","capacity","shortage","surplus","inventory","supplies","installation","procedure","guideline","policy","standard","violation","appeal","dispute","settlement","ownership","membership","partnership","workload","overtime","attendance","milestone","completion","outage","coverage","bandwidth","accessibility","usability","subscription","homepage","webpage","keyword","dataset","directory","annotation","worksheet","itinerary","checkin","lodging","reception","outskirts","appliance","extensioncord","lightbulb","smokealarm","firealarm","thermostat","ventilation","recycling","utility","plumbing","wellbeing","hydration","stamina","fitness","nutrition",
+            "acorn","alligator","alpaca","anchovy","antelope","badger","bat","beaver","bison","boar","buffalo","calf","canary","carp","cheetah","chick","chimpanzee","cobra","cod","dolphin","donkey","dove","falcon","ferret","flamingo","giraffe","gorilla","hawk","hedgehog","hen","jellyfish","kangaroo","kitten","lamb","leopard","lobster","mole","octopus","ostrich","otter","parrot","peacock","penguin","pigeon","pony","puppy","raccoon","raven","salmon","seal","shark","squid","swan","trout","wasp","zebra",
+            "avocado","bacon","bagel","barley","beet","blueberry","bun","cashew","cauliflower","chili","cracker","croissant","dates","dough","fig","gravy","ham","hazelnut","kiwi","lentil","lime","margarine","oat","olive","omelet","peanut","pickle","popcorn","raisin","raspberry","salmon","soy","spinach","syrup","walnut","watermelon",
+            "armchair","bookshelf","bunkbed","carport","ceilingfan","coffeetable","dishcloth","doorknob","fryingpan","garagedoor","headboard","laundrybasket","lightshade","microwaveoven","nightstand","ovenmitt","powerstrip","showercurtain","trashcan","washingmachine","waterheater","windowframe",
+            "bandwidth","bluetooth","bookmark","cache","checkbox","database","dropdown","emoji","firewall","firmware","hotspot","hyperlink","inbox","keypad","laptop","malware","password","podcast","popup","processor","reboot","scrollbar","smartwatch","touchscreen","webcam","webpage","wifi"],
+            verb:["accomplish","allocate","anticipate","assess","categorize","cite","compile","concentrate","coordinate","deduce","demonstrate","differentiate","elaborate","evaluate","exaggerate","forecast","highlight","illustrate","indicate","justify","misinterpret","mishear","outline","predict","prioritize","reconsider","revise","specify","underline","validate","authorize","consult","contribute","delegate","facilitate","implement","notify","postpone","supervise","archive","configure","filter","forward","import","merge","preview","refresh","rename","restore","sync","zoom","vacate","ventilate","hydrate","medicate","tremble","disinfect","itch","sniff","sweat","sprain","fracture","browse","bookmark","cache","click","copy","crop","debug","decode","delete","encode","export","format","index","paste","reboot","tag","transcribe","update","broadcast","caption","compress","mute","stream","zoom","fastforward","rewind","subscribe","unsubscribe","scroll","swipe","tap","drag","drop","pin","unpin","share","block","unblock","follow","unfollow","favorite","unfavorite","archive","restore","attach","detach"],
+            adjective:["accountable","adaptable","alert","appreciative","assertive","capable","confidential","dependable","efficient","hospitable","mature","motivated","optimistic","punctual","resourceful","stable","suitable","transparent","vulnerable","misleading","exaggerated","understated","editable","searchable","downloadable","uploadable","printable","archived","outdated","updated","wireless","portable","digital","electronic","automatic","manual","ventilated","recyclable","nauseous","rested","recovering","bluetooth","offline","online","interactive","clickable","scrollable","selectable","configurable","customizable","visible","hidden","enabled","disabled","muted","unmuted","subscribed","unsubscribed","blocked","unblocked","pinned","unpinned","shared","private","public","encrypted","unencrypted","responsive","adaptive","compatible","incompatible","available","unavailable","active","inactive","portable","stationary","rechargeable","disposable"],
+            adverb:["assertively","courteously","fluently","neutrally","relevantly","specifically","ambiguously","contextually","comparatively","analytically","descriptively","persuasively","responsively","dismissively","decisively","securely","wirelessly","digitally","automatically","manually","conveniently","efficiently","reliably","transparently","optimistically","punctually","resourcefully","sensitively","remotely","internationally","professionally","socially","emotionally","physically","mentally","interactively","privately","publicly","offline","online","visibly","silently","explicitly","implicitly","accurately","inaccurately","carefully","quickly","slowly","smoothly","freely","securely","temporarily","permanently"]
+          };
+
+          const chosen=[];
+          for(const [pos,lemmas] of Object.entries(groups)){
+            for(const raw of lemmas){
+              const lemma=String(raw).toLowerCase();
+              const key=lemma+":"+pos;
+              if(!V.byKey[key]&&!chosen.some(e=>e.lemma===lemma&&e.pos===pos)){
+                chosen.push({lemma,pos,tags:["daily","communication","technology","home","nature","food","batch079"]});
+                if(chosen.length===200) break;
+              }
+            }
+            if(chosen.length===200) break;
+          }
+          if(chosen.length<200) throw new Error("Only "+chosen.length+" unique candidates available");
+          const byPos={};for(const e of chosen)(byPos[e.pos]||(byPos[e.pos]=[])).push(e.lemma);
+          const lines=[
+            '(() => {','  "use strict";',
+            '  const V = window.HMW?.Dialogue?.Vocabulary;',
+            '  if (!V) throw new Error("Vocabulary registry must load first.");','',
+            '  // Daily, communication, technology, home, nature and food vocabulary.',
+            '  const words = '+JSON.stringify(byPos,null,4).replace(/^/gm,'  ')+';','',
+            '  const entries = [];',
+            '  for (const [pos, lemmas] of Object.entries(words)) {',
+            '    for (const lemma of lemmas) {',
+            '      entries.push({ lemma, pos, tags: ["daily","communication","technology","home","nature","food","batch079"] });',
+            '    }','  }','',
+            '  V.register(entries);','})();',''
+          ];
+          const out=path.join(lang,'vocabulary-079-daily-tech-home.js');
+          fs.writeFileSync(out,lines.join('\n'));
+          for(const e of chosen)V.register([e]);
+          const result={added:chosen.length,uniqueAfter:V.entries.length,remainingTo5000:Math.max(0,5000-V.entries.length),byPos:Object.fromEntries(Object.entries(byPos).map(([k,v])=>[k,v.length]))};
+          console.log('AUDIT_RESULT '+JSON.stringify(result));
+          cp.execSync('git config user.name "github-actions[bot]"');
+          cp.execSync('git config user.email "41898282+github-actions[bot]@users.noreply.github.com"');
+          cp.execSync('git add HMW/js/dialogue/language/vocabulary-079-daily-tech-home.js');
+          cp.execSync('git commit -m "Add vocabulary batch 079"');
+          cp.execSync('git push');
+          NODE
