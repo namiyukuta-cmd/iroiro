@@ -4,6 +4,7 @@
   const D = H.DATA;
   const G = H.Game;
   const { $, escapeHtml: esc, openModal, closeModal, info, travel } = G;
+  let autoSaveEnabled = false;
 
   function peopleActions() {
     const id = H.state.location;
@@ -400,13 +401,14 @@
         onClick: async () => {
           closeModal();
           await H.saveGame(slot);
+          autoSaveEnabled = true;
           refresh();
         }
       };
     });
   }
 
-  function loadSlotActions() {
+  function loadSlotActions(fromStart = false) {
     return Array.from({ length: H.SAVE_SLOT_COUNT || 3 }, (_, i) => {
       const slot = i + 1;
       return {
@@ -415,6 +417,11 @@
           closeModal();
           const loaded = await H.loadGame(slot);
           if (!loaded) return info("ロード", `スロット${slot}にはセーブデータがない。`);
+          autoSaveEnabled = true;
+          if (fromStart) {
+            enterGame();
+            return;
+          }
           G.ensureState();
           refresh();
         }
@@ -428,17 +435,17 @@
       label: "最初から",
       className: "danger",
       onClick: () => openModal("最初から", "現在の進行を最初からにする。セーブスロットは消さない。", [
-        { label: "最初から始める", className: "danger", onClick: () => { H.state = H.createInitialState(); closeModal(); refresh(); } },
+        { label: "最初から始める", className: "danger", onClick: () => { H.state = H.createInitialState(); autoSaveEnabled = false; closeModal(); G.ensureState(); refresh(); } },
         { label: "やめる", onClick: closeModal }
       ])
     });
     openModal("セーブ", "保存先を選ぶ。スロットごとに別のデータとして残る。", actions);
   }
 
-  function openLoad() {
-    const actions = loadSlotActions();
+  function openLoad(fromStart = false) {
+    const actions = loadSlotActions(fromStart);
     actions.push({ label: "やめる", onClick: closeModal });
-    openModal("ロード", "読み込むスロットを選ぶ。", actions);
+    openModal(fromStart ? "続きから" : "ロード", "読み込むスロットを選ぶ。", actions);
   }
 
   function openMenu() {
@@ -452,7 +459,32 @@
     renderStatus();
     renderScene();
     renderActions();
-    H.saveLocal();
+    if (autoSaveEnabled) H.saveLocal();
+  }
+
+  function enterGame() {
+    G.ensureState();
+    if (!H.state.world.weather) H.state.world.weather = "clear";
+    G.locState(H.state.location).visits += 1;
+    $("start-screen")?.classList.add("hidden");
+    $("game-app")?.classList.remove("game-not-started");
+    refresh();
+  }
+
+  function startNewGame() {
+    H.state = H.createInitialState();
+    autoSaveEnabled = false;
+    enterGame();
+  }
+
+  async function continueGame() {
+    const loaded = await H.loadGame(H.activeSaveSlot || 1);
+    if (!loaded) {
+      openLoad(true);
+      return;
+    }
+    autoSaveEnabled = true;
+    enterGame();
   }
 
   G.refresh = refresh;
@@ -463,13 +495,10 @@
     $("nav-inventory").addEventListener("click", openInventory);
     $("nav-log").addEventListener("click", openLog);
     $("nav-save").addEventListener("click", openSave);
-    $("nav-load").addEventListener("click", openLoad);
+    $("nav-load").addEventListener("click", () => openLoad(false));
+    $("start-new").addEventListener("click", startNewGame);
+    $("start-continue").addEventListener("click", continueGame);
     $("modal-close").addEventListener("click", closeModal);
     $("modal-backdrop").addEventListener("click", (e) => { if (e.target === $("modal-backdrop")) closeModal(); });
-    H.loadLocal();
-    G.ensureState();
-    if (!H.state.world.weather) H.state.world.weather = "clear";
-    G.locState(H.state.location).visits += 1;
-    refresh();
   });
 })();
