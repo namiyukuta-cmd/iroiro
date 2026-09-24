@@ -733,7 +733,7 @@
 <body>
 <script>
 (() => {
-  const SHOP_BUILD='20260924-social-rules-v1';
+  const SHOP_BUILD='20260924-life-route-v1';
   const u=new URL(location.href);
   if(u.searchParams.get('build')!==SHOP_BUILD){
     u.searchParams.set('build',SHOP_BUILD);
@@ -784,7 +784,7 @@
 
     <section class="utility-panel" aria-label="主人公情報と持ち物・行動">
       <aside class="player-panel" aria-label="主人公の状態">
-        <div class="money-box"><span>所持金</span><span id="moneyText">0</span></div>
+        <div class="money-box"><span>所持金</span><span id="moneyText">0</span><span>信用</span><span id="reputationText">0</span></div>
         <div class="portrait" id="portrait"></div>
         <div class="stats">
           <div class="stat-row">
@@ -833,6 +833,7 @@
       './SHOP_well.js',
       './SHOP_stall.js',
       './SHOP_society.js',
+      './SHOP_life.js',
       './SHOP_action.js',
       './SHOP_save.js',
       './SHOP_app.js'
@@ -840,7 +841,7 @@
     for (const file of files) {
       await new Promise((resolve, reject) => {
         const script = document.createElement('script');
-        script.src = file + '?v=20260924-social-rules-v1&nocache=' + stamp;
+        script.src = file + '?v=20260924-life-route-v1&nocache=' + stamp;
         script.onload = resolve;
         script.onerror = reject;
         document.body.appendChild(script);
