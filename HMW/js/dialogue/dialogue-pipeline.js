@@ -10,6 +10,7 @@
     characterPolicy = {},
     psychology = {},
     relationship = {},
+    conversationContext = {},
     variantSeed = 0,
     slotOverridesByMeaning = {},
     recentMeaningIds = []
@@ -29,6 +30,7 @@
           characterPolicy,
           psychology,
           relationship,
+          conversationContext,
           recentMeaningIds
         })
       : {
