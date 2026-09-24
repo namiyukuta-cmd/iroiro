@@ -468,6 +468,15 @@
   render();
   window.SHOP_RENDER = render;
 
+  if (window.SHOP_TIME && window.SHOP_TIME.startRealtime) {
+    window.SHOP_TIME.startRealtime(
+      () => window.SHOP_STATE,
+      () => {
+        if (typeof window.SHOP_RENDER === 'function') window.SHOP_RENDER();
+      }
+    );
+  }
+
   const params = new URLSearchParams(location.search);
   if (params.get('continue') === '1') {
     status.textContent = '続きから始める場合は「ロード」を押してください。';
