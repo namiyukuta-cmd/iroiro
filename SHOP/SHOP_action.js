@@ -146,10 +146,14 @@
     const interest=window.SHOP_SOCIETY && window.SHOP_SOCIETY.sellingInterestMultiplier
       ? window.SHOP_SOCIETY.sellingInterestMultiplier(stateRef)
       : 1;
+    const marketMultiplier=window.SHOP_LIFE && window.SHOP_LIFE.sellingStopMultiplier
+      ? window.SHOP_LIFE.sellingStopMultiplier(stateRef)
+      : 1;
     const chance=(Number(rule.stopChance)||0.32) *
       interest *
-      weatherSellingMultiplier();
-    return Math.max(0.03,Math.min(0.70,chance));
+      weatherSellingMultiplier() *
+      marketMultiplier;
+    return Math.max(0.03,Math.min(0.85,chance));
   }
 
   function refreshPersistentUi(){
@@ -343,6 +347,15 @@
   }
 
   function maybeHandleActivityEnforcement(){
+    if(
+      mode==='sell' &&
+      window.SHOP_LIFE &&
+      window.SHOP_LIFE.protectedSelling &&
+      window.SHOP_LIFE.protectedSelling(stateRef)
+    ){
+      return false;
+    }
+
     const rule=currentActivityEnforcement(mode);
     if(!rule) return false;
 
@@ -600,7 +613,12 @@
       pot.style.display='block';
       grid.style.display='none';
     }else{
-      title.textContent='物売り中';
+      title.textContent=
+        window.SHOP_LIFE &&
+        window.SHOP_LIFE.protectedSelling &&
+        window.SHOP_LIFE.protectedSelling(stateRef)
+          ? '露店営業中'
+          : '物売り中';
       pot.style.display='none';
       grid.style.display='grid';
       renderGrid();
