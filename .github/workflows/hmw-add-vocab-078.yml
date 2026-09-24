@@ -1,0 +1,72 @@
+name: Add HMW vocabulary 078
+on:
+  push:
+    paths:
+      - '.github/workflows/hmw-add-vocab-078.yml'
+permissions:
+  contents: write
+jobs:
+  add:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Build 200 unique entries and commit
+        run: |
+          node <<'NODE'
+          const fs=require('fs'),path=require('path'),vm=require('vm'),cp=require('child_process');
+          const lang=path.join(process.cwd(),'HMW/js/dialogue/language');
+          const ctx={console};ctx.window=ctx;ctx.HMW={};vm.createContext(ctx);
+          const run=f=>vm.runInContext(fs.readFileSync(f,'utf8'),ctx,{filename:path.basename(f)});
+          run(path.join(lang,'vocabulary-registry.js'));
+          const files=fs.readdirSync(lang).filter(f=>{const m=f.match(/^vocabulary-(\d{3}).*\.js$/);return m&&Number(m[1])>=1&&Number(m[1])<=77}).sort((a,b)=>Number(a.match(/(\d{3})/)[1])-Number(b.match(/(\d{3})/)[1]));
+          for(const f of files)run(path.join(lang,f));
+          const V=ctx.HMW.Dialogue.Vocabulary;
+
+          const groups={
+            noun:["accountability","adaptation","adjustment","admiration","advocacy","affordability","alertness","allocation","anticipation","appreciation","assertiveness","availability","awareness","capability","certainty","compatibility","confidentiality","convenience","credibility","dependability","efficiency","flexibility","friendliness","hospitality","independence","inconvenience","initiative","intimacy","leadership","likelihood","maturity","motivation","openness","productivity","readiness","reliability","sensitivity","stability","suitability","transparency","usefulness","vulnerability","adaptability","cooperation","coordination","dedication","enthusiasm","fairness","generosity","helpfulness","honesty","kindness","loyalty","modesty","optimism","persistence","punctuality","resourcefulness","seriousness","sincerity","thoughtfulness","tolerance","trustworthiness","willingness","accuracy","attention","brevity","coherence","courtesy","directness","fluency","formality","informality","neutrality","objectivity","precision","relevance","specificity","subjectivity","wording","phrasing","intonation","miscommunication","misinterpretation","misreading","mishearing","understatement","overstatement","exaggeration","implication","clarification","elaboration","confirmation","acknowledgment","observation","interpretation","assessment","evaluation","comparison","contrast","classification","category","criterion","criteria","indicator","measurement","estimate","calculation","prediction","forecast","likelihood","uncertainty","assumption","hypothesis","theory","principle","concept","context","framework","structure","sequence","order","priority","dependency","constraint","limitation","capacity","resource","availability","shortage","surplus","inventory","equipment","supplies","maintenance","inspection","replacement","installation","operation","procedure","instruction","guideline","policy","standard","requirement","permission","authorization","approval","rejection","exception","violation","complaint","appeal","dispute","settlement","resolution","agreement","commitment","obligation","responsibility","ownership","membership","partnership","employment","unemployment","promotion","retirement","resignation","qualification","application","candidate","applicant","recruitment","vacancy","position","occupation","profession","workload","overtime","breaktime","attendance","absence","punctuality","productivity","performance","feedback","supervision","management","leadership","training","orientation","assignment","deadline","milestone","progress","completion","delay","cancellation","revision","update","version","backup","recovery","failure","outage","connection","coverage","signal","bandwidth","network","device","settings","preference","notification","subscription","account","username","password","security","privacy","accessibility","usability","compatibility","storage","memory","battery","charging","adapter","connector","attachment","download","upload","browser","homepage","webpage","link","search","query","keyword","result","filter","sort","category","folder","directory","filename","extension","format","document","template","draft","copy","original","revision","comment","annotation","highlight","bookmark","history","record","archive","database","spreadsheet","worksheet","column","row","cell","formula","chart","diagram","dashboard","calendar","event","appointment","reservation","booking","confirmation","cancellation","destination","itinerary","departure","arrival","transfer","connection","platform","terminal","luggage","baggage","accommodation","lodging","hostel","motel","reception","checkin","checkout","vacancy","fare","route","detour","traffic","intersection","crosswalk","sidewalk","pavement","neighborhood","suburb","downtown","outskirts","landmark","entrance","exit","hallway","corridor","stairwell","elevator","escalator","doorway","doorbell","doormat","windowsill","balcony","porch","patio","driveway","garage","attic","basement","cellar","pantry","laundry","appliance","dishwasher","freezer","kettle","toaster","blender","detergent","sponge","dustpan","toolbox","workbench","screwdriver","wrench","pliers","ladder","fence","mailbox","countertop","wardrobe","cupboard","pillowcase","mattress","duvet","radiator","boiler","faucet","drain","outlet","socket","extensioncord","lightbulb","smokealarm","firealarm","thermostat","ventilation","recycling","garbage","waste","landlord","tenant","lease","deposit","mortgage","utility","electricity","heating","cooling","plumbing","repair","contractor","caretaker","janitor","neighbor","community","resident","citizen","volunteer","charity","donation","shelter","clinic","pharmacy","prescription","dosage","treatment","therapy","checkup","symptom","diagnosis","recovery","infection","inflammation","swelling","bruise","fracture","allergy","appetite","nausea","dizziness","fatigue","stamina","fitness","wellbeing","hygiene","nutrition","hydration","exercise","stretching","breathing","heartbeat","pulse","temperature","pressure","weight","height","waist","shoulder","elbow","wrist","thumb","palm","knee","ankle","heel","toe","throat","tongue","eyelid","eyebrow","forehead","chin","jaw","cheek","chest","spine","muscle","joint","bone","skin","scar","wound"],
+            verb:["allocate","anticipate","appreciate","assert","assess","categorize","cite","collaborate","compile","concentrate","coordinate","deduce","demonstrate","differentiate","elaborate","evaluate","exaggerate","forecast","highlight","illustrate","indicate","interpret","justify","misinterpret","misread","mishear","outline","paraphrase","predict","prioritize","quote","reconsider","rephrase","revise","specify","summarize","underline","validate","verify","acknowledge","authorize","confirm","consult","contribute","delegate","document","estimate","facilitate","implement","inspect","maintain","monitor","notify","organize","participate","postpone","process","recommend","register","schedule","supervise","update","archive","attach","bookmark","browse","configure","connect","disconnect","download","filter","forward","import","install","log","merge","mute","navigate","preview","refresh","rename","reset","restore","scan","scroll","select","stream","sync","upload","zoom","checkin","checkout","commute","detour","escort","reserve","transfer","unpack","vacate","ventilate","disinfect","hydrate","medicate","stretch","swallow","tremble","bandage","diagnose","prescribe","recover","relieve","worsen","bruise","fracture","sprain","itch","swell","sniff","sweat","yawn","blink","gaze","glance","gesture","grin","mutter","murmur","nod","peer","peek","shrug","smirk","stammer","whisper","wink"],
+            adjective:["accessible","accountable","adaptable","affordable","alert","appreciative","assertive","available","capable","compatible","confidential","convenient","credible","dependable","efficient","flexible","hospitable","independent","inconvenient","mature","motivated","optimistic","punctual","resourceful","reliable","sensitive","stable","suitable","transparent","vulnerable","accurate","brief","coherent","courteous","fluent","formal","informal","neutral","objective","precise","relevant","specific","subjective","ambiguous","misleading","exaggerated","understated","explicit","implicit","contextual","comparative","analytical","descriptive","persuasive","responsive","receptive","dismissive","attentive","distracted","focused","decisive","indecisive","credible","plausible","implausible","consistent","inconsistent","valid","invalid","editable","searchable","downloadable","uploadable","printable","archived","outdated","updated","pending","secure","insecure","wireless","portable","digital","electronic","automatic","manual","residential","suburban","urban","vacant","furnished","unfurnished","ventilated","recyclable","damaged","repaired","swollen","infected","allergic","nauseous","feverish","rested","recovering"],
+            adverb:["accurately","assertively","attentively","briefly","coherently","courteously","fluently","formally","informally","neutrally","objectively","precisely","relevantly","specifically","subjectively","ambiguously","explicitly","implicitly","contextually","comparatively","analytically","descriptively","persuasively","responsively","receptively","dismissively","decisively","consistently","inconsistently","securely","wirelessly","digitally","automatically","manually","conveniently","efficiently","reliably","transparently","optimistically","punctually","resourcefully","sensitively","temporarily","permanently","currently","recently","previously","eventually","gradually","immediately","regularly","occasionally","frequently","rarely","constantly","locally","remotely","internationally","professionally","socially","emotionally","physically","mentally"]
+          };
+
+          const chosen=[];
+          for(const [pos,lemmas] of Object.entries(groups)){
+            for(const raw of lemmas){
+              const lemma=String(raw).toLowerCase();
+              const key=lemma+":"+pos;
+              if(!V.byKey[key]&&!chosen.some(e=>e.lemma===lemma&&e.pos===pos)){
+                chosen.push({lemma,pos,tags:["conversation","practical","work","technology","daily","batch078"]});
+                if(chosen.length===200) break;
+              }
+            }
+            if(chosen.length===200) break;
+          }
+          if(chosen.length<200) throw new Error("Only "+chosen.length+" unique candidates available");
+          const byPos={};for(const e of chosen)(byPos[e.pos]||(byPos[e.pos]=[])).push(e.lemma);
+          const lines=[
+            '(() => {','  "use strict";',
+            '  const V = window.HMW?.Dialogue?.Vocabulary;',
+            '  if (!V) throw new Error("Vocabulary registry must load first.");','',
+            '  // Practical communication, work, technology and daily-life vocabulary.',
+            '  const words = '+JSON.stringify(byPos,null,4).replace(/^/gm,'  ')+';','',
+            '  const entries = [];',
+            '  for (const [pos, lemmas] of Object.entries(words)) {',
+            '    for (const lemma of lemmas) {',
+            '      entries.push({ lemma, pos, tags: ["conversation","practical","work","technology","daily","batch078"] });',
+            '    }','  }','',
+            '  V.register(entries);','})();',''
+          ];
+          const out=path.join(lang,'vocabulary-078-practical-work-tech.js');
+          fs.writeFileSync(out,lines.join('\n'));
+          for(const e of chosen)V.register([e]);
+          const result={added:chosen.length,uniqueAfter:V.entries.length,remainingTo5000:Math.max(0,5000-V.entries.length),byPos:Object.fromEntries(Object.entries(byPos).map(([k,v])=>[k,v.length]))};
+          console.log('AUDIT_RESULT '+JSON.stringify(result));
+          cp.execSync('git config user.name "github-actions[bot]"');
+          cp.execSync('git config user.email "41898282+github-actions[bot]@users.noreply.github.com"');
+          cp.execSync('git add HMW/js/dialogue/language/vocabulary-078-practical-work-tech.js');
+          cp.execSync('git commit -m "Add vocabulary batch 078"');
+          cp.execSync('git push');
+          NODE
