@@ -1,0 +1,62 @@
+name: HMW Vocabulary Audit
+on:
+  push:
+    paths:
+      - '.github/workflows/hmw-vocab-audit.yml'
+  workflow_dispatch:
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Audit vocabulary registry
+        run: |
+          node <<'NODE'
+          const fs = require('fs');
+          const path = require('path');
+          const vm = require('vm');
+          const dir = path.join(process.cwd(), 'HMW/js/dialogue/language');
+          const context = { console };
+          context.window = context;
+          context.HMW = {};
+          vm.createContext(context);
+          vm.runInContext(fs.readFileSync(path.join(dir,'vocabulary-registry.js'),'utf8'), context, {filename:'vocabulary-registry.js'});
+          const V = context.HMW.Dialogue.Vocabulary;
+          let attempts = 0;
+          const orig = V.register.bind(V);
+          V.register = function(entries = []) {
+            for (const e of entries) if (e && e.lemma) attempts++;
+            return orig(entries);
+          };
+          const files = fs.readdirSync(dir)
+            .filter(f => {
+              const m = f.match(/^vocabulary-(\d{3}).*\.js$/);
+              if (!m) return false;
+              const n = Number(m[1]);
+              return n >= 1 && n <= 74;
+            })
+            .sort((a,b)=>Number(a.match(/(\d{3})/)[1])-Number(b.match(/(\d{3})/)[1]));
+          const errors = [];
+          for (const f of files) {
+            try {
+              vm.runInContext(fs.readFileSync(path.join(dir,f),'utf8'), context, {filename:f});
+            } catch (e) {
+              errors.push({file:f,error:String(e && e.stack || e)});
+            }
+          }
+          const byPos = {};
+          for (const e of V.entries) byPos[e.pos] = (byPos[e.pos] || 0) + 1;
+          const result = {
+            files: files.length,
+            attempts,
+            uniqueLemmaPos: V.entries.length,
+            duplicatesReplaced: attempts - V.entries.length,
+            byPos,
+            errors
+          };
+          console.log('AUDIT_RESULT ' + JSON.stringify(result));
+          if (errors.length) process.exitCode = 1;
+          NODE
