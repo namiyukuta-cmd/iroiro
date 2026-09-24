@@ -59,6 +59,36 @@
     return Number.isFinite(limit) ? found.slice(0, limit) : found;
   };
 
+  const CONFLICT_GROUPS = [
+    ["AFFIRM_LOVE","DENY_LOVE"],
+    ["DENY_BETRAYAL","ADMIT_BETRAYAL"],
+    ["ACCEPT_DISTANCE","REFUSE_DISTANCE"],
+    ["AGREE_REQUEST","DECLINE_REQUEST"],
+    ["ACCEPT_CONTACT","DECLINE_CONTACT"],
+    ["GRANT_PERMISSION","DENY_PERMISSION"],
+    ["ACCEPT_ACTION_REQUEST","DECLINE_ACTION_REQUEST"],
+    ["ACCEPT_INVITATION","DECLINE_INVITATION"],
+    ["ACCEPT_SUGGESTION","DECLINE_SUGGESTION"],
+    ["CONFIRM_POSSESSION","DENY_POSSESSION"],
+    ["CONFIRM_CAPABILITY","DENY_CAPABILITY"],
+    ["CONFIRM_AVAILABLE","DENY_AVAILABLE"],
+    ["CONFIRM_KNOWLEDGE","DENY_KNOWLEDGE"],
+    ["CONFIRM_FACT","DENY_FACT"],
+    ["EXPRESS_CERTAINTY","EXPRESS_UNCERTAINTY"],
+    ["STATE_SLEEP_STATUS_GOOD","STATE_SLEEP_STATUS_BAD"],
+    ["STATE_FOOD_STATUS_EATEN","STATE_FOOD_STATUS_NOT_EATEN"]
+  ];
+
+  const removeConflicts = source => {
+    let out = [...source];
+    for (const group of CONFLICT_GROUPS) {
+      const first = out.find(id => group.includes(id));
+      if (!first) continue;
+      out = out.filter(id => !group.includes(id) || id === first);
+    }
+    return out;
+  };
+
   HMW.Dialogue.selectResponseMeanings = function selectResponseMeanings(
     meaningIds = [],
     {
@@ -66,7 +96,7 @@
       boundaryActive = false
     } = {}
   ) {
-    let ordered = [...new Set((meaningIds || []).filter(Boolean))];
+    let ordered = removeConflicts([...new Set((meaningIds || []).filter(Boolean))]);
 
     const hasSpecificAnswer = ordered.some(id => DIRECT_ANSWER.has(id));
     const hasSpecificRequestResponse = ordered.some(id => REQUEST_RESPONSE.has(id));
