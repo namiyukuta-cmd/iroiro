@@ -183,18 +183,26 @@
     if (w.lexicalTargetAll && !hasAll(a.lexicalTargets, w.lexicalTargetAll)) return false;
 
     for (const [key,min] of Object.entries(w.emotionMin || {})) {
-      if (num(a.emotions?.[key]) < Number(min)) return false;
+      const value = a.emotions?.[key];
+      if (!Number.isFinite(Number(value)) || Number(value) < Number(min)) return false;
     }
     for (const [key,max] of Object.entries(w.emotionMax || {})) {
-      if (num(a.emotions?.[key]) > Number(max)) return false;
+      const value = a.emotions?.[key];
+      if (!Number.isFinite(Number(value)) || Number(value) > Number(max)) return false;
     }
+    if (w.emotionPresent && !arr(w.emotionPresent).every(path => hasValueAtPath(a.emotions || {}, path))) return false;
+    if (w.emotionAbsent && !arr(w.emotionAbsent).every(path => !hasValueAtPath(a.emotions || {}, path))) return false;
 
     for (const [key,min] of Object.entries(w.toneMin || {})) {
-      if (num(getToneValue(a.tone, key)) < Number(min)) return false;
+      const value = getToneValue(a.tone, key);
+      if (!Number.isFinite(Number(value)) || Number(value) < Number(min)) return false;
     }
     for (const [key,max] of Object.entries(w.toneMax || {})) {
-      if (num(getToneValue(a.tone, key)) > Number(max)) return false;
+      const value = getToneValue(a.tone, key);
+      if (!Number.isFinite(Number(value)) || Number(value) > Number(max)) return false;
     }
+    if (w.tonePresent && !arr(w.tonePresent).every(path => hasValueAtPath(a.tone || {}, path))) return false;
+    if (w.toneAbsent && !arr(w.toneAbsent).every(path => !hasValueAtPath(a.tone || {}, path))) return false;
     for (const [key,expected] of Object.entries(w.toneEq || {})) {
       const value = a.tone?.[key];
       if (Array.isArray(expected)) {
