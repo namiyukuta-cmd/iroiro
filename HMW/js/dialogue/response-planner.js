@@ -258,7 +258,19 @@
     if (has(a.intents, "report_condition")) {
       if (has(a.focusConcepts, "food") && characterPolicy.canOfferFood === true) add(meaningIds, "OFFER_FOOD");
       if (has(a.focusConcepts, "water") && characterPolicy.canOfferWater === true) add(meaningIds, "OFFER_DRINK");
-      if (has(a.focusConcepts, "health")) add(meaningIds, "ASK_IF_OKAY");
+      if (has(a.focusConcepts, "health")) {
+        const positivity = Number(a.tone?.positivity);
+        const hesitation = Number(a.tone?.hesitation);
+        if (
+          Number.isFinite(positivity) &&
+          positivity >= 65 &&
+          (!Number.isFinite(hesitation) || hesitation <= 35)
+        ) {
+          add(meaningIds, "EXPRESS_RELIEF");
+        } else {
+          add(meaningIds, "ASK_IF_OKAY");
+        }
+      }
       reasons.push("condition_report");
     }
 
