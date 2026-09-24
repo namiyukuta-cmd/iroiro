@@ -25,6 +25,7 @@
       "ask_thirst","ask_tiredness","offer_company","offer_contact","request_contact",
       "ask_permission_enter","ask_permission_wait","ask_return_time","confirm_arrival",
       "confirm_departure","express_disappointment","express_hope","express_pride",
+      "ask_possession","ask_capability","ask_availability","ask_quantity",
       "refuse","agree","report_condition","report_event","state_plan","state_preference"
     ],
 
@@ -48,6 +49,20 @@
       "question","accusation","request","boundary","report","preference","plan"
     ],
 
+    questionKinds: [
+      "generic","where","when","reason","possession","capability","availability",
+      "plan","preference","quantity","health","sleep","food","home","work","money"
+    ],
+
+    questionShape: {
+      kind: "questionKindsのいずれか",
+      concept: "質問対象の概念",
+      target: "尋ねている物・対象。NPC側の事実は入れない",
+      action: "できるか尋ねている行動。必要な場合のみ",
+      requestedField: "currentLocation/returnTime等、JS側で読む事実フィールド",
+      text: "主人公原文の該当部分"
+    },
+
     certainty: ["low","medium","high","explicit"],
 
     rule: [
@@ -57,7 +72,9 @@
       "主人公が報告した出来事はspeaker_factとして扱えるが、NPCの未確認事実へ拡張しない。",
       "明示された境界はboundariesへ別枠で入れる。",
       "原文にない主人公の心理・承諾・行動を追加しない。",
-      "主人公のplanやpreferenceをNPC側のplanやpreferenceへコピーしない。"
+      "主人公のplanやpreferenceをNPC側のplanやpreferenceへコピーしない。",
+      "questionsには主人公が何を尋ねたかだけを入れ、NPCの答えや事実をAIが補完しない。",
+      "NPCの場所・所持品・能力・予定・好み・状態はcharacterFactsからJSが決める。"
     ]
   };
 })();
