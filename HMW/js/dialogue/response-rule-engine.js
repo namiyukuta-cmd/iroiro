@@ -337,7 +337,21 @@
     const matchedRuleIds = [];
     const slotOverridesByMeaning = {};
     const suppressedMeaningIds = new Set();
-    const preferredMeaningIds = [];
+    const preferredMeaningMeta = new Map();
+    let preferredSequence = 0;
+
+    const rulePreferenceRank = rule => {
+      if (Number.isFinite(Number(rule.preferRank))) return Number(rule.preferRank);
+      const qIndex = rule.when?.questionAt?.index;
+      if (Number.isInteger(Number(qIndex)) && Number(qIndex) >= 0) return Number(qIndex);
+      if (rule.when?.primaryQuestionAny) return 0;
+      if (rule.when?.secondaryQuestionAny) return 1;
+      const cIndex = rule.when?.claimAt?.index;
+      if (Number.isInteger(Number(cIndex)) && Number(cIndex) >= 0) return 100 + Number(cIndex);
+      if (rule.when?.primaryClaimAny) return 100;
+      if (rule.when?.secondaryClaimAny) return 101;
+      return 500;
+    };
 
     for (const rule of rules) {
       if (!matches(rule, ctx)) continue;
@@ -348,23 +362,25 @@
         suppressedMeaningIds.add(id);
         const index = meaningIds.indexOf(id);
         if (index >= 0) meaningIds.splice(index, 1);
-        const preferredIndex = preferredMeaningIds.indexOf(id);
-        if (preferredIndex >= 0) preferredMeaningIds.splice(preferredIndex, 1);
+        preferredMeaningMeta.delete(id);
       }
 
       for (const id of arr(rule.meanings)) {
         if (suppressedMeaningIds.has(id)) continue;
         if (!meaningIds.includes(id)) meaningIds.push(id);
         if (
-          (
-            rule.primary === true ||
-            rule.prefer === true ||
-            rule.when?.primaryQuestionAny ||
-            rule.when?.primaryClaimAny
-          ) &&
-          !preferredMeaningIds.includes(id)
+          rule.primary === true ||
+          rule.prefer === true ||
+          rule.when?.primaryQuestionAny ||
+          rule.when?.primaryClaimAny ||
+          rule.when?.questionAt ||
+          rule.when?.claimAt
         ) {
-          preferredMeaningIds.push(id);
+          const rank = rulePreferenceRank(rule);
+          const existing = preferredMeaningMeta.get(id);
+          if (!existing || rank < existing.rank) {
+            preferredMeaningMeta.set(id, { rank, sequence: preferredSequence++ });
+          }
         }
       }
       if (rule.slots && typeof rule.slots === "object") {
@@ -384,7 +400,10 @@
       matchedRuleIds,
       slotOverridesByMeaning,
       suppressedMeaningIds:[...suppressedMeaningIds],
-      preferredMeaningIds: preferredMeaningIds.filter(id => !suppressedMeaningIds.has(id))
+      preferredMeaningIds: [...preferredMeaningMeta.entries()]
+        .filter(([id]) => !suppressedMeaningIds.has(id))
+        .sort((a,b) => a[1].rank - b[1].rank || a[1].sequence - b[1].sequence)
+        .map(([id]) => id)
     };
   };
 })();
