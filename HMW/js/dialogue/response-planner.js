@@ -12,7 +12,9 @@
     analysis = {},
     characterFacts = {},
     characterPolicy = {},
-    psychology = {}
+    psychology = {},
+    relationship = {},
+    recentMeaningIds = []
   } = {}) {
     const a = HMW.Dialogue.normalizeInputAnalysis
       ? HMW.Dialogue.normalizeInputAnalysis(analysis)
@@ -938,7 +940,9 @@
             analysis: a,
             characterFacts,
             characterPolicy,
-            psychology
+            psychology,
+            relationship,
+            recentMeaningIds
           })
         : null;
 
@@ -972,6 +976,7 @@
       slotOverridesByMeaning,
       claimInterpretation: claimInfo,
       matchedResponseRuleIds: rulePlan?.matchedRuleIds || [],
+      relationship,
       analysis: a
     };
   };
