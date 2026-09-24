@@ -1,0 +1,148 @@
+name: Audit HMW response rules 015
+on:
+  push:
+    paths:
+      - '.github/workflows/hmw-audit-response-rules-015.yml'
+permissions:
+  contents: read
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Audit response rules
+        run: |
+          node <<'NODE'
+          const fs=require('fs'),path=require('path'),vm=require('vm');
+          const root=process.cwd();
+          const ctx={console};ctx.window=ctx;ctx.HMW={};vm.createContext(ctx);
+          const run=p=>vm.runInContext(fs.readFileSync(path.join(root,p),'utf8'),ctx,{filename:p});
+          const files=[
+            'HMW/js/dialogue/dialogue-input.js',
+            'HMW/js/dialogue/analysis-schema.js',
+            'HMW/js/dialogue/claim-rules.js',
+            'HMW/js/dialogue/dialogue-meanings.js',
+            'HMW/js/dialogue/language/lexical-target-rules.js',
+            'HMW/js/dialogue/response-rule-engine.js'
+          ];
+          for(let i=1;i<=15;i++){
+            const n=String(i).padStart(3,'0');
+            const found=fs.readdirSync(path.join(root,'HMW/js/dialogue'))
+              .find(name=>name.startsWith('response-rules-'+n+'-')&&name.endsWith('.js'));
+            if(!found) throw new Error('missing response rules file '+n);
+            files.push('HMW/js/dialogue/'+found);
+          }
+          files.push(
+            'HMW/js/dialogue/response-planner.js',
+            'HMW/js/dialogue/response-priority.js',
+            'HMW/js/dialogue/response-selection.js',
+            'HMW/js/dialogue/response-history.js',
+            'HMW/js/dialogue/dialogue-pipeline.js'
+          );
+          files.forEach(run);
+
+          const D=ctx.HMW.Dialogue;
+          const rules=D.RESPONSE_RULES||[];
+          const ids=rules.map(r=>r.id);
+          const meanings=D.MEANINGS||{};
+          const dupIds=ids.filter((id,i)=>ids.indexOf(id)!==i);
+          const missingMeaningIds=[...new Set(rules.flatMap(r=>r.meanings||[]).filter(id=>!meanings[id]))];
+
+          const cases=[
+            {
+              name:'missing_context',
+              analysis:{intents:['report_event']},
+              facts:{},policy:{},psych:{},
+              relationship:{stage:'friend',familiarity:60,trust:60,goodwill:60,desire:20,conscience:60,malice:0,flags:{}},
+              context:{},recent:[]
+            },
+            {
+              name:'private_partner_reassure',
+              analysis:{intents:['request_reassurance'],focusConcepts:['relationship']},
+              facts:{},policy:{},psych:{care:60},
+              relationship:{stage:'partner',familiarity:90,trust:85,goodwill:90,desire:70,conscience:80,malice:0,flags:{}},
+              context:{privacy:'private',alone:true,conversationPhase:'ongoing'},recent:[]
+            },
+            {
+              name:'public_trust_broken',
+              analysis:{focusConcepts:['trust','relationship']},
+              facts:{},policy:{},psych:{},
+              relationship:{stage:'partner',familiarity:90,trust:30,goodwill:70,desire:40,conscience:80,malice:0,flags:{trustBroken:true}},
+              context:{privacy:'public',alone:false},recent:[]
+            },
+            {
+              name:'danger_boundary',
+              analysis:{boundaries:['do_not_touch'],emotions:{fear:70}},
+              facts:{},policy:{},psych:{},
+              relationship:{stage:'partner',familiarity:90,trust:90,goodwill:90,desire:90,conscience:80,malice:0,flags:{}},
+              context:{dangerLevel:90,urgency:90,privacy:'private'},recent:[]
+            },
+            {
+              name:'cannot_talk',
+              analysis:{intents:['ask_to_talk']},
+              facts:{},policy:{willingToTalk:true},psych:{},
+              relationship:{stage:'close',familiarity:80,trust:80,goodwill:80,desire:30,conscience:70,malice:0,flags:{}},
+              context:{canTalkFreely:false,privacy:'public'},recent:[]
+            },
+            {
+              name:'home_food',
+              analysis:{intents:['report_condition'],focusConcepts:['food','hunger']},
+              facts:{},policy:{canOfferFood:true},psych:{care:60},
+              relationship:{stage:'friend',familiarity:70,trust:70,goodwill:80,desire:20,conscience:70,malice:0,flags:{}},
+              context:{locationType:'home',privacy:'private',urgency:50},recent:[]
+            }
+          ];
+
+          const results=cases.map(c=>{
+            const plan=D.planResponse({
+              analysis:c.analysis,
+              characterFacts:c.facts,
+              characterPolicy:c.policy,
+              psychology:c.psych,
+              relationship:c.relationship,
+              conversationContext:c.context,
+              recentMeaningIds:c.recent
+            });
+            const prioritized=D.prioritizeResponseMeanings(plan.meaningIds);
+            const selected=D.selectResponseMeanings(prioritized,{boundaryActive:plan.boundaryActive,maxMeanings:5});
+            return {name:c.name,meaningIds:plan.meaningIds,matchedRuleIds:plan.matchedResponseRuleIds,boundaryActive:plan.boundaryActive,selected,context:plan.conversationContext};
+          });
+
+          const pipelineResult=D.runDialoguePipeline({
+            analysis:{intents:['request_reassurance'],focusConcepts:['relationship']},
+            characterFacts:{},
+            characterPolicy:{},
+            psychology:{care:60},
+            relationship:{stage:'partner',familiarity:90,trust:85,goodwill:90,desire:70,conscience:80,malice:0,flags:{}},
+            conversationContext:{privacy:'private',alone:true},
+            recentMeaningIds:[]
+          });
+
+          const checks={
+            ruleCount:rules.length===1500,
+            uniqueRuleIds:new Set(ids).size===1500,
+            noMissingMeanings:missingMeaningIds.length===0,
+            missingContextNoNumericLeak:
+              !results[0].matchedRuleIds.some(id=>['R1427_DANGER_LOW_RELIEF','R1434_URGENCY_LOW_REPORT'].includes(id)),
+            privatePartner:results[1].matchedRuleIds.includes('R1481_PRIVATE_PARTNER_REASSURE')&&results[1].meaningIds.includes('EXPRESS_CARE'),
+            publicTrustBroken:results[2].matchedRuleIds.includes('R1484_PUBLIC_TRUST_BROKEN_DELAY')&&results[2].meaningIds.includes('REQUEST_TIME'),
+            dangerBoundary:results[3].matchedRuleIds.includes('R1499_DANGER_BOUNDARY_ALWAYS')&&results[3].selected.includes('RESPECT_BOUNDARY'),
+            cannotTalk:results[4].matchedRuleIds.includes('R1414_CANNOT_TALK_FREELY')&&results[4].meaningIds.includes('DECLINE_REQUEST'),
+            homeFood:results[5].matchedRuleIds.includes('R1463_HOME_FOOD')&&results[5].meaningIds.includes('OFFER_FOOD'),
+            pipelineContext:pipelineResult.plan.conversationContext?.privacy==='private'&&pipelineResult.plan.matchedResponseRuleIds.includes('R1481_PRIVATE_PARTNER_REASSURE')
+          };
+
+          console.log('AUDIT_RESULT '+JSON.stringify({
+            ruleCount:rules.length,
+            uniqueRuleIds:new Set(ids).size,
+            dupIds,
+            missingMeaningIds,
+            checks,
+            results,
+            pipeline:{selected:pipelineResult.plan.selectedMeaningIds,matchedRuleIds:pipelineResult.plan.matchedResponseRuleIds,context:pipelineResult.plan.conversationContext}
+          }));
+          if(Object.values(checks).some(v=>v!==true)) process.exit(1);
+          NODE
