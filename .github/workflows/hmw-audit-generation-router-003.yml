@@ -63,6 +63,12 @@ jobs:
           const fixedOnly=noRouted.filter(id=>(specs[id]?.candidates||[]).some(c=>c.surfaceOverride));
           const noSpec=noRouted.filter(id=>!specs[id]);
 
+          const tagCounts={};
+          for(const entry of D.Vocabulary?.entries||[]){
+            for(const tag of entry.tags||[]) tagCounts[tag]=(tagCounts[tag]||0)+1;
+          }
+          const topTags=Object.entries(tagCounts).sort((a,b)=>b[1]-a[1]).slice(0,120);
+
           console.log('AUDIT_RESULT '+JSON.stringify({
             vocabularyCount:D.Vocabulary?.entries?.length||0,
             patternCount:allPatternIds.length,
@@ -78,6 +84,7 @@ jobs:
             unusedPatternCount:allPatternIds.length-usedPatterns.size,
             dynamicEnglishCount:dynamicEnglish.size,
             usedChosenWordCount:usedWords.size,
+            topTags,
             weakest:Object.entries(perMeaning).sort((a,b)=>a[1].variants-b[1].variants).slice(0,40)
           }));
           NODE
