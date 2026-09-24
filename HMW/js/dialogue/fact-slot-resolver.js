@@ -82,6 +82,7 @@
       set("STATE_AVAILABLE_TIME", {
         SUBJECT: "I",
         BE: "am",
+        AVAILABILITY: "available",
         TIME: text(characterFacts.availableTime)
       });
     }
