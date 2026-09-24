@@ -8,26 +8,26 @@
     R.push({ id, priority, when, meanings, reason });
 
   // Exact action-specific permission/request/invitation/suggestion rules.
-  add("R501_PERMISSION_ENTER_ALLOW",770,{questionKindAny:["permission"],questionActionAny:["enter"],policyEq:{"permissions.enter":true},boundaryNone:["do_not_enter"]},["GRANT_PERMISSION"],"permission_enter_allow");
-  add("R502_PERMISSION_ENTER_DENY",790,{questionKindAny:["permission"],questionActionAny:["enter"],policyEq:{"permissions.enter":false}},["DENY_PERMISSION"],"permission_enter_deny");
-  add("R503_PERMISSION_WAIT_ALLOW",760,{questionKindAny:["permission"],questionActionAny:["wait"],policyEq:{"permissions.wait":true},boundaryNone:["do_not_wait"]},["GRANT_PERMISSION"],"permission_wait_allow");
-  add("R504_PERMISSION_WAIT_DENY",780,{questionKindAny:["permission"],questionActionAny:["wait"],policyEq:{"permissions.wait":false}},["DENY_PERMISSION"],"permission_wait_deny");
-  add("R505_PERMISSION_VISIT_ALLOW",760,{questionKindAny:["permission"],questionActionAny:["visit"],policyEq:{"permissions.visit":true},boundaryNone:["do_not_visit"]},["GRANT_PERMISSION"],"permission_visit_allow");
-  add("R506_PERMISSION_VISIT_DENY",780,{questionKindAny:["permission"],questionActionAny:["visit"],policyEq:{"permissions.visit":false}},["DENY_PERMISSION"],"permission_visit_deny");
-  add("R507_PERMISSION_CALL_ALLOW",750,{questionKindAny:["permission"],questionActionAny:["call"],policyEq:{"permissions.call":true},boundaryNone:["do_not_call","do_not_contact"]},["GRANT_PERMISSION"],"permission_call_allow");
-  add("R508_PERMISSION_CALL_DENY",780,{questionKindAny:["permission"],questionActionAny:["call"],policyEq:{"permissions.call":false}},["DENY_PERMISSION"],"permission_call_deny");
-  add("R509_PERMISSION_MESSAGE_ALLOW",750,{questionKindAny:["permission"],questionActionAny:["message"],policyEq:{"permissions.message":true},boundaryNone:["do_not_message","do_not_contact"]},["GRANT_PERMISSION"],"permission_message_allow");
-  add("R510_PERMISSION_MESSAGE_DENY",780,{questionKindAny:["permission"],questionActionAny:["message"],policyEq:{"permissions.message":false}},["DENY_PERMISSION"],"permission_message_deny");
-  add("R511_REQUEST_STAY_ALLOW",760,{questionKindAny:["request_action"],questionActionAny:["stay"],policyEq:{"requestResponses.stay":true},boundaryNone:["leave_me_alone","stop_conversation"]},["ACCEPT_ACTION_REQUEST"],"request_stay_allow");
-  add("R512_REQUEST_STAY_DENY",780,{questionKindAny:["request_action"],questionActionAny:["stay"],policyEq:{"requestResponses.stay":false}},["DECLINE_ACTION_REQUEST"],"request_stay_deny");
-  add("R513_REQUEST_FOLLOW_ALLOW",760,{questionKindAny:["request_action"],questionActionAny:["follow"],policyEq:{"requestResponses.follow":true},boundaryNone:["do_not_follow"]},["ACCEPT_ACTION_REQUEST"],"request_follow_allow");
-  add("R514_REQUEST_FOLLOW_DENY",780,{questionKindAny:["request_action"],questionActionAny:["follow"],policyEq:{"requestResponses.follow":false}},["DECLINE_ACTION_REQUEST"],"request_follow_deny");
-  add("R515_INVITE_REST_ALLOW",740,{questionKindAny:["invitation"],questionActionAny:["rest"],policyEq:{"invitationResponses.rest":true}},["ACCEPT_INVITATION"],"invite_rest_allow");
-  add("R516_INVITE_REST_DENY",740,{questionKindAny:["invitation"],questionActionAny:["rest"],policyEq:{"invitationResponses.rest":false}},["DECLINE_INVITATION"],"invite_rest_deny");
-  add("R517_INVITE_DRINK_ALLOW",740,{questionKindAny:["invitation"],questionActionAny:["drink"],policyEq:{"invitationResponses.drink":true}},["ACCEPT_INVITATION"],"invite_drink_allow");
-  add("R518_INVITE_DRINK_DENY",740,{questionKindAny:["invitation"],questionActionAny:["drink"],policyEq:{"invitationResponses.drink":false}},["DECLINE_INVITATION"],"invite_drink_deny");
-  add("R519_SUGGEST_GO_ALLOW",730,{questionKindAny:["suggestion"],questionActionAny:["go"],policyEq:{"suggestionResponses.go":true}},["ACCEPT_SUGGESTION"],"suggest_go_allow");
-  add("R520_SUGGEST_GO_DENY",730,{questionKindAny:["suggestion"],questionActionAny:["go"],policyEq:{"suggestionResponses.go":false}},["DECLINE_SUGGESTION"],"suggest_go_deny");
+  add("R501_PERMISSION_ENTER_ALLOW",770,{questionAny:{kindAny:["permission"],actionAny:["enter"]},policyEq:{"permissions.enter":true},boundaryNone:["do_not_enter"]},["GRANT_PERMISSION"],"permission_enter_allow");
+  add("R502_PERMISSION_ENTER_DENY",790,{questionAny:{kindAny:["permission"],actionAny:["enter"]},policyEq:{"permissions.enter":false}},["DENY_PERMISSION"],"permission_enter_deny");
+  add("R503_PERMISSION_WAIT_ALLOW",760,{questionAny:{kindAny:["permission"],actionAny:["wait"]},policyEq:{"permissions.wait":true},boundaryNone:["do_not_wait"]},["GRANT_PERMISSION"],"permission_wait_allow");
+  add("R504_PERMISSION_WAIT_DENY",780,{questionAny:{kindAny:["permission"],actionAny:["wait"]},policyEq:{"permissions.wait":false}},["DENY_PERMISSION"],"permission_wait_deny");
+  add("R505_PERMISSION_VISIT_ALLOW",760,{questionAny:{kindAny:["permission"],actionAny:["visit"]},policyEq:{"permissions.visit":true},boundaryNone:["do_not_visit"]},["GRANT_PERMISSION"],"permission_visit_allow");
+  add("R506_PERMISSION_VISIT_DENY",780,{questionAny:{kindAny:["permission"],actionAny:["visit"]},policyEq:{"permissions.visit":false}},["DENY_PERMISSION"],"permission_visit_deny");
+  add("R507_PERMISSION_CALL_ALLOW",750,{questionAny:{kindAny:["permission"],actionAny:["call"]},policyEq:{"permissions.call":true},boundaryNone:["do_not_call","do_not_contact"]},["GRANT_PERMISSION"],"permission_call_allow");
+  add("R508_PERMISSION_CALL_DENY",780,{questionAny:{kindAny:["permission"],actionAny:["call"]},policyEq:{"permissions.call":false}},["DENY_PERMISSION"],"permission_call_deny");
+  add("R509_PERMISSION_MESSAGE_ALLOW",750,{questionAny:{kindAny:["permission"],actionAny:["message"]},policyEq:{"permissions.message":true},boundaryNone:["do_not_message","do_not_contact"]},["GRANT_PERMISSION"],"permission_message_allow");
+  add("R510_PERMISSION_MESSAGE_DENY",780,{questionAny:{kindAny:["permission"],actionAny:["message"]},policyEq:{"permissions.message":false}},["DENY_PERMISSION"],"permission_message_deny");
+  add("R511_REQUEST_STAY_ALLOW",760,{questionAny:{kindAny:["request_action"],actionAny:["stay"]},policyEq:{"requestResponses.stay":true},boundaryNone:["leave_me_alone","stop_conversation"]},["ACCEPT_ACTION_REQUEST"],"request_stay_allow");
+  add("R512_REQUEST_STAY_DENY",780,{questionAny:{kindAny:["request_action"],actionAny:["stay"]},policyEq:{"requestResponses.stay":false}},["DECLINE_ACTION_REQUEST"],"request_stay_deny");
+  add("R513_REQUEST_FOLLOW_ALLOW",760,{questionAny:{kindAny:["request_action"],actionAny:["follow"]},policyEq:{"requestResponses.follow":true},boundaryNone:["do_not_follow"]},["ACCEPT_ACTION_REQUEST"],"request_follow_allow");
+  add("R514_REQUEST_FOLLOW_DENY",780,{questionAny:{kindAny:["request_action"],actionAny:["follow"]},policyEq:{"requestResponses.follow":false}},["DECLINE_ACTION_REQUEST"],"request_follow_deny");
+  add("R515_INVITE_REST_ALLOW",740,{questionAny:{kindAny:["invitation"],actionAny:["rest"]},policyEq:{"invitationResponses.rest":true}},["ACCEPT_INVITATION"],"invite_rest_allow");
+  add("R516_INVITE_REST_DENY",740,{questionAny:{kindAny:["invitation"],actionAny:["rest"]},policyEq:{"invitationResponses.rest":false}},["DECLINE_INVITATION"],"invite_rest_deny");
+  add("R517_INVITE_DRINK_ALLOW",740,{questionAny:{kindAny:["invitation"],actionAny:["drink"]},policyEq:{"invitationResponses.drink":true}},["ACCEPT_INVITATION"],"invite_drink_allow");
+  add("R518_INVITE_DRINK_DENY",740,{questionAny:{kindAny:["invitation"],actionAny:["drink"]},policyEq:{"invitationResponses.drink":false}},["DECLINE_INVITATION"],"invite_drink_deny");
+  add("R519_SUGGEST_GO_ALLOW",730,{questionAny:{kindAny:["suggestion"],actionAny:["go"]},policyEq:{"suggestionResponses.go":true}},["ACCEPT_SUGGESTION"],"suggest_go_allow");
+  add("R520_SUGGEST_GO_DENY",730,{questionAny:{kindAny:["suggestion"],actionAny:["go"]},policyEq:{"suggestionResponses.go":false}},["DECLINE_SUGGESTION"],"suggest_go_deny");
 
   // Question-kind nuance driven by step-4 analysis.
   add("R521_IDENTITY_QUESTION_FRIENDLY",520,{questionKindAny:["identity"],toneMin:{friendliness:60}},["EXPRESS_CARE"],"identity_question_friendly");
@@ -74,25 +74,25 @@
   add("R560_FIELD_CERTAINTY",540,{questionRequestedFieldAny:["certain","certainty"]},["ANSWER_UNKNOWN"],"requested_certainty");
 
   // Claim + context combinations without converting protagonist claims into NPC facts.
-  add("R561_CLAIM_LOVE_NEG_HURT",760,{claimConceptAny:["love","like"],claimPolarityEq:false,emotionMin:{hurt:45}},["EXPRESS_CONCERN"],"negative_love_claim_hurt");
-  add("R562_CLAIM_LOVE_NEG_FEAR",760,{claimConceptAny:["love","like"],claimPolarityEq:false,emotionMin:{fear:45}},["EXPRESS_CARE"],"negative_love_claim_fear");
-  add("R563_CLAIM_TRUST_NEG_HURT",740,{claimConceptAny:["trust"],claimPolarityEq:false,emotionMin:{hurt:45}},["EXPRESS_CONCERN"],"negative_trust_claim_hurt");
-  add("R564_CLAIM_TRUST_NEG_ANGER",740,{claimConceptAny:["trust"],claimPolarityEq:false,emotionMin:{anger:45}},["ASK_FOR_HONEST_ANSWER"],"negative_trust_claim_anger");
-  add("R565_CLAIM_BETRAYAL_FEAR",780,{claimConceptAny:["betrayal"],claimTypeAny:["speaker_fear"],emotionMin:{fear:45}},["EXPRESS_CONCERN"],"betrayal_claim_fear");
+  add("R561_CLAIM_LOVE_NEG_HURT",760,{claimAny:{conceptAny:["love","like"],polarityEq:false},emotionMin:{hurt:45}},["EXPRESS_CONCERN"],"negative_love_claim_hurt");
+  add("R562_CLAIM_LOVE_NEG_FEAR",760,{claimAny:{conceptAny:["love","like"],polarityEq:false},emotionMin:{fear:45}},["EXPRESS_CARE"],"negative_love_claim_fear");
+  add("R563_CLAIM_TRUST_NEG_HURT",740,{claimAny:{conceptAny:["trust"],polarityEq:false},emotionMin:{hurt:45}},["EXPRESS_CONCERN"],"negative_trust_claim_hurt");
+  add("R564_CLAIM_TRUST_NEG_ANGER",740,{claimAny:{conceptAny:["trust"],polarityEq:false},emotionMin:{anger:45}},["ASK_FOR_HONEST_ANSWER"],"negative_trust_claim_anger");
+  add("R565_CLAIM_BETRAYAL_FEAR",780,{claimAny:{conceptAny:["betrayal"],typeAny:["speaker_fear"]},emotionMin:{fear:45}},["EXPRESS_CONCERN"],"betrayal_claim_fear");
   add("R566_CLAIM_BETRAYAL_HURT",780,{claimConceptAny:["betrayal"],emotionMin:{hurt:45}},["EXPRESS_CONCERN"],"betrayal_claim_hurt");
   add("R567_CLAIM_ABANDON_FEAR",790,{claimConceptAny:["abandonment"],emotionMin:{fear:45}},["EXPRESS_CARE"],"abandonment_claim_fear");
   add("R568_CLAIM_ABANDON_SAD",760,{claimConceptAny:["abandonment"],emotionMin:{sadness:45}},["EXPRESS_CARE"],"abandonment_claim_sadness");
   add("R569_CLAIM_HARM_FEAR",800,{claimConceptAny:["harm"],emotionMin:{fear:45}},["REASSURE_SAFETY"],"harm_claim_fear");
   add("R570_CLAIM_RELATIONSHIP_CONFUSION",650,{claimConceptAny:["relationship"],emotionMin:{confusion:45}},["ASK_TO_TALK"],"relationship_claim_confusion");
-  add("R571_CLAIM_WORK_REPORT",520,{claimConceptAny:["work","job"],claimTypeAny:["report"]},["ACKNOWLEDGE_EVENT"],"work_claim_report");
-  add("R572_CLAIM_MONEY_REPORT",520,{claimConceptAny:["money"],claimTypeAny:["report"]},["ACKNOWLEDGE_EVENT"],"money_claim_report");
-  add("R573_CLAIM_HEALTH_REPORT",550,{claimConceptAny:["health","injury","illness"],claimTypeAny:["report"]},["ASK_IF_OKAY"],"health_claim_report");
-  add("R574_CLAIM_HOME_REPORT",520,{claimConceptAny:["home","shelter"],claimTypeAny:["report"]},["ACKNOWLEDGE_EVENT"],"home_claim_report");
-  add("R575_CLAIM_TRAVEL_PLAN",540,{claimConceptAny:["travel"],claimTypeAny:["plan"]},["STATE_PLAN"],"travel_claim_plan");
-  add("R576_CLAIM_MEETING_PLAN",540,{claimConceptAny:["meeting"],claimTypeAny:["plan"]},["STATE_PLAN"],"meeting_claim_plan");
-  add("R577_CLAIM_CONTACT_PLAN",540,{claimConceptAny:["contact"],claimTypeAny:["plan"]},["STATE_PLAN"],"contact_claim_plan");
-  add("R578_CLAIM_FOOD_PREFERENCE",530,{claimConceptAny:["food"],claimTypeAny:["preference"]},["STATE_PREFERENCE"],"food_claim_preference");
-  add("R579_CLAIM_HOME_PREFERENCE",530,{claimConceptAny:["home","place"],claimTypeAny:["preference"]},["STATE_PREFERENCE"],"home_claim_preference");
+  add("R571_CLAIM_WORK_REPORT",520,{claimAny:{conceptAny:["work","job"],typeAny:["report"]}},["ACKNOWLEDGE_EVENT"],"work_claim_report");
+  add("R572_CLAIM_MONEY_REPORT",520,{claimAny:{conceptAny:["money"],typeAny:["report"]}},["ACKNOWLEDGE_EVENT"],"money_claim_report");
+  add("R573_CLAIM_HEALTH_REPORT",550,{claimAny:{conceptAny:["health","injury","illness"],typeAny:["report"]}},["ASK_IF_OKAY"],"health_claim_report");
+  add("R574_CLAIM_HOME_REPORT",520,{claimAny:{conceptAny:["home","shelter"],typeAny:["report"]}},["ACKNOWLEDGE_EVENT"],"home_claim_report");
+  add("R575_CLAIM_TRAVEL_PLAN",540,{claimAny:{conceptAny:["travel"],typeAny:["plan"]}},["STATE_PLAN"],"travel_claim_plan");
+  add("R576_CLAIM_MEETING_PLAN",540,{claimAny:{conceptAny:["meeting"],typeAny:["plan"]}},["STATE_PLAN"],"meeting_claim_plan");
+  add("R577_CLAIM_CONTACT_PLAN",540,{claimAny:{conceptAny:["contact"],typeAny:["plan"]}},["STATE_PLAN"],"contact_claim_plan");
+  add("R578_CLAIM_FOOD_PREFERENCE",530,{claimAny:{conceptAny:["food"],typeAny:["preference"]}},["STATE_PREFERENCE"],"food_claim_preference");
+  add("R579_CLAIM_HOME_PREFERENCE",530,{claimAny:{conceptAny:["home","place"],typeAny:["preference"]}},["STATE_PREFERENCE"],"home_claim_preference");
   add("R580_CLAIM_BOUNDARY_HURT",980,{claimTypeAny:["boundary"],emotionMin:{hurt:45}},["RESPECT_BOUNDARY"],"hurt_boundary_claim");
 
   // Social/emotional combinations for more varied response selection.
