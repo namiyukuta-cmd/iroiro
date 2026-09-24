@@ -29,6 +29,7 @@
       "ask_identity","ask_origin","ask_destination","ask_opinion","ask_price",
       "ask_work_location","ask_job_role","ask_knowledge","ask_fact",
       "ask_desire","ask_need","ask_choice","ask_certainty","ask_event",
+      "ask_permission_action","request_action","invite_action","suggest_action",
       "refuse","agree","report_condition","report_event","state_plan","state_preference"
     ],
 
@@ -56,7 +57,8 @@
       "generic","where","when","reason","possession","capability","availability",
       "plan","preference","quantity","health","sleep","food","home","work","money",
       "identity","origin","destination","opinion","price","work_location","job_role",
-      "knowledge","fact","desire","need","choice","certainty","event","relationship_status","feelings"
+      "knowledge","fact","desire","need","choice","certainty","event","relationship_status","feelings",
+      "permission","request_action","invitation","suggestion"
     ],
 
     questionShape: {
