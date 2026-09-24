@@ -743,6 +743,74 @@
       reasons.push("answer_fact_question");
     }
 
+
+    if (has(a.intents, "ask_desire") || firstQuestion?.kind === "desire") {
+      const value =
+        characterFacts.currentDesire ??
+        characterFacts.desires?.[firstQuestion?.target || "default"];
+      if (value != null) {
+        add(meaningIds, "STATE_DESIRE");
+        setSlots("STATE_DESIRE", { OBJECT:String(value) });
+      } else {
+        add(meaningIds, "ANSWER_UNKNOWN");
+      }
+      reasons.push("answer_desire_question");
+    }
+
+    if (has(a.intents, "ask_need") || firstQuestion?.kind === "need") {
+      const value =
+        characterFacts.currentNeed ??
+        characterFacts.needs?.[firstQuestion?.target || "default"];
+      if (value != null) {
+        add(meaningIds, "STATE_NEED");
+        setSlots("STATE_NEED", { OBJECT:String(value) });
+      } else {
+        add(meaningIds, "ANSWER_UNKNOWN");
+      }
+      reasons.push("answer_need_question");
+    }
+
+    if (has(a.intents, "ask_choice") || firstQuestion?.kind === "choice") {
+      const value =
+        characterFacts.currentChoice ??
+        characterFacts.choices?.[firstQuestion?.target || "default"];
+      if (value != null) {
+        add(meaningIds, "STATE_CHOICE");
+        setSlots("STATE_CHOICE", { OBJECT:String(value) });
+      } else {
+        add(meaningIds, "ANSWER_UNKNOWN");
+      }
+      reasons.push("answer_choice_question");
+    }
+
+    if (has(a.intents, "ask_certainty") || firstQuestion?.kind === "certainty") {
+      const value =
+        typeof characterFacts.certain === "boolean"
+          ? characterFacts.certain
+          : characterFacts.certainty;
+      if (value === true || Number(value) >= 70) {
+        add(meaningIds, "EXPRESS_CERTAINTY");
+      } else if (value === false || (Number.isFinite(Number(value)) && Number(value) < 70)) {
+        add(meaningIds, "EXPRESS_UNCERTAINTY");
+      } else {
+        add(meaningIds, "ANSWER_UNKNOWN");
+      }
+      reasons.push("answer_certainty_question");
+    }
+
+    if (has(a.intents, "ask_event") || firstQuestion?.kind === "event") {
+      const event =
+        characterFacts.lastEvent ??
+        characterFacts.events?.[firstQuestion?.target || "latest"];
+      if (event != null) {
+        add(meaningIds, "STATE_EVENT");
+        setSlots("STATE_EVENT", { CLAUSE:String(event) });
+      } else {
+        add(meaningIds, "ANSWER_UNKNOWN");
+      }
+      reasons.push("answer_event_question");
+    }
+
     if (meaningIds.length === 0 && has(a.intents, "ask_question")) {
       add(meaningIds, "ANSWER_UNKNOWN");
       reasons.push("generic_question_fallback_unknown");
