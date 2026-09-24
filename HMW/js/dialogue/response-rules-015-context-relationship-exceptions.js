@@ -20,7 +20,7 @@
   add("R1410_PUBLIC_APOLOGY",580,{intentAny:["apologize"],contextEq:{privacy:"public"}},["EXPRESS_NEED_CLARITY"],"public_apology");
   add("R1411_ALONE_RELATIONSHIP",620,{focusAny:["relationship","love","trust"],contextEq:{alone:true}},["EXPRESS_CARE"],"relationship_topic_alone");
   add("R1412_NOT_ALONE_RELATIONSHIP",570,{focusAny:["relationship","love","trust"],contextEq:{alone:false}},["EXPRESS_NEED_CLARITY"],"relationship_topic_not_alone");
-  add("R1413_CAN_TALK_FREELY",590,{intentAny:["ask_to_talk"],contextEq:{canTalkFreely:true}},["AGREE_REQUEST"],"can_talk_freely");
+  add("R1413_CAN_TALK_FREELY",590,{intentAny:["ask_to_talk"],contextEq:{canTalkFreely:true},policyEq:{willingToTalk:true}},["AGREE_REQUEST"],"can_talk_freely");
   add("R1414_CANNOT_TALK_FREELY",650,{intentAny:["ask_to_talk"],contextEq:{canTalkFreely:false}},["DECLINE_REQUEST","REQUEST_TIME"],"cannot_talk_freely");
   add("R1415_INTERRUPTED_REPORT",600,{intentAny:["report_event","report_condition"],contextEq:{interrupted:true}},["ASK_FOR_DETAILS"],"interrupted_report");
   add("R1416_INTERRUPTED_QUESTION",600,{intentAny:["ask_question"],contextEq:{interrupted:true}},["EXPRESS_NEED_CLARITY"],"interrupted_question");
