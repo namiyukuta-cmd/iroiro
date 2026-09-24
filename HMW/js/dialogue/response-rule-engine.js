@@ -289,6 +289,7 @@
     const matchedRuleIds = [];
     const slotOverridesByMeaning = {};
     const suppressedMeaningIds = new Set();
+    const preferredMeaningIds = [];
 
     for (const rule of rules) {
       if (!matches(rule, ctx)) continue;
@@ -299,11 +300,19 @@
         suppressedMeaningIds.add(id);
         const index = meaningIds.indexOf(id);
         if (index >= 0) meaningIds.splice(index, 1);
+        const preferredIndex = preferredMeaningIds.indexOf(id);
+        if (preferredIndex >= 0) preferredMeaningIds.splice(preferredIndex, 1);
       }
 
       for (const id of arr(rule.meanings)) {
         if (suppressedMeaningIds.has(id)) continue;
         if (!meaningIds.includes(id)) meaningIds.push(id);
+        if (
+          (rule.primary === true || rule.when?.primaryQuestionAny || rule.when?.primaryClaimAny) &&
+          !preferredMeaningIds.includes(id)
+        ) {
+          preferredMeaningIds.push(id);
+        }
       }
       if (rule.slots && typeof rule.slots === "object") {
         for (const [meaningId,slots] of Object.entries(rule.slots)) {
@@ -321,7 +330,8 @@
       reasons,
       matchedRuleIds,
       slotOverridesByMeaning,
-      suppressedMeaningIds:[...suppressedMeaningIds]
+      suppressedMeaningIds:[...suppressedMeaningIds],
+      preferredMeaningIds: preferredMeaningIds.filter(id => !suppressedMeaningIds.has(id))
     };
   };
 })();
