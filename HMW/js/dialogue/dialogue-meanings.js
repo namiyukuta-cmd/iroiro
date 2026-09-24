@@ -432,6 +432,86 @@
     EXPRESS_DISAPPROVAL: {
       category: "response",
       meaningJa: "相手の案や出来事へ否定的な反応を示す"
+    },
+    ASK_PLAN: {
+      category: "daily",
+      meaningJa: "相手のこれからの予定を尋ねる"
+    },
+    ASK_PREFERENCE: {
+      category: "daily",
+      meaningJa: "相手の好みや選好を尋ねる"
+    },
+    ASK_WORK_STATUS: {
+      category: "daily",
+      meaningJa: "仕事の状況について尋ねる"
+    },
+    ASK_MONEY_STATUS: {
+      category: "daily",
+      meaningJa: "お金や支払いの余裕について尋ねる"
+    },
+    ASK_HUNGER: {
+      category: "care",
+      meaningJa: "空腹かどうか尋ねる"
+    },
+    ASK_THIRST: {
+      category: "care",
+      meaningJa: "喉が渇いているか尋ねる"
+    },
+    ASK_TIREDNESS: {
+      category: "care",
+      meaningJa: "疲れているか尋ねる"
+    },
+    OFFER_COMPANY: {
+      category: "closeness",
+      meaningJa: "一緒にいることを申し出る"
+    },
+    OFFER_CONTACT: {
+      category: "contact",
+      meaningJa: "あとで連絡することを申し出る"
+    },
+    REQUEST_CONTACT: {
+      category: "contact",
+      meaningJa: "相手に連絡してほしいと求める"
+    },
+    ACCEPT_CONTACT: {
+      category: "contact",
+      meaningJa: "連絡を続けることに同意する"
+    },
+    DECLINE_CONTACT: {
+      category: "contact",
+      meaningJa: "連絡を取ることを断る"
+    },
+    ASK_PERMISSION_ENTER: {
+      category: "boundary",
+      meaningJa: "中へ入ってよいか確認する"
+    },
+    ASK_PERMISSION_WAIT: {
+      category: "boundary",
+      meaningJa: "ここで待ってよいか確認する"
+    },
+    EXPRESS_DISAPPOINTMENT: {
+      category: "emotion",
+      meaningJa: "落胆していることを伝える"
+    },
+    EXPRESS_HOPE: {
+      category: "emotion",
+      meaningJa: "希望を持っていることを伝える"
+    },
+    EXPRESS_PRIDE: {
+      category: "positive",
+      meaningJa: "相手を誇りに思っていることを伝える"
+    },
+    CONFIRM_ARRIVAL: {
+      category: "movement",
+      meaningJa: "到着したことを伝える"
+    },
+    CONFIRM_DEPARTURE: {
+      category: "movement",
+      meaningJa: "これから出発することを伝える"
+    },
+    ASK_RETURN_TIME: {
+      category: "parting",
+      meaningJa: "いつ戻るのか尋ねる"
     }
   };
 })();
