@@ -6,7 +6,7 @@
     subtitle: '砂漠都市で暮らし、商いを始める',
 
     initialState: Object.freeze({
-      version: 10,
+      version: 11,
       day: 1,
       minutes: 360,
       temperature: 24,
@@ -17,6 +17,18 @@
       hunger: 25,
       thirst: 30,
       money: 0,
+      reputation: 0,
+      housing: Object.freeze({
+        roomPaidUntilDay: 0
+      }),
+      work: Object.freeze({
+        day: 1,
+        completed: Object.freeze([])
+      }),
+      market: Object.freeze({
+        stage: 0,
+        feePaidDay: 0
+      }),
       beggingHistory: Object.freeze({}),
       sellingHistory: Object.freeze({}),
       access: Object.freeze({
