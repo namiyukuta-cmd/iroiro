@@ -31,6 +31,18 @@
     const questions = Array.isArray(a.questions) ? a.questions : [];
     const firstQuestion = questions[0] || null;
 
+    const claimInfo = HMW.Dialogue.interpretClaims
+      ? HMW.Dialogue.interpretClaims(a.claims || [])
+      : {
+          concepts: [],
+          has: () => false,
+          hasType: () => false,
+          needsNpcFactLookup: () => false
+        };
+    const claimHas = concept =>
+      typeof claimInfo.has === "function" && claimInfo.has(concept);
+
+
     const distanceBoundary =
       has(boundaryList, "leave_me_alone") ||
       has(boundaryList, "do_not_follow") ||
@@ -61,7 +73,12 @@
       reasons.push("physical_boundary_active");
     }
 
-    if (has(a.intents, "question_affection") || has(a.focusConcepts, "love")) {
+    if (
+      has(a.intents, "question_affection") ||
+      has(a.focusConcepts, "love") ||
+      claimHas("love") ||
+      claimHas("like")
+    ) {
       if (characterFacts.lovesHeroine === true) {
         add(meaningIds, "AFFIRM_LOVE");
         if (characterFacts.choosesHeroine === true) add(meaningIds, "CONFIRM_CHOICE");
@@ -83,7 +100,8 @@
     if (
       has(a.intents, "fear_betrayal") ||
       has(a.intents, "accuse_betrayal") ||
-      has(a.focusConcepts, "betrayal")
+      has(a.focusConcepts, "betrayal") ||
+      claimHas("betrayal")
     ) {
       if (characterFacts.intendsBetrayal === true || characterFacts.hasBetrayed === true) {
         add(meaningIds, "ADMIT_BETRAYAL");
@@ -98,14 +116,23 @@
       }
     }
 
-    if (has(a.focusConcepts, "abandonment") || has(a.intents, "seek_reassurance")) {
+    if (
+      has(a.focusConcepts, "abandonment") ||
+      has(a.intents, "seek_reassurance") ||
+      claimHas("abandonment")
+    ) {
       if (characterFacts.willAbandonHeroine === false) {
         add(meaningIds, "DENY_ABANDONMENT");
         reasons.push("not_abandoning");
       }
     }
 
-    if (has(a.focusConcepts, "death") || has(a.focusConcepts, "harm")) {
+    if (
+      has(a.focusConcepts, "death") ||
+      has(a.focusConcepts, "harm") ||
+      claimHas("death") ||
+      claimHas("harm")
+    ) {
       if (characterFacts.wantsHeroineDead === false || characterFacts.wantsToHarmHeroine === false) {
         add(meaningIds, "REJECT_DEATH_WISH_CLAIM");
         reasons.push("no_death_or_harm_wish");
@@ -734,6 +761,7 @@
         : (Array.isArray(a.lexicalTargets) ? [...a.lexicalTargets] : []),
       boundaryActive: distanceBoundary || touchBoundary,
       slotOverridesByMeaning,
+      claimInterpretation: claimInfo,
       analysis: a
     };
   };
