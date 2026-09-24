@@ -225,7 +225,7 @@
 
     if (
       has(a.intents, "ask_relationship_status") ||
-      firstQuestion?.kind === "relationship_status"
+      questionOfKind("relationship_status")
     ) {
       const status = characterFacts.relationshipStatus;
       if (status != null && status !== "") {
@@ -241,7 +241,7 @@
 
     if (
       has(a.intents, "ask_feelings") ||
-      firstQuestion?.kind === "feelings"
+      questionOfKind("feelings")
     ) {
       const feelings = characterFacts.feelingsTowardHeroine;
       if (feelings != null && feelings !== "") {
@@ -355,7 +355,7 @@
       reasons.push("parting_received");
     }
 
-    if (has(a.intents, "ask_where") || firstQuestion?.kind === "where") {
+    if (has(a.intents, "ask_where") || questionOfKind("where")) {
       if (characterFacts.currentLocation) {
         add(meaningIds, "STATE_CURRENT_LOCATION");
         setSlots("STATE_CURRENT_LOCATION", {
@@ -370,8 +370,9 @@
       }
     }
 
-    if (has(a.intents, "ask_when") || firstQuestion?.kind === "when") {
-      const requestedField = firstQuestion?.requestedField;
+    if (has(a.intents, "ask_when") || questionOfKind("when")) {
+      const whenQuestion = questionOfKind("when");
+      const requestedField = whenQuestion?.requestedField;
       const timeValue =
         (requestedField && characterFacts[requestedField] != null
           ? characterFacts[requestedField]
@@ -482,7 +483,7 @@
     }
 
 
-    if (has(a.intents, "ask_plan") || firstQuestion?.kind === "plan") {
+    if (has(a.intents, "ask_plan") || questionOfKind("plan")) {
       const plan = characterFacts.currentPlan;
       if (plan && typeof plan === "object" && plan.verb) {
         add(meaningIds, "STATE_CURRENT_PLAN");
@@ -498,9 +499,10 @@
       reasons.push("answer_plan_question");
     }
 
-    if (has(a.intents, "ask_preference") || firstQuestion?.kind === "preference") {
+    if (has(a.intents, "ask_preference") || questionOfKind("preference")) {
+      const preferenceQuestion = questionOfKind("preference");
       const preference = characterFacts.currentPreference ??
-        characterFacts.preferences?.[firstQuestion?.target || ""];
+        characterFacts.preferences?.[preferenceQuestion?.target || ""];
       if (preference != null) {
         add(meaningIds, "STATE_CURRENT_PREFERENCE");
         setSlots("STATE_CURRENT_PREFERENCE", {
@@ -650,8 +652,9 @@
       reasons.push("answer_return_time_question");
     }
 
-    if (has(a.intents, "ask_possession") || firstQuestion?.kind === "possession") {
-      const target = firstQuestion?.target || a.lexicalTargets?.[0] || "it";
+    if (has(a.intents, "ask_possession") || questionOfKind("possession")) {
+      const possessionQuestion = questionOfKind("possession");
+      const target = possessionQuestion?.target || a.lexicalTargets?.[0] || "it";
       const value = characterFacts.possessions?.[target];
       if (typeof value === "number") {
         add(meaningIds, "STATE_QUANTITY");
@@ -670,8 +673,9 @@
       reasons.push("answer_possession_question");
     }
 
-    if (has(a.intents, "ask_capability") || firstQuestion?.kind === "capability") {
-      const action = firstQuestion?.action || firstQuestion?.target || a.lexicalTargets?.[0] || "do";
+    if (has(a.intents, "ask_capability") || questionOfKind("capability")) {
+      const capabilityQuestion = questionOfKind("capability");
+      const action = capabilityQuestion?.action || capabilityQuestion?.target || a.lexicalTargets?.[0] || "do";
       const value = characterFacts.capabilities?.[action];
       if (value === true) {
         add(meaningIds, "CONFIRM_CAPABILITY");
@@ -689,7 +693,7 @@
       reasons.push("answer_capability_question");
     }
 
-    if (has(a.intents, "ask_availability") || firstQuestion?.kind === "availability") {
+    if (has(a.intents, "ask_availability") || questionOfKind("availability")) {
       if (characterFacts.available === true) {
         add(meaningIds, "CONFIRM_AVAILABLE");
         setSlots("CONFIRM_AVAILABLE", {
@@ -709,8 +713,9 @@
     }
 
 
-    if (has(a.intents, "ask_identity") || firstQuestion?.kind === "identity") {
-      const field = firstQuestion?.requestedField || "name";
+    if (has(a.intents, "ask_identity") || questionOfKind("identity")) {
+      const identityQuestion = questionOfKind("identity");
+      const field = identityQuestion?.requestedField || "name";
       if (field === "role" || field === "jobRole") {
         const role = characterFacts.jobRole ?? characterFacts.role;
         if (role) {
@@ -730,7 +735,7 @@
       reasons.push("answer_identity_question");
     }
 
-    if (has(a.intents, "ask_origin") || firstQuestion?.kind === "origin") {
+    if (has(a.intents, "ask_origin") || questionOfKind("origin")) {
       const origin = characterFacts.origin;
       if (origin) {
         add(meaningIds, "STATE_ORIGIN");
@@ -739,7 +744,7 @@
       reasons.push("answer_origin_question");
     }
 
-    if (has(a.intents, "ask_destination") || firstQuestion?.kind === "destination") {
+    if (has(a.intents, "ask_destination") || questionOfKind("destination")) {
       const destination = characterFacts.destination;
       if (destination) {
         add(meaningIds, "STATE_DESTINATION");
@@ -748,8 +753,9 @@
       reasons.push("answer_destination_question");
     }
 
-    if (has(a.intents, "ask_reason") || firstQuestion?.kind === "reason") {
-      const key = firstQuestion?.target || firstQuestion?.action || "default";
+    if (has(a.intents, "ask_reason") || questionOfKind("reason")) {
+      const reasonQuestion = questionOfKind("reason");
+      const key = reasonQuestion?.target || reasonQuestion?.action || "default";
       const reason =
         characterFacts.reasons?.[key] ??
         characterFacts.reason ??
@@ -767,8 +773,9 @@
       reasons.push("answer_reason_question");
     }
 
-    if (has(a.intents, "ask_opinion") || firstQuestion?.kind === "opinion") {
-      const key = firstQuestion?.target || "default";
+    if (has(a.intents, "ask_opinion") || questionOfKind("opinion")) {
+      const opinionQuestion = questionOfKind("opinion");
+      const key = opinionQuestion?.target || "default";
       const opinion = characterFacts.opinions?.[key] ?? characterFacts.opinion;
       if (opinion) {
         add(meaningIds, "STATE_OPINION");
@@ -777,8 +784,9 @@
       reasons.push("answer_opinion_question");
     }
 
-    if (has(a.intents, "ask_price") || firstQuestion?.kind === "price") {
-      const target = firstQuestion?.target || a.lexicalTargets?.[0] || "item";
+    if (has(a.intents, "ask_price") || questionOfKind("price")) {
+      const priceQuestion = questionOfKind("price");
+      const target = priceQuestion?.target || a.lexicalTargets?.[0] || "item";
       const price = characterFacts.prices?.[target] ?? characterFacts.price;
       if (price != null) {
         add(meaningIds, "STATE_PRICE");
@@ -787,8 +795,9 @@
       reasons.push("answer_price_question");
     }
 
-    if (has(a.intents, "ask_quantity") || firstQuestion?.kind === "quantity") {
-      const target = firstQuestion?.target || a.lexicalTargets?.[0] || "item";
+    if (has(a.intents, "ask_quantity") || questionOfKind("quantity")) {
+      const quantityQuestion = questionOfKind("quantity");
+      const target = quantityQuestion?.target || a.lexicalTargets?.[0] || "item";
       const count = characterFacts.quantities?.[target] ?? characterFacts.quantity;
       if (count != null) {
         add(meaningIds, "STATE_COUNT");
@@ -800,7 +809,7 @@
       reasons.push("answer_quantity_question");
     }
 
-    if (has(a.intents, "ask_work_location") || firstQuestion?.kind === "work_location") {
+    if (has(a.intents, "ask_work_location") || questionOfKind("work_location")) {
       const workLocation = characterFacts.workLocation;
       if (workLocation) {
         add(meaningIds, "STATE_WORK_LOCATION");
@@ -809,7 +818,7 @@
       reasons.push("answer_work_location_question");
     }
 
-    if (has(a.intents, "ask_job_role") || firstQuestion?.kind === "job_role") {
+    if (has(a.intents, "ask_job_role") || questionOfKind("job_role")) {
       const jobRole = characterFacts.jobRole ?? characterFacts.role;
       if (jobRole) {
         add(meaningIds, "STATE_JOB_ROLE");
@@ -818,8 +827,9 @@
       reasons.push("answer_job_role_question");
     }
 
-    if (has(a.intents, "ask_knowledge") || firstQuestion?.kind === "knowledge") {
-      const target = firstQuestion?.target || "default";
+    if (has(a.intents, "ask_knowledge") || questionOfKind("knowledge")) {
+      const knowledgeQuestion = questionOfKind("knowledge");
+      const target = knowledgeQuestion?.target || "default";
       const knows = characterFacts.knowledge?.[target];
       if (knows === true) add(meaningIds, "CONFIRM_KNOWLEDGE");
       else if (knows === false) add(meaningIds, "DENY_KNOWLEDGE");
@@ -827,8 +837,9 @@
       reasons.push("answer_knowledge_question");
     }
 
-    if (has(a.intents, "ask_fact") || firstQuestion?.kind === "fact") {
-      const target = firstQuestion?.target || "default";
+    if (has(a.intents, "ask_fact") || questionOfKind("fact")) {
+      const factQuestion = questionOfKind("fact");
+      const target = factQuestion?.target || "default";
       const fact = characterFacts.facts?.[target];
       if (fact === true) add(meaningIds, "CONFIRM_FACT");
       else if (fact === false) add(meaningIds, "DENY_FACT");
@@ -837,10 +848,11 @@
     }
 
 
-    if (has(a.intents, "ask_desire") || firstQuestion?.kind === "desire") {
+    if (has(a.intents, "ask_desire") || questionOfKind("desire")) {
+      const desireQuestion = questionOfKind("desire");
       const value =
         characterFacts.currentDesire ??
-        characterFacts.desires?.[firstQuestion?.target || "default"];
+        characterFacts.desires?.[desireQuestion?.target || "default"];
       if (value != null) {
         add(meaningIds, "STATE_DESIRE");
         setSlots("STATE_DESIRE", { OBJECT:String(value) });
@@ -850,10 +862,11 @@
       reasons.push("answer_desire_question");
     }
 
-    if (has(a.intents, "ask_need") || firstQuestion?.kind === "need") {
+    if (has(a.intents, "ask_need") || questionOfKind("need")) {
+      const needQuestion = questionOfKind("need");
       const value =
         characterFacts.currentNeed ??
-        characterFacts.needs?.[firstQuestion?.target || "default"];
+        characterFacts.needs?.[needQuestion?.target || "default"];
       if (value != null) {
         add(meaningIds, "STATE_NEED");
         setSlots("STATE_NEED", { OBJECT:String(value) });
@@ -863,10 +876,11 @@
       reasons.push("answer_need_question");
     }
 
-    if (has(a.intents, "ask_choice") || firstQuestion?.kind === "choice") {
+    if (has(a.intents, "ask_choice") || questionOfKind("choice")) {
+      const choiceQuestion = questionOfKind("choice");
       const value =
         characterFacts.currentChoice ??
-        characterFacts.choices?.[firstQuestion?.target || "default"];
+        characterFacts.choices?.[choiceQuestion?.target || "default"];
       if (value != null) {
         add(meaningIds, "STATE_CHOICE");
         setSlots("STATE_CHOICE", { OBJECT:String(value) });
@@ -876,7 +890,7 @@
       reasons.push("answer_choice_question");
     }
 
-    if (has(a.intents, "ask_certainty") || firstQuestion?.kind === "certainty") {
+    if (has(a.intents, "ask_certainty") || questionOfKind("certainty")) {
       const value =
         typeof characterFacts.certain === "boolean"
           ? characterFacts.certain
@@ -891,10 +905,11 @@
       reasons.push("answer_certainty_question");
     }
 
-    if (has(a.intents, "ask_event") || firstQuestion?.kind === "event") {
+    if (has(a.intents, "ask_event") || questionOfKind("event")) {
+      const eventQuestion = questionOfKind("event");
       const event =
         characterFacts.lastEvent ??
-        characterFacts.events?.[firstQuestion?.target || "latest"];
+        characterFacts.events?.[eventQuestion?.target || "latest"];
       if (event != null) {
         add(meaningIds, "STATE_EVENT");
         setSlots("STATE_EVENT", { CLAUSE:String(event) });
