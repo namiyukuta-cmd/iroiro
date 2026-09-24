@@ -6,7 +6,7 @@
     subtitle: '砂漠都市で暮らし、商いを始める',
 
     initialState: Object.freeze({
-      version: 9,
+      version: 10,
       day: 1,
       minutes: 360,
       temperature: 24,
@@ -18,6 +18,7 @@
       thirst: 30,
       money: 0,
       beggingHistory: Object.freeze({}),
+      sellingHistory: Object.freeze({}),
       access: Object.freeze({
         upperArea: false
       }),
@@ -57,6 +58,19 @@
             Object.freeze({weight:4, type:'copper', minCopper:2, maxCopper:3}),
             Object.freeze({weight:1, type:'item', itemId:'food_flatbread', count:1})
           ])
+        }),
+        selling: Object.freeze({
+          stopChance: 0.34,
+          enforcement: Object.freeze({
+            startAfter: 14,
+            startAfterMinutes: 90,
+            checkChance: 0.05,
+            warningsBeforeRemoval: 2,
+            cooldownMinutes: 45,
+            forcedScene: null,
+            authority: '近くの店主',
+            reason: '通りを長く占めて商いを続けている'
+          })
         }),
         background: './asset/bg_desert_wall.jpeg',
         pickups: Object.freeze([
@@ -103,6 +117,19 @@
             Object.freeze({weight:1, type:'item', itemId:'food_flatbread', count:1})
           ])
         }),
+        selling: Object.freeze({
+          stopChance: 0.30,
+          enforcement: Object.freeze({
+            startAfter: 8,
+            startAfterMinutes: 45,
+            checkChance: 0.10,
+            warningsBeforeRemoval: 2,
+            cooldownMinutes: 60,
+            forcedScene: 'outerPoor',
+            authority: '門番',
+            reason: '門前で通行の邪魔になる'
+          })
+        }),
         background: './asset/bg_desert_wall.jpeg',
         pickups: Object.freeze([
           Object.freeze({id:'gate_wood_01', itemId:'wood', left:24, bottom:17})
@@ -140,6 +167,19 @@
             Object.freeze({weight:2, type:'copper', minCopper:5, maxCopper:5}),
             Object.freeze({weight:1, type:'item', itemId:'food_flatbread', count:1})
           ])
+        }),
+        selling: Object.freeze({
+          stopChance: 0.40,
+          enforcement: Object.freeze({
+            startAfter: 10,
+            startAfterMinutes: 60,
+            checkChance: 0.12,
+            warningsBeforeRemoval: 2,
+            cooldownMinutes: 60,
+            forcedScene: 'smallGateOutside',
+            authority: '市場の見回り',
+            reason: '市場の場所を取って商いを続けている'
+          })
         }),
         background: './asset/bg_desert_wall.jpeg',
         pickups: Object.freeze([
@@ -236,6 +276,19 @@
             Object.freeze({weight:4, type:'copper', minCopper:10, maxCopper:10}),
             Object.freeze({weight:3, type:'item', itemId:'food_flatbread', count:1})
           ])
+        }),
+        selling: Object.freeze({
+          stopChance: 0.18,
+          enforcement: Object.freeze({
+            startAfter: 4,
+            startAfterMinutes: 30,
+            checkChance: 0.18,
+            warningsBeforeRemoval: 1,
+            cooldownMinutes: 90,
+            forcedScene: 'cityCommon',
+            authority: '衛兵',
+            reason: '路上で商いを続けて目立っている'
+          })
         }),
         background: './asset/bg_desert_wall.jpeg',
         pickups: Object.freeze([
