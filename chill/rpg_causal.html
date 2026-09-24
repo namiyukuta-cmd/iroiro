@@ -1,0 +1,321 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+<meta name="theme-color" content="#f7f3e8">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
+<title>因果カードRPG</title>
+<style>
+*{box-sizing:border-box}
+html,body{
+  margin:0;width:100%;min-height:100%;background:#f7f3e8;color:#24211d;
+  font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Yu Gothic",sans-serif;
+  -webkit-text-size-adjust:100%;
+}
+button{font:inherit;color:inherit;touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+body{min-height:100dvh}
+#app{
+  width:min(100%,520px);min-height:100dvh;margin:0 auto;padding:12px 12px calc(92px + env(safe-area-inset-bottom));
+}
+.topbar{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:10px}
+.back{
+  border:1px solid #aaa;background:#fffdf8;border-radius:10px;padding:8px 10px;font-size:12px;font-weight:700
+}
+.turn{font-size:12px;color:#665f54}
+h1{font-size:21px;margin:3px 0 4px;letter-spacing:.03em}
+.sub{font-size:12px;color:#736b60;margin:0 0 12px;line-height:1.55}
+.paper{
+  background:#fffdf8;border:1px solid #cfc6b8;border-radius:14px;
+  box-shadow:0 2px 0 rgba(0,0,0,.05);padding:11px;margin-bottom:10px
+}
+.section-title{font-size:11px;font-weight:800;color:#766c60;letter-spacing:.08em;margin-bottom:8px}
+.cards{display:grid;grid-template-columns:1fr;gap:8px}
+.card{
+  position:relative;overflow:hidden;background:#fff;border:1px solid #a79e91;border-radius:12px;padding:12px 12px 11px;
+  min-height:92px;
+}
+.card::after{
+  content:"";position:absolute;right:-16px;bottom:-20px;width:52px;height:52px;border:1px solid #e2ddd4;
+  border-radius:50%;transform:rotate(-12deg)
+}
+.kind{font-size:10px;font-weight:900;color:#7d7468;margin-bottom:4px}
+.name{font-size:18px;font-weight:900;margin-bottom:5px}
+.desc{font-size:13px;line-height:1.5;color:#4d473f;min-height:20px}
+.tags{display:flex;flex-wrap:wrap;gap:4px;margin-top:8px}
+.tag,.state-chip{
+  display:inline-flex;align-items:center;border:1px solid #d5cec4;border-radius:999px;background:#faf8f3;
+  padding:3px 7px;font-size:10px;line-height:1.2
+}
+.reason{margin-top:7px;font-size:10px;line-height:1.45;color:#8b5d3b}
+.placeholder{color:#aaa;font-size:13px;display:grid;place-items:center;min-height:70px}
+.state-row{display:flex;gap:5px;flex-wrap:wrap;min-height:22px}
+.state-chip strong{margin-left:4px}
+.empty{font-size:11px;color:#958d82}
+.log{max-height:160px;overflow:auto;font-size:11px;line-height:1.55}
+.log-entry{padding:5px 0;border-bottom:1px dashed #ded7cd}
+.log-entry:last-child{border-bottom:0}
+.controls{
+  position:fixed;left:50%;bottom:0;transform:translateX(-50%);width:min(100%,520px);
+  padding:9px 12px calc(9px + env(safe-area-inset-bottom));background:rgba(247,243,232,.96);
+  border-top:1px solid #d8d0c5;backdrop-filter:blur(8px);display:grid;grid-template-columns:1fr auto;gap:8px;z-index:20
+}
+.primary{
+  min-height:54px;border:1px solid #2c2924;border-radius:13px;background:#2c2924;color:#fff;
+  font-size:16px;font-weight:900
+}
+.primary:active{transform:translateY(1px)}
+.reset{
+  min-width:72px;border:1px solid #aaa;border-radius:13px;background:#fffdf8;font-size:12px;font-weight:800
+}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:9px}
+.stat{background:#fffdf8;border:1px solid #d5cec4;border-radius:10px;padding:7px;text-align:center}
+.stat b{display:block;font-size:15px}.stat span{font-size:9px;color:#7a7267}
+.flash{animation:flash .24s ease}
+@keyframes flash{0%{transform:translateY(4px);opacity:.45}100%{transform:none;opacity:1}}
+</style>
+</head>
+<body>
+<main id="app">
+  <div class="topbar">
+    <button class="back" id="backBtn">← 戻る</button>
+    <div class="turn">探索 <b id="turnNo">0</b> 回</div>
+  </div>
+
+  <h1>因果カードRPG</h1>
+  <p class="sub">場所 → 発見 → 出来事の順で1枚ずつ引く。前に出たタグが、次のカードの出やすさを変える。</p>
+
+  <div class="stats">
+    <div class="stat"><b id="dangerStat">0</b><span>危険</span></div>
+    <div class="stat"><b id="clueStat">0</b><span>痕跡</span></div>
+    <div class="stat"><b id="lootStat">0</b><span>持ち帰り</span></div>
+  </div>
+
+  <section class="paper">
+    <div class="section-title">今回の一区画</div>
+    <div id="cards" class="cards">
+      <div class="card placeholder">「探索する」で3枚引く</div>
+    </div>
+  </section>
+
+  <section class="paper">
+    <div class="section-title">今、世界に残っている気配</div>
+    <div id="stateRow" class="state-row"><span class="empty">まだ何もない</span></div>
+  </section>
+
+  <section class="paper">
+    <div class="section-title">持ち帰ったもの</div>
+    <div id="lootRow" class="state-row"><span class="empty">まだ何もない</span></div>
+  </section>
+
+  <section class="paper">
+    <div class="section-title">因果ログ</div>
+    <div id="log" class="log"><div class="empty">探索すると、なぜそのカードが出たかを記録します。</div></div>
+  </section>
+</main>
+
+<div class="controls">
+  <button class="primary" id="drawBtn">探索する</button>
+  <button class="reset" id="resetBtn">リセット</button>
+</div>
+
+<script>
+(()=>{
+  const LABELS={
+    forest:"森",water:"水辺",ruin:"廃墟",cave:"洞窟",road:"街道",human:"人",goblin:"ゴブリン",
+    beast:"獣",blood:"血痕",danger:"危険",resource:"資源",herb:"薬草",rain:"雨",night:"夜",
+    shelter:"休息地",treasure:"宝",clue:"痕跡",trap:"罠",fire:"火",mud:"ぬかるみ"
+  };
+
+  const locationCards=[
+    {id:"forest_path",kind:"場所",name:"森の小道",desc:"木々の間を細い道が続いている。",tags:["forest"],effects:{forest:2,beast:1},affinity:{forest:3,beast:2,herb:2}},
+    {id:"riverbank",kind:"場所",name:"浅い川辺",desc:"水音が近い。石の間に何か流れ着いている。",tags:["water"],effects:{water:2,resource:1},affinity:{water:3,rain:2}},
+    {id:"ruin_edge",kind:"場所",name:"崩れた遺跡",desc:"壁だけが残り、奥は暗い。",tags:["ruin"],effects:{ruin:2,danger:1},affinity:{ruin:4,treasure:2,clue:1}},
+    {id:"old_road",kind:"場所",name:"古い街道",desc:"人の往来が途絶えた石敷きの道。",tags:["road","human"],effects:{human:1,road:2},affinity:{human:3,road:3}},
+    {id:"cave_mouth",kind:"場所",name:"洞窟の入口",desc:"冷たい空気が奥から流れてくる。",tags:["cave"],effects:{cave:2,danger:1},affinity:{cave:4,goblin:2,beast:2,ruin:1}},
+    {id:"marsh",kind:"場所",name:"ぬかるんだ湿地",desc:"足元が沈み、進むたび水が鳴る。",tags:["water","mud"],effects:{water:1,mud:2,danger:1},affinity:{rain:3,water:2}},
+    {id:"old_bridge",kind:"場所",name:"古い橋",desc:"板が何枚か抜けた橋が谷を渡っている。",tags:["road","danger"],effects:{road:1,danger:2},affinity:{road:2,danger:3,human:1}},
+    {id:"clearing",kind:"場所",name:"森の空き地",desc:"木々が途切れ、見通しが開けている。",tags:["forest"],effects:{forest:1},affinity:{forest:3,fire:2,human:1}},
+    {id:"abandoned_hut",kind:"場所",name:"捨てられた小屋",desc:"扉が半分開いたままになっている。",tags:["human","shelter"],effects:{human:2,shelter:2,clue:1},affinity:{human:3,clue:2,road:1}},
+    {id:"rocky_slope",kind:"場所",name:"岩だらけの斜面",desc:"登りにくいが、遠くまで見渡せる。",tags:["danger"],effects:{danger:1,clue:1},affinity:{danger:2,cave:2}}
+  ];
+
+  const discoveryCards=[
+    {id:"blood_trace",kind:"発見",name:"新しい血痕",desc:"まだ乾いていない。何かが近くにいる。",tags:["blood","clue"],effects:{blood:3,clue:2,danger:1},affinity:{beast:4,human:3,goblin:3,danger:2}},
+    {id:"herbs",kind:"発見",name:"薬草",desc:"使えそうな葉がまとまって生えている。",tags:["herb","resource"],effects:{herb:2,resource:2},loot:"薬草",affinity:{forest:4,water:1}},
+    {id:"goblin_tracks",kind:"発見",name:"小さな足跡",desc:"裸足に近い足跡が何度も往復している。",tags:["goblin","clue"],effects:{goblin:3,clue:2,danger:1},affinity:{goblin:5,cave:2,forest:2}},
+    {id:"broken_cart",kind:"発見",name:"壊れた荷車",desc:"車輪が外れ、荷物の一部が散らばっている。",tags:["human","clue"],effects:{human:2,clue:1,danger:1},loot:"布切れ",affinity:{road:4,human:3,goblin:1}},
+    {id:"cold_fire",kind:"発見",name:"消えた焚火",desc:"灰の下にわずかな熱が残っている。",tags:["fire","human","clue"],effects:{fire:2,human:2,clue:1},affinity:{human:3,goblin:2,shelter:2}},
+    {id:"bones",kind:"発見",name:"散らばった骨",desc:"古い骨に新しい噛み跡が混じっている。",tags:["beast","clue"],effects:{beast:3,clue:2,danger:1},affinity:{beast:5,blood:2,cave:1}},
+    {id:"small_chest",kind:"発見",name:"小さな箱",desc:"泥に半分埋まった木箱を見つけた。",tags:["treasure"],effects:{treasure:2},loot:"古い硬貨",affinity:{ruin:4,human:1}},
+    {id:"map_piece",kind:"発見",name:"破れた地図",desc:"近くの地形らしき線が描かれている。",tags:["clue"],effects:{clue:3,cave:1,ruin:1},loot:"地図の切れ端",affinity:{human:2,ruin:2,road:2}},
+    {id:"berries",kind:"発見",name:"木の実",desc:"食べられそうな実が低い枝に残っている。",tags:["resource","forest"],effects:{resource:2,forest:1},loot:"木の実",affinity:{forest:5,beast:1}},
+    {id:"iron_key",kind:"発見",name:"錆びた鍵",desc:"何の鍵かは分からない。",tags:["clue","treasure"],effects:{clue:2,treasure:1,ruin:1},loot:"錆びた鍵",affinity:{ruin:4,human:2}}
+  ];
+
+  const eventCards=[
+    {id:"wolf",kind:"出来事",name:"狼が現れる",desc:"低い唸り声とともに茂みから姿を見せた。",tags:["beast","danger"],effects:{beast:2,danger:2},affinity:{beast:5,blood:4,forest:2},loot:"獣の毛"},
+    {id:"goblin_scout",kind:"出来事",name:"ゴブリンの斥候",desc:"こちらに気づき、逃げるか迷っている。",tags:["goblin","danger"],effects:{goblin:2,danger:2,clue:1},affinity:{goblin:6,cave:2,forest:1},loot:"粗末な小袋"},
+    {id:"wounded_traveler",kind:"出来事",name:"負傷した旅人",desc:"道端で腕を押さえ、助けを求めている。",tags:["human","blood"],effects:{human:2,blood:1,clue:1},affinity:{human:5,blood:5,road:2}},
+    {id:"rain",kind:"出来事",name:"雨が降り出す",desc:"細い雨が急に強くなってきた。",tags:["rain","water"],effects:{rain:3,water:2,mud:1},affinity:{water:4,rain:3}},
+    {id:"fog",kind:"出来事",name:"霧が濃くなる",desc:"少し先までしか見えなくなる。",tags:["danger"],effects:{danger:2,clue:1},affinity:{water:2,forest:2,danger:2}},
+    {id:"rockfall",kind:"出来事",name:"小さな崩落",desc:"進路に石が落ち、別の道を探す必要がある。",tags:["danger"],effects:{danger:3,cave:1},affinity:{cave:4,danger:4}},
+    {id:"merchant",kind:"出来事",name:"行商人と出会う",desc:"荷を背負った商人がこちらへ手を上げた。",tags:["human"],effects:{human:2,danger:-1},affinity:{road:5,human:5}},
+    {id:"snare",kind:"出来事",name:"仕掛け罠",desc:"草の下に細い縄が張られている。",tags:["trap","danger"],effects:{trap:2,danger:2,goblin:1},affinity:{goblin:4,human:2,forest:2}},
+    {id:"nightfall",kind:"出来事",name:"日が暮れる",desc:"辺りが急に暗くなり、音だけが目立つ。",tags:["night","danger"],effects:{night:3,danger:1},affinity:{danger:2,beast:2,cave:1}},
+    {id:"quiet",kind:"出来事",name:"何も起きない",desc:"しばらく静かな道が続く。",tags:["shelter"],effects:{danger:-2,shelter:1},affinity:{shelter:3}}
+  ];
+
+  const state={};
+  const loot=[];
+  const log=[];
+  let turn=0;
+
+  const el={
+    cards:document.getElementById("cards"),
+    state:document.getElementById("stateRow"),
+    loot:document.getElementById("lootRow"),
+    log:document.getElementById("log"),
+    turn:document.getElementById("turnNo"),
+    danger:document.getElementById("dangerStat"),
+    clue:document.getElementById("clueStat"),
+    lootStat:document.getElementById("lootStat")
+  };
+
+  function value(k){return Math.max(0,Number(state[k]||0))}
+  function add(k,n){
+    state[k]=Math.max(0,Math.min(12,(state[k]||0)+n));
+    if(state[k]===0)delete state[k];
+  }
+
+  function decay(){
+    for(const k of Object.keys(state)){
+      if(["night","rain"].includes(k)) state[k]=Math.max(0,state[k]-1);
+      else state[k]=Math.max(0,Math.round(state[k]*0.82*10)/10);
+      if(state[k]<0.4) delete state[k];
+    }
+  }
+
+  function score(card){
+    let weight=10;
+    const reasons=[];
+    for(const [tag,mul] of Object.entries(card.affinity||{})){
+      const v=value(tag);
+      if(v>0){
+        const plus=v*mul;
+        weight+=plus;
+        if(plus>=2) reasons.push((LABELS[tag]||tag)+" "+format(v)+" → +"+format(plus));
+      }
+    }
+    if(card.id==="quiet" && value("danger")>6) weight+=8;
+    return {weight:Math.max(1,weight),reasons};
+  }
+
+  function weightedDraw(cards){
+    const scored=cards.map(card=>({card,...score(card)}));
+    const total=scored.reduce((s,x)=>s+x.weight,0);
+    let r=Math.random()*total;
+    let chosen=scored[scored.length-1];
+    for(const x of scored){
+      r-=x.weight;
+      if(r<=0){chosen=x;break}
+    }
+    return chosen;
+  }
+
+  function applyCard(card){
+    for(const [k,n] of Object.entries(card.effects||{})) add(k,n);
+    if(card.loot && !loot.includes(card.loot)) loot.push(card.loot);
+  }
+
+  function drawSection(cards){
+    const chosen=weightedDraw(cards);
+    applyCard(chosen.card);
+    return chosen;
+  }
+
+  function format(n){
+    return Number.isInteger(n)?String(n):Number(n).toFixed(1);
+  }
+
+  function cardHTML(x){
+    const c=x.card;
+    const why=x.reasons.length
+      ? "因果："+x.reasons.slice(0,3).join(" / ")
+      : "因果：基礎抽選";
+    return '<article class="card flash">'+
+      '<div class="kind">'+c.kind+'</div>'+
+      '<div class="name">'+c.name+'</div>'+
+      '<div class="desc">'+c.desc+'</div>'+
+      '<div class="tags">'+c.tags.map(t=>'<span class="tag">'+(LABELS[t]||t)+'</span>').join("")+'</div>'+
+      '<div class="reason">'+why+'</div>'+
+    '</article>';
+  }
+
+  function renderState(){
+    const entries=Object.entries(state).filter(([,v])=>v>0).sort((a,b)=>b[1]-a[1]).slice(0,14);
+    el.state.innerHTML=entries.length
+      ? entries.map(([k,v])=>'<span class="state-chip">'+(LABELS[k]||k)+' <strong>'+format(v)+'</strong></span>').join("")
+      : '<span class="empty">まだ何もない</span>';
+
+    el.loot.innerHTML=loot.length
+      ? loot.map(x=>'<span class="state-chip">'+x+'</span>').join("")
+      : '<span class="empty">まだ何もない</span>';
+
+    el.turn.textContent=turn;
+    el.danger.textContent=Math.round(value("danger"));
+    el.clue.textContent=Math.round(value("clue"));
+    el.lootStat.textContent=loot.length;
+  }
+
+  function renderLog(){
+    el.log.innerHTML=log.length
+      ? log.slice().reverse().map(x=>'<div class="log-entry">'+x+'</div>').join("")
+      : '<div class="empty">探索すると、なぜそのカードが出たかを記録します。</div>';
+  }
+
+  function explore(){
+    turn++;
+    decay();
+
+    const loc=drawSection(locationCards);
+    const disc=drawSection(discoveryCards);
+    const evt=drawSection(eventCards);
+
+    el.cards.innerHTML=cardHTML(loc)+cardHTML(disc)+cardHTML(evt);
+
+    const chain=[loc,disc,evt].map(x=>x.card.name).join(" → ");
+    const cause=[loc,disc,evt]
+      .flatMap(x=>x.reasons)
+      .filter((v,i,a)=>a.indexOf(v)===i)
+      .slice(0,4);
+
+    log.push('<b>'+turn+'回目</b>　'+chain+
+      (cause.length?'<br><span style="color:#8b5d3b">'+cause.join(" / ")+'</span>':""));
+
+    renderState();
+    renderLog();
+  }
+
+  function reset(){
+    for(const k of Object.keys(state)) delete state[k];
+    loot.length=0;log.length=0;turn=0;
+    el.cards.innerHTML='<div class="card placeholder">「探索する」で3枚引く</div>';
+    renderState();renderLog();
+  }
+
+  document.getElementById("drawBtn").addEventListener("click",explore);
+  document.getElementById("resetBtn").addEventListener("click",reset);
+  document.getElementById("backBtn").addEventListener("click",()=>location.href='chill_index.html?_nc='+Date.now());
+
+  const u=new URL(location.href);
+  if(!u.searchParams.has("_nc")){
+    u.searchParams.set("_nc",Date.now().toString());
+    location.replace(u.toString());
+  }
+})();
+</script>
+</body>
+</html>
