@@ -238,8 +238,8 @@
       if (rule.slots && typeof rule.slots === "object") {
         for (const [meaningId,slots] of Object.entries(rule.slots)) {
           slotOverridesByMeaning[meaningId] = {
-            ...(slotOverridesByMeaning[meaningId] || {}),
-            ...(slots || {})
+            ...(slots || {}),
+            ...(slotOverridesByMeaning[meaningId] || {})
           };
         }
       }
