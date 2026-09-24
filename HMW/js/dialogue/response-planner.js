@@ -54,6 +54,35 @@
       has(boundaryList, "do_not_kiss") ||
       has(boundaryList, "do_not_hug");
 
+    const actionBlockedByBoundary = action => {
+      const value = String(action || "").toLowerCase();
+      if (
+        value === "touch" &&
+        (has(boundaryList, "do_not_touch") ||
+         has(boundaryList, "do_not_hug") ||
+         has(boundaryList, "do_not_kiss"))
+      ) return true;
+      if (
+        value === "hug" &&
+        (has(boundaryList, "do_not_hug") || has(boundaryList, "do_not_touch"))
+      ) return true;
+      if (
+        value === "kiss" &&
+        (has(boundaryList, "do_not_kiss") || has(boundaryList, "do_not_touch"))
+      ) return true;
+      if (
+        (value === "call" || value === "message" || value === "contact") &&
+        (has(boundaryList, "do_not_contact") ||
+         has(boundaryList, "do_not_call") ||
+         has(boundaryList, "do_not_message"))
+      ) return true;
+      if (value === "enter" && has(boundaryList, "do_not_enter")) return true;
+      if (value === "wait" && has(boundaryList, "do_not_wait")) return true;
+      if (value === "visit" && has(boundaryList, "do_not_visit")) return true;
+      if (value === "follow" && has(boundaryList, "do_not_follow")) return true;
+      return false;
+    };
+
     if (boundaryList.length) {
       add(meaningIds, "RESPECT_BOUNDARY");
       reasons.push("explicit_boundary");
@@ -851,7 +880,10 @@
     ) {
       const action = firstQuestion?.action || firstQuestion?.target || "default";
       const value = characterPolicy.permissions?.[action];
-      if (value === true) add(meaningIds, "GRANT_PERMISSION");
+      if (actionBlockedByBoundary(action)) {
+        add(meaningIds, "DENY_PERMISSION");
+        reasons.push("permission_blocked_by_boundary");
+      } else if (value === true) add(meaningIds, "GRANT_PERMISSION");
       else if (value === false) add(meaningIds, "DENY_PERMISSION");
       else add(meaningIds, "ANSWER_UNKNOWN");
       reasons.push("answer_permission_question");
@@ -863,7 +895,10 @@
     ) {
       const action = firstQuestion?.action || firstQuestion?.target || "default";
       const value = characterPolicy.requestResponses?.[action];
-      if (value === true) add(meaningIds, "ACCEPT_ACTION_REQUEST");
+      if (actionBlockedByBoundary(action)) {
+        add(meaningIds, "DECLINE_ACTION_REQUEST");
+        reasons.push("action_request_blocked_by_boundary");
+      } else if (value === true) add(meaningIds, "ACCEPT_ACTION_REQUEST");
       else if (value === false) add(meaningIds, "DECLINE_ACTION_REQUEST");
       else add(meaningIds, "ANSWER_UNKNOWN");
       reasons.push("answer_action_request");
