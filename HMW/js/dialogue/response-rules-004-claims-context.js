@@ -8,18 +8,18 @@
     R.push({ id, priority, when, meanings, reason });
 
   // Claim interpretation from step 4: treat claims as claims, never as NPC facts.
-  add("R301_CLAIM_FEAR_LOVE",760,{claimConceptAny:["love","like"],claimTypeAny:["speaker_fear"]},["ASK_AFFECTION_REASON","EXPRESS_CARE"],"speaker_fear_about_affection");
-  add("R302_CLAIM_SUSPICION_LOVE",740,{claimConceptAny:["love","like"],claimTypeAny:["speaker_suspicion"]},["ASK_AFFECTION_REASON"],"speaker_suspicion_about_affection");
-  add("R303_CLAIM_QUESTION_LOVE",750,{claimConceptAny:["love","like"],claimTypeAny:["question"]},["ASK_AFFECTION_REASON"],"speaker_question_about_affection");
-  add("R304_CLAIM_FEAR_BETRAYAL",780,{claimConceptAny:["betrayal"],claimTypeAny:["speaker_fear"]},["EXPRESS_CONCERN"],"speaker_fear_about_betrayal");
-  add("R305_CLAIM_SUSPICION_BETRAYAL",780,{claimConceptAny:["betrayal"],claimTypeAny:["speaker_suspicion"]},["EXPRESS_NEED_CLARITY"],"speaker_suspicion_about_betrayal");
-  add("R306_CLAIM_ACCUSATION_BETRAYAL",790,{claimConceptAny:["betrayal"],claimTypeAny:["accusation"]},["ASK_FOR_HONEST_ANSWER"],"speaker_accusation_about_betrayal");
-  add("R307_CLAIM_FEAR_ABANDONMENT",790,{claimConceptAny:["abandonment"],claimTypeAny:["speaker_fear"]},["EXPRESS_CARE"],"speaker_fear_about_abandonment");
-  add("R308_CLAIM_SUSPICION_ABANDONMENT",760,{claimConceptAny:["abandonment"],claimTypeAny:["speaker_suspicion"]},["ASK_TO_TALK"],"speaker_suspicion_about_abandonment");
-  add("R309_CLAIM_FEAR_HARM",800,{claimConceptAny:["harm"],claimTypeAny:["speaker_fear"]},["REASSURE_SAFETY"],"speaker_fear_about_harm");
-  add("R310_CLAIM_FEAR_DEATH",800,{claimConceptAny:["death"],claimTypeAny:["speaker_fear"]},["EXPRESS_CONCERN"],"speaker_fear_about_death");
-  add("R311_CLAIM_TRUST_POSITIVE",650,{claimConceptAny:["trust"],claimTypeAny:["speaker_fact"],claimPolarityEq:true},["CONFIRM_TRUST"],"speaker_reports_trust");
-  add("R312_CLAIM_TRUST_NEGATIVE",700,{claimConceptAny:["trust"],claimTypeAny:["speaker_fact"],claimPolarityEq:false},["ASK_FOR_TRUST"],"speaker_reports_distrust");
+  add("R301_CLAIM_FEAR_LOVE",760,{claimAny:{conceptAny:["love","like"],typeAny:["speaker_fear"]}},["ASK_AFFECTION_REASON","EXPRESS_CARE"],"speaker_fear_about_affection");
+  add("R302_CLAIM_SUSPICION_LOVE",740,{claimAny:{conceptAny:["love","like"],typeAny:["speaker_suspicion"]}},["ASK_AFFECTION_REASON"],"speaker_suspicion_about_affection");
+  add("R303_CLAIM_QUESTION_LOVE",750,{claimAny:{conceptAny:["love","like"],typeAny:["question"]}},["ASK_AFFECTION_REASON"],"speaker_question_about_affection");
+  add("R304_CLAIM_FEAR_BETRAYAL",780,{claimAny:{conceptAny:["betrayal"],typeAny:["speaker_fear"]}},["EXPRESS_CONCERN"],"speaker_fear_about_betrayal");
+  add("R305_CLAIM_SUSPICION_BETRAYAL",780,{claimAny:{conceptAny:["betrayal"],typeAny:["speaker_suspicion"]}},["EXPRESS_NEED_CLARITY"],"speaker_suspicion_about_betrayal");
+  add("R306_CLAIM_ACCUSATION_BETRAYAL",790,{claimAny:{conceptAny:["betrayal"],typeAny:["accusation"]}},["ASK_FOR_HONEST_ANSWER"],"speaker_accusation_about_betrayal");
+  add("R307_CLAIM_FEAR_ABANDONMENT",790,{claimAny:{conceptAny:["abandonment"],typeAny:["speaker_fear"]}},["EXPRESS_CARE"],"speaker_fear_about_abandonment");
+  add("R308_CLAIM_SUSPICION_ABANDONMENT",760,{claimAny:{conceptAny:["abandonment"],typeAny:["speaker_suspicion"]}},["ASK_TO_TALK"],"speaker_suspicion_about_abandonment");
+  add("R309_CLAIM_FEAR_HARM",800,{claimAny:{conceptAny:["harm"],typeAny:["speaker_fear"]}},["REASSURE_SAFETY"],"speaker_fear_about_harm");
+  add("R310_CLAIM_FEAR_DEATH",800,{claimAny:{conceptAny:["death"],typeAny:["speaker_fear"]}},["EXPRESS_CONCERN"],"speaker_fear_about_death");
+  add("R311_CLAIM_TRUST_POSITIVE",650,{claimAny:{conceptAny:["trust"],typeAny:["speaker_fact"],polarityEq:true}},["CONFIRM_TRUST"],"speaker_reports_trust");
+  add("R312_CLAIM_TRUST_NEGATIVE",700,{claimAny:{conceptAny:["trust"],typeAny:["speaker_fact"],polarityEq:false}},["ASK_FOR_TRUST"],"speaker_reports_distrust");
   add("R313_CLAIM_PLAN",520,{claimTypeAny:["plan"]},["STATE_PLAN"],"speaker_plan_claim");
   add("R314_CLAIM_PREFERENCE",520,{claimTypeAny:["preference"]},["STATE_PREFERENCE"],"speaker_preference_claim");
   add("R315_CLAIM_REQUEST",610,{claimTypeAny:["request"]},["ASK_FOR_ANSWER"],"speaker_request_claim");
