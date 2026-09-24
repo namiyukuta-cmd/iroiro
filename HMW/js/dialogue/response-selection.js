@@ -93,7 +93,8 @@
     meaningIds = [],
     {
       maxMeanings = 5,
-      boundaryActive = false
+      boundaryActive = false,
+      preferredMeaningIds = []
     } = {}
   ) {
     let ordered = removeConflicts([...new Set((meaningIds || []).filter(Boolean))]);
@@ -112,8 +113,10 @@
     const pushUnique = ids => {
       for (const id of ids) if (!selected.includes(id)) selected.push(id);
     };
+    const preferred = [...new Set((preferredMeaningIds || []).filter(id => ordered.includes(id)))];
 
     pushUnique(take(ordered, BOUNDARY, Infinity));
+    pushUnique(preferred);
     pushUnique(take(ordered, DIRECT_ANSWER, 2));
     pushUnique(take(ordered, CORE_RELATION, 3));
     pushUnique(take(ordered, REQUEST_RESPONSE, 1));
@@ -128,8 +131,9 @@
       if (!selected.includes(id)) selected.push(id);
     }
 
+    const preferredSet = new Set(preferred);
     const criticalCount = selected.filter(id =>
-      BOUNDARY.has(id) || DIRECT_ANSWER.has(id)
+      BOUNDARY.has(id) || DIRECT_ANSWER.has(id) || preferredSet.has(id)
     ).length;
 
     const limit = Math.max(
