@@ -338,8 +338,8 @@
     }),
 
     links: Object.freeze({
-      newGame: './SHOP_top.html?new=1&build=20260924-social-rules-v1',
-      continueGame: './SHOP_top.html?continue=1&build=20260924-social-rules-v1',
+      newGame: './SHOP_top.html?new=1&build=20260924-life-route-v1',
+      continueGame: './SHOP_top.html?continue=1&build=20260924-life-route-v1',
       backToGames: '../index.html',
       backToShopMenu: './SHOP_index.html'
     })
