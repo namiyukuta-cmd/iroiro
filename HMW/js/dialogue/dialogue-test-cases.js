@@ -364,6 +364,129 @@
       expectedMeaningIds: ["ANSWER_UNKNOWN"],
       forbiddenMeaningIds: ["ASK_RETURN_TIME","ASK_FOR_ANSWER"],
       expectedEnglishIncludes: ["know"]
+    },
+    {
+      id: "answer_identity_name_001",
+      sourceJa: "名前は？",
+      analysis: {
+        analysisVersion: 2,
+        rawText: "名前は？",
+        emotions: {},
+        intents: ["ask_identity"],
+        focusConcepts: [],
+        lexicalTargets: ["name"],
+        boundaries: [],
+        claims: [],
+        questions: [
+          {
+            kind: "identity",
+            concept: "identity",
+            target: "npc",
+            requestedField: "name",
+            text: "名前は？"
+          }
+        ]
+      },
+      characterFacts: {
+        name: "Sam"
+      },
+      characterPolicy: {},
+      psychology: {},
+      expectedMeaningIds: ["STATE_IDENTITY_NAME"],
+      forbiddenMeaningIds: ["ANSWER_UNKNOWN"],
+      expectedEnglishIncludes: ["Sam"]
+    },
+    {
+      id: "answer_price_001",
+      sourceJa: "これいくら？",
+      analysis: {
+        analysisVersion: 2,
+        rawText: "これいくら？",
+        emotions: {},
+        intents: ["ask_price"],
+        focusConcepts: ["money"],
+        lexicalTargets: ["bread"],
+        boundaries: [],
+        claims: [],
+        questions: [
+          {
+            kind: "price",
+            concept: "price",
+            target: "bread",
+            requestedField: "prices",
+            text: "これいくら？"
+          }
+        ]
+      },
+      characterFacts: {
+        prices: {
+          bread: "$3"
+        }
+      },
+      characterPolicy: {},
+      psychology: {},
+      expectedMeaningIds: ["STATE_PRICE"],
+      forbiddenMeaningIds: ["ANSWER_UNKNOWN"],
+      expectedEnglishIncludes: ["$3"]
+    },
+    {
+      id: "answer_reason_001",
+      sourceJa: "どうしてここにいるの？",
+      analysis: {
+        analysisVersion: 2,
+        rawText: "どうしてここにいるの？",
+        emotions: {},
+        intents: ["ask_reason"],
+        focusConcepts: ["place"],
+        lexicalTargets: [],
+        boundaries: [],
+        claims: [],
+        questions: [
+          {
+            kind: "reason",
+            concept: "place",
+            target: "here",
+            action: "stay",
+            requestedField: "reasons",
+            text: "どうしてここにいるの？"
+          }
+        ]
+      },
+      characterFacts: {
+        reasons: {
+          here: "I am waiting for someone"
+        }
+      },
+      characterPolicy: {},
+      psychology: {},
+      expectedMeaningIds: ["STATE_REASON"],
+      forbiddenMeaningIds: ["ANSWER_UNKNOWN"],
+      expectedEnglishIncludes: ["waiting for someone"]
+    },
+    {
+      id: "priority_boundary_before_affection_001",
+      sourceJa: "触らないで。私のこと好き？",
+      analysis: {
+        analysisVersion: 2,
+        rawText: "触らないで。私のこと好き？",
+        emotions: {
+          fear: 70
+        },
+        intents: ["refuse","question_affection"],
+        focusConcepts: ["love","distance"],
+        lexicalTargets: ["touch","love"],
+        boundaries: ["do_not_touch"],
+        claims: [],
+        questions: []
+      },
+      characterFacts: {
+        lovesHeroine: true
+      },
+      characterPolicy: {},
+      psychology: {},
+      expectedMeaningIds: ["RESPECT_BOUNDARY","PROMISE_NOT_TOUCH","AFFIRM_LOVE"],
+      forbiddenMeaningIds: [],
+      expectedFirstMeaningId: "RESPECT_BOUNDARY"
     }
   ];
 
@@ -385,15 +508,26 @@
         text => !englishLower.includes(String(text).toLowerCase())
       );
 
+      const firstMeaningId =
+        result.plan?.prioritizedMeaningIds?.[0] ||
+        result.plan?.meaningIds?.[0] ||
+        null;
+      const firstMeaningMismatch =
+        test.expectedFirstMeaningId &&
+        firstMeaningId !== test.expectedFirstMeaningId;
+
       return {
         id: test.id,
         pass:
           missingExpected.length === 0 &&
           forbiddenProduced.length === 0 &&
-          missingEnglish.length === 0,
+          missingEnglish.length === 0 &&
+          !firstMeaningMismatch,
         missingExpected,
         forbiddenProduced,
         missingEnglish,
+        firstMeaningId,
+        firstMeaningMismatch,
         meaningIds: produced,
         english: result.english,
         lexicalTargets: result.lexicalTargets,
