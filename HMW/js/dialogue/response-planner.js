@@ -984,7 +984,10 @@
         if (reason && !reasons.includes(reason)) reasons.push(reason);
       }
       for (const [id, slots] of Object.entries(rulePlan.slotOverridesByMeaning || {})) {
-        setSlots(id, slots);
+        slotOverridesByMeaning[id] = {
+          ...(slots || {}),
+          ...(slotOverridesByMeaning[id] || {})
+        };
       }
     }
 
