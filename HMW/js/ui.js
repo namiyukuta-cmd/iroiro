@@ -292,11 +292,113 @@
 
   function openMap() {
     if (H.state.activeEvent) return info("移動", "現在の出来事への対応が先になる。");
+
     const current = H.state.location;
-    const list = Object.keys(D.locations)
-      .filter((id) => H.state.knownLocations[id] && id !== current)
-      .map((id) => ({ label: D.locations[id].name, onClick: () => travel(id) }));
-    openModal("移動", `現在地：${D.locations[current].name}`, list.length ? list : [{ label: "まだ他の場所を知らない", disabled: true }]);
+    const knownIds = Object.keys(D.locations).filter((id) => H.state.knownLocations[id]);
+    const destinationIds = knownIds.filter((id) => id !== current);
+
+    const layout = {
+      station_front:      [13, 17],
+      shopping_street:    [38, 17],
+      park:               [69, 17],
+      police_station:     [12, 38],
+      labor_office:       [34, 38],
+      public_toilet:      [56, 38],
+      convenience_store:  [82, 38],
+      residential_alley:  [23, 62],
+      charity_center:     [53, 62],
+      underpass:          [78, 62],
+      industrial_street:  [23, 84],
+      recycling_yard:     [52, 84],
+      riverside:          [78, 84]
+    };
+
+    const edgeKeys = new Set();
+    const edges = [];
+    knownIds.forEach((id) => {
+      const from = layout[id];
+      if (!from) return;
+      (D.locations[id].connections || []).forEach((toId) => {
+        if (!knownIds.includes(toId) || !layout[toId]) return;
+        const key = [id, toId].sort().join("|");
+        if (edgeKeys.has(key)) return;
+        edgeKeys.add(key);
+        edges.push([id, toId]);
+      });
+    });
+
+    const destinationHtml = destinationIds.length
+      ? destinationIds.map((id) =>
+          `<button class="travel-destination" data-travel-id="${esc(id)}">${esc(D.locations[id].name)}</button>`
+        ).join("")
+      : `<div class="travel-empty">まだ他の場所を知らない</div>`;
+
+    const lineHtml = edges.map(([fromId, toId]) => {
+      const [x1, y1] = layout[fromId];
+      const [x2, y2] = layout[toId];
+      return `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}"></line>`;
+    }).join("");
+
+    const nodeHtml = knownIds
+      .filter((id) => layout[id])
+      .map((id) => {
+        const [x, y] = layout[id];
+        const currentClass = id === current ? " current" : "";
+        return `<div class="travel-map-node${currentClass}" data-map-id="${esc(id)}" style="left:${x}%;top:${y}%">
+          <span></span><small>${esc(D.locations[id].name)}</small>
+        </div>`;
+      }).join("");
+
+    const body = `
+      <div class="travel-window">
+        <div class="travel-section-title">行き先</div>
+        <div class="travel-destinations">${destinationHtml}</div>
+        <div class="travel-map">
+          <svg class="travel-map-lines" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">${lineHtml}</svg>
+          ${nodeHtml}
+        </div>
+        <div class="travel-hint" id="travel-hint">行き先を1回押すと地図で確認できます</div>
+      </div>`;
+
+    openModal("移動", body, [], true);
+
+    let selectedId = null;
+    const hint = $("travel-hint");
+    const buttons = [...document.querySelectorAll(".travel-destination")];
+
+    const selectDestination = (id) => {
+      buttons.forEach((button) => {
+        button.classList.toggle("selected", button.dataset.travelId === id);
+      });
+
+      document.querySelectorAll(".travel-map-node").forEach((node) => {
+        node.classList.toggle("selected", node.dataset.mapId === id);
+      });
+
+      const marker = document.querySelector(`.travel-map-node[data-map-id="${CSS.escape(id)}"]`);
+      if (marker) {
+        marker.classList.remove("ping");
+        void marker.offsetWidth;
+        marker.classList.add("ping");
+      }
+    };
+
+    buttons.forEach((button) => {
+      button.addEventListener("click", () => {
+        const id = button.dataset.travelId;
+        if (!id) return;
+
+        if (selectedId === id) {
+          closeModal();
+          travel(id);
+          return;
+        }
+
+        selectedId = id;
+        selectDestination(id);
+        if (hint) hint.textContent = `${D.locations[id].name}をもう1回押すと移動`;
+      });
+    });
   }
 
   function openInventory() {
