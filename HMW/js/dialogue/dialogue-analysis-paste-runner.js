@@ -5,21 +5,6 @@
   HMW.Dialogue = HMW.Dialogue || {};
   HMW.DialogueTest = HMW.DialogueTest || {};
 
-  const clone = value => JSON.parse(JSON.stringify(value));
-
-  const EXAMPLE_ANALYSIS = {
-    rawText: "こんにちは",
-    emotions: {},
-    intents: ["greet"],
-    focusConcepts: [],
-    lexicalTargets: [],
-    boundaries: [],
-    claims: [],
-    questions: [],
-    tone: {},
-    analysisVersion: 2
-  };
-
   const contextFor = characterId => {
     const c = HMW.CHARACTERS?.[characterId] || {};
     const traits = c.psychologyTraits || {};
@@ -108,10 +93,6 @@
   const contextEl = document.getElementById("character-context");
   const detailsEl = document.getElementById("details");
 
-  const loadExample = () => {
-    inputEl.value = JSON.stringify(clone(EXAMPLE_ANALYSIS), null, 2);
-  };
-
   const render = () => {
     try {
       const analysis = JSON.parse(inputEl.value);
@@ -148,12 +129,18 @@
   };
 
   document.getElementById("run-test").addEventListener("click", render);
-  document.getElementById("load-example").addEventListener("click", () => {
-    loadExample();
-    render();
+  document.getElementById("clear-input").addEventListener("click", () => {
+    inputEl.value = "";
+    englishEl.classList.remove("error");
+    englishEl.textContent = "分析JSONを貼ってください。";
+    meaningEl.textContent = "";
+    proofEl.textContent = "";
+    contextEl.textContent = "";
+    detailsEl.textContent = "";
+    inputEl.focus();
   });
   characterEl.addEventListener("change", render);
 
-  loadExample();
-  render();
+  inputEl.value = "";
+  englishEl.textContent = "分析JSONを貼ってください。";
 })();
