@@ -109,7 +109,7 @@
   add("R491_PSY_CARE_HEALTH",600,{psychologyMin:{care:65},focusAny:["health","injury","illness"]},["EXPRESS_CONCERN"],"npc_care_health");
   add("R492_PSY_CARE_HOME",570,{psychologyMin:{care:65},focusAny:["home","shelter"]},["EXPRESS_CARE"],"npc_care_home");
   add("R493_PSY_CARE_WORK",570,{psychologyMin:{care:65},focusAny:["work","job"]},["EXPRESS_CARE"],"npc_care_work");
-  add("R494_PSY_TENDER_GREETING",550,{psychologyMin:{tenderness:65},intentAny:["greet"]},["EXPRESS_CARE"],"npc_tender_greeting");
+  add("R494_PSY_TENDER_GREETING",550,{psychologyMin:{tenderness:65},intentAny:["greet"]},["RETURN_GREETING"],"npc_tender_greeting");
   add("R495_PSY_TENDER_GOODBYE",560,{psychologyMin:{tenderness:65},intentAny:["say_goodbye"]},["EXPRESS_MISSING"],"npc_tender_goodbye");
   add("R496_PSY_EMPATHY_APOLOGY",590,{psychologyMin:{empathy:65},intentAny:["apologize"]},["EXPRESS_REPAIR_DESIRE"],"npc_empathy_apology");
   add("R497_PSY_LONELY_GREETING",540,{psychologyMin:{loneliness:65},intentAny:["greet"]},["EXPRESS_JOY"],"npc_lonely_greeting");
