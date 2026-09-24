@@ -672,6 +672,14 @@
     STATE_EVENT: {
       category: "answer",
       meaningJa: "自分に起きた出来事を答える"
+    },
+    STATE_RELATIONSHIP_STATUS: {
+      category: "answer",
+      meaningJa: "二人の現在の関係を答える"
+    },
+    STATE_FEELINGS_TOWARD_HEROINE: {
+      category: "answer",
+      meaningJa: "主人公に対する自分の気持ちを答える"
     }
   };
 })();
