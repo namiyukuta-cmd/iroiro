@@ -15,7 +15,7 @@
     "tokens": [
       "I feel",
       "{FEELING}",
-      "about you"
+      "toward you"
     ],
     "slots": [
       "FEELING"
