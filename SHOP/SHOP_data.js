@@ -6,7 +6,7 @@
     subtitle: '砂漠都市で暮らし、商いを始める',
 
     initialState: Object.freeze({
-      version: 7,
+      version: 8,
       day: 1,
       minutes: 360,
       temperature: 24,
@@ -17,6 +17,7 @@
       hunger: 25,
       thirst: 30,
       money: 0,
+      beggingHistory: Object.freeze({}),
       access: Object.freeze({
         upperArea: false
       }),
@@ -40,12 +41,12 @@
           Object.freeze({label:'井戸', sceneKey:'outerWell'})
         ]),
         begging: Object.freeze({
-          stopChance: 0.52,
+          stopChance: 0.24,
           outcomes: Object.freeze([
-            Object.freeze({weight:65, minCopper:0, maxCopper:0}),
-            Object.freeze({weight:28, minCopper:1, maxCopper:2}),
-            Object.freeze({weight:6, minCopper:3, maxCopper:5}),
-            Object.freeze({weight:1, minCopper:10, maxCopper:10})
+            Object.freeze({weight:78, type:'none'}),
+            Object.freeze({weight:17, type:'copper', minCopper:1, maxCopper:1}),
+            Object.freeze({weight:4, type:'copper', minCopper:2, maxCopper:3}),
+            Object.freeze({weight:1, type:'item', itemId:'food_flatbread', count:1})
           ])
         }),
         background: './asset/bg_desert_wall.jpeg',
@@ -76,12 +77,12 @@
           Object.freeze({label:'公衆浴場', sceneKey:'smallGateBathhouse'})
         ]),
         begging: Object.freeze({
-          stopChance: 0.48,
+          stopChance: 0.28,
           outcomes: Object.freeze([
-            Object.freeze({weight:55, minCopper:0, maxCopper:0}),
-            Object.freeze({weight:30, minCopper:1, maxCopper:3}),
-            Object.freeze({weight:12, minCopper:5, maxCopper:5}),
-            Object.freeze({weight:3, minCopper:10, maxCopper:10})
+            Object.freeze({weight:72, type:'none'}),
+            Object.freeze({weight:22, type:'copper', minCopper:1, maxCopper:2}),
+            Object.freeze({weight:5, type:'copper', minCopper:3, maxCopper:3}),
+            Object.freeze({weight:1, type:'item', itemId:'food_flatbread', count:1})
           ])
         }),
         background: './asset/bg_desert_wall.jpeg',
@@ -104,12 +105,13 @@
           Object.freeze({label:'小モスク', sceneKey:'cityMosque'})
         ]),
         begging: Object.freeze({
-          stopChance: 0.55,
+          stopChance: 0.34,
           outcomes: Object.freeze([
-            Object.freeze({weight:45, minCopper:0, maxCopper:0}),
-            Object.freeze({weight:30, minCopper:1, maxCopper:3}),
-            Object.freeze({weight:20, minCopper:4, maxCopper:5}),
-            Object.freeze({weight:5, minCopper:10, maxCopper:10})
+            Object.freeze({weight:65, type:'none'}),
+            Object.freeze({weight:25, type:'copper', minCopper:1, maxCopper:2}),
+            Object.freeze({weight:7, type:'copper', minCopper:3, maxCopper:4}),
+            Object.freeze({weight:2, type:'copper', minCopper:5, maxCopper:5}),
+            Object.freeze({weight:1, type:'item', itemId:'food_flatbread', count:1})
           ])
         }),
         background: './asset/bg_desert_wall.jpeg',
@@ -190,12 +192,13 @@
       upperArea: Object.freeze({
         name: '上級区',
         begging: Object.freeze({
-          stopChance: 0.30,
+          stopChance: 0.16,
           outcomes: Object.freeze([
-            Object.freeze({weight:60, minCopper:0, maxCopper:0}),
-            Object.freeze({weight:20, minCopper:3, maxCopper:5}),
-            Object.freeze({weight:15, minCopper:10, maxCopper:10}),
-            Object.freeze({weight:5, minCopper:20, maxCopper:20})
+            Object.freeze({weight:70, type:'none'}),
+            Object.freeze({weight:15, type:'copper', minCopper:2, maxCopper:3}),
+            Object.freeze({weight:8, type:'copper', minCopper:4, maxCopper:5}),
+            Object.freeze({weight:4, type:'copper', minCopper:10, maxCopper:10}),
+            Object.freeze({weight:3, type:'item', itemId:'food_flatbread', count:1})
           ])
         }),
         background: './asset/bg_desert_wall.jpeg',
