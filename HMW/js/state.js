@@ -120,7 +120,12 @@
       charity_center: true,
       labor_office: true,
       park: true,
-      police_station: true
+      police_station: true,
+      recycling_yard: true,
+      industrial_street: true,
+      underpass: true,
+      riverside: true,
+      residential_alley: true
     },
     world: {
       locations: {},
