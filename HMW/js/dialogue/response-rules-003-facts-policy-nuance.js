@@ -30,24 +30,24 @@
   add("R220_FACT_CHOOSES_TRUE",850,{focusAny:["relationship","love"],factEq:{"choosesHeroine":true}},["CONFIRM_CHOICE"],"known_choice_true");
 
   // Permission / action / invitation / suggestion policy.
-  add("R221_PERMISSION_TOUCH_ALLOW",760,{questionKindAny:["permission"],questionActionAny:["touch"],policyEq:{"permissions.touch":true}},["GRANT_PERMISSION"],"permission_touch_allow");
-  add("R222_PERMISSION_TOUCH_DENY",760,{questionKindAny:["permission"],questionActionAny:["touch"],policyEq:{"permissions.touch":false}},["DENY_PERMISSION"],"permission_touch_deny");
-  add("R223_PERMISSION_HUG_ALLOW",760,{questionKindAny:["permission"],questionActionAny:["hug"],policyEq:{"permissions.hug":true}},["GRANT_PERMISSION"],"permission_hug_allow");
-  add("R224_PERMISSION_HUG_DENY",760,{questionKindAny:["permission"],questionActionAny:["hug"],policyEq:{"permissions.hug":false}},["DENY_PERMISSION"],"permission_hug_deny");
-  add("R225_PERMISSION_KISS_ALLOW",760,{questionKindAny:["permission"],questionActionAny:["kiss"],policyEq:{"permissions.kiss":true}},["GRANT_PERMISSION"],"permission_kiss_allow");
-  add("R226_PERMISSION_KISS_DENY",760,{questionKindAny:["permission"],questionActionAny:["kiss"],policyEq:{"permissions.kiss":false}},["DENY_PERMISSION"],"permission_kiss_deny");
-  add("R227_ACTION_HELP_ALLOW",750,{questionKindAny:["request_action"],questionActionAny:["help"],policyEq:{"requestResponses.help":true}},["ACCEPT_ACTION_REQUEST"],"request_help_allow");
-  add("R228_ACTION_HELP_DENY",750,{questionKindAny:["request_action"],questionActionAny:["help"],policyEq:{"requestResponses.help":false}},["DECLINE_ACTION_REQUEST"],"request_help_deny");
-  add("R229_ACTION_WAIT_ALLOW",750,{questionKindAny:["request_action"],questionActionAny:["wait"],policyEq:{"requestResponses.wait":true}},["ACCEPT_ACTION_REQUEST"],"request_wait_allow");
-  add("R230_ACTION_WAIT_DENY",750,{questionKindAny:["request_action"],questionActionAny:["wait"],policyEq:{"requestResponses.wait":false}},["DECLINE_ACTION_REQUEST"],"request_wait_deny");
-  add("R231_INVITE_MEET_ALLOW",740,{questionKindAny:["invitation"],questionActionAny:["meet"],policyEq:{"invitationResponses.meet":true}},["ACCEPT_INVITATION"],"invite_meet_allow");
-  add("R232_INVITE_MEET_DENY",740,{questionKindAny:["invitation"],questionActionAny:["meet"],policyEq:{"invitationResponses.meet":false}},["DECLINE_INVITATION"],"invite_meet_deny");
-  add("R233_INVITE_EAT_ALLOW",740,{questionKindAny:["invitation"],questionActionAny:["eat"],policyEq:{"invitationResponses.eat":true}},["ACCEPT_INVITATION"],"invite_eat_allow");
-  add("R234_INVITE_EAT_DENY",740,{questionKindAny:["invitation"],questionActionAny:["eat"],policyEq:{"invitationResponses.eat":false}},["DECLINE_INVITATION"],"invite_eat_deny");
-  add("R235_SUGGEST_REST_ALLOW",730,{questionKindAny:["suggestion"],questionActionAny:["rest"],policyEq:{"suggestionResponses.rest":true}},["ACCEPT_SUGGESTION"],"suggest_rest_allow");
-  add("R236_SUGGEST_REST_DENY",730,{questionKindAny:["suggestion"],questionActionAny:["rest"],policyEq:{"suggestionResponses.rest":false}},["DECLINE_SUGGESTION"],"suggest_rest_deny");
-  add("R237_SUGGEST_TALK_ALLOW",730,{questionKindAny:["suggestion"],questionActionAny:["talk"],policyEq:{"suggestionResponses.talk":true}},["ACCEPT_SUGGESTION"],"suggest_talk_allow");
-  add("R238_SUGGEST_TALK_DENY",730,{questionKindAny:["suggestion"],questionActionAny:["talk"],policyEq:{"suggestionResponses.talk":false}},["DECLINE_SUGGESTION"],"suggest_talk_deny");
+  add("R221_PERMISSION_TOUCH_ALLOW",760,{questionAny:{kindAny:["permission"],actionAny:["touch"]},policyEq:{"permissions.touch":true}},["GRANT_PERMISSION"],"permission_touch_allow");
+  add("R222_PERMISSION_TOUCH_DENY",760,{questionAny:{kindAny:["permission"],actionAny:["touch"]},policyEq:{"permissions.touch":false}},["DENY_PERMISSION"],"permission_touch_deny");
+  add("R223_PERMISSION_HUG_ALLOW",760,{questionAny:{kindAny:["permission"],actionAny:["hug"]},policyEq:{"permissions.hug":true}},["GRANT_PERMISSION"],"permission_hug_allow");
+  add("R224_PERMISSION_HUG_DENY",760,{questionAny:{kindAny:["permission"],actionAny:["hug"]},policyEq:{"permissions.hug":false}},["DENY_PERMISSION"],"permission_hug_deny");
+  add("R225_PERMISSION_KISS_ALLOW",760,{questionAny:{kindAny:["permission"],actionAny:["kiss"]},policyEq:{"permissions.kiss":true}},["GRANT_PERMISSION"],"permission_kiss_allow");
+  add("R226_PERMISSION_KISS_DENY",760,{questionAny:{kindAny:["permission"],actionAny:["kiss"]},policyEq:{"permissions.kiss":false}},["DENY_PERMISSION"],"permission_kiss_deny");
+  add("R227_ACTION_HELP_ALLOW",750,{questionAny:{kindAny:["request_action"],actionAny:["help"]},policyEq:{"requestResponses.help":true}},["ACCEPT_ACTION_REQUEST"],"request_help_allow");
+  add("R228_ACTION_HELP_DENY",750,{questionAny:{kindAny:["request_action"],actionAny:["help"]},policyEq:{"requestResponses.help":false}},["DECLINE_ACTION_REQUEST"],"request_help_deny");
+  add("R229_ACTION_WAIT_ALLOW",750,{questionAny:{kindAny:["request_action"],actionAny:["wait"]},policyEq:{"requestResponses.wait":true}},["ACCEPT_ACTION_REQUEST"],"request_wait_allow");
+  add("R230_ACTION_WAIT_DENY",750,{questionAny:{kindAny:["request_action"],actionAny:["wait"]},policyEq:{"requestResponses.wait":false}},["DECLINE_ACTION_REQUEST"],"request_wait_deny");
+  add("R231_INVITE_MEET_ALLOW",740,{questionAny:{kindAny:["invitation"],actionAny:["meet"]},policyEq:{"invitationResponses.meet":true}},["ACCEPT_INVITATION"],"invite_meet_allow");
+  add("R232_INVITE_MEET_DENY",740,{questionAny:{kindAny:["invitation"],actionAny:["meet"]},policyEq:{"invitationResponses.meet":false}},["DECLINE_INVITATION"],"invite_meet_deny");
+  add("R233_INVITE_EAT_ALLOW",740,{questionAny:{kindAny:["invitation"],actionAny:["eat"]},policyEq:{"invitationResponses.eat":true}},["ACCEPT_INVITATION"],"invite_eat_allow");
+  add("R234_INVITE_EAT_DENY",740,{questionAny:{kindAny:["invitation"],actionAny:["eat"]},policyEq:{"invitationResponses.eat":false}},["DECLINE_INVITATION"],"invite_eat_deny");
+  add("R235_SUGGEST_REST_ALLOW",730,{questionAny:{kindAny:["suggestion"],actionAny:["rest"]},policyEq:{"suggestionResponses.rest":true}},["ACCEPT_SUGGESTION"],"suggest_rest_allow");
+  add("R236_SUGGEST_REST_DENY",730,{questionAny:{kindAny:["suggestion"],actionAny:["rest"]},policyEq:{"suggestionResponses.rest":false}},["DECLINE_SUGGESTION"],"suggest_rest_deny");
+  add("R237_SUGGEST_TALK_ALLOW",730,{questionAny:{kindAny:["suggestion"],actionAny:["talk"]},policyEq:{"suggestionResponses.talk":true}},["ACCEPT_SUGGESTION"],"suggest_talk_allow");
+  add("R238_SUGGEST_TALK_DENY",730,{questionAny:{kindAny:["suggestion"],actionAny:["talk"]},policyEq:{"suggestionResponses.talk":false}},["DECLINE_SUGGESTION"],"suggest_talk_deny");
   add("R239_CONTACT_BOUNDARY_OVERRIDES",980,{intentAny:["request_contact"],boundaryAny:["do_not_contact","do_not_call","do_not_message"]},["DECLINE_CONTACT","RESPECT_BOUNDARY"],"contact_boundary_override");
   add("R240_TOUCH_BOUNDARY_OVERRIDES",980,{questionKindAny:["permission"],boundaryAny:["do_not_touch","do_not_kiss","do_not_hug"]},["DENY_PERMISSION","RESPECT_BOUNDARY"],"physical_boundary_override");
 
