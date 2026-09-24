@@ -169,6 +169,56 @@
       "Are you all right?",
       "Are you okay?",
       "Do you feel all right?"
+    ],
+    EXPRESS_JOY: [
+      "I am happy.",
+      "I am glad.",
+      "I am really happy to see you."
+    ],
+    EXPRESS_LONELINESS: [
+      "I was lonely.",
+      "I have been feeling lonely.",
+      "I did not like being alone."
+    ],
+    EXPRESS_ANXIETY: [
+      "I am worried.",
+      "I feel uneasy.",
+      "I do not know what will happen."
+    ],
+    ASK_RELATIONSHIP_STATUS: [
+      "What are we?",
+      "What do you think we are?",
+      "How do you see our relationship?"
+    ],
+    ASK_FEELINGS: [
+      "How do you feel about me?",
+      "What do you think of me?",
+      "Do you have feelings for me?"
+    ],
+    EXPRESS_WANT_TO_BE_TOGETHER: [
+      "I want to be with you.",
+      "I want us to stay together.",
+      "I want to spend more time with you."
+    ],
+    ASK_TO_STAY_CLOSE: [
+      "Stay close to me.",
+      "Please stay near me.",
+      "I want you close to me."
+    ],
+    ASK_PERMISSION_TOUCH: [
+      "Can I touch you?",
+      "May I touch your hand?",
+      "Is it all right if I touch you?"
+    ],
+    ASK_PERMISSION_HUG: [
+      "Can I hug you?",
+      "May I hold you?",
+      "Is it all right if I hug you?"
+    ],
+    ASK_PERMISSION_KISS: [
+      "Can I kiss you?",
+      "May I kiss you?",
+      "Is it all right if I kiss you?"
     ]
   };
 })();
