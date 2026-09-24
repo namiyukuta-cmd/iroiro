@@ -512,6 +512,94 @@
     ASK_RETURN_TIME: {
       category: "parting",
       meaningJa: "いつ戻るのか尋ねる"
+    },
+    STATE_CURRENT_LOCATION: {
+      category: "answer",
+      meaningJa: "自分の現在地を答える"
+    },
+    STATE_AVAILABLE_TIME: {
+      category: "answer",
+      meaningJa: "自分が対応できる時間を答える"
+    },
+    STATE_CONDITION: {
+      category: "answer",
+      meaningJa: "自分の現在の体調や状態を答える"
+    },
+    CONFIRM_POSSESSION: {
+      category: "answer",
+      meaningJa: "尋ねられた物を持っていると答える"
+    },
+    DENY_POSSESSION: {
+      category: "answer",
+      meaningJa: "尋ねられた物を持っていないと答える"
+    },
+    STATE_QUANTITY: {
+      category: "answer",
+      meaningJa: "尋ねられた物の数量を答える"
+    },
+    CONFIRM_CAPABILITY: {
+      category: "answer",
+      meaningJa: "尋ねられた行動ができると答える"
+    },
+    DENY_CAPABILITY: {
+      category: "answer",
+      meaningJa: "尋ねられた行動ができないと答える"
+    },
+    STATE_CURRENT_PLAN: {
+      category: "answer",
+      meaningJa: "自分の予定を答える"
+    },
+    STATE_CURRENT_PREFERENCE: {
+      category: "answer",
+      meaningJa: "自分の好みを答える"
+    },
+    CONFIRM_AVAILABLE: {
+      category: "answer",
+      meaningJa: "対応可能であると答える"
+    },
+    DENY_AVAILABLE: {
+      category: "answer",
+      meaningJa: "対応できないと答える"
+    },
+    ANSWER_UNKNOWN: {
+      category: "answer",
+      meaningJa: "答えを知らない、または事実が未設定だと伝える"
+    },
+    STATE_RETURN_TIME: {
+      category: "answer",
+      meaningJa: "戻る予定時刻を答える"
+    },
+    STATE_WORK_STATUS: {
+      category: "answer",
+      meaningJa: "自分の仕事の状況を答える"
+    },
+    STATE_MONEY_STATUS: {
+      category: "answer",
+      meaningJa: "自分のお金の状況を答える"
+    },
+    STATE_NO_MONEY: {
+      category: "answer",
+      meaningJa: "十分なお金がないと答える"
+    },
+    STATE_SLEEP_STATUS_GOOD: {
+      category: "answer",
+      meaningJa: "よく眠れたと答える"
+    },
+    STATE_SLEEP_STATUS_BAD: {
+      category: "answer",
+      meaningJa: "よく眠れなかったと答える"
+    },
+    STATE_FOOD_STATUS_EATEN: {
+      category: "answer",
+      meaningJa: "すでに食事をしたと答える"
+    },
+    STATE_FOOD_STATUS_NOT_EATEN: {
+      category: "answer",
+      meaningJa: "まだ食事をしていないと答える"
+    },
+    STATE_HOME: {
+      category: "answer",
+      meaningJa: "自分の家や寝場所を答える"
     }
   };
 })();
