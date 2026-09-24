@@ -1,7 +1,7 @@
 (() => {
   "use strict";
 
-  const version = "20260925-response-relevance";
+  const version = "20260925-response-relevance-2";
   const files = [
     "dialogue-meanings.js",
     "language/vocabulary-registry.js",
