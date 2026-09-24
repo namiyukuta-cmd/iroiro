@@ -393,6 +393,7 @@
     const state = window.SHOP_STATE;
 
     if (window.SHOP_LIFE) window.SHOP_LIFE.ensureState(state);
+    if (window.SHOP_TRADE) window.SHOP_TRADE.ensureState(state);
     if (window.SHOP_TIME) window.SHOP_TIME.syncClimate(state);
     renderScene();
 
