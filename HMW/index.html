@@ -7,7 +7,7 @@
   <meta http-equiv="Pragma" content="no-cache" />
   <meta http-equiv="Expires" content="0" />
   <title>HMW</title>
-  <link rel="stylesheet" href="css/style.css?v=20260925-travel-map" />
+  <link rel="stylesheet" href="css/style.css?v=20260925-location-popup" />
 </head>
 <body>
   <section class="start-screen" id="start-screen" aria-label="開始メニュー">
@@ -53,10 +53,8 @@
 
     <main class="main">
       <section class="scene">
-        <h1 id="location-name">駅前</h1>
-        <p id="location-desc"></p>
-        <div class="message" id="last-message"></div>
-        <div class="housing-goal" id="housing-goal"></div>
+        <button class="location-name-btn" id="location-name" type="button">駅前</button>
+        <div class="location-points" id="location-points" aria-label="この場所で調べられるもの"></div>
         <section class="city-scene hidden" id="city-scene"></section>
       </section>
     </main>
@@ -105,12 +103,12 @@
   <script src="js/housing.js?v=20260923-2230"></script>
   <script src="js/jobs.js?v=20260923-2315"></script>
   <script src="js/save.js?v=20260922-1115"></script>
-  <script src="js/core.js?v=20260923-1944"></script>
+  <script src="js/core.js?v=20260925-location-popup"></script>
   <script src="js/activities.js?v=20260909-2118"></script>
   <script src="js/actions-life.js?v=20260922-2205"></script>
   <script src="js/actions-people.js?v=20260923-1944"></script>
   <script src="js/scenes.js?v=20260922-1148"></script>
-  <script src="js/ui.js?v=20260925-travel-map"></script>
+  <script src="js/ui.js?v=20260925-location-popup"></script>
   <script src="js/display-names.js?v=20260909-2130"></script>
 </body>
 </html>
