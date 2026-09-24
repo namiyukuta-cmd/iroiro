@@ -38,6 +38,10 @@ h1{font-size:21px;margin:3px 0 4px;letter-spacing:.03em}
   background:#fffdf8;border:1px solid #cfc6b8;border-radius:14px;
   box-shadow:0 2px 0 rgba(0,0,0,.05);padding:11px;margin-bottom:10px
 }
+.quest{border:2px solid #2c2924}
+.quest-name{font-size:16px;font-weight:900;margin-bottom:4px}
+.quest-text{font-size:12px;line-height:1.5;color:#4f493f}
+.quest-progress{margin-top:8px;font-size:11px;font-weight:800;color:#8b5d3b}
 .section-title{font-size:11px;font-weight:800;color:#766c60;letter-spacing:.08em;margin-bottom:8px}
 .cards{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}
 .card{
@@ -135,9 +139,11 @@ h1{font-size:21px;margin:3px 0 4px;letter-spacing:.03em}
     </div>
   </div>
 
-  <section class="paper">
-    <div class="section-title">今、世界に残っている気配</div>
-    <div id="stateRow" class="state-row"><span class="empty">まだ何もない</span></div>
+  <section class="paper quest">
+    <div class="section-title">依頼</div>
+    <div class="quest-name">ゴブリンの巣を探して退治する</div>
+    <div class="quest-text">周辺でゴブリンの被害が出ている。痕跡を追って巣を見つける。</div>
+    <div class="quest-progress" id="questProgress">手掛かりを探す</div>
   </section>
 
   <section class="paper">
@@ -153,15 +159,6 @@ h1{font-size:21px;margin:3px 0 4px;letter-spacing:.03em}
     <div class="action-result" id="actionResult"></div>
   </section>
 
-  <section class="paper">
-    <div class="section-title">持ち帰ったもの</div>
-    <div id="lootRow" class="state-row"><span class="empty">まだ何もない</span></div>
-  </section>
-
-  <section class="paper">
-    <div class="section-title">因果ログ</div>
-    <div id="log" class="log"><div class="empty">探索すると、なぜそのカードが出たかを記録します。</div></div>
-  </section>
 </main>
 
 <div class="detail-layer" id="detailLayer" aria-hidden="true">
@@ -183,7 +180,7 @@ h1{font-size:21px;margin:3px 0 4px;letter-spacing:.03em}
     <h2>ヘルプ</h2>
     <p>場所・発見・出来事の3枚が自動で出ます。最初は1枚ずつ大きく表示され、あとから上の小さなカードを押せば見直せます。</p>
     <p><b>オート ON</b>では、「どうする？」の選択だけを現在の状況から自動で決めます。オート OFFなら自分で選びます。</p>
-    <p>過去のカードや選択結果は内部状態に残り、次に出るカードの確率へ影響します。</p>
+    <p>依頼の目的は「ゴブリンの巣を探して退治する」です。カードと選択結果から痕跡を追い、巣を見つけて戦えば達成できます。</p>
     <div class="detail-actions"><button class="detail-btn primary-mini" id="helpCloseBtn">閉じる</button></div>
   </div>
 </div>
@@ -251,13 +248,16 @@ h1{font-size:21px;margin:3px 0 4px;letter-spacing:.03em}
   let autoTimer=null;
   let detailIndex=0;
   let detailSequence=false;
+  let questStage=0;
+  let questDone=false;
 
   const el={
     cards:document.getElementById("cards"),
-    state:document.getElementById("stateRow"),
-    loot:document.getElementById("lootRow"),
-    log:document.getElementById("log"),
+    state:null,
+    loot:null,
+    log:null,
     turn:document.getElementById("turnNo"),
+    questProgress:document.getElementById("questProgress"),
     actionBox:document.getElementById("actionBox"),
     actionGrid:document.getElementById("actionGrid"),
     actionResult:document.getElementById("actionResult"),
@@ -494,7 +494,13 @@ h1{font-size:21px;margin:3px 0 4px;letter-spacing:.03em}
       if(roll<0.68){
         add("danger",-2); add("clue",1);
         foundLoot.forEach(addLoot);
-        result="勝った。"+(foundLoot.length?"「"+foundLoot.join("・")+"」を持ち帰る。":"周囲を調べ、痕跡を得た。");
+        if(questStage>=3 && hasTag("goblin")){
+          questDone=true;
+          addLoot("依頼報酬 30G");
+          result="ゴブリンを退治し、巣を制圧した。依頼達成。報酬30G。";
+        }else{
+          result="勝った。"+(foundLoot.length?"「"+foundLoot.join("・")+"」を持ち帰る。":"周囲を調べ、痕跡を得た。");
+        }
       }else{
         add("danger",3);
         result="押し切れなかった。危険が増した。";
@@ -553,20 +559,51 @@ h1{font-size:21px;margin:3px 0 4px;letter-spacing:.03em}
     renderLog();
   }
 
+  function updateQuest(){
+    if(questDone){
+      el.questProgress.textContent="依頼達成：ゴブリンの巣を退治した";
+      return;
+    }
+
+    const g=value("goblin");
+    const clue=value("clue");
+    const cave=value("cave");
+
+    if(g>=6 && cave>=2 && clue>=3){
+      questStage=3;
+      el.questProgress.textContent="巣を発見した。次にゴブリンと遭遇したら退治する";
+    }else if(g>=3 && clue>=2){
+      questStage=2;
+      el.questProgress.textContent="痕跡が濃い。巣の場所を絞り込む";
+    }else if(g>=1 || clue>=1){
+      questStage=1;
+      el.questProgress.textContent="ゴブリンの痕跡を追う";
+    }else{
+      questStage=0;
+      el.questProgress.textContent="手掛かりを探す";
+    }
+  }
+
   function renderState(){
     const entries=Object.entries(state).filter(([,v])=>v>0).sort((a,b)=>b[1]-a[1]).slice(0,14);
-    el.state.innerHTML=entries.length
-      ? entries.map(([k,v])=>'<span class="state-chip">'+(LABELS[k]||k)+' <strong>'+format(v)+'</strong></span>').join("")
-      : '<span class="empty">まだ何もない</span>';
+    if(el.state){
+      el.state.innerHTML=entries.length
+        ? entries.map(([k,v])=>'<span class="state-chip">'+(LABELS[k]||k)+' <strong>'+format(v)+'</strong></span>').join("")
+        : '<span class="empty">まだ何もない</span>';
+    }
 
-    el.loot.innerHTML=loot.length
-      ? loot.map(x=>'<span class="state-chip">'+x+'</span>').join("")
-      : '<span class="empty">まだ何もない</span>';
+    if(el.loot){
+      el.loot.innerHTML=loot.length
+        ? loot.map(x=>'<span class="state-chip">'+x+'</span>').join("")
+        : '<span class="empty">まだ何もない</span>';
+    }
 
     el.turn.textContent=turn;
+    updateQuest();
   }
 
   function renderLog(){
+    if(!el.log)return;
     el.log.innerHTML=log.length
       ? log.slice().reverse().map(x=>'<div class="log-entry">'+x+'</div>').join("")
       : '<div class="empty">探索すると、なぜそのカードが出たかを記録します。</div>';
@@ -609,7 +646,7 @@ h1{font-size:21px;margin:3px 0 4px;letter-spacing:.03em}
     clearTimeout(autoTimer);
     autoTimer=null;
     for(const k of Object.keys(state)) delete state[k];
-    loot.length=0;log.length=0;turn=0;currentDraw=null;awaitingAction=false;detailIndex=0;detailSequence=false;
+    loot.length=0;log.length=0;turn=0;currentDraw=null;awaitingAction=false;detailIndex=0;detailSequence=false;questStage=0;questDone=false;
     closeDetail();
     el.cards.innerHTML='<div class="card placeholder">最初の一区画を引く</div>';
     el.actionBox.classList.remove("show");
