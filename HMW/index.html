@@ -7,7 +7,7 @@
   <meta http-equiv="Pragma" content="no-cache" />
   <meta http-equiv="Expires" content="0" />
   <title>HMW</title>
-  <link rel="stylesheet" href="css/style.css?v=20260925-location-popup" />
+  <link rel="stylesheet" href="css/style.css?v=20260925-compact-main" />
 </head>
 <body>
   <section class="start-screen" id="start-screen" aria-label="開始メニュー">
@@ -53,6 +53,7 @@
 
     <main class="main">
       <section class="scene">
+        <div class="housing-goal-bar" id="housing-goal"></div>
         <button class="location-name-btn" id="location-name" type="button">駅前</button>
         <div class="location-points" id="location-points" aria-label="この場所で調べられるもの"></div>
         <section class="city-scene hidden" id="city-scene"></section>
@@ -60,6 +61,7 @@
     </main>
 
     <aside class="side-actions" aria-label="主要操作">
+      <button class="side-action-btn side-task-btn" id="side-tasks">用事 →</button>
       <button class="side-action-btn" id="side-action">行動</button>
       <button class="side-action-btn" id="side-talk">会話</button>
       <button class="side-action-btn" id="side-move">移動</button>
@@ -69,7 +71,10 @@
     <section class="main-actions" id="action-list"></section>
 
     <nav class="bottom-nav" aria-label="ゲームメニュー">
-      <button class="nav-btn menu-bottom-btn" id="nav-menu" aria-label="メニュー">…</button>
+      <button class="nav-btn" id="nav-save">セーブ</button>
+      <button class="nav-btn" id="nav-load">ロード</button>
+      <button class="nav-btn" id="nav-log">ログ</button>
+      <button class="nav-btn" id="nav-people">人物一覧</button>
     </nav>
   </div>
 
@@ -108,7 +113,7 @@
   <script src="js/actions-life.js?v=20260922-2205"></script>
   <script src="js/actions-people.js?v=20260923-1944"></script>
   <script src="js/scenes.js?v=20260922-1148"></script>
-  <script src="js/ui.js?v=20260925-location-popup"></script>
+  <script src="js/ui.js?v=20260925-compact-main"></script>
   <script src="js/display-names.js?v=20260909-2130"></script>
 </body>
 </html>
