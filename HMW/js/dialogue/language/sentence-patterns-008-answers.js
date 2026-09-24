@@ -33,10 +33,12 @@
   },
   "ANSWER_DESTINATION": {
     "tokens": [
-      "I am going to",
+      "I am going",
+      "{DIRECTION_PREP?}",
       "{PLACE}"
     ],
     "slots": [
+      "DIRECTION_PREP?",
       "PLACE"
     ]
   },
@@ -170,19 +172,23 @@
   },
   "ANSWER_WORK_LOCATION": {
     "tokens": [
-      "I work at",
+      "I work",
+      "{LOCATION_PREP?}",
       "{PLACE}"
     ],
     "slots": [
+      "LOCATION_PREP?",
       "PLACE"
     ]
   },
   "ANSWER_JOB_ROLE": {
     "tokens": [
-      "My job is",
+      "I work as",
+      "{ARTICLE?}",
       "{ROLE}"
     ],
     "slots": [
+      "ARTICLE?",
       "ROLE"
     ]
   },
