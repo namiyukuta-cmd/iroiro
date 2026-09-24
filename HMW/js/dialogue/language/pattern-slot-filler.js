@@ -18,20 +18,29 @@
 
   const entryFor = (lemma, pos) => D.Vocabulary?.get?.(lemma, pos) || null;
 
-  const pickLexeme = (pos, { lexicalTargets = [], preferred = [], seed = 0 } = {}) => {
+  const pickLexeme = (pos, { lexicalTargets = [], preferred = [], seed = 0, tags = [] } = {}) => {
     const wanted = [...lexicalTargets, ...preferred]
       .map(x => String(x || "").toLowerCase().trim())
       .filter(Boolean);
 
     for (const lemma of wanted) {
       const hit = entryFor(lemma, pos);
-      if (hit) return hit.lemma;
+      if (!hit) continue;
+      const entryTags = Array.isArray(hit.tags) ? hit.tags : [];
+      if (!tags.length || tags.some(tag => entryTags.includes(tag))) return hit.lemma;
     }
 
     const curated = (DEFAULTS[pos] || []).filter(lemma => entryFor(lemma, pos));
     if (curated.length) return curated[Math.abs(Number(seed) || 0) % curated.length];
 
-    const pool = (D.Vocabulary?.entries || []).filter(entry => entry.pos === pos);
+    let pool = (D.Vocabulary?.entries || []).filter(entry => entry.pos === pos);
+    if (tags.length) {
+      const tagged = pool.filter(entry => {
+        const entryTags = Array.isArray(entry.tags) ? entry.tags : [];
+        return tags.some(tag => entryTags.includes(tag));
+      });
+      if (tagged.length) pool = tagged;
+    }
     if (!pool.length) return "";
     return pool[Math.abs(Number(seed) || 0) % pool.length].lemma;
   };
@@ -94,6 +103,7 @@
     {
       slotOverrides = {},
       lexicalTargets = [],
+      vocabularyTags = [],
       subject = "I",
       seed = 0,
       fillOptional = false
@@ -108,7 +118,7 @@
     const slots = { ...slotOverrides };
     const explicitSlots = new Set(Object.keys(slotOverrides || {}));
 
-    const verb = pickLexeme("verb", { lexicalTargets, seed });
+    const verb = pickLexeme("verb", { lexicalTargets, seed, tags:vocabularyTags });
     const remainingForNoun = (lexicalTargets || []).filter(
       target => String(target || "").toLowerCase() !== String(verb || "").toLowerCase()
     );
@@ -117,22 +127,25 @@
         target => String(target || "").toLowerCase() !== String(verb || "").toLowerCase()
       ),
       seed:seed + 1,
-      preferred:["help","tell","ask","give","take"]
+      preferred:["help","tell","ask","give","take"],
+      tags:vocabularyTags
     });
     const noun = pickLexeme("noun", {
       lexicalTargets: remainingForNoun,
       seed,
-      preferred:["thing","home","time","place","work","friend"]
+      preferred:["thing","home","time","place","work","friend"],
+      tags:vocabularyTags
     });
     const noun2 = pickLexeme("noun", {
       lexicalTargets: remainingForNoun.filter(
         target => String(target || "").toLowerCase() !== String(noun || "").toLowerCase()
       ),
       seed:seed + 1,
-      preferred:["time","place","work","home","friend"]
+      preferred:["time","place","work","home","friend"],
+      tags:vocabularyTags
     });
-    const adjective = pickLexeme("adjective", { lexicalTargets, seed });
-    const adverb = pickLexeme("adverb", { lexicalTargets, seed });
+    const adjective = pickLexeme("adjective", { lexicalTargets, seed, tags:vocabularyTags });
+    const adverb = pickLexeme("adverb", { lexicalTargets, seed, tags:vocabularyTags });
 
     const baseSubject = slots.SUBJECT || subject || "I";
     const clause = simpleClause({ subject:baseSubject, verb:verb || "know", noun:noun || "thing" });
