@@ -277,7 +277,7 @@
 
     const page = Math.max(0, Math.min(pageIndex, pages.length - 1));
     const isLast = page >= pages.length - 1;
-    openModal(loc.name, `<div class="location-intro-text">${esc(pages[page])}</div>`, [], true);
+    openModal(loc.name, `<div class="location-intro-text">${esc(pages[page])}</div><div class="location-intro-tap">Tap</div>`, [], true);
     const backdrop = $("modal-backdrop");
     backdrop.classList.add("tap-popup");
     backdrop.onclick = () => {
