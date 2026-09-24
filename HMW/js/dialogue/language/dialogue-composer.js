@@ -180,6 +180,27 @@
       }
     }
 
+    if (typeof HMW.Dialogue.buildRoutedMeaning === "function") {
+      const routed = HMW.Dialogue.buildRoutedMeaning(id, {
+        variantSeed,
+        lexicalTargets,
+        slotOverrides
+      });
+
+      if (routed?.ok && routed.english) {
+        candidates.push({
+          meaningId: id,
+          ok: true,
+          patternId: routed.patternId || null,
+          english: routed.english,
+          slots: routed.slots || {},
+          source: "pattern_family_router",
+          lexicalScore: targetScore(routed.english, lexicalTargets),
+          weight: 5
+        });
+      }
+    }
+
     if (!candidates.length) {
       return {
         meaningId: id,
