@@ -114,9 +114,9 @@
   add("R092_POLICY_MEET_FALSE",700,{intentAny:["ask_to_meet"],policyEq:{"willingToMeet":false}},["DECLINE_REQUEST"],"policy_meet_false");
 
   // NPC psychology can influence what JS chooses, without inventing protagonist state.
-  add("R093_PSY_CARE_HIGH",530,{psychologyMin:{care:70}},["EXPRESS_CARE"],"npc_care_high");
-  add("R094_PSY_TENDER_HIGH",530,{psychologyMin:{tenderness:70}},["EXPRESS_CARE"],"npc_tenderness_high");
-  add("R095_PSY_EMPATHY_HIGH",540,{psychologyMin:{empathy:70}},["EXPRESS_SYMPATHY"],"npc_empathy_high");
+  add("R093_PSY_CARE_HIGH",530,{intentAny:["affirm_affection","seek_reassurance","request_reassurance"],psychologyMin:{care:70}},["EXPRESS_CARE"],"npc_care_high");
+  add("R094_PSY_TENDER_HIGH",530,{intentAny:["affirm_affection","seek_reassurance","request_reassurance"],psychologyMin:{tenderness:70}},["EXPRESS_CARE"],"npc_tenderness_high");
+  add("R095_PSY_EMPATHY_HIGH",540,{emotionMin:{sadness:45},psychologyMin:{empathy:70}},["EXPRESS_SYMPATHY"],"npc_empathy_for_sadness");
   add("R096_PSY_FEAR_LOSS_HIGH",550,{psychologyMin:{fearOfLoss:70}},["EXPRESS_FEAR_OF_LOSS"],"npc_fear_of_loss_high");
   add("R097_PSY_JEALOUSY_HIGH",520,{psychologyMin:{jealousy:70}},["EXPRESS_JEALOUSY"],"npc_jealousy_high");
   add("R098_PSY_ANGER_HIGH",520,{psychologyMin:{anger:70}},["EXPRESS_ANGER"],"npc_anger_high");
