@@ -6,7 +6,7 @@
     subtitle: '砂漠都市で暮らし、商いを始める',
 
     initialState: Object.freeze({
-      version: 8,
+      version: 9,
       day: 1,
       minutes: 360,
       temperature: 24,
@@ -42,6 +42,14 @@
         ]),
         begging: Object.freeze({
           stopChance: 0.24,
+          enforcement: Object.freeze({
+            startAfter: 20,
+            checkChance: 0.04,
+            warningsBeforeRemoval: 2,
+            cooldownMinutes: 45,
+            forcedScene: null,
+            authority: '近くの商人'
+          }),
           outcomes: Object.freeze([
             Object.freeze({weight:78, type:'none'}),
             Object.freeze({weight:17, type:'copper', minCopper:1, maxCopper:1}),
@@ -78,6 +86,14 @@
         ]),
         begging: Object.freeze({
           stopChance: 0.28,
+          enforcement: Object.freeze({
+            startAfter: 8,
+            checkChance: 0.11,
+            warningsBeforeRemoval: 2,
+            cooldownMinutes: 60,
+            forcedScene: 'outerPoor',
+            authority: '門番'
+          }),
           outcomes: Object.freeze([
             Object.freeze({weight:72, type:'none'}),
             Object.freeze({weight:22, type:'copper', minCopper:1, maxCopper:2}),
@@ -106,6 +122,14 @@
         ]),
         begging: Object.freeze({
           stopChance: 0.34,
+          enforcement: Object.freeze({
+            startAfter: 10,
+            checkChance: 0.09,
+            warningsBeforeRemoval: 2,
+            cooldownMinutes: 60,
+            forcedScene: 'smallGateOutside',
+            authority: '市場の見回り'
+          }),
           outcomes: Object.freeze([
             Object.freeze({weight:65, type:'none'}),
             Object.freeze({weight:25, type:'copper', minCopper:1, maxCopper:2}),
@@ -193,6 +217,14 @@
         name: '上級区',
         begging: Object.freeze({
           stopChance: 0.16,
+          enforcement: Object.freeze({
+            startAfter: 3,
+            checkChance: 0.22,
+            warningsBeforeRemoval: 1,
+            cooldownMinutes: 120,
+            forcedScene: 'cityCommon',
+            authority: '衛兵'
+          }),
           outcomes: Object.freeze([
             Object.freeze({weight:70, type:'none'}),
             Object.freeze({weight:15, type:'copper', minCopper:2, maxCopper:3}),
