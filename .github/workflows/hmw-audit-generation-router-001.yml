@@ -1,0 +1,109 @@
+name: Audit HMW generation router 001
+on:
+  push:
+    paths:
+      - '.github/workflows/hmw-audit-generation-router-001.yml'
+permissions:
+  contents: read
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Audit semantic generation router
+        run: |
+          node <<'NODE'
+          const fs=require('fs'),path=require('path'),vm=require('vm');
+          const root=process.cwd();
+          const ctx={console};ctx.window=ctx;ctx.HMW={};vm.createContext(ctx);
+          const run=p=>vm.runInContext(fs.readFileSync(path.join(root,p),'utf8'),ctx,{filename:p});
+          const langDir=path.join(root,'HMW/js/dialogue/language');
+          const names=fs.readdirSync(langDir).sort();
+
+          run('HMW/js/dialogue/dialogue-meanings.js');
+          run('HMW/js/dialogue/language/vocabulary-registry.js');
+          for(const name of names.filter(n=>/^vocabulary-\d+.*\.js$/.test(n))) run('HMW/js/dialogue/language/'+name);
+          run('HMW/js/dialogue/language/morphology-rules.js');
+          run('HMW/js/dialogue/language/word-selector.js');
+          for(const name of names.filter(n=>/^sentence-patterns-\d+.*\.js$/.test(n))) run('HMW/js/dialogue/language/'+name);
+          run('HMW/js/dialogue/language/pattern-slot-filler.js');
+          for(const name of names.filter(n=>/^meaning-pattern-map-\d+.*\.js$/.test(n))) run('HMW/js/dialogue/language/'+name);
+          for(const name of names.filter(n=>/^meaning-generation-specs-\d+.*\.js$/.test(n))) run('HMW/js/dialogue/language/'+name);
+          run('HMW/js/dialogue/language/generated-sentence-builder.js');
+          run('HMW/js/dialogue/language/semantic-generation-router.js');
+          run('HMW/js/dialogue/language/dialogue-composer.js');
+
+          const D=ctx.HMW.Dialogue;
+          const meaningIds=Object.keys(D.MEANINGS||{});
+          const patternCount=Object.keys(D.SENTENCE_PATTERNS||{}).length;
+          const vocabCount=D.Vocabulary?.entries?.length||0;
+
+          const routedStats=meaningIds.map(id=>{
+            const cap=D.getMeaningGenerationCapacity(id);
+            return cap;
+          });
+          const routed=routedStats.filter(x=>x.routedVariants>0);
+          const totalRoutedVariants=routed.reduce((s,x)=>s+x.routedVariants,0);
+
+          const rendered=meaningIds.map((id,index)=>D.composeMeaning(id,{
+            variantSeed:index,
+            lexicalTargets:[]
+          }));
+          const failed=rendered.filter(x=>!x?.ok||!String(x.english||'').trim());
+          const unresolved=rendered.filter(x=>/[{}]/.test(String(x.english||'')));
+
+          const collect=(id,seeds=40)=>{
+            const out=new Set();
+            const sources=new Set();
+            const patterns=new Set();
+            for(let seed=0;seed<seeds;seed++){
+              const x=D.composeMeaning(id,{variantSeed:seed,lexicalTargets:[]});
+              if(x?.ok&&x.english) out.add(x.english);
+              if(x?.source) sources.add(x.source);
+              if(x?.patternId) patterns.add(x.patternId);
+            }
+            return {id,count:out.size,sentences:[...out],sources:[...sources],patterns:[...patterns]};
+          };
+
+          const examples=[
+            collect('AFFIRM_LOVE'),
+            collect('EXPRESS_CONCERN'),
+            collect('OFFER_HELP'),
+            collect('ASK_FOR_HELP'),
+            collect('REQUEST_TIME'),
+            collect('ASK_TO_WAIT'),
+            collect('PROMISE_RETURN'),
+            collect('OFFER_CONTACT')
+          ];
+
+          const help=D.composeMeaning('ASK_FOR_HELP',{variantSeed:3,lexicalTargets:['help']});
+          const concern=D.composeMeaning('EXPRESS_CONCERN',{variantSeed:2,lexicalTargets:['worried']});
+          const time=D.composeMeaning('REQUEST_TIME',{variantSeed:4,lexicalTargets:['give']});
+
+          const checks={
+            vocabularyLoaded:vocabCount===5073,
+            patternsLoaded:patternCount===1000,
+            fullMeaningRender:meaningIds.length===177 && failed.length===0,
+            noUnresolvedSlots:unresolved.length===0,
+            routedMeanings:routed.length>=25,
+            routedVariants:totalRoutedVariants>=60,
+            routerUsed:rendered.some(x=>x.source==='semantic_router'),
+            requestVariety:examples.find(x=>x.id==='ASK_FOR_HELP').count>=3,
+            offerVariety:examples.find(x=>x.id==='OFFER_HELP').count>=2,
+            lexicalHelp:/help/i.test(help.english||''),
+            lexicalConcern:/worried/i.test(concern.english||''),
+            requestTime:/give/i.test(time.english||'')
+          };
+
+          console.log('AUDIT_RESULT '+JSON.stringify({
+            vocabCount,patternCount,meaningCount:meaningIds.length,
+            routedMeaningCount:routed.length,
+            totalRoutedVariants,
+            routed:routed.map(x=>({meaningId:x.meaningId,routedVariants:x.routedVariants,families:x.families,patternCount:x.patternIds.length})),
+            failed,unresolved,examples,help,concern,time,checks
+          }));
+          if(Object.values(checks).some(v=>v!==true)) process.exit(1);
+          NODE
