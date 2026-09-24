@@ -8,22 +8,22 @@
     R.push({ id, priority, when, meanings, reason });
 
   // Action requests, permissions, invitations and boundaries.
-  add("R401_REQ_TOUCH_ALLOW",780,{intentAny:["request_action"],policyEq:{"requestResponses.touch":true},boundaryNone:["do_not_touch"]},["ACCEPT_ACTION_REQUEST"],"request_touch_allowed");
-  add("R402_REQ_TOUCH_DENY",800,{intentAny:["request_action"],policyEq:{"requestResponses.touch":false}},["DECLINE_ACTION_REQUEST"],"request_touch_denied");
-  add("R403_REQ_HUG_ALLOW",780,{intentAny:["request_action"],policyEq:{"requestResponses.hug":true},boundaryNone:["do_not_hug","do_not_touch"]},["ACCEPT_ACTION_REQUEST"],"request_hug_allowed");
-  add("R404_REQ_HUG_DENY",800,{intentAny:["request_action"],policyEq:{"requestResponses.hug":false}},["DECLINE_ACTION_REQUEST"],"request_hug_denied");
-  add("R405_REQ_KISS_ALLOW",780,{intentAny:["request_action"],policyEq:{"requestResponses.kiss":true},boundaryNone:["do_not_kiss","do_not_touch"]},["ACCEPT_ACTION_REQUEST"],"request_kiss_allowed");
-  add("R406_REQ_KISS_DENY",800,{intentAny:["request_action"],policyEq:{"requestResponses.kiss":false}},["DECLINE_ACTION_REQUEST"],"request_kiss_denied");
-  add("R407_REQ_CALL_ALLOW",750,{intentAny:["request_action"],policyEq:{"requestResponses.call":true},boundaryNone:["do_not_call","do_not_contact"]},["ACCEPT_ACTION_REQUEST"],"request_call_allowed");
-  add("R408_REQ_CALL_DENY",780,{intentAny:["request_action"],policyEq:{"requestResponses.call":false}},["DECLINE_ACTION_REQUEST"],"request_call_denied");
-  add("R409_REQ_MESSAGE_ALLOW",750,{intentAny:["request_action"],policyEq:{"requestResponses.message":true},boundaryNone:["do_not_message","do_not_contact"]},["ACCEPT_ACTION_REQUEST"],"request_message_allowed");
-  add("R410_REQ_MESSAGE_DENY",780,{intentAny:["request_action"],policyEq:{"requestResponses.message":false}},["DECLINE_ACTION_REQUEST"],"request_message_denied");
-  add("R411_INVITE_TALK_ALLOW",750,{intentAny:["invite_action"],policyEq:{"invitationResponses.talk":true},boundaryNone:["stop_conversation"]},["ACCEPT_INVITATION"],"invite_talk_allowed");
-  add("R412_INVITE_TALK_DENY",750,{intentAny:["invite_action"],policyEq:{"invitationResponses.talk":false}},["DECLINE_INVITATION"],"invite_talk_denied");
-  add("R413_INVITE_GO_ALLOW",740,{intentAny:["invite_action"],policyEq:{"invitationResponses.go":true}},["ACCEPT_INVITATION"],"invite_go_allowed");
-  add("R414_INVITE_GO_DENY",740,{intentAny:["invite_action"],policyEq:{"invitationResponses.go":false}},["DECLINE_INVITATION"],"invite_go_denied");
-  add("R415_SUGGEST_WAIT_ALLOW",730,{intentAny:["suggest_action"],policyEq:{"suggestionResponses.wait":true}},["ACCEPT_SUGGESTION"],"suggest_wait_allowed");
-  add("R416_SUGGEST_WAIT_DENY",730,{intentAny:["suggest_action"],policyEq:{"suggestionResponses.wait":false}},["DECLINE_SUGGESTION"],"suggest_wait_denied");
+  add("R401_REQ_TOUCH_ALLOW",780,{intentAny:["request_action"],questionActionAny:["touch"],policyEq:{"requestResponses.touch":true},boundaryNone:["do_not_touch"]},["ACCEPT_ACTION_REQUEST"],"request_touch_allowed");
+  add("R402_REQ_TOUCH_DENY",800,{intentAny:["request_action"],questionActionAny:["touch"],policyEq:{"requestResponses.touch":false}},["DECLINE_ACTION_REQUEST"],"request_touch_denied");
+  add("R403_REQ_HUG_ALLOW",780,{intentAny:["request_action"],questionActionAny:["hug"],policyEq:{"requestResponses.hug":true},boundaryNone:["do_not_hug","do_not_touch"]},["ACCEPT_ACTION_REQUEST"],"request_hug_allowed");
+  add("R404_REQ_HUG_DENY",800,{intentAny:["request_action"],questionActionAny:["hug"],policyEq:{"requestResponses.hug":false}},["DECLINE_ACTION_REQUEST"],"request_hug_denied");
+  add("R405_REQ_KISS_ALLOW",780,{intentAny:["request_action"],questionActionAny:["kiss"],policyEq:{"requestResponses.kiss":true},boundaryNone:["do_not_kiss","do_not_touch"]},["ACCEPT_ACTION_REQUEST"],"request_kiss_allowed");
+  add("R406_REQ_KISS_DENY",800,{intentAny:["request_action"],questionActionAny:["kiss"],policyEq:{"requestResponses.kiss":false}},["DECLINE_ACTION_REQUEST"],"request_kiss_denied");
+  add("R407_REQ_CALL_ALLOW",750,{intentAny:["request_action"],questionActionAny:["call"],policyEq:{"requestResponses.call":true},boundaryNone:["do_not_call","do_not_contact"]},["ACCEPT_ACTION_REQUEST"],"request_call_allowed");
+  add("R408_REQ_CALL_DENY",780,{intentAny:["request_action"],questionActionAny:["call"],policyEq:{"requestResponses.call":false}},["DECLINE_ACTION_REQUEST"],"request_call_denied");
+  add("R409_REQ_MESSAGE_ALLOW",750,{intentAny:["request_action"],questionActionAny:["message"],policyEq:{"requestResponses.message":true},boundaryNone:["do_not_message","do_not_contact"]},["ACCEPT_ACTION_REQUEST"],"request_message_allowed");
+  add("R410_REQ_MESSAGE_DENY",780,{intentAny:["request_action"],questionActionAny:["message"],policyEq:{"requestResponses.message":false}},["DECLINE_ACTION_REQUEST"],"request_message_denied");
+  add("R411_INVITE_TALK_ALLOW",750,{intentAny:["invite_action"],questionActionAny:["talk"],policyEq:{"invitationResponses.talk":true},boundaryNone:["stop_conversation"]},["ACCEPT_INVITATION"],"invite_talk_allowed");
+  add("R412_INVITE_TALK_DENY",750,{intentAny:["invite_action"],questionActionAny:["talk"],policyEq:{"invitationResponses.talk":false}},["DECLINE_INVITATION"],"invite_talk_denied");
+  add("R413_INVITE_GO_ALLOW",740,{intentAny:["invite_action"],questionActionAny:["go"],policyEq:{"invitationResponses.go":true}},["ACCEPT_INVITATION"],"invite_go_allowed");
+  add("R414_INVITE_GO_DENY",740,{intentAny:["invite_action"],questionActionAny:["go"],policyEq:{"invitationResponses.go":false}},["DECLINE_INVITATION"],"invite_go_denied");
+  add("R415_SUGGEST_WAIT_ALLOW",730,{intentAny:["suggest_action"],questionActionAny:["wait"],policyEq:{"suggestionResponses.wait":true}},["ACCEPT_SUGGESTION"],"suggest_wait_allowed");
+  add("R416_SUGGEST_WAIT_DENY",730,{intentAny:["suggest_action"],questionActionAny:["wait"],policyEq:{"suggestionResponses.wait":false}},["DECLINE_SUGGESTION"],"suggest_wait_denied");
   add("R417_BOUNDARY_NO_ASK",990,{boundaryAny:["do_not_ask"]},["RESPECT_BOUNDARY"],"boundary_do_not_ask");
   add("R418_BOUNDARY_NO_ENTER",990,{boundaryAny:["do_not_enter"]},["RESPECT_BOUNDARY"],"boundary_do_not_enter");
   add("R419_BOUNDARY_NO_VISIT_STRICT",990,{boundaryAny:["do_not_visit"]},["RESPECT_BOUNDARY"],"boundary_do_not_visit_strict");
