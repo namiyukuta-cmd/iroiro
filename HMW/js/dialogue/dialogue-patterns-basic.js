@@ -119,6 +119,56 @@
       "Do not disappear without telling me.",
       "Please do not just disappear.",
       "Tell me before you go."
+    ],
+    EXPRESS_GRATITUDE: [
+      "Thank you.",
+      "Thank you for that.",
+      "I appreciate it."
+    ],
+    REASSURE_SAFETY: [
+      "You are safe with me.",
+      "I will not hurt you.",
+      "It is all right. You are safe."
+    ],
+    EXPRESS_MISSING: [
+      "I missed you.",
+      "I have missed you.",
+      "I wanted to see you."
+    ],
+    ASK_TO_MEET: [
+      "Can I see you again?",
+      "I want to see you again.",
+      "Can we meet again?"
+    ],
+    EXPRESS_JEALOUSY: [
+      "I was jealous.",
+      "I am jealous.",
+      "I did not like seeing you with someone else."
+    ],
+    ASK_ABOUT_OTHER_PERSON: [
+      "Who was that?",
+      "Who is that person?",
+      "Do you know that person well?"
+    ],
+    AGREE_REQUEST: [
+      "All right. I will do it.",
+      "Yes. I can do that.",
+      "Okay. I agree."
+    ],
+    DECLINE_REQUEST: [
+      "No. I cannot do that.",
+      "I do not want to do that.",
+      "I am sorry, but I cannot agree."
+    ],
+    CONFIRM_TRUST: [
+      "I trust you.",
+      "Yes. I believe you.",
+      "I still trust you."
+    ],
+    ASK_IF_OKAY: [
+      "Are you all right?",
+      "Are you okay?",
+      "Do you feel all right?"
     ]
   };
 })();
