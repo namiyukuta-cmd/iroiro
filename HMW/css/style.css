@@ -76,3 +76,23 @@
  .modal-backdrop.travel-popup .travel-destination{min-height:36px;padding:4px;font-size:13px}
  .modal-backdrop.travel-popup .travel-map-node small{font-size:9px}
 }
+
+/* 2026-09-25 compact header + no redundant action rail */
+.topbar{gap:4px}
+.status-box,.weather-box{min-height:42px;border-radius:10px}
+.calendar-icon{width:38px;height:33px;padding-bottom:2px}
+.calendar-icon::before{height:11px}
+.calendar-icon b{font-size:19px!important}
+.alarm-icon{width:36px;height:36px}
+.alarm-icon b{font-size:15px!important}
+.coin-icon{width:22px;height:22px}
+.money-status b{font-size:18px!important}
+.weather-box{font-size:23px}
+.stats{gap:3px}
+.stat{min-height:42px;border-radius:9px;padding:2px 1px;font-size:13px;font-weight:650}
+.stat b{margin-top:2px;font-size:18px}
+.cycle-row{min-height:34px;padding:1px 5px 2px}
+.cycle-head{padding-bottom:1px;font-size:12px}
+.cycle-head b{font-size:12px}
+.cycle-day{height:14px;font-size:8px}
+.side-actions{grid-template-rows:42px repeat(3,minmax(0,1fr))}
