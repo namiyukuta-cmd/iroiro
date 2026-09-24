@@ -53,7 +53,11 @@ jobs:
           const test=c=>{
             const plan=D.planResponse(c);
             const prioritized=D.prioritizeResponseMeanings(plan.meaningIds);
-            const selected=D.selectResponseMeanings(prioritized,{boundaryActive:plan.boundaryActive,maxMeanings:5});
+            const selected=D.selectResponseMeanings(prioritized,{
+              boundaryActive:plan.boundaryActive,
+              maxMeanings:5,
+              preferredMeaningIds:plan.preferredMeaningIds||[]
+            });
             return {plan,selected,prioritized};
           };
 
@@ -137,8 +141,9 @@ jobs:
             noMissingMeanings:missingMeaningIds.length===0,
             multiPrimaryWhere:
               multiQuestion.plan.matchedResponseRuleIds.includes('R1841_MULTI_PRIMARY_WHERE') &&
+              multiQuestion.plan.preferredMeaningIds.includes('STATE_CURRENT_LOCATION') &&
               multiQuestion.selected.includes('STATE_CURRENT_LOCATION') &&
-              multiQuestion.selected.indexOf('STATE_CURRENT_LOCATION') <= multiQuestion.selected.indexOf('STATE_RELATIONSHIP_STATUS'),
+              multiQuestion.selected.indexOf('STATE_CURRENT_LOCATION') < multiQuestion.selected.indexOf('STATE_RELATIONSHIP_STATUS'),
             primaryPermissionDenied:
               primaryPermissionDenied.plan.matchedResponseRuleIds.includes('R1825_PRIMARY_PERMISSION_KISS_DENY') &&
               primaryPermissionDenied.plan.suppressedMeaningIds.includes('GRANT_PERMISSION') &&
@@ -178,3 +183,5 @@ jobs:
           }));
           if(Object.values(checks).some(v=>v!==true)) process.exit(1);
           NODE
+
+# rerun after primary meaning preference support
