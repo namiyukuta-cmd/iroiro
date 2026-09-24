@@ -93,6 +93,10 @@
   const contextEl = document.getElementById("character-context");
   const detailsEl = document.getElementById("details");
 
+  // The same engine helper is also loaded by the actual game screen.
+  // Only attach the standalone test-page UI when those elements exist.
+  if (!inputEl || !characterEl || !englishEl || !meaningEl || !proofEl || !contextEl || !detailsEl) return;
+
   const render = () => {
     try {
       const analysis = JSON.parse(inputEl.value);
