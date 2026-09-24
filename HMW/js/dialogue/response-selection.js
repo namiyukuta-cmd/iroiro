@@ -118,7 +118,8 @@
 
     const hasSpecificAnswer = ordered.some(id => DIRECT_ANSWER.has(id));
     const hasSpecificRequestResponse = ordered.some(id => REQUEST_RESPONSE.has(id));
-    if (hasSpecificAnswer || hasSpecificRequestResponse) {
+    const hasSpecificCoreRelation = ordered.some(id => CORE_RELATION.has(id));
+    if (hasSpecificAnswer || hasSpecificRequestResponse || hasSpecificCoreRelation) {
       ordered = ordered.filter(id =>
         id !== "ANSWER_UNKNOWN" &&
         id !== "ASK_FOR_ANSWER" &&
