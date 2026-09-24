@@ -10,7 +10,7 @@
         slots:["RELATIONSHIP"]
       },
       ANSWER_FEELINGS_TOWARD_HEROINE:{
-        tokens:["I feel","{FEELINGS}","about you"],
+        tokens:["I feel","{FEELINGS}"],
         slots:["FEELINGS"]
       }
     }
