@@ -1,8 +1,9 @@
 (() => {
   "use strict";
 
-  const version = "20260924-router-audit";
+  const version = "20260924-router-constraints";
   const files = [
+    "dialogue-meanings.js",
     "language/vocabulary-registry.js",
     "language/vocabulary-001-function.js",
     "language/vocabulary-002-verbs.js",
@@ -182,6 +183,6 @@
 
   const base = "js/dialogue/";
   document.write(files.map(file =>
-    `<script src="${base}${file}?v=${version}"><\\/script>`
+    `<script src="${base}${file}?v=${version}"></script>`
   ).join(""));
 })();
