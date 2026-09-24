@@ -49,6 +49,10 @@
 
     if (w.questionKindAny && !questions.some(q => arr(w.questionKindAny).includes(q?.kind))) return false;
 
+    if (w.questionActionAny && !questions.some(q => arr(w.questionActionAny).includes(q?.action))) return false;
+    if (w.questionTargetAny && !questions.some(q => arr(w.questionTargetAny).includes(q?.target))) return false;
+    if (w.questionRequestedFieldAny && !questions.some(q => arr(w.questionRequestedFieldAny).includes(q?.requestedField))) return false;
+
     if (w.claimConceptAny) {
       const claims = arr(a.claims);
       if (!claims.some(claim => arr(w.claimConceptAny).includes(claim?.concept))) return false;
