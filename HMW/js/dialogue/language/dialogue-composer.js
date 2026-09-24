@@ -116,6 +116,27 @@
       });
     });
 
+    if (typeof HMW.Dialogue.getMeaningGenerationRoutes === "function") {
+      const routed = HMW.Dialogue.getMeaningGenerationRoutes(id, {
+        variantSeed,
+        lexicalTargets,
+        slotOverrides
+      });
+
+      for (const route of routed) {
+        candidates.push({
+          meaningId: id,
+          ok: true,
+          patternId: route.patternId || null,
+          english: route.english,
+          slots: route.slots || {},
+          source: "semantic_router",
+          lexicalScore: targetScore(route.english, lexicalTargets),
+          weight: Math.max(1, Number(route.weight) || 1) + (preferGenerated ? 8 : 2)
+        });
+      }
+    }
+
     if (typeof HMW.Dialogue.buildGeneratedMeaning === "function") {
       const generated = HMW.Dialogue.buildGeneratedMeaning(id, {
         variantSeed,
@@ -176,11 +197,18 @@
       ? candidates.filter(item => item.lexicalScore === bestLexicalScore)
       : candidates;
 
+    const routedPreferred =
+      preferGenerated &&
+      lexicalPreferred.some(item => item.source === "semantic_router")
+        ? lexicalPreferred.filter(item => item.source === "semantic_router")
+        : lexicalPreferred;
+
     const generatedPreferred =
       preferGenerated &&
-      lexicalPreferred.some(item => item.source === "generation_spec")
-        ? lexicalPreferred.filter(item => item.source === "generation_spec")
-        : lexicalPreferred;
+      !routedPreferred.some(item => item.source === "semantic_router") &&
+      routedPreferred.some(item => item.source === "generation_spec")
+        ? routedPreferred.filter(item => item.source === "generation_spec")
+        : routedPreferred;
 
     const selected = weightedPick(generatedPreferred, variantSeed);
 
@@ -221,6 +249,9 @@
         .join(" "),
       missingMeaningIds: results
         .filter(item => !item.ok)
+        .map(item => item.meaningId),
+      routedMeaningIds: results
+        .filter(item => item.ok && item.source === "semantic_router")
         .map(item => item.meaningId),
       generatedMeaningIds: results
         .filter(item => item.ok && item.source === "generation_spec")
