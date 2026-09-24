@@ -6,7 +6,7 @@
     subtitle: '砂漠都市で暮らし、商いを始める',
 
     initialState: Object.freeze({
-      version: 11,
+      version: 12,
       day: 1,
       minutes: 360,
       temperature: 24,
@@ -28,6 +28,12 @@
       market: Object.freeze({
         stage: 0,
         feePaidDay: 0
+      }),
+      trade: Object.freeze({
+        delivery: Object.freeze({
+          status: 'none',
+          completed: false
+        })
       }),
       beggingHistory: Object.freeze({}),
       sellingHistory: Object.freeze({}),
