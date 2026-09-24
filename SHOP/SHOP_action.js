@@ -10,6 +10,7 @@
   const dialog = $('actionDialog');
   const passerbyLane = $('passerbyLane');
   const passerbyPopup = $('passerbyPopup');
+  const speedButtons = Array.from(document.querySelectorAll('[data-action-speed]'));
 
   let stateRef = null;
   let mode = 'beg';
@@ -195,13 +196,6 @@
       window.SHOP_CURRENCY.formatAmount(price) + 'で1個売れた。';
   }
 
-  function advancePasserbyTime(){
-    if (window.SHOP_TIME && stateRef) {
-      window.SHOP_TIME.advance(stateRef, 15, mode === 'sell' ? 'selling' : 'begging');
-      refreshPersistentUi();
-    }
-  }
-
   function clearPasserby(){
     if(passerbyTimer){
       clearTimeout(passerbyTimer);
@@ -275,7 +269,6 @@
               image.style.left=fromLeft ? '124%' : '-24%';
 
               passerbyTimer=setTimeout(()=>{
-                advancePasserbyTime();
                 clearPasserby();
                 scheduleNextPasserby(650 + Math.round(Math.random()*900));
               },2450);
@@ -286,12 +279,23 @@
           image.style.left=fromLeft ? '124%' : '-24%';
 
           passerbyTimer=setTimeout(()=>{
-            advancePasserbyTime();
             clearPasserby();
             scheduleNextPasserby(500 + Math.round(Math.random()*850));
           },5250);
         }
       });
+    });
+  }
+
+  function setTimeSpeed(multiplier){
+    const value=[1,2,4].includes(Number(multiplier)) ? Number(multiplier) : 1;
+    if(window.SHOP_TIME && window.SHOP_TIME.setRealtimeMultiplier){
+      window.SHOP_TIME.setRealtimeMultiplier(value);
+    }
+    speedButtons.forEach(button=>{
+      const active=Number(button.dataset.actionSpeed)===value;
+      button.classList.toggle('active',active);
+      button.setAttribute('aria-pressed',active ? 'true' : 'false');
     });
   }
 
@@ -322,6 +326,7 @@
     screen.classList.add('is-open');
 
     if(!setMode(initialMode)) setMode('beg');
+    setTimeSpeed(1);
 
     clearPasserby();
     scheduleNextPasserby(350);
@@ -334,6 +339,7 @@
     const app=document.querySelector('.app');
     if(app) app.classList.remove('action-open');
     dialog.classList.remove('is-open');
+    setTimeSpeed(1);
     refreshPersistentUi();
   }
 
@@ -343,6 +349,12 @@
   }
 
   back.addEventListener('click',close);
+  speedButtons.forEach(button=>{
+    button.addEventListener('click',()=>{
+      setTimeSpeed(button.dataset.actionSpeed);
+    });
+  });
+  setTimeSpeed(1);
 
   window.SHOP_ACTION=Object.freeze({
     open,
