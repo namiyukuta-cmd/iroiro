@@ -29,10 +29,27 @@ for (const tone of [{},{style:"neutral"}]) {
 const help=run({intents:["greet","ask_for_help"]});
 assert(meanings(help).includes("OFFER_HELP"));
 assert(!meanings(help).some(id=>["EXPRESS_CARE","EXPRESS_JOY","EXPRESS_SYMPATHY"].includes(id)));
+
+const exactSupportGreeting=run({
+  rawText:"アーロンさん。初めまして。支援の相談に伺いました。",
+  intents:["greet","ask_to_talk","ask_for_help"],
+  emotions:{},
+  focusConcepts:[],
+  lexicalTargets:["support","help"],
+  tone:{style:"polite",positivity:50,hesitation:0}
+});
+assert(meanings(exactSupportGreeting).includes("RETURN_GREETING"));
+assert(meanings(exactSupportGreeting).includes("OFFER_HELP"));
+assert(!meanings(exactSupportGreeting).some(id=>["EXPRESS_CARE","EXPRESS_JOY","EXPRESS_SYMPATHY"].includes(id)));
+
+const when=run({intents:["ask_when"],questions:[{kind:"when"}],emotions:{},tone:{style:"neutral"}});
+assert(meanings(when).includes("STATE_AVAILABLE_TIME"));
+assert(!/\bI am today\b/i.test(when.english), when.english);
+assert(/\bavailable today\b/i.test(when.english), when.english);
 const sad=run({intents:["report_event"],emotions:{sadness:70}});
 assert(meanings(sad).includes("EXPRESS_SYMPATHY"));
 const reassurance=run({intents:["request_reassurance"]});
 assert(meanings(reassurance).includes("EXPRESS_CARE"));
 const joyful=run({intents:["greet"],emotions:{joy:70}});
 assert(meanings(joyful).includes("EXPRESS_JOY"));
-console.log("PASS: neutral greetings, greeting with help, sad report, reassurance, joyful greeting");
+console.log("PASS: relevance, exact support greeting, available-time grammar, grounded emotion");
