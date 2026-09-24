@@ -26,12 +26,18 @@
     './asset/Npc/npc_traveler_01.png'
   ]);
 
-  const BEG_LINES = Object.freeze([
-    '「……腹が減ってるのか？」',
-    '「今日は暑いな」',
-    '「これで何か食べな」',
-    '「ここでずっと座ってるのか？」',
-    '「……少しだけだぞ」'
+  const BEG_GIVE_LINES = Object.freeze([
+    '「……少しだけだぞ」',
+    '「これで何か口にしな」',
+    '「今日はこれだけだ」',
+    '「困っているなら持っていけ」'
+  ]);
+
+  const BEG_NONE_LINES = Object.freeze([
+    '「悪いが、余裕がない」',
+    '「今日は勘弁してくれ」',
+    '「……すまない」',
+    '「神の加護を」'
   ]);
 
   const SELL_LINES = Object.freeze([
@@ -49,6 +55,77 @@
     const low=Math.floor(Number(min)||0);
     const high=Math.max(low,Math.floor(Number(max)||0));
     return low + Math.floor(Math.random()*(high-low+1));
+  }
+
+  function inventory(){
+    if(!stateRef.inventory || typeof stateRef.inventory!=='object') stateRef.inventory={};
+    return stateRef.inventory;
+  }
+
+  function addInventoryItem(itemId,count=1){
+    const inv=inventory();
+    inv[itemId]=(Number(inv[itemId])||0)+Math.max(1,Math.floor(Number(count)||1));
+  }
+
+  function beggingHistoryForScene(){
+    if(!stateRef.beggingHistory || typeof stateRef.beggingHistory!=='object'){
+      stateRef.beggingHistory={};
+    }
+    const key=stateRef.sceneKey || 'outerPoor';
+    const day=Math.max(1,Math.floor(Number(stateRef.day)||1));
+    const existing=stateRef.beggingHistory[key];
+
+    if(!existing || Number(existing.day)!==day){
+      stateRef.beggingHistory[key]={day,attempts:0};
+    }
+    return stateRef.beggingHistory[key];
+  }
+
+  function beggingFatigueMultiplier(attempts){
+    const n=Math.max(0,Math.floor(Number(attempts)||0));
+    if(n<5) return 1;
+    if(n<10) return 0.8;
+    if(n<15) return 0.6;
+    if(n<25) return 0.45;
+    return 0.3;
+  }
+
+  function prayerCharityMultiplier(){
+    if(!window.SHOP_TIME || !Array.isArray(window.SHOP_TIME.prayers) || !stateRef) return 1;
+    const now=((Number(stateRef.minutes)||0)%1440+1440)%1440;
+    const nearPrayer=window.SHOP_TIME.prayers.some(prayer=>
+      now>=prayer.minute-20 && now<prayer.minute+30
+    );
+    return nearPrayer ? 1.35 : 1;
+  }
+
+  function timeOfDayBeggingMultiplier(){
+    const now=((Number(stateRef && stateRef.minutes)||0)%1440+1440)%1440;
+    if(now<300 || now>=1320) return 0.25;
+    if(now<480) return 0.75;
+    if(now<720) return 1;
+    if(now<900) return 0.7;
+    if(now<1080) return 1.05;
+    if(now<1260) return 0.9;
+    return 0.6;
+  }
+
+  function weatherBeggingMultiplier(){
+    const weather=String(stateRef && stateRef.weather || '');
+    if(weather.includes('砂')) return 0.65;
+    if(weather.includes('雨')) return 0.7;
+    return 1;
+  }
+
+  function effectiveBeggingStopChance(){
+    const rule=currentBeggingRule();
+    const history=beggingHistoryForScene();
+    const chance=(Number(rule.stopChance)||0) *
+      beggingFatigueMultiplier(history.attempts) *
+      timeOfDayBeggingMultiplier() *
+      prayerCharityMultiplier() *
+      weatherBeggingMultiplier();
+    return Math.max(0.03,Math.min(0.75,chance));
   }
 
   function refreshPersistentUi(){
@@ -135,32 +212,46 @@
         };
   }
 
-  function rollBeggingDonation(){
+  function rollBeggingOutcome(){
     const rule=currentBeggingRule();
     const outcomes=Array.isArray(rule.outcomes) ? rule.outcomes : [];
     const total=outcomes.reduce((sum,row)=>sum+Math.max(0,Number(row.weight)||0),0);
-    if(total<=0) return 0;
+    if(total<=0) return {type:'none'};
 
     let roll=Math.random()*total;
     for(const row of outcomes){
       roll-=Math.max(0,Number(row.weight)||0);
-      if(roll<0){
-        return randomInt(row.minCopper,row.maxCopper);
-      }
+      if(roll<0) return row;
     }
-    return 0;
+    return {type:'none'};
   }
 
   function handleBeggingResult(){
-    const line=randomItem(BEG_LINES);
-    const donation=rollBeggingDonation();
+    const outcome=rollBeggingOutcome();
 
+    if(!outcome || outcome.type==='none'){
+      return randomItem(BEG_NONE_LINES) + '　何も置かずに去った。';
+    }
+
+    if(outcome.type==='item' && outcome.itemId){
+      const count=Math.max(1,Math.floor(Number(outcome.count)||1));
+      addInventoryItem(outcome.itemId,count);
+      refreshPersistentUi();
+      const item=window.SHOP_ITEMS && window.SHOP_ITEMS.all
+        ? window.SHOP_ITEMS.all[outcome.itemId]
+        : null;
+      const name=item ? item.name : outcome.itemId;
+      return randomItem(BEG_GIVE_LINES) + '　' + name + 'を' + count + '個もらった。';
+    }
+
+    const donation=randomInt(outcome.minCopper,outcome.maxCopper);
     if(donation<=0){
-      return line + '　何も置かずに去った。';
+      return randomItem(BEG_NONE_LINES) + '　何も置かずに去った。';
     }
 
     addMoney(donation);
-    return line + '　' + window.SHOP_CURRENCY.formatAmount(donation) + 'を恵んでもらった。';
+    return randomItem(BEG_GIVE_LINES) + '　' +
+      window.SHOP_CURRENCY.formatAmount(donation) + 'を恵んでもらった。';
   }
 
   function handleSellingResult(){
@@ -232,11 +323,15 @@
     clearPasserby();
 
     const fromLeft=Math.random()>=0.5;
-    const beggingRule=currentBeggingRule();
     const stopChance=mode==='beg'
-      ? Math.max(0,Math.min(1,Number(beggingRule.stopChance)||0))
+      ? effectiveBeggingStopChance()
       : 0.48;
     const willStop=Math.random()<stopChance;
+
+    if(mode==='beg'){
+      const history=beggingHistoryForScene();
+      history.attempts=Math.max(0,Math.floor(Number(history.attempts)||0))+1;
+    }
     const stopAt=38 + Math.round(Math.random()*24);
 
     const image=document.createElement('img');
