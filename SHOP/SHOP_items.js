@@ -116,6 +116,33 @@
       hiddenWhenEmpty:true
     }),
 
+    trade_cloth_bundle: Object.freeze({
+      id:'trade_cloth_bundle',
+      name:'布束',
+      sellMinCopper:6,
+      sellMaxCopper:8,
+      hiddenWhenEmpty:true
+    }),
+    trade_spice_packet: Object.freeze({
+      id:'trade_spice_packet',
+      name:'香辛料小包',
+      sellMinCopper:9,
+      sellMaxCopper:12,
+      hiddenWhenEmpty:true
+    }),
+    trade_oil_jar: Object.freeze({
+      id:'trade_oil_jar',
+      name:'油壺',
+      sellMinCopper:11,
+      sellMaxCopper:14,
+      hiddenWhenEmpty:true
+    }),
+    delivery_parcel: Object.freeze({
+      id:'delivery_parcel',
+      name:'商人の荷包',
+      hiddenWhenEmpty:true
+    }),
+
     food_flatbread: Object.freeze({
       id:'food_flatbread',
       name:'平焼きパン',
