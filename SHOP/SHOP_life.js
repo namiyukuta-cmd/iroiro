@@ -137,7 +137,7 @@
 
   function activeRoom(state){
     ensureState(state);
-    return Number(state.housing.roomPaidUntilDay)||0 >= Math.max(1,Number(state.day)||1);
+    return (Number(state.housing.roomPaidUntilDay)||0) >= Math.max(1,Number(state.day)||1);
   }
 
   function housingLabel(state){
@@ -280,6 +280,10 @@
   function upgradeMarket(state){
     ensureState(state);
 
+    if(state.sceneKey!=='cityCommon'){
+      return {ok:false,message:'露店の手続きは市内・庶民街で行う。'};
+    }
+
     if(state.market.stage>=2){
       return {ok:false,message:'すでに市場の正式な露店を使える。'};
     }
@@ -315,6 +319,10 @@
 
   function payMarketFee(state){
     ensureState(state);
+
+    if(state.sceneKey!=='cityCommon'){
+      return {ok:false,message:'場所代は市内・庶民街で支払う。'};
+    }
 
     const stage=marketStage(state);
     if(state.market.stage<=0){
