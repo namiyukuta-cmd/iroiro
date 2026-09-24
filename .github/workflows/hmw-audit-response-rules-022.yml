@@ -1,0 +1,199 @@
+name: Audit HMW response rules 022
+on:
+  push:
+    paths:
+      - '.github/workflows/hmw-audit-response-rules-022.yml'
+permissions:
+  contents: read
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Audit response rules
+        run: |
+          node <<'NODE'
+          const fs=require('fs'),path=require('path'),vm=require('vm');
+          const root=process.cwd();
+          const ctx={console};ctx.window=ctx;ctx.HMW={};vm.createContext(ctx);
+          const run=p=>vm.runInContext(fs.readFileSync(path.join(root,p),'utf8'),ctx,{filename:p});
+          const files=[
+            'HMW/js/dialogue/dialogue-input.js',
+            'HMW/js/dialogue/analysis-schema.js',
+            'HMW/js/dialogue/claim-rules.js',
+            'HMW/js/dialogue/dialogue-meanings.js',
+            'HMW/js/dialogue/language/lexical-target-rules.js',
+            'HMW/js/dialogue/response-rule-engine.js'
+          ];
+          for(let i=1;i<=22;i++){
+            const n=String(i).padStart(3,'0');
+            const found=fs.readdirSync(path.join(root,'HMW/js/dialogue'))
+              .find(name=>name.startsWith('response-rules-'+n+'-')&&name.endsWith('.js'));
+            if(!found) throw new Error('missing response rules file '+n);
+            files.push('HMW/js/dialogue/'+found);
+          }
+          files.push(
+            'HMW/js/dialogue/response-planner.js',
+            'HMW/js/dialogue/response-priority.js',
+            'HMW/js/dialogue/response-selection.js',
+            'HMW/js/dialogue/response-history.js'
+          );
+          files.forEach(run);
+
+          const D=ctx.HMW.Dialogue;
+          const rules=D.RESPONSE_RULES||[];
+          const ids=rules.map(r=>r.id);
+          const dupIds=ids.filter((id,i)=>ids.indexOf(id)!==i);
+          const missingMeaningIds=[...new Set(rules.flatMap(r=>r.meanings||[]).filter(id=>!D.MEANINGS[id]))];
+
+          const test=c=>{
+            const plan=D.planResponse(c);
+            const prioritized=D.prioritizeResponseMeanings(plan.meaningIds);
+            const selected=D.selectResponseMeanings(prioritized,{
+              boundaryActive:plan.boundaryActive,
+              maxMeanings:5,
+              preferredMeaningIds:plan.preferredMeaningIds||[]
+            });
+            return {plan,selected};
+          };
+
+          const threeQuestions=test({
+            analysis:{
+              intents:['ask_where','ask_when','ask_relationship_status'],
+              questions:[
+                {kind:'where',requestedField:'currentLocation'},
+                {kind:'when',requestedField:'returnTime'},
+                {kind:'relationship_status',requestedField:'relationshipStatus'}
+              ]
+            },
+            characterFacts:{currentLocation:'Tokyo',returnTime:'21:00',relationshipStatus:'married'},
+            characterPolicy:{},
+            relationship:{stage:'partner',familiarity:90,trust:90,goodwill:90,flags:{}}
+          });
+
+          const repeatedWhen=test({
+            analysis:{
+              intents:['ask_when'],
+              questions:[
+                {kind:'when',requestedField:'returnTime'},
+                {kind:'when',requestedField:'availableTime'}
+              ]
+            },
+            characterFacts:{returnTime:'21:00',availableTime:'18:00'},
+            characterPolicy:{},
+            relationship:{stage:'friend',familiarity:70,trust:70,goodwill:70,flags:{}}
+          });
+
+          const thirdPermission=test({
+            analysis:{
+              intents:['ask_where','ask_when','ask_permission_action'],
+              questions:[
+                {kind:'where',requestedField:'currentLocation'},
+                {kind:'when',requestedField:'returnTime'},
+                {kind:'permission',action:'kiss'}
+              ]
+            },
+            characterFacts:{currentLocation:'Osaka',returnTime:'22:00'},
+            characterPolicy:{permissions:{kiss:false}},
+            relationship:{stage:'partner',familiarity:90,trust:90,goodwill:90,desire:80,conscience:80,malice:0,flags:{}}
+          });
+
+          const thirdBoundary=test({
+            analysis:{
+              intents:['ask_where','ask_when','invite_action'],
+              questions:[
+                {kind:'where',requestedField:'currentLocation'},
+                {kind:'when',requestedField:'returnTime'},
+                {kind:'invitation',action:'visit'}
+              ],
+              boundaries:['do_not_visit']
+            },
+            characterFacts:{currentLocation:'Kyoto',returnTime:'20:00'},
+            characterPolicy:{invitationResponses:{visit:true}},
+            relationship:{stage:'partner',familiarity:90,trust:90,goodwill:90,flags:{}}
+          });
+
+          const indexedClaims=test({
+            analysis:{
+              focusConcepts:['love','trust','betrayal'],
+              claims:[
+                {concept:'love',type:'speaker_fear',polarity:false,certainty:'medium'},
+                {concept:'trust',type:'speaker_suspicion',polarity:false,certainty:'high'},
+                {concept:'betrayal',type:'accusation',polarity:true,certainty:'high'}
+              ]
+            },
+            characterFacts:{lovesHeroine:true,trustsHeroine:true,intendsBetrayal:false,loyalToHeroine:true},
+            characterPolicy:{},
+            relationship:{stage:'partner',familiarity:90,trust:80,goodwill:90,flags:{}}
+          });
+
+          const onlyTwo=test({
+            analysis:{
+              questions:[
+                {kind:'where',requestedField:'currentLocation'},
+                {kind:'when',requestedField:'returnTime'}
+              ]
+            },
+            characterFacts:{currentLocation:'Tokyo',returnTime:'19:00'},
+            relationship:{stage:'friend',familiarity:70,trust:70,goodwill:70,flags:{}}
+          });
+
+          const checks={
+            ruleCount:rules.length===2200,
+            uniqueRuleIds:new Set(ids).size===2200,
+            noMissingMeanings:missingMeaningIds.length===0,
+            threeQuestionOrder:
+              threeQuestions.plan.matchedResponseRuleIds.includes('R2102_Q2_RETURN_TIME') &&
+              threeQuestions.plan.matchedResponseRuleIds.includes('R2124_Q3_REL_STATUS') &&
+              threeQuestions.selected.includes('STATE_CURRENT_LOCATION') &&
+              threeQuestions.selected.includes('STATE_RETURN_TIME') &&
+              threeQuestions.selected.includes('STATE_RELATIONSHIP_STATUS') &&
+              threeQuestions.selected.indexOf('STATE_CURRENT_LOCATION') <
+                threeQuestions.selected.indexOf('STATE_RETURN_TIME') &&
+              threeQuestions.selected.indexOf('STATE_RETURN_TIME') <
+                threeQuestions.selected.indexOf('STATE_RELATIONSHIP_STATUS'),
+            repeatedWhen:
+              repeatedWhen.plan.matchedResponseRuleIds.includes('R2103_Q2_AVAILABLE_TIME') &&
+              repeatedWhen.selected.includes('STATE_RETURN_TIME') &&
+              repeatedWhen.selected.includes('STATE_AVAILABLE_TIME'),
+            thirdPermission:
+              thirdPermission.plan.matchedResponseRuleIds.includes('R2154_Q3_PERMISSION_KISS_DENY') &&
+              thirdPermission.plan.suppressedMeaningIds.includes('GRANT_PERMISSION') &&
+              thirdPermission.selected.includes('DENY_PERMISSION') &&
+              !thirdPermission.selected.includes('GRANT_PERMISSION'),
+            thirdBoundary:
+              thirdBoundary.plan.matchedResponseRuleIds.includes('R2200_Q3_SUGGEST_VISIT_BOUNDARY')===false &&
+              thirdBoundary.plan.matchedResponseRuleIds.includes('R2198_Q3_INVITE_VISIT_BOUNDARY') &&
+              thirdBoundary.plan.suppressedMeaningIds.includes('ACCEPT_INVITATION') &&
+              thirdBoundary.selected.includes('RESPECT_BOUNDARY') &&
+              thirdBoundary.selected.includes('DECLINE_INVITATION'),
+            indexedClaims:
+              indexedClaims.plan.matchedResponseRuleIds.includes('R2165_C2_TRUST_TRUE') &&
+              indexedClaims.plan.matchedResponseRuleIds.includes('R2173_C3_BETRAY_FALSE') &&
+              indexedClaims.selected.includes('CONFIRM_TRUST') &&
+              indexedClaims.selected.includes('DENY_BETRAYAL') &&
+              !indexedClaims.selected.includes('ADMIT_BETRAYAL'),
+            noThirdLeak:
+              !onlyTwo.plan.matchedResponseRuleIds.some(id=>/^R21(2[1-9]|3[0-9]|4[0])_Q3_/.test(id))
+          };
+
+          console.log('AUDIT_RESULT '+JSON.stringify({
+            ruleCount:rules.length,
+            uniqueRuleIds:new Set(ids).size,
+            dupIds,
+            missingMeaningIds,
+            checks,
+            cases:{
+              threeQuestions:{meaningIds:threeQuestions.plan.meaningIds,preferred:threeQuestions.plan.preferredMeaningIds,selected:threeQuestions.selected,matched:threeQuestions.plan.matchedResponseRuleIds},
+              repeatedWhen:{meaningIds:repeatedWhen.plan.meaningIds,preferred:repeatedWhen.plan.preferredMeaningIds,selected:repeatedWhen.selected,matched:repeatedWhen.plan.matchedResponseRuleIds},
+              thirdPermission:{meaningIds:thirdPermission.plan.meaningIds,suppressed:thirdPermission.plan.suppressedMeaningIds,preferred:thirdPermission.plan.preferredMeaningIds,selected:thirdPermission.selected,matched:thirdPermission.plan.matchedResponseRuleIds},
+              thirdBoundary:{meaningIds:thirdBoundary.plan.meaningIds,suppressed:thirdBoundary.plan.suppressedMeaningIds,preferred:thirdBoundary.plan.preferredMeaningIds,selected:thirdBoundary.selected,matched:thirdBoundary.plan.matchedResponseRuleIds},
+              indexedClaims:{meaningIds:indexedClaims.plan.meaningIds,preferred:indexedClaims.plan.preferredMeaningIds,selected:indexedClaims.selected,matched:indexedClaims.plan.matchedResponseRuleIds},
+              onlyTwo:{meaningIds:onlyTwo.plan.meaningIds,matched:onlyTwo.plan.matchedResponseRuleIds}
+            }
+          }));
+          if(Object.values(checks).some(v=>v!==true)) process.exit(1);
+          NODE
