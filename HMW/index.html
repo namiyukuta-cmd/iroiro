@@ -7,7 +7,7 @@
   <meta http-equiv="Pragma" content="no-cache" />
   <meta http-equiv="Expires" content="0" />
   <title>HMW</title>
-  <link rel="stylesheet" href="css/style.css?v=20260924-icon-status" />
+  <link rel="stylesheet" href="css/style.css?v=20260924-side-actions" />
 </head>
 <body>
   <section class="start-screen" id="start-screen" aria-label="開始メニュー">
@@ -62,11 +62,16 @@
       </section>
     </main>
 
+    <aside class="side-actions" aria-label="主要操作">
+      <button class="side-action-btn" id="side-action">行動</button>
+      <button class="side-action-btn" id="side-talk">会話</button>
+      <button class="side-action-btn" id="side-move">移動</button>
+      <button class="side-action-btn" id="side-inventory">持物</button>
+    </aside>
+
     <section class="main-actions" id="action-list"></section>
 
     <nav class="bottom-nav" aria-label="ゲームメニュー">
-      <button class="nav-btn" id="nav-map">マップ</button>
-      <button class="nav-btn" id="nav-inventory">持ち物</button>
       <button class="nav-btn" id="nav-log">記録</button>
       <button class="nav-btn" id="nav-save">セーブ</button>
       <button class="nav-btn" id="nav-load">ロード</button>
@@ -108,7 +113,7 @@
   <script src="js/actions-life.js?v=20260922-2205"></script>
   <script src="js/actions-people.js?v=20260923-1944"></script>
   <script src="js/scenes.js?v=20260922-1148"></script>
-  <script src="js/ui.js?v=20260924-icon-status"></script>
+  <script src="js/ui.js?v=20260924-side-actions"></script>
   <script src="js/display-names.js?v=20260909-2130"></script>
 </body>
 </html>
