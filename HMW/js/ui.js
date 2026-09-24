@@ -432,8 +432,8 @@
   function renderScene() {
     const loc = D.locations[H.state.location];
     $("location-name").textContent = loc.name;
-    const housingGoal = $("housing-goal");
-    if (housingGoal) housingGoal.textContent = H.getHousingGoalText?.() || "";
+    const housingGoalText = $("housing-goal-text");
+    if (housingGoalText) housingGoalText.textContent = H.getHousingGoalText?.() || "";
     renderLocationPoints();
     renderCityScene();
   }
@@ -626,6 +626,99 @@
     openModal("持ち物", html, buttons, true);
   }
 
+  function defaultDialogueCharacter() {
+    const byLocation = {
+      charity_center: "support_named",
+      park: "homeless_named",
+      underpass: "homeless_named",
+      police_station: "police_named",
+      industrial_street: "thug_named"
+    };
+    return byLocation[H.state.location] || "support_named";
+  }
+
+  function openDialogueJson() {
+    const body = `
+      <div class="game-dialogue-json">
+        <label class="dialogue-json-label" for="game-dialogue-character">相手</label>
+        <select class="dialogue-json-select" id="game-dialogue-character">
+          <option value="support_named">アーロン</option>
+          <option value="homeless_named">サム</option>
+          <option value="police_named">マーク</option>
+          <option value="thug_named">レオン</option>
+        </select>
+
+        <label class="dialogue-json-label" for="game-dialogue-analysis">分析JSON</label>
+        <textarea class="dialogue-json-textarea" id="game-dialogue-analysis"
+          spellcheck="false" autocomplete="off" autocapitalize="off" autocorrect="off"
+          placeholder="ChatGPTから受け取った分析JSONをここに貼る"></textarea>
+
+        <div class="dialogue-json-result hidden" id="game-dialogue-result">
+          <div class="dialogue-json-output">
+            <b>⑥ JSが生成した英文</b>
+            <div class="dialogue-json-english" id="game-dialogue-english"></div>
+          </div>
+          <div class="dialogue-json-output">
+            <b>⑤ JSが選んだ意味ID</b>
+            <pre id="game-dialogue-meaning"></pre>
+          </div>
+          <details class="dialogue-json-proof">
+            <summary>文ごとの証拠</summary>
+            <pre id="game-dialogue-proof"></pre>
+          </details>
+        </div>
+      </div>`;
+
+    const run = () => {
+      const input = $("game-dialogue-analysis");
+      const character = $("game-dialogue-character");
+      const resultBox = $("game-dialogue-result");
+      const english = $("game-dialogue-english");
+      const meaning = $("game-dialogue-meaning");
+      const proof = $("game-dialogue-proof");
+
+      try {
+        if (!H.DialogueTest?.runAnalysis) throw new Error("会話JSが読み込まれていません。");
+        const analysis = JSON.parse(input.value);
+        const result = H.DialogueTest.runAnalysis(analysis, character.value);
+
+        resultBox.classList.remove("hidden");
+        english.classList.remove("error");
+        english.textContent = result.english || "(英文なし)";
+        meaning.textContent = result.selectedMeaningIds.join("\n");
+        proof.textContent = result.composed.map((item, index) => [
+          `${index + 1}. ${item.meaningId}`,
+          `英文: ${item.english || "(なし)"}`,
+          `生成元: ${item.source || "(不明)"}`,
+          `文型: ${item.patternId || "(なし)"}`
+        ].join("\n")).join("\n\n");
+      } catch (error) {
+        resultBox.classList.remove("hidden");
+        english.classList.add("error");
+        english.textContent = String(error?.message || error);
+        meaning.textContent = "";
+        proof.textContent = "";
+      }
+    };
+
+    const clear = () => {
+      const input = $("game-dialogue-analysis");
+      if (input) {
+        input.value = "";
+        input.focus();
+      }
+      $("game-dialogue-result")?.classList.add("hidden");
+    };
+
+    openModal("会話JSON", body, [
+      { label: "JSで英文生成", className: "good", onClick: run },
+      { label: "全消去", onClick: clear }
+    ], true);
+
+    const character = $("game-dialogue-character");
+    if (character) character.value = defaultDialogueCharacter();
+  }
+
   function openPeople() {
     const html = Object.entries(D.people).map(([id, person]) => {
       const r = G.rel(id);
@@ -770,6 +863,7 @@
 
   document.addEventListener("DOMContentLoaded", () => {
     $("location-name").addEventListener("click", () => openLocationIntro(H.state.location));
+    $("dialogue-json")?.addEventListener("click", openDialogueJson);
     $("side-tasks").addEventListener("click", openTasks);
     $("side-move").addEventListener("click", openMap);
     $("side-inventory").addEventListener("click", openInventory);
