@@ -122,6 +122,31 @@
     for (const [path,expected] of Object.entries(w.policyEq || {})) {
       if (!comparePath(ctx.characterPolicy || {}, path, expected)) return false;
     }
+    for (const [path,expected] of Object.entries(w.relationshipEq || {})) {
+      if (!comparePath(ctx.relationship || {}, path, expected)) return false;
+    }
+    for (const [key,min] of Object.entries(w.relationshipMin || {})) {
+      if (num(ctx.relationship?.[key]) < Number(min)) return false;
+    }
+    for (const [key,max] of Object.entries(w.relationshipMax || {})) {
+      if (num(ctx.relationship?.[key]) > Number(max)) return false;
+    }
+    for (const [path,expected] of Object.entries(w.relationshipFlagEq || {})) {
+      if (!comparePath(ctx.relationship?.flags || {}, path, expected)) return false;
+    }
+
+    const recentMeaningIds = arr(ctx.recentMeaningIds);
+    if (w.historyAny && !hasAny(recentMeaningIds, w.historyAny)) return false;
+    if (w.historyAll && !hasAll(recentMeaningIds, w.historyAll)) return false;
+    if (w.historyNone && hasAny(recentMeaningIds, w.historyNone)) return false;
+    for (const [id,min] of Object.entries(w.historyCountMin || {})) {
+      const count = recentMeaningIds.filter(item => item === id).length;
+      if (count < Number(min)) return false;
+    }
+    for (const [id,max] of Object.entries(w.historyCountMax || {})) {
+      const count = recentMeaningIds.filter(item => item === id).length;
+      if (count > Number(max)) return false;
+    }
     for (const [key,min] of Object.entries(w.psychologyMin || {})) {
       if (num(ctx.psychology?.[key]) < Number(min)) return false;
     }
@@ -155,13 +180,15 @@
     analysis = {},
     characterFacts = {},
     characterPolicy = {},
-    psychology = {}
+    psychology = {},
+    relationship = {},
+    recentMeaningIds = []
   } = {}) {
     const normalized = D.normalizeInputAnalysis
       ? D.normalizeInputAnalysis(analysis)
       : analysis;
 
-    const ctx = { analysis:normalized, characterFacts, characterPolicy, psychology };
+    const ctx = { analysis:normalized, characterFacts, characterPolicy, psychology, relationship, recentMeaningIds };
     const meaningIds = [];
     const reasons = [];
     const matchedRuleIds = [];
