@@ -397,6 +397,7 @@
     removePanel();
     if(window.SHOP_WELL && window.SHOP_WELL.close) window.SHOP_WELL.close();
     if(window.SHOP_STALL && window.SHOP_STALL.close) window.SHOP_STALL.close();
+    if(window.SHOP_TRADE && window.SHOP_TRADE.close) window.SHOP_TRADE.close();
     if(window.SHOP_ACTION && document.getElementById('actionScreen')?.classList.contains('is-open')){
       window.SHOP_ACTION.close();
     }
@@ -436,6 +437,14 @@
         makeButton('今日の仕事',showJobs),
         makeButton('寝床・休む',showHousing),
         makeButton('露店・市場',showMarket),
+        makeButton('仕入れ・配達',()=>{
+          removePanel();
+          if(window.SHOP_TRADE){
+            window.SHOP_TRADE.open(state,()=>{
+              if(typeof onChange==='function') onChange();
+            });
+          }
+        }),
         makeButton('物乞い',()=>{
           removePanel();
           if(window.SHOP_ACTION) window.SHOP_ACTION.open(state,'beg');
