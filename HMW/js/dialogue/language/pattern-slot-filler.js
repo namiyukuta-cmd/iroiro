@@ -96,7 +96,7 @@
       lexicalTargets = [],
       subject = "I",
       seed = 0,
-      fillOptional = true
+      fillOptional = false
     } = {}
   ) {
     const pattern = D.SENTENCE_PATTERNS?.[patternId];
@@ -108,9 +108,28 @@
     const slots = { ...slotOverrides };
 
     const verb = pickLexeme("verb", { lexicalTargets, seed });
-    const verb2 = pickLexeme("verb", { lexicalTargets, seed:seed + 1, preferred:["help","tell","ask","give","take"] });
-    const noun = pickLexeme("noun", { lexicalTargets, seed });
-    const noun2 = pickLexeme("noun", { lexicalTargets, seed:seed + 1, preferred:["time","place","work","home","friend"] });
+    const remainingForNoun = (lexicalTargets || []).filter(
+      target => String(target || "").toLowerCase() !== String(verb || "").toLowerCase()
+    );
+    const verb2 = pickLexeme("verb", {
+      lexicalTargets: (lexicalTargets || []).filter(
+        target => String(target || "").toLowerCase() !== String(verb || "").toLowerCase()
+      ),
+      seed:seed + 1,
+      preferred:["help","tell","ask","give","take"]
+    });
+    const noun = pickLexeme("noun", {
+      lexicalTargets: remainingForNoun,
+      seed,
+      preferred:["thing","home","time","place","work","friend"]
+    });
+    const noun2 = pickLexeme("noun", {
+      lexicalTargets: remainingForNoun.filter(
+        target => String(target || "").toLowerCase() !== String(noun || "").toLowerCase()
+      ),
+      seed:seed + 1,
+      preferred:["time","place","work","home","friend"]
+    });
     const adjective = pickLexeme("adjective", { lexicalTargets, seed });
     const adverb = pickLexeme("adverb", { lexicalTargets, seed });
 
