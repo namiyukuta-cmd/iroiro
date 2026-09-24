@@ -80,6 +80,7 @@
     removePanel();
     if(window.SHOP_WELL && window.SHOP_WELL.close) window.SHOP_WELL.close();
     if(window.SHOP_LIFE && window.SHOP_LIFE.close) window.SHOP_LIFE.close();
+    if(window.SHOP_TRADE && window.SHOP_TRADE.close) window.SHOP_TRADE.close();
 
     const host=document.querySelector('.town-panel');
     if(!host) return;
