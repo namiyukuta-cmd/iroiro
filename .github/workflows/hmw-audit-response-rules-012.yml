@@ -1,0 +1,136 @@
+name: Audit HMW response rules 012
+on:
+  push:
+    paths:
+      - '.github/workflows/hmw-audit-response-rules-012.yml'
+permissions:
+  contents: read
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Audit response rules
+        run: |
+          node <<'NODE'
+          const fs=require('fs'),path=require('path'),vm=require('vm');
+          const root=process.cwd();
+          const ctx={console};ctx.window=ctx;ctx.HMW={};vm.createContext(ctx);
+          const run=p=>vm.runInContext(fs.readFileSync(path.join(root,p),'utf8'),ctx,{filename:p});
+          [
+            'HMW/js/dialogue/dialogue-input.js',
+            'HMW/js/dialogue/analysis-schema.js',
+            'HMW/js/dialogue/claim-rules.js',
+            'HMW/js/dialogue/dialogue-meanings.js',
+            'HMW/js/dialogue/language/lexical-target-rules.js',
+            'HMW/js/dialogue/response-rule-engine.js',
+            'HMW/js/dialogue/response-rules-001-social-emotion.js',
+            'HMW/js/dialogue/response-rules-002-daily-relationship.js',
+            'HMW/js/dialogue/response-rules-003-facts-policy-nuance.js',
+            'HMW/js/dialogue/response-rules-004-claims-context.js',
+            'HMW/js/dialogue/response-rules-005-actions-daily-repair.js',
+            'HMW/js/dialogue/response-rules-006-exact-actions-questions.js',
+            'HMW/js/dialogue/response-rules-007-semantic-continuity.js',
+            'HMW/js/dialogue/response-rules-008-questions-boundaries-repair.js',
+            'HMW/js/dialogue/response-rules-009-practical-social-context.js',
+            'HMW/js/dialogue/response-rules-010-completion-expansion.js',
+            'HMW/js/dialogue/response-rules-011-relationship-history.js',
+            'HMW/js/dialogue/response-rules-012-relationship-continuity.js',
+            'HMW/js/dialogue/response-planner.js',
+            'HMW/js/dialogue/response-priority.js',
+            'HMW/js/dialogue/response-selection.js',
+            'HMW/js/dialogue/response-history.js',
+            'HMW/js/dialogue/dialogue-pipeline.js'
+          ].forEach(run);
+
+          const D=ctx.HMW.Dialogue;
+          const rules=D.RESPONSE_RULES||[];
+          const ids=rules.map(r=>r.id);
+          const meanings=D.MEANINGS||{};
+          const dupIds=ids.filter((id,i)=>ids.indexOf(id)!==i);
+          const missingMeaningIds=[...new Set(rules.flatMap(r=>r.meanings||[]).filter(id=>!meanings[id]))];
+
+          const cases=[
+            {
+              name:'partner_hurt',
+              analysis:{intents:['express_hurt'],focusConcepts:['relationship'],emotions:{hurt:70}},
+              facts:{},policy:{},psych:{care:60},
+              relationship:{stage:'partner',familiarity:90,trust:85,goodwill:90,desire:70,conscience:80,malice:0,flags:{}},
+              recent:[]
+            },
+            {
+              name:'high_desire_boundary',
+              analysis:{focusConcepts:['love'],boundaries:['do_not_touch']},
+              facts:{lovesHeroine:true},policy:{},psych:{},
+              relationship:{stage:'partner',familiarity:90,trust:90,goodwill:90,desire:95,conscience:80,malice:0,flags:{}},
+              recent:[]
+            },
+            {
+              name:'last_love_confirm',
+              analysis:{intents:['question_affection'],focusConcepts:['love']},
+              facts:{lovesHeroine:true},policy:{},psych:{care:50},
+              relationship:{stage:'romantic',familiarity:80,trust:80,goodwill:80,desire:70,conscience:70,malice:0,flags:{}},
+              recent:['EXPRESS_JOY','AFFIRM_LOVE']
+            },
+            {
+              name:'recent_unknowns',
+              analysis:{intents:['ask_question'],questions:[{kind:'generic'}]},
+              facts:{},policy:{},psych:{},
+              relationship:{stage:'stranger',familiarity:10,trust:10,goodwill:10,desire:0,conscience:50,malice:0,flags:{}},
+              recent:['ANSWER_UNKNOWN','EXPRESS_NEED_CLARITY','ANSWER_UNKNOWN','ANSWER_UNKNOWN']
+            },
+            {
+              name:'meet_high_trust',
+              analysis:{intents:['ask_to_meet']},
+              facts:{},policy:{willingToMeet:true},psych:{},
+              relationship:{stage:'close',familiarity:80,trust:85,goodwill:80,desire:40,conscience:70,malice:0,flags:{}},
+              recent:[]
+            },
+            {
+              name:'no_contact_flag',
+              analysis:{intents:['request_contact']},
+              facts:{},policy:{allowContact:true},psych:{},
+              relationship:{stage:'partner',familiarity:90,trust:90,goodwill:90,desire:70,conscience:80,malice:0,flags:{noContact:true}},
+              recent:[]
+            }
+          ];
+
+          const results=cases.map(c=>{
+            const plan=D.planResponse({
+              analysis:c.analysis,
+              characterFacts:c.facts,
+              characterPolicy:c.policy,
+              psychology:c.psych,
+              relationship:c.relationship,
+              recentMeaningIds:c.recent
+            });
+            const prioritized=D.prioritizeResponseMeanings(plan.meaningIds);
+            const selected=D.selectResponseMeanings(prioritized,{boundaryActive:plan.boundaryActive,maxMeanings:5});
+            return {name:c.name,meaningIds:plan.meaningIds,matchedRuleIds:plan.matchedResponseRuleIds,selected};
+          });
+
+          const checks={
+            ruleCount:rules.length===1200,
+            uniqueRuleIds:new Set(ids).size===1200,
+            noMissingMeanings:missingMeaningIds.length===0,
+            partnerHurt:results[0].matchedRuleIds.includes('R1117_STAGE_PARTNER_HURT')&&results[0].meaningIds.includes('ASK_TO_REPAIR'),
+            desireBoundary:results[1].matchedRuleIds.includes('R1199_BOUNDARY_DESIRE_HIGH')&&results[1].meaningIds.includes('RESPECT_BOUNDARY'),
+            lastLove:results[2].matchedRuleIds.includes('R1141_LAST_AFFIRM_LOVE'),
+            repeatedUnknown:results[3].matchedRuleIds.includes('R1171_REPEAT_UNKNOWN_3')&&results[3].meaningIds.includes('ASK_FOR_DETAILS'),
+            meetTrust:results[4].matchedRuleIds.includes('R1184_MEET_POLICY_HIGH_TRUST')&&results[4].meaningIds.includes('AGREE_REQUEST'),
+            noContact:results[5].matchedRuleIds.includes('R1188_CONTACT_POLICY_NO_CONTACT_FLAG')&&results[5].meaningIds.includes('DECLINE_CONTACT')&&results[5].meaningIds.includes('RESPECT_BOUNDARY')
+          };
+
+          console.log('AUDIT_RESULT '+JSON.stringify({
+            ruleCount:rules.length,
+            uniqueRuleIds:new Set(ids).size,
+            dupIds,
+            missingMeaningIds,
+            checks,
+            results
+          }));
+          if(Object.values(checks).some(v=>v!==true)) process.exit(1);
+          NODE
