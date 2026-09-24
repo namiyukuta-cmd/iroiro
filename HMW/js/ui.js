@@ -201,35 +201,214 @@
     }
   }
 
+  const LOCATION_INTRO_EXTRA = {
+    station_front: "駅前にいる。ここには掲示板だけでなく、仕事を探す人、通勤客、店の搬入口、休める場所がある。"
+  };
+
+  const LOCATION_POINTS = {
+    station_front: [
+      { id:"board", label:"掲示板", text:"支援、廃品回収、小仕事など、今日の生活につながる情報が貼られている。" },
+      { id:"loading", label:"駅の搬入口", text:"駅ビルの搬入口で、台車を押す人が何度も出入りしている。欠員が出た日に当日手伝いを募集することがある。" },
+      { id:"bench", label:"ベンチ", text:"通勤客の流れから少し外れて座れるベンチ。人の出入りを見ながら休める。" },
+      { id:"bin", label:"ゴミ箱", text:"駅前のゴミ箱とその周辺。使える物が残っていることもある。" }
+    ],
+    shopping_street: [
+      { id:"shops", label:"店先", text:"個人商店が並ぶ。店の貼り紙や手伝いの募集が出ることがある。" },
+      { id:"alley", label:"裏道", text:"店の裏手へ続く道。住宅裏やコンビニにつながる。" }
+    ],
+    park: [
+      { id:"bench", label:"ベンチ", text:"昼は休みやすいベンチ。夜は巡回や他の利用者の影響を受ける。" },
+      { id:"water", label:"水場", text:"公園の水場。周囲には掲示や落とし物が見つかることもある。" },
+      { id:"notice", label:"掲示板", text:"地域の案内や支援情報が貼られる掲示板。" }
+    ],
+    convenience_store: [
+      { id:"shelf", label:"商品棚", text:"食料、水、衛生用品などを買える。" },
+      { id:"counter", label:"レジ", text:"店員がいる。何度も利用すれば顔を覚えられる。" },
+      { id:"back", label:"店の裏", text:"段ボールや清掃道具が置かれている。仕事につながることもある。" }
+    ],
+    charity_center: [
+      { id:"desk", label:"受付", text:"生活相談の受付。相談記録を作れば、日をまたいで続きを進められる。" },
+      { id:"food", label:"食料支援", text:"その日の食料支援を受けられる。" },
+      { id:"wash", label:"洗面・洗濯", text:"身支度、シャワー、洗濯に使える設備がある。" }
+    ],
+    public_toilet: [
+      { id:"sink", label:"洗面台", text:"水道と洗面台があり、最低限の身支度ができる。" },
+      { id:"rest", label:"休める所", text:"長居はできないが、少しだけ休める。" }
+    ],
+    labor_office: [
+      { id:"desk", label:"受付", text:"仕事の条件や、現在紹介を受けられる仕事を確認できる。" }
+    ],
+    underpass: [
+      { id:"entrance", label:"入口", text:"人の出入りが多い側。夜は使い方に注意が必要。" },
+      { id:"pillars", label:"柱の陰", text:"雨風を避けやすい場所。古い書き込みや残された物が見つかることもある。" },
+      { id:"sleep", label:"寝場所", text:"夜に使える可能性があるが、縄張りや安全の情報が必要になる。" }
+    ],
+    riverside: [
+      { id:"bank", label:"河原", text:"人目が少ない河原。廃品が見つかることがある。" },
+      { id:"rest", label:"休める所", text:"天候の影響は強いが、少し休める場所がある。" }
+    ],
+    industrial_street: [
+      { id:"scrap", label:"廃材置場", text:"金属片などの回収品が出やすい。" },
+      { id:"warehouse", label:"倉庫前", text:"倉庫が並ぶ通り。夕方以降は人通りが減る。" }
+    ],
+    recycling_yard: [
+      { id:"scale", label:"計量台", text:"缶や金属片を種類ごとに分けて計量し、買い取っている。" }
+    ],
+    residential_alley: [
+      { id:"alley", label:"路地", text:"住宅の裏側。捨てられた物が見つかることもあるが、住民の目がある。" }
+    ],
+    police_station: [
+      { id:"desk", label:"窓口", text:"相談や落とし物の窓口。警官に用件を伝えられる。" }
+    ]
+  };
+
+  function locationIntroPages(id) {
+    const loc = D.locations[id];
+    if (!loc) return [];
+    const pages = [loc.description];
+    if (LOCATION_INTRO_EXTRA[id]) pages.push(LOCATION_INTRO_EXTRA[id]);
+    return pages.filter(Boolean);
+  }
+
+  function openLocationIntro(id, pageIndex = 0) {
+    const loc = D.locations[id];
+    const pages = locationIntroPages(id);
+    if (!loc || !pages.length) return;
+
+    const page = Math.max(0, Math.min(pageIndex, pages.length - 1));
+    const isLast = page >= pages.length - 1;
+    const body = `<div class="location-intro-text">${esc(pages[page])}</div><div class="location-intro-tap">Tap</div>`;
+
+    openModal(loc.name, body, [{
+      label: "Tap",
+      className: "location-tap-btn",
+      onClick: () => {
+        if (isLast) {
+          closeModal();
+          return;
+        }
+        openLocationIntro(id, page + 1);
+      }
+    }], true);
+  }
+
+  function openScenePopup(scene) {
+    if (!scene) return;
+    const actions = (scene.actions || []).map((action) => ({
+      label: action.label,
+      disabled: !!action.disabled,
+      onClick: () => {
+        closeModal();
+        action.run();
+      }
+    }));
+    openModal(scene.title, `<div class="scene-popup-text">${esc(scene.text)}</div>`, actions, true);
+    $("modal-actions")?.classList.add("scene-popup-actions");
+  }
+
+  function pointActions(locationId, pointId) {
+    const actions = [];
+
+    if (locationId === "station_front" && pointId === "board" && !H.state.knownLocations.charity_center) {
+      actions.push({ label:"掲示板を見る", onClick:() => { closeModal(); G.board(); } });
+    }
+    if (locationId === "station_front" && pointId === "loading") {
+      if (H.state.progression.informal.casualWorkKnown && !H.state.daily.casualChecked) {
+        actions.push({ label:"今日の募集を確認する", onClick:() => { closeModal(); G.checkCasualWork(); } });
+      }
+      if (H.state.daily.casualOffer && !H.state.daily.casualDone) {
+        actions.push({ label:"荷下ろしを手伝う", onClick:() => { closeModal(); G.casualWork(); } });
+      }
+    }
+    if (locationId === "station_front" && pointId === "bin" && !H.state.daily.scavenge[locationId]) {
+      actions.push({ label:"使える物を探す", onClick:() => { closeModal(); G.scavenge(); } });
+    }
+    if (locationId === "shopping_street" && pointId === "shops" && !H.state.knownLocations.convenience_store) {
+      actions.push({ label:"店と裏道を確認する", onClick:() => { closeModal(); G.shoppingLook(); } });
+    }
+    if (locationId === "convenience_store" && pointId === "shelf") {
+      actions.push({ label:"買い物をする", onClick:() => { closeModal(); G.openShop(); } });
+    }
+    if (locationId === "charity_center" && pointId === "food" && !H.state.daily.foodSupport && H.state.slot !== 3) {
+      actions.push({ label:"食料支援を受ける", onClick:() => { closeModal(); G.foodSupport(); } });
+    }
+    if (locationId === "charity_center" && pointId === "wash" && !H.state.daily.supportShowerLaundry && H.state.slot !== 3) {
+      actions.push({ label:"シャワーと洗濯を使う", onClick:() => { closeModal(); G.supportShowerLaundry(); } });
+    }
+    if (locationId === "public_toilet" && pointId === "sink" && !H.state.daily.wash[locationId]) {
+      actions.push({ label:"身支度する", onClick:() => { closeModal(); G.wash(); } });
+    }
+    if (locationId === "public_toilet" && pointId === "rest" && !H.state.daily.rest[locationId]) {
+      actions.push({ label:"少し休む", onClick:() => { closeModal(); G.rest(); } });
+    }
+    if (["park","riverside","residential_alley","industrial_street"].includes(locationId) &&
+        ["bench","bank","alley","scrap"].includes(pointId) &&
+        !H.state.daily.scavenge[locationId]) {
+      actions.push({ label:"使える物を探す", onClick:() => { closeModal(); G.scavenge(); } });
+    }
+    if (["park","riverside","residential_alley","industrial_street"].includes(locationId) &&
+        ["bench","rest","alley","warehouse"].includes(pointId) &&
+        !H.state.daily.rest[locationId]) {
+      actions.push({ label:"休む", onClick:() => { closeModal(); G.rest(); } });
+    }
+
+    return actions;
+  }
+
+  function openLocationPoint(locationId, point) {
+    const liveScene = G.getCityScene?.();
+    if (locationId === "station_front" && point.id === "loading" &&
+        liveScene && ["station_morning_work","daily_station_shortage"].includes(liveScene.id)) {
+      openScenePopup(liveScene);
+      return;
+    }
+    openModal(point.label, `<div class="point-popup-text">${esc(point.text)}</div>`, pointActions(locationId, point.id), true);
+  }
+
+  function renderLocationPoints() {
+    const box = $("location-points");
+    if (!box) return;
+    const id = H.state.location;
+    const points = LOCATION_POINTS[id] || [];
+    box.innerHTML = "";
+
+    points.forEach((point) => {
+      const button = document.createElement("button");
+      button.className = "location-point-btn";
+      button.type = "button";
+      button.textContent = point.label;
+      button.addEventListener("click", () => openLocationPoint(id, point));
+      box.appendChild(button);
+    });
+  }
+
   function renderCityScene() {
     const box = $("city-scene");
     if (!box) return;
     const scene = G.getCityScene?.();
-    if (!scene) {
+    const mergedIntoPoint = H.state.location === "station_front" &&
+      scene && ["station_morning_work","daily_station_shortage"].includes(scene.id);
+
+    if (!scene || mergedIntoPoint) {
       box.classList.add("hidden");
       box.innerHTML = "";
       return;
     }
+
     box.classList.remove("hidden");
-    box.innerHTML = `<strong>${esc(scene.title)}</strong><p>${esc(scene.text)}</p><div class="scene-choice-row"></div>`;
-    const row = box.querySelector(".scene-choice-row");
-    scene.actions.forEach((action) => {
-      const b = document.createElement("button");
-      b.className = "scene-choice";
-      b.textContent = action.label;
-      b.disabled = !!action.disabled;
-      b.addEventListener("click", action.run);
-      row.appendChild(b);
-    });
+    box.innerHTML = "";
+    const button = document.createElement("button");
+    button.className = "location-point-btn event-point-btn";
+    button.type = "button";
+    button.textContent = scene.title;
+    button.addEventListener("click", () => openScenePopup(scene));
+    box.appendChild(button);
   }
 
   function renderScene() {
     const loc = D.locations[H.state.location];
     $("location-name").textContent = loc.name;
-    $("location-desc").textContent = loc.description;
-    $("last-message").textContent = H.state.lastMessage;
-    const housingGoal = $("housing-goal");
-    if (housingGoal) housingGoal.textContent = H.getHousingGoalText?.() || "";
+    renderLocationPoints();
     renderCityScene();
   }
 
@@ -391,6 +570,7 @@
         if (selectedId === id) {
           closeModal();
           travel(id);
+          openLocationIntro(id);
           return;
         }
 
@@ -540,19 +720,20 @@
     if (autoSaveEnabled) H.saveLocal();
   }
 
-  function enterGame() {
+  function enterGame(showLocationIntro = false) {
     G.ensureState();
     if (!H.state.world.weather) H.state.world.weather = "clear";
     G.locState(H.state.location).visits += 1;
     $("start-screen")?.classList.add("hidden");
     $("game-app")?.classList.remove("game-not-started");
     refresh();
+    if (showLocationIntro) openLocationIntro(H.state.location);
   }
 
   function startNewGame() {
     H.state = H.createInitialState();
     autoSaveEnabled = false;
-    enterGame();
+    enterGame(true);
   }
 
   async function continueGame() {
@@ -569,6 +750,7 @@
 
   document.addEventListener("DOMContentLoaded", () => {
     $("nav-menu").addEventListener("click", openMenu);
+    $("location-name").addEventListener("click", () => openLocationIntro(H.state.location));
     $("side-action").addEventListener("click", openLocationActions);
     $("side-talk").addEventListener("click", openPeopleHere);
     $("side-move").addEventListener("click", openMap);
