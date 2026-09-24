@@ -70,7 +70,7 @@
   add("R054_FOCUS_FOOD",520,{focusAny:["food","hunger"]},["ASK_HUNGER"],"food_topic");
   add("R055_FOCUS_WATER",520,{focusAny:["water","thirst"]},["ASK_THIRST"],"water_topic");
   add("R056_FOCUS_SLEEP",520,{focusAny:["sleep","tiredness"]},["ASK_TIREDNESS"],"sleep_topic");
-  add("R057_FOCUS_HEALTH",540,{focusAny:["health","injury","illness"]},["ASK_IF_OKAY"],"health_topic");
+  add("R057_FOCUS_HEALTH",540,{focusAny:["health","injury","illness"],intentNone:["report_condition"]},["ASK_IF_OKAY"],"health_topic");
   add("R058_FOCUS_HOME",500,{focusAny:["home","shelter"]},["ASK_ABOUT_HOME"],"home_topic");
   add("R059_FOCUS_PLAN",500,{focusAny:["plan","future"]},["ASK_PLAN"],"plan_topic");
 
