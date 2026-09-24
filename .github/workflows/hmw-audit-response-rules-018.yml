@@ -1,0 +1,173 @@
+name: Audit HMW response rules 018
+on:
+  push:
+    paths:
+      - '.github/workflows/hmw-audit-response-rules-018.yml'
+permissions:
+  contents: read
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Audit response rules
+        run: |
+          node <<'NODE'
+          const fs=require('fs'),path=require('path'),vm=require('vm');
+          const root=process.cwd();
+          const ctx={console};ctx.window=ctx;ctx.HMW={};vm.createContext(ctx);
+          const run=p=>vm.runInContext(fs.readFileSync(path.join(root,p),'utf8'),ctx,{filename:p});
+          const files=[
+            'HMW/js/dialogue/dialogue-input.js',
+            'HMW/js/dialogue/analysis-schema.js',
+            'HMW/js/dialogue/claim-rules.js',
+            'HMW/js/dialogue/dialogue-meanings.js',
+            'HMW/js/dialogue/language/lexical-target-rules.js',
+            'HMW/js/dialogue/response-rule-engine.js'
+          ];
+          for(let i=1;i<=18;i++){
+            const n=String(i).padStart(3,'0');
+            const found=fs.readdirSync(path.join(root,'HMW/js/dialogue'))
+              .find(name=>name.startsWith('response-rules-'+n+'-')&&name.endsWith('.js'));
+            if(!found) throw new Error('missing response rules file '+n);
+            files.push('HMW/js/dialogue/'+found);
+          }
+          files.push(
+            'HMW/js/dialogue/response-planner.js',
+            'HMW/js/dialogue/response-priority.js',
+            'HMW/js/dialogue/response-selection.js',
+            'HMW/js/dialogue/response-history.js',
+            'HMW/js/dialogue/fact-slot-resolver.js'
+          );
+          files.forEach(run);
+
+          const D=ctx.HMW.Dialogue;
+          const rules=D.RESPONSE_RULES||[];
+          const ids=rules.map(r=>r.id);
+          const dupIds=ids.filter((id,i)=>ids.indexOf(id)!==i);
+          const missingMeaningIds=[...new Set(rules.flatMap(r=>r.meanings||[]).filter(id=>!D.MEANINGS[id]))];
+
+          const test=c=>{
+            const plan=D.planResponse(c);
+            const prioritized=D.prioritizeResponseMeanings(plan.meaningIds);
+            const selected=D.selectResponseMeanings(prioritized,{boundaryActive:plan.boundaryActive,maxMeanings:5});
+            return {plan,selected};
+          };
+
+          const explicitStatus=test({
+            analysis:{
+              intents:['ask_relationship_status'],
+              questions:[{kind:'relationship_status',requestedField:'relationshipStatus'}]
+            },
+            characterFacts:{relationshipStatus:'married'},
+            characterPolicy:{},
+            relationship:{stage:'partner',familiarity:90,trust:90,goodwill:90,flags:{dating:true}},
+            recentMeaningIds:[]
+          });
+
+          const stageFallback=test({
+            analysis:{
+              intents:['ask_relationship_status'],
+              questions:[{kind:'relationship_status',requestedField:'relationshipStatus'}]
+            },
+            characterFacts:{},
+            characterPolicy:{},
+            relationship:{stage:'partner',familiarity:90,trust:90,goodwill:90,flags:{}},
+            recentMeaningIds:[]
+          });
+
+          const missingStatus=test({
+            analysis:{
+              intents:['ask_relationship_status'],
+              questions:[{kind:'relationship_status',requestedField:'relationshipStatus'}]
+            },
+            characterFacts:{},
+            characterPolicy:{},
+            relationship:{},
+            recentMeaningIds:[]
+          });
+
+          const policyKissFalse=test({
+            analysis:{intents:['ask_permission_action'],questions:[{kind:'permission',action:'kiss'}]},
+            characterPolicy:{permissions:{kiss:false}},
+            relationship:{stage:'partner',familiarity:90,trust:90,goodwill:90,desire:90,conscience:80,malice:0,flags:{}},
+            conversationContext:{privacy:'private'}
+          });
+
+          const policyContactFalse=test({
+            analysis:{intents:['request_contact']},
+            characterPolicy:{allowContact:false},
+            relationship:{stage:'partner',familiarity:90,trust:90,goodwill:90,desire:70,conscience:80,malice:0,flags:{}}
+          });
+
+          const boundaryBeatsPositive=test({
+            analysis:{
+              intents:['ask_permission_action'],
+              questions:[{kind:'permission',action:'hug'}],
+              boundaries:['do_not_hug']
+            },
+            characterPolicy:{permissions:{hug:true}},
+            relationship:{stage:'partner',familiarity:90,trust:90,goodwill:90,desire:80,conscience:80,malice:0,flags:{}},
+            conversationContext:{privacy:'private'}
+          });
+
+          const explicitLove=test({
+            analysis:{intents:['question_affection'],focusConcepts:['love']},
+            characterFacts:{lovesHeroine:true},
+            characterPolicy:{},
+            relationship:{stage:'stranger',familiarity:10,trust:10,goodwill:10,flags:{}}
+          });
+
+          const checks={
+            ruleCount:rules.length===1800,
+            uniqueRuleIds:new Set(ids).size===1800,
+            noMissingMeanings:missingMeaningIds.length===0,
+            explicitStatus:
+              explicitStatus.plan.slotOverridesByMeaning.STATE_RELATIONSHIP_STATUS?.RELATIONSHIP==='married' &&
+              explicitStatus.selected.includes('STATE_RELATIONSHIP_STATUS'),
+            stageFallback:
+              stageFallback.plan.matchedResponseRuleIds.includes('R1746_STAGE_PARTNER_FALLBACK') &&
+              stageFallback.plan.slotOverridesByMeaning.STATE_RELATIONSHIP_STATUS?.RELATIONSHIP==='partners',
+            missingStatus:
+              missingStatus.plan.matchedResponseRuleIds.includes('R1718_FACT_REL_STATUS_ABSENT') &&
+              missingStatus.selected.includes('ANSWER_UNKNOWN'),
+            kissFalse:
+              policyKissFalse.plan.matchedResponseRuleIds.includes('R1769_POLICY_KISS_FALSE') &&
+              policyKissFalse.plan.suppressedMeaningIds.includes('GRANT_PERMISSION') &&
+              !policyKissFalse.plan.meaningIds.includes('GRANT_PERMISSION') &&
+              policyKissFalse.selected.includes('DENY_PERMISSION'),
+            contactFalse:
+              policyContactFalse.plan.matchedResponseRuleIds.includes('R1764_POLICY_CONTACT_FALSE') &&
+              !policyContactFalse.plan.meaningIds.includes('ACCEPT_CONTACT') &&
+              policyContactFalse.selected.includes('DECLINE_CONTACT'),
+            boundaryPositive:
+              boundaryBeatsPositive.plan.suppressedMeaningIds.includes('GRANT_PERMISSION') &&
+              !boundaryBeatsPositive.plan.meaningIds.includes('GRANT_PERMISSION') &&
+              boundaryBeatsPositive.selected.includes('RESPECT_BOUNDARY'),
+            explicitLove:
+              explicitLove.plan.matchedResponseRuleIds.includes('R1750_LOVE_TRUE_HARD') &&
+              explicitLove.selected.includes('AFFIRM_LOVE') &&
+              !explicitLove.plan.meaningIds.includes('DENY_LOVE')
+          };
+
+          console.log('AUDIT_RESULT '+JSON.stringify({
+            ruleCount:rules.length,
+            uniqueRuleIds:new Set(ids).size,
+            dupIds,
+            missingMeaningIds,
+            checks,
+            cases:{
+              explicitStatus:{meaningIds:explicitStatus.plan.meaningIds,slots:explicitStatus.plan.slotOverridesByMeaning,selected:explicitStatus.selected,matched:explicitStatus.plan.matchedResponseRuleIds},
+              stageFallback:{meaningIds:stageFallback.plan.meaningIds,slots:stageFallback.plan.slotOverridesByMeaning,selected:stageFallback.selected,matched:stageFallback.plan.matchedResponseRuleIds},
+              missingStatus:{meaningIds:missingStatus.plan.meaningIds,selected:missingStatus.selected,matched:missingStatus.plan.matchedResponseRuleIds},
+              policyKissFalse:{meaningIds:policyKissFalse.plan.meaningIds,suppressed:policyKissFalse.plan.suppressedMeaningIds,selected:policyKissFalse.selected,matched:policyKissFalse.plan.matchedResponseRuleIds},
+              policyContactFalse:{meaningIds:policyContactFalse.plan.meaningIds,suppressed:policyContactFalse.plan.suppressedMeaningIds,selected:policyContactFalse.selected,matched:policyContactFalse.plan.matchedResponseRuleIds},
+              boundaryBeatsPositive:{meaningIds:boundaryBeatsPositive.plan.meaningIds,suppressed:boundaryBeatsPositive.plan.suppressedMeaningIds,selected:boundaryBeatsPositive.selected,matched:boundaryBeatsPositive.plan.matchedResponseRuleIds},
+              explicitLove:{meaningIds:explicitLove.plan.meaningIds,suppressed:explicitLove.plan.suppressedMeaningIds,selected:explicitLove.selected,matched:explicitLove.plan.matchedResponseRuleIds}
+            }
+          }));
+          if(Object.values(checks).some(v=>v!==true)) process.exit(1);
+          NODE
