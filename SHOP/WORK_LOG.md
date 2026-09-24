@@ -1236,3 +1236,11 @@
 - 井戸パネルと屋台パネルは同時に開かないよう相互に閉じる。
 - 保存期限は現時点ではメタデータ表示まで。時間切れで腐敗させる実処理はまだ未接続。
 - build: 20260923-simple-stall-v1
+
+### 2026-09-24 09:xx タップ可能な店・井戸を発光表示
+- ユーザー要望: タップできる店や井戸は光らせる。
+- `SHOP_app.js` で `selectableType:'shop'` と `selectableType:'well'` に `selectable-place` クラスを付与。
+- `SHOP_top.html` に `selectablePlaceGlow` アニメーションを追加。
+- 屋台・井戸は暖色系の弱い光から少し強い光へゆっくり脈動する表示にした。
+- NPCの既存選択表示には今回触れていない。
+- build: 20260924-tappable-place-glow-v1
