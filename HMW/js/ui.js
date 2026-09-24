@@ -163,9 +163,9 @@
   }
 
   function renderStatus() {
-    $("day").innerHTML = `DAY<b>${H.state.day}</b>`;
-    $("time").innerHTML = `TIME<b>${esc(D.slots[H.state.slot])}</b>`;
-    $("money").innerHTML = `MONEY<b>${H.state.money}</b>`;
+    $("day-value").textContent = H.state.day;
+    $("time-value").textContent = D.slots[H.state.slot];
+    $("money-value").textContent = H.state.money;
     $("weather").textContent = H.state.world.weather === "rain" ? "☂️" : H.state.world.weather === "cold" ? "❄️" : "☀️";
     const s = H.state.stats;
     const fields = {
