@@ -88,7 +88,8 @@
     ["CONFIRM_FACT","DENY_FACT"],
     ["EXPRESS_CERTAINTY","EXPRESS_UNCERTAINTY"],
     ["STATE_SLEEP_STATUS_GOOD","STATE_SLEEP_STATUS_BAD"],
-    ["STATE_FOOD_STATUS_EATEN","STATE_FOOD_STATUS_NOT_EATEN"]
+    ["STATE_FOOD_STATUS_EATEN","STATE_FOOD_STATUS_NOT_EATEN"],
+    ["SAY_GOODBYE","SAY_GOODBYE_TEMPORARY"]
   ];
 
   const removeConflicts = source => {
@@ -110,6 +111,10 @@
     } = {}
   ) {
     let ordered = removeConflicts([...new Set((meaningIds || []).filter(Boolean))]);
+
+    if (boundaryActive) {
+      ordered = ordered.filter(id => !FOLLOWUP.has(id));
+    }
 
     const hasSpecificAnswer = ordered.some(id => DIRECT_ANSWER.has(id));
     const hasSpecificRequestResponse = ordered.some(id => REQUEST_RESPONSE.has(id));
