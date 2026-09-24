@@ -82,7 +82,7 @@ jobs:
             ruleCount:rules.length===100,
             missingMeaningIds:missingMeaningIds.length===0,
             friendly:results[0].meaningIds.includes('RETURN_GREETING'),
-            bright:results[1].meaningIds.includes('EXPRESS_RELIEF'),
+            bright:results[1].meaningIds.includes('EXPRESS_RELIEF')&&!results[1].meaningIds.includes('ASK_IF_OKAY'),
             hesitant:results[2].meaningIds.includes('EXPRESS_CONCERN'),
             subdued:results[3].meaningIds.includes('ASK_IF_OKAY'),
             affection:results[4].meaningIds.includes('AFFIRM_LOVE')&&!results[4].meaningIds.includes('DENY_LOVE'),
@@ -92,3 +92,5 @@ jobs:
           console.log('AUDIT_RESULT '+JSON.stringify({ruleCount:rules.length,missingMeaningIds,checks,results}));
           if(Object.values(checks).some(v=>v!==true)) process.exit(1);
           NODE
+
+# rerun refined health handling
