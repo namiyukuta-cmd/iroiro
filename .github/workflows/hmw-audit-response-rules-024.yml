@@ -1,0 +1,165 @@
+name: Audit HMW response rules 024
+on:
+  push:
+    paths:
+      - '.github/workflows/hmw-audit-response-rules-024.yml'
+permissions:
+  contents: read
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Audit response rules
+        run: |
+          node <<'NODE'
+          const fs=require('fs'),path=require('path'),vm=require('vm');
+          const root=process.cwd();
+          const ctx={console};ctx.window=ctx;ctx.HMW={};vm.createContext(ctx);
+          const run=p=>vm.runInContext(fs.readFileSync(path.join(root,p),'utf8'),ctx,{filename:p});
+          const files=[
+            'HMW/js/dialogue/dialogue-input.js',
+            'HMW/js/dialogue/analysis-schema.js',
+            'HMW/js/dialogue/claim-rules.js',
+            'HMW/js/dialogue/dialogue-meanings.js',
+            'HMW/js/dialogue/language/lexical-target-rules.js',
+            'HMW/js/dialogue/response-rule-engine.js'
+          ];
+          for(let i=1;i<=24;i++){
+            const n=String(i).padStart(3,'0');
+            const found=fs.readdirSync(path.join(root,'HMW/js/dialogue'))
+              .find(name=>name.startsWith('response-rules-'+n+'-')&&name.endsWith('.js'));
+            if(!found) throw new Error('missing response rules file '+n);
+            files.push('HMW/js/dialogue/'+found);
+          }
+          files.push(
+            'HMW/js/dialogue/response-planner.js',
+            'HMW/js/dialogue/response-priority.js',
+            'HMW/js/dialogue/response-selection.js',
+            'HMW/js/dialogue/response-history.js'
+          );
+          files.forEach(run);
+
+          const D=ctx.HMW.Dialogue;
+          const rules=D.RESPONSE_RULES||[];
+          const ids=rules.map(r=>r.id);
+          const dupIds=ids.filter((id,i)=>ids.indexOf(id)!==i);
+          const missingMeaningIds=[...new Set(rules.flatMap(r=>r.meanings||[]).filter(id=>!D.MEANINGS[id]))];
+
+          const test=c=>{
+            const plan=D.planResponse(c);
+            const prioritized=D.prioritizeResponseMeanings(plan.meaningIds);
+            const selected=D.selectResponseMeanings(prioritized,{
+              boundaryActive:plan.boundaryActive,
+              maxMeanings:5,
+              preferredMeaningIds:plan.preferredMeaningIds||[]
+            });
+            return {plan,selected};
+          };
+
+          const missingPsych=test({
+            analysis:{intents:['request_reassurance'],focusConcepts:['relationship']},
+            characterFacts:{},
+            characterPolicy:{},
+            psychology:{},
+            relationship:{stage:'partner',familiarity:90,trust:90,goodwill:90,flags:{}}
+          });
+
+          const lowCare=test({
+            analysis:{intents:['request_reassurance'],focusConcepts:['relationship']},
+            characterFacts:{},
+            characterPolicy:{},
+            psychology:{care:20},
+            relationship:{stage:'friend',familiarity:70,trust:70,goodwill:60,flags:{}}
+          });
+
+          const highCare=test({
+            analysis:{intents:['request_reassurance'],focusConcepts:['relationship']},
+            characterFacts:{},
+            characterPolicy:{},
+            psychology:{care:85},
+            relationship:{stage:'partner',familiarity:90,trust:90,goodwill:90,flags:{}}
+          });
+
+          const highEmpathy=test({
+            analysis:{intents:['express_hurt'],emotions:{hurt:80},focusConcepts:['relationship']},
+            characterFacts:{},
+            characterPolicy:{},
+            psychology:{empathy:85},
+            relationship:{stage:'close',familiarity:80,trust:75,goodwill:80,flags:{}}
+          });
+
+          const highAnger=test({
+            analysis:{intents:['apologize'],focusConcepts:['apology']},
+            characterFacts:{},
+            characterPolicy:{acceptApology:false},
+            psychology:{anger:85},
+            relationship:{stage:'close',familiarity:80,trust:60,goodwill:60,flags:{conflict:true}}
+          });
+
+          const lonelyBoundary=test({
+            analysis:{intents:['express_loneliness'],boundaries:['leave_me_alone'],focusConcepts:['relationship']},
+            characterFacts:{},
+            characterPolicy:{},
+            psychology:{loneliness:90,care:80},
+            relationship:{stage:'partner',familiarity:90,trust:90,goodwill:90,flags:{}}
+          });
+
+          const historyCare=test({
+            analysis:{focusConcepts:['relationship']},
+            characterFacts:{},
+            characterPolicy:{},
+            psychology:{care:85},
+            relationship:{stage:'partner',familiarity:90,trust:90,goodwill:90,flags:{}},
+            recentMeaningIds:['EXPRESS_CONCERN']
+          });
+
+          const checks={
+            ruleCount:rules.length===2400,
+            uniqueRuleIds:new Set(ids).size===2400,
+            noMissingMeanings:missingMeaningIds.length===0,
+            missingPsychNoLowLeak:
+              !missingPsych.plan.matchedResponseRuleIds.some(id=>
+                ['R2381_LOW_CARE_REASSURE','R2389_LOW_CARE_RELATIONSHIP'].includes(id)
+              ),
+            lowCareExplicit:
+              lowCare.plan.matchedResponseRuleIds.includes('R2381_LOW_CARE_REASSURE') &&
+              lowCare.plan.meaningIds.includes('EXPRESS_NEED_CLARITY'),
+            highCare:
+              highCare.plan.matchedResponseRuleIds.includes('R2311_CARE_REASSURE') &&
+              highCare.plan.meaningIds.includes('EXPRESS_CARE'),
+            highEmpathy:
+              highEmpathy.plan.matchedResponseRuleIds.includes('R2316_EMPATHY_HURT') &&
+              highEmpathy.plan.meaningIds.includes('EXPRESS_CONCERN'),
+            highAnger:
+              highAnger.plan.matchedResponseRuleIds.includes('R2351_ANGER_APOLOGY') &&
+              highAnger.plan.meaningIds.includes('REQUEST_TIME'),
+            lonelyBoundary:
+              lonelyBoundary.selected.includes('RESPECT_BOUNDARY') &&
+              !lonelyBoundary.selected.includes('OFFER_COMPANY'),
+            historyCare:
+              historyCare.plan.matchedResponseRuleIds.includes('R2391_CARE_AFTER_CONCERN') &&
+              historyCare.plan.meaningIds.includes('EXPRESS_CARE')
+          };
+
+          console.log('AUDIT_RESULT '+JSON.stringify({
+            ruleCount:rules.length,
+            uniqueRuleIds:new Set(ids).size,
+            dupIds,
+            missingMeaningIds,
+            checks,
+            cases:{
+              missingPsych:{meaningIds:missingPsych.plan.meaningIds,matched:missingPsych.plan.matchedResponseRuleIds},
+              lowCare:{meaningIds:lowCare.plan.meaningIds,matched:lowCare.plan.matchedResponseRuleIds},
+              highCare:{meaningIds:highCare.plan.meaningIds,matched:highCare.plan.matchedResponseRuleIds},
+              highEmpathy:{meaningIds:highEmpathy.plan.meaningIds,matched:highEmpathy.plan.matchedResponseRuleIds},
+              highAnger:{meaningIds:highAnger.plan.meaningIds,matched:highAnger.plan.matchedResponseRuleIds},
+              lonelyBoundary:{meaningIds:lonelyBoundary.plan.meaningIds,selected:lonelyBoundary.selected,matched:lonelyBoundary.plan.matchedResponseRuleIds},
+              historyCare:{meaningIds:historyCare.plan.meaningIds,matched:historyCare.plan.matchedResponseRuleIds}
+            }
+          }));
+          if(Object.values(checks).some(v=>v!==true)) process.exit(1);
+          NODE
