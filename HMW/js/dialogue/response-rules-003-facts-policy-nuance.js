@@ -107,7 +107,7 @@
   add("R287_TONE_DOUBTFUL",610,{toneEq:{style:["doubtful"]}},["EXPRESS_NEED_CLARITY"],"doubtful_tone");
   add("R288_TONE_DISTANT",620,{toneEq:{style:["distant"]}},["ASK_TO_TALK"],"distant_tone");
   add("R289_TONE_AFFECTIONATE",550,{toneEq:{style:["affectionate"]}},["EXPRESS_CARE"],"affectionate_tone");
-  add("R290_TONE_NEUTRAL",400,{toneEq:{style:["neutral"]}},["ACKNOWLEDGE_EVENT"],"neutral_tone");
+  add("R290_TONE_NEUTRAL",400,{intentAny:["report_event","report_condition"],toneEq:{style:["neutral"]}},["ACKNOWLEDGE_EVENT"],"neutral_report");
 
   // Fallback and response-shaping rules.
   add("R291_QUESTION_WITH_FEAR",630,{intentAny:["ask_question"],emotionMin:{fear:50}},["EXPRESS_CONCERN"],"fearful_question");
@@ -116,8 +116,8 @@
   add("R294_REPORT_WITH_JOY",550,{intentAny:["report_event","report_condition"],emotionMin:{joy:55}},["EXPRESS_APPROVAL"],"positive_report");
   add("R295_REPORT_WITH_FEAR",620,{intentAny:["report_event","report_condition"],emotionMin:{fear:55}},["EXPRESS_CONCERN"],"fearful_report");
   add("R296_REPORT_WITH_HURT",620,{intentAny:["report_event","report_condition"],emotionMin:{hurt:55}},["EXPRESS_CONCERN"],"hurt_report");
-  add("R297_HIGH_EMPATHY_REPLY",510,{psychologyMin:{empathy:80}},["EXPRESS_SYMPATHY"],"npc_empathy_very_high");
-  add("R298_HIGH_CARE_REPLY",510,{psychologyMin:{care:80}},["EXPRESS_CARE"],"npc_care_very_high");
+  add("R297_HIGH_EMPATHY_REPLY",510,{emotionMin:{sadness:45},psychologyMin:{empathy:80}},["EXPRESS_SYMPATHY"],"npc_empathy_for_sadness");
+  add("R298_HIGH_CARE_REPLY",510,{intentAny:["affirm_affection","seek_reassurance","request_reassurance"],psychologyMin:{care:80}},["EXPRESS_CARE"],"npc_care_for_affection_or_reassurance");
   add("R299_HIGH_ANGER_REPLY",500,{psychologyMin:{anger:80},boundaryNone:["stop_conversation"]},["EXPRESS_ANGER"],"npc_anger_very_high");
   add("R300_HIGH_CONFUSION_REPLY",500,{psychologyMin:{confusion:80}},["EXPRESS_CONFUSION"],"npc_confusion_very_high");
 
