@@ -112,7 +112,7 @@
   add("R694_CARE_TIRED_REPORT",580,{intentAny:["report_condition"],focusAny:["tiredness","sleep"],psychologyMin:{care:55}},["OFFER_REST"],"care_tired_report");
   add("R695_EMPATHY_WORK_REPORT",570,{intentAny:["report_event"],focusAny:["work"],psychologyMin:{empathy:55}},["ACKNOWLEDGE_EVENT"],"empathy_work_report");
   add("R696_EMPATHY_MONEY_REPORT",580,{intentAny:["report_event"],focusAny:["money"],psychologyMin:{empathy:55}},["EXPRESS_SYMPATHY"],"empathy_money_report");
-  add("R697_TENDER_GREETING",540,{intentAny:["greet"],psychologyMin:{tenderness:55}},["EXPRESS_CARE"],"tender_greeting");
+  add("R697_TENDER_GREETING",540,{intentAny:["greet"],psychologyMin:{tenderness:55}},["RETURN_GREETING"],"tender_greeting");
   add("R698_TENDER_GOODBYE",550,{intentAny:["say_goodbye"],psychologyMin:{tenderness:55}},["EXPRESS_MISSING"],"tender_goodbye");
   add("R699_FEARLOSS_DISTANCE",690,{intentAny:["request_distance"],psychologyMin:{fearOfLoss:55}},["EXPRESS_FEAR_OF_LOSS"],"fearloss_distance");
   add("R700_FEARLOSS_RETURN",580,{focusAny:["return"],psychologyMin:{fearOfLoss:55}},["EXPRESS_RELIEF"],"fearloss_return");
