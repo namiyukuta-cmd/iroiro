@@ -197,7 +197,7 @@
 
   function advancePasserbyTime(){
     if (window.SHOP_TIME && stateRef) {
-      window.SHOP_TIME.advance(stateRef, 10, mode === 'sell' ? 'selling' : 'begging');
+      window.SHOP_TIME.advance(stateRef, 15, mode === 'sell' ? 'selling' : 'begging');
       refreshPersistentUi();
     }
   }
