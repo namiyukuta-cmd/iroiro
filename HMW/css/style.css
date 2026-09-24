@@ -107,3 +107,31 @@
  .modal-backdrop.travel-popup .travel-destinations{grid-template-columns:repeat(4,minmax(0,1fr));gap:4px}
  .modal-backdrop.travel-popup .travel-destination{min-height:32px;padding:3px 2px;font-size:12px}
 }
+
+/* 2026-09-25 genuinely compact status header */
+.app{grid-template-rows:auto auto auto minmax(0,1fr) auto;gap:3px;padding-top:max(3px,env(safe-area-inset-top))}
+.topbar{grid-template-columns:repeat(4,minmax(0,1fr));gap:3px}
+.status-box,.weather-box{min-height:32px;height:32px;border-radius:8px}
+.icon-status{padding:1px}
+.calendar-icon{width:31px;height:27px;border-width:1.5px;border-radius:6px;padding-bottom:1px}
+.calendar-icon::before{left:-1.5px;right:-1.5px;top:-1.5px;height:9px;border-width:1.5px;border-radius:6px 6px 2px 2px}
+.calendar-icon::after{top:-4px;left:8px;width:4px;height:8px;box-shadow:15px 0 0 #403b34}
+.calendar-icon b{font-size:15px!important}
+.alarm-icon{width:28px;height:28px;border-width:1.5px}
+.alarm-icon::before,.alarm-icon::after{top:-4px;width:10px;height:6px;border-width:1.5px}
+.alarm-icon::before{left:0}
+.alarm-icon::after{right:0}
+.alarm-icon b{font-size:12px!important}
+.money-status{gap:4px!important;padding:1px 3px!important}
+.coin-icon{width:18px;height:18px;border-width:1.5px}
+.coin-icon::after{inset:4px}
+.money-status b{font-size:15px!important}
+.weather-box{font-size:18px}
+.stats{gap:2px}
+.stat{min-height:31px;height:31px;border-radius:7px;padding:1px 0;font-size:10px;line-height:1}
+.stat b{margin-top:1px;font-size:14px;line-height:1}
+.cycle-row{min-height:27px;height:27px;padding:0 4px 1px}
+.cycle-head{height:12px;padding:0 2px;font-size:10px;line-height:1}
+.cycle-head b{font-size:10px}
+.cycle-track{gap:1px}
+.cycle-day{height:11px;border-radius:4px;font-size:7px}
