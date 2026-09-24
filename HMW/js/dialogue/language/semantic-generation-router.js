@@ -161,12 +161,41 @@
     meaningId,
     { lexicalTargets = [], slotOverrides = {}, variantSeed = 0 } = {}
   ) {
-    const spec = D.GENERATION_SPECS?.[String(meaningId || "")];
-    if (!spec) return [];
+    const id = String(meaningId || "");
+    const spec = D.GENERATION_SPECS?.[id];
+    const mapped = arr(D.MEANING_PATTERN_MAP?.[id]);
+
+    const specCandidates = arr(spec?.candidates).map(candidate => ({
+      ...candidate,
+      routeSource: "generation_spec"
+    }));
+
+    const mappedCandidates = mapped
+      .filter(choice => choice?.pattern && !choice.surfaceOverride)
+      .map(choice => {
+        const slots = { ...(choice.slots || {}) };
+        const baseVerb = slots.VERB_BASE && D.Vocabulary?.has?.(slots.VERB_BASE, "verb")
+          ? [slots.VERB_BASE]
+          : [];
+        const adjective = slots.ADJECTIVE && D.Vocabulary?.has?.(slots.ADJECTIVE, "adjective")
+          ? [slots.ADJECTIVE]
+          : [];
+        return {
+          pattern: choice.pattern,
+          slots,
+          verbs: baseVerb,
+          adjectives: adjective,
+          weight: choice.weight,
+          routeSource: "meaning_pattern_map"
+        };
+      });
+
+    const candidates = [...specCandidates, ...mappedCandidates];
+    if (!candidates.length) return [];
 
     const routes = [];
 
-    arr(spec.candidates).forEach((candidate, candidateIndex) => {
+    candidates.forEach((candidate, candidateIndex) => {
       if (!candidate?.pattern || candidate.surfaceOverride) return;
 
       const patterns = compatiblePatterns(candidate.pattern);
@@ -222,13 +251,14 @@
 
         if (!built?.ok || !built.english) return;
         routes.push({
-          meaningId: String(meaningId || ""),
+          meaningId: id,
           ok: true,
           patternId,
           english: built.english,
           slots: built.slots,
           chosenWords: built.chosenWords,
           source: "semantic_router",
+          routeSource: candidate.routeSource || "generation_spec",
           family: familyFor(patternId),
           candidateIndex,
           weight: Math.max(1, Number(candidate.weight) || 1)
