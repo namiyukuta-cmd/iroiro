@@ -1,0 +1,134 @@
+name: Audit HMW response rules 007
+on:
+  push:
+    paths:
+      - '.github/workflows/hmw-audit-response-rules-007.yml'
+permissions:
+  contents: read
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Audit response rules
+        run: |
+          node <<'NODE'
+          const fs=require('fs'),path=require('path'),vm=require('vm');
+          const root=process.cwd();
+          const ctx={console};ctx.window=ctx;ctx.HMW={};vm.createContext(ctx);
+          const run=p=>vm.runInContext(fs.readFileSync(path.join(root,p),'utf8'),ctx,{filename:p});
+          [
+            'HMW/js/dialogue/dialogue-input.js',
+            'HMW/js/dialogue/analysis-schema.js',
+            'HMW/js/dialogue/claim-rules.js',
+            'HMW/js/dialogue/dialogue-meanings.js',
+            'HMW/js/dialogue/language/lexical-target-rules.js',
+            'HMW/js/dialogue/response-rule-engine.js',
+            'HMW/js/dialogue/response-rules-001-social-emotion.js',
+            'HMW/js/dialogue/response-rules-002-daily-relationship.js',
+            'HMW/js/dialogue/response-rules-003-facts-policy-nuance.js',
+            'HMW/js/dialogue/response-rules-004-claims-context.js',
+            'HMW/js/dialogue/response-rules-005-actions-daily-repair.js',
+            'HMW/js/dialogue/response-rules-006-exact-actions-questions.js',
+            'HMW/js/dialogue/response-rules-007-semantic-continuity.js',
+            'HMW/js/dialogue/response-planner.js',
+            'HMW/js/dialogue/response-priority.js',
+            'HMW/js/dialogue/response-selection.js'
+          ].forEach(run);
+
+          const D=ctx.HMW.Dialogue;
+          const rules=D.RESPONSE_RULES||[];
+          const ids=rules.map(r=>r.id);
+          const meanings=D.MEANINGS||{};
+          const dupIds=ids.filter((id,i)=>ids.indexOf(id)!==i);
+          const missingMeaningIds=[...new Set(rules.flatMap(r=>r.meanings||[]).filter(id=>!meanings[id]))];
+
+          const cases=[
+            {
+              name:'same_question_no_cross_match',
+              analysis:{
+                intents:['ask_permission_action'],
+                questions:[
+                  {kind:'permission',action:'hug'},
+                  {kind:'generic',action:'touch'}
+                ]
+              },
+              facts:{},
+              policy:{permissions:{hug:false,touch:true}},
+              psych:{}
+            },
+            {
+              name:'same_claim_no_cross_match',
+              analysis:{
+                focusConcepts:['love','trust'],
+                claims:[
+                  {concept:'love',type:'speaker_fact',polarity:false,certainty:'medium'},
+                  {concept:'trust',type:'speaker_fear',polarity:true,certainty:'low'}
+                ]
+              },
+              facts:{lovesHeroine:true,trustsHeroine:true},
+              policy:{},
+              psych:{}
+            },
+            {
+              name:'lexical_safety',
+              analysis:{lexicalTargets:['safe'],focusConcepts:['safety']},
+              facts:{},
+              policy:{},
+              psych:{care:20}
+            },
+            {
+              name:'exact_talk_request_allow',
+              analysis:{intents:['request_action'],questions:[{kind:'request_action',action:'talk'}]},
+              facts:{},
+              policy:{requestResponses:{talk:true}},
+              psych:{}
+            },
+            {
+              name:'betrayal_high_fear_claim',
+              analysis:{claims:[{concept:'betrayal',type:'speaker_fear',polarity:true,certainty:'high'}],focusConcepts:['betrayal'],emotions:{fear:60}},
+              facts:{intendsBetrayal:false,loyalToHeroine:true},
+              policy:{},
+              psych:{}
+            },
+            {
+              name:'sad_lonely',
+              analysis:{emotions:{sadness:70,loneliness:70}},
+              facts:{},
+              policy:{},
+              psych:{care:60}
+            }
+          ];
+
+          const results=cases.map(c=>{
+            const plan=D.planResponse({analysis:c.analysis,characterFacts:c.facts,characterPolicy:c.policy,psychology:c.psych});
+            const prioritized=D.prioritizeResponseMeanings(plan.meaningIds);
+            const selected=D.selectResponseMeanings(prioritized,{boundaryActive:plan.boundaryActive,maxMeanings:5});
+            return {name:c.name,meaningIds:plan.meaningIds,matchedRuleIds:plan.matchedResponseRuleIds,selected};
+          });
+
+          const checks={
+            ruleCount:rules.length===700,
+            uniqueRuleIds:new Set(ids).size===700,
+            noMissingMeanings:missingMeaningIds.length===0,
+            sameQuestion:results[0].meaningIds.includes('DENY_PERMISSION')&&!results[0].matchedRuleIds.includes('R221_PERMISSION_TOUCH_ALLOW'),
+            sameClaim:!results[1].matchedRuleIds.includes('R301_CLAIM_FEAR_LOVE'),
+            lexicalSafety:results[2].meaningIds.includes('REASSURE_SAFETY'),
+            exactTalk:results[3].meaningIds.includes('ACCEPT_ACTION_REQUEST')&&results[3].matchedRuleIds.includes('R641_REQ_TALK_ALLOW'),
+            betrayal:results[4].meaningIds.includes('DENY_BETRAYAL')&&!results[4].meaningIds.includes('ADMIT_BETRAYAL'),
+            sadLonely:results[5].meaningIds.includes('OFFER_COMPANY')&&results[5].meaningIds.includes('EXPRESS_SYMPATHY')
+          };
+
+          console.log('AUDIT_RESULT '+JSON.stringify({
+            ruleCount:rules.length,
+            uniqueRuleIds:new Set(ids).size,
+            dupIds,
+            missingMeaningIds,
+            checks,
+            results
+          }));
+          if(Object.values(checks).some(v=>v!==true)) process.exit(1);
+          NODE
