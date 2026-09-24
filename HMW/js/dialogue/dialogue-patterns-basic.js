@@ -69,6 +69,56 @@
     REQUEST_STAY: [
       "Please stay.",
       "I want you to stay."
+    ],
+    APOLOGIZE: [
+      "I am sorry.",
+      "I am sorry for what I did.",
+      "I should not have done that."
+    ],
+    ACCEPT_APOLOGY: [
+      "I accept your apology.",
+      "All right. I hear you.",
+      "Thank you for apologizing."
+    ],
+    EXPRESS_HURT: [
+      "That hurt me.",
+      "What you said hurt me.",
+      "I was hurt by that."
+    ],
+    EXPRESS_ANGER: [
+      "I am angry.",
+      "I am still angry.",
+      "I am angry about what happened."
+    ],
+    REASSURE_NOT_LEAVING: [
+      "I am not leaving you.",
+      "I am not going to abandon you.",
+      "I am still here."
+    ],
+    ASK_TO_TALK: [
+      "Please talk to me.",
+      "Can we talk about this?",
+      "I want to talk to you."
+    ],
+    REQUEST_TIME: [
+      "I need some time.",
+      "Give me a little time.",
+      "I need time to think."
+    ],
+    SAY_GOODBYE_TEMPORARY: [
+      "I have to go for now.",
+      "I will see you later.",
+      "I am leaving for now."
+    ],
+    PROMISE_RETURN: [
+      "I will come back.",
+      "I will see you again.",
+      "I will come back later."
+    ],
+    ASK_NOT_TO_DISAPPEAR: [
+      "Do not disappear without telling me.",
+      "Please do not just disappear.",
+      "Tell me before you go."
     ]
   };
 })();
