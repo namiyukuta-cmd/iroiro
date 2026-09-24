@@ -1,7 +1,7 @@
 (() => {
   "use strict";
 
-  const version = "20260924-router-constraints";
+  const version = "20260925-response-relevance";
   const files = [
     "dialogue-meanings.js",
     "language/vocabulary-registry.js",
