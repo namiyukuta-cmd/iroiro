@@ -157,6 +157,22 @@
       const slice = recentMeaningIds.slice(-limit);
       if (hasAny(slice, w.historyRecentNone)) return false;
     }
+    if (w.historySuffix) {
+      const suffix = arr(w.historySuffix);
+      if (suffix.length > recentMeaningIds.length) return false;
+      const tail = recentMeaningIds.slice(-suffix.length);
+      if (!suffix.every((id,index) => tail[index] === id)) return false;
+    }
+    for (const [id,min] of Object.entries(w.historyRecentCountMin || {})) {
+      const limit = Math.max(1, Number(w.historyRecentWindow) || 3);
+      const count = recentMeaningIds.slice(-limit).filter(item => item === id).length;
+      if (count < Number(min)) return false;
+    }
+    for (const [id,max] of Object.entries(w.historyRecentCountMax || {})) {
+      const limit = Math.max(1, Number(w.historyRecentWindow) || 3);
+      const count = recentMeaningIds.slice(-limit).filter(item => item === id).length;
+      if (count > Number(max)) return false;
+    }
     for (const [id,min] of Object.entries(w.historyCountMin || {})) {
       const count = recentMeaningIds.filter(item => item === id).length;
       if (count < Number(min)) return false;
