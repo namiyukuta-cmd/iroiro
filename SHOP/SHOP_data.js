@@ -44,6 +44,7 @@
           stopChance: 0.24,
           enforcement: Object.freeze({
             startAfter: 20,
+            startAfterMinutes: 120,
             checkChance: 0.04,
             warningsBeforeRemoval: 2,
             cooldownMinutes: 45,
@@ -88,6 +89,7 @@
           stopChance: 0.28,
           enforcement: Object.freeze({
             startAfter: 8,
+            startAfterMinutes: 45,
             checkChance: 0.11,
             warningsBeforeRemoval: 2,
             cooldownMinutes: 60,
@@ -124,6 +126,7 @@
           stopChance: 0.34,
           enforcement: Object.freeze({
             startAfter: 10,
+            startAfterMinutes: 60,
             checkChance: 0.09,
             warningsBeforeRemoval: 2,
             cooldownMinutes: 60,
@@ -219,6 +222,7 @@
           stopChance: 0.16,
           enforcement: Object.freeze({
             startAfter: 3,
+            startAfterMinutes: 20,
             checkChance: 0.22,
             warningsBeforeRemoval: 1,
             cooldownMinutes: 120,
