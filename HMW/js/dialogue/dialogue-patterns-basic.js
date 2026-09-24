@@ -219,6 +219,56 @@
       "Can I kiss you?",
       "May I kiss you?",
       "Is it all right if I kiss you?"
+    ],
+    EXPRESS_TIRED: [
+      "I am tired.",
+      "I am really tired.",
+      "I need some rest."
+    ],
+    EXPRESS_HUNGRY: [
+      "I am hungry.",
+      "I have not eaten yet.",
+      "I need something to eat."
+    ],
+    EXPRESS_COLD: [
+      "I am cold.",
+      "It is too cold for me.",
+      "I cannot get warm."
+    ],
+    OFFER_HELP: [
+      "Can I help you?",
+      "Let me help you.",
+      "I can help you."
+    ],
+    ASK_FOR_HELP: [
+      "Can you help me?",
+      "Please help me.",
+      "I need your help."
+    ],
+    OFFER_FOOD: [
+      "Would you like something to eat?",
+      "You should eat something.",
+      "I have some food for you."
+    ],
+    OFFER_DRINK: [
+      "Would you like something to drink?",
+      "Do you want some water?",
+      "I have something for you to drink."
+    ],
+    ASK_TO_WAIT: [
+      "Wait for me.",
+      "Please wait a moment.",
+      "Can you wait for me?"
+    ],
+    ASK_TO_GO_TOGETHER: [
+      "Let us go together.",
+      "Come with me.",
+      "Can we go together?"
+    ],
+    ASK_DESTINATION: [
+      "Where are you going?",
+      "Where are you headed?",
+      "Where do you want to go?"
     ]
   };
 })();
