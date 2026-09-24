@@ -135,7 +135,7 @@ jobs:
             historyLove:results[2].matchedRuleIds.includes('R1061_HISTORY_AFTER_LOVE_CONFIRM'),
             historyUnknown:results[3].matchedRuleIds.includes('R1071_HISTORY_UNKNOWN_REPEAT')&&results[3].meaningIds.includes('ASK_FOR_DETAILS'),
             datingFlag:results[4].meaningIds.includes('STATE_RELATIONSHIP_STATUS')&&results[4].slots.STATE_RELATIONSHIP_STATUS?.RELATIONSHIP==='dating',
-            trustBroken:results[5].matchedRuleIds.includes('R1093_FLAG_TRUST_BROKEN')&&results[5].meaningIds.includes('ASK_TO_REPAIR'),
+            trustBroken:results[5].matchedRuleIds.includes('R1093_FLAG_TRUST_BROKEN')&&results[5].meaningIds.includes('ASK_TO_REPAIR')&&!results[5].selected.includes('CONFIRM_TRUST'),
             pipelineRelationship:pipelineResult.plan.relationship?.trust===80,
             pipelineHistory:pipelineResult.plan.matchedResponseRuleIds.includes('R1061_HISTORY_AFTER_LOVE_CONFIRM')
           };
@@ -151,3 +151,5 @@ jobs:
           }));
           if(Object.values(checks).some(v=>v!==true)) process.exit(1);
           NODE
+
+# rerun after trust-topic assertion fix
