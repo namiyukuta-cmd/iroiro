@@ -1,0 +1,150 @@
+name: Audit HMW response rules 017
+on:
+  push:
+    paths:
+      - '.github/workflows/hmw-audit-response-rules-017.yml'
+permissions:
+  contents: read
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Audit response rules
+        run: |
+          node <<'NODE'
+          const fs=require('fs'),path=require('path'),vm=require('vm');
+          const root=process.cwd();
+          const ctx={console};ctx.window=ctx;ctx.HMW={};vm.createContext(ctx);
+          const run=p=>vm.runInContext(fs.readFileSync(path.join(root,p),'utf8'),ctx,{filename:p});
+          const files=[
+            'HMW/js/dialogue/dialogue-input.js',
+            'HMW/js/dialogue/analysis-schema.js',
+            'HMW/js/dialogue/claim-rules.js',
+            'HMW/js/dialogue/dialogue-meanings.js',
+            'HMW/js/dialogue/language/lexical-target-rules.js',
+            'HMW/js/dialogue/response-rule-engine.js'
+          ];
+          for(let i=1;i<=17;i++){
+            const n=String(i).padStart(3,'0');
+            const found=fs.readdirSync(path.join(root,'HMW/js/dialogue'))
+              .find(name=>name.startsWith('response-rules-'+n+'-')&&name.endsWith('.js'));
+            if(!found) throw new Error('missing response rules file '+n);
+            files.push('HMW/js/dialogue/'+found);
+          }
+          files.push(
+            'HMW/js/dialogue/response-planner.js',
+            'HMW/js/dialogue/response-priority.js',
+            'HMW/js/dialogue/response-selection.js',
+            'HMW/js/dialogue/response-history.js',
+            'HMW/js/dialogue/dialogue-pipeline.js'
+          );
+          files.forEach(run);
+
+          const D=ctx.HMW.Dialogue;
+          const rules=D.RESPONSE_RULES||[];
+          const ids=rules.map(r=>r.id);
+          const dupIds=ids.filter((id,i)=>ids.indexOf(id)!==i);
+          const missingMeaningIds=[...new Set(rules.flatMap(r=>r.meanings||[]).filter(id=>!D.MEANINGS[id]))];
+
+          const test=c=>{
+            const plan=D.planResponse(c);
+            const prioritized=D.prioritizeResponseMeanings(plan.meaningIds);
+            const selected=D.selectResponseMeanings(prioritized,{boundaryActive:plan.boundaryActive,maxMeanings:5});
+            return {plan,selected};
+          };
+
+          const unavailable=test({
+            analysis:{intents:['ask_to_meet']},
+            characterPolicy:{willingToMeet:true},
+            relationship:{stage:'close',familiarity:80,trust:80,goodwill:80,desire:40,conscience:70,malice:0,flags:{}},
+            conversationContext:{availableNow:false}
+          });
+          const noContact=test({
+            analysis:{intents:['request_contact']},
+            characterPolicy:{allowContact:true},
+            relationship:{stage:'partner',familiarity:90,trust:90,goodwill:90,desire:70,conscience:80,malice:0,flags:{noContact:true}},
+            conversationContext:{privacy:'private'}
+          });
+          const kissBoundary=test({
+            analysis:{
+              intents:['ask_permission_action'],
+              questions:[{kind:'permission',action:'kiss'}],
+              boundaries:['do_not_kiss']
+            },
+            characterPolicy:{permissions:{kiss:true}},
+            relationship:{stage:'partner',familiarity:90,trust:90,goodwill:90,desire:90,conscience:80,malice:0,flags:{}},
+            conversationContext:{privacy:'private'}
+          });
+          const mustLeave=test({
+            analysis:{intents:['request_stay']},
+            characterPolicy:{willingToStay:true},
+            relationship:{stage:'partner',familiarity:90,trust:90,goodwill:90,desire:70,conscience:80,malice:0,flags:{}},
+            conversationContext:{mustLeaveNow:true}
+          });
+          const trustBroken=test({
+            analysis:{intents:['express_hurt'],focusConcepts:['trust'],emotions:{hurt:70,distrust:60}},
+            characterFacts:{trustsHeroine:true},
+            characterPolicy:{},
+            psychology:{care:60},
+            relationship:{stage:'partner',familiarity:90,trust:30,goodwill:70,desire:50,conscience:80,malice:0,flags:{trustBroken:true}},
+            conversationContext:{privacy:'private'}
+          });
+          const partnerKiss=test({
+            analysis:{intents:['ask_permission_action'],questions:[{kind:'permission',action:'kiss'}]},
+            characterPolicy:{permissions:{kiss:true}},
+            relationship:{stage:'partner',familiarity:90,trust:90,goodwill:90,desire:80,conscience:80,malice:0,flags:{}},
+            conversationContext:{privacy:'private'}
+          });
+
+          const checks={
+            ruleCount:rules.length===1700,
+            uniqueRuleIds:new Set(ids).size===1700,
+            noMissingMeanings:missingMeaningIds.length===0,
+            unavailableSuppressed:
+              unavailable.plan.matchedResponseRuleIds.includes('R1601_UNAVAILABLE_MEET_HARD') &&
+              unavailable.plan.suppressedMeaningIds.includes('AGREE_REQUEST') &&
+              !unavailable.plan.meaningIds.includes('AGREE_REQUEST') &&
+              unavailable.selected.includes('DECLINE_REQUEST'),
+            noContactSuppressed:
+              noContact.plan.matchedResponseRuleIds.includes('R1606_NO_CONTACT_HARD') &&
+              noContact.plan.suppressedMeaningIds.includes('ACCEPT_CONTACT') &&
+              !noContact.plan.meaningIds.includes('ACCEPT_CONTACT') &&
+              noContact.selected.includes('DECLINE_CONTACT'),
+            kissBoundarySuppressed:
+              kissBoundary.plan.matchedResponseRuleIds.includes('R1615_NO_KISS_PERMISSION_HARD') &&
+              kissBoundary.plan.suppressedMeaningIds.includes('GRANT_PERMISSION') &&
+              !kissBoundary.plan.meaningIds.includes('GRANT_PERMISSION') &&
+              kissBoundary.selected.includes('DENY_PERMISSION'),
+            leaveStaySuppressed:
+              mustLeave.plan.matchedResponseRuleIds.includes('R1605_LEAVING_STAY_HARD') &&
+              mustLeave.plan.suppressedMeaningIds.includes('AGREE_REQUEST') &&
+              !mustLeave.plan.meaningIds.includes('AGREE_REQUEST'),
+            trustBrokenRepair:
+              trustBroken.plan.matchedResponseRuleIds.includes('R1631_TRUST_BROKEN_HURT') &&
+              trustBroken.plan.meaningIds.includes('ASK_TO_REPAIR'),
+            partnerKissAllowed:
+              partnerKiss.plan.matchedResponseRuleIds.includes('R1683_KISS_PARTNER_ALLOW') &&
+              partnerKiss.plan.meaningIds.includes('GRANT_PERMISSION')
+          };
+
+          console.log('AUDIT_RESULT '+JSON.stringify({
+            ruleCount:rules.length,
+            uniqueRuleIds:new Set(ids).size,
+            dupIds,
+            missingMeaningIds,
+            checks,
+            cases:{
+              unavailable:{meaningIds:unavailable.plan.meaningIds,suppressed:unavailable.plan.suppressedMeaningIds,selected:unavailable.selected,matched:unavailable.plan.matchedResponseRuleIds},
+              noContact:{meaningIds:noContact.plan.meaningIds,suppressed:noContact.plan.suppressedMeaningIds,selected:noContact.selected,matched:noContact.plan.matchedResponseRuleIds},
+              kissBoundary:{meaningIds:kissBoundary.plan.meaningIds,suppressed:kissBoundary.plan.suppressedMeaningIds,selected:kissBoundary.selected,matched:kissBoundary.plan.matchedResponseRuleIds},
+              mustLeave:{meaningIds:mustLeave.plan.meaningIds,suppressed:mustLeave.plan.suppressedMeaningIds,selected:mustLeave.selected,matched:mustLeave.plan.matchedResponseRuleIds},
+              trustBroken:{meaningIds:trustBroken.plan.meaningIds,selected:trustBroken.selected,matched:trustBroken.plan.matchedResponseRuleIds},
+              partnerKiss:{meaningIds:partnerKiss.plan.meaningIds,selected:partnerKiss.selected,matched:partnerKiss.plan.matchedResponseRuleIds}
+            }
+          }));
+          if(Object.values(checks).some(v=>v!==true)) process.exit(1);
+          NODE
