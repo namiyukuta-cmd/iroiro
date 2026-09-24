@@ -1,0 +1,79 @@
+name: Add HMW vocabulary 075
+on:
+  push:
+    paths:
+      - '.github/workflows/hmw-add-vocab-075.yml'
+permissions:
+  contents: write
+jobs:
+  add:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Build 200 unique entries and commit
+        run: |
+          node <<'NODE'
+          const fs=require('fs'),path=require('path'),vm=require('vm'),cp=require('child_process');
+          const lang=path.join(process.cwd(),'HMW/js/dialogue/language');
+          const ctx={console};ctx.window=ctx;ctx.HMW={};vm.createContext(ctx);
+          const run=f=>vm.runInContext(fs.readFileSync(f,'utf8'),ctx,{filename:path.basename(f)});
+          run(path.join(lang,'vocabulary-registry.js'));
+          const files=fs.readdirSync(lang).filter(f=>{const m=f.match(/^vocabulary-(\d{3}).*\.js$/);return m&&Number(m[1])>=1&&Number(m[1])<=74}).sort((a,b)=>Number(a.match(/(\d{3})/)[1])-Number(b.match(/(\d{3})/)[1]));
+          for(const f of files)run(path.join(lang,f));
+          const V=ctx.HMW.Dialogue.Vocabulary;
+          const groups={
+            verb:["murmur","mutter","mumble","yell","groan","gasp","sob","sniffle","stammer","shrug","frown","glare","gaze","peek","peer","gesture","signal","imply","infer","interpret","paraphrase","emphasize","distinguish","deduce","articulate","react","distract","collaborate","tolerate","insult","discourage","forgive","reassure","negotiate","compromise","protest","demand","compliment","persuade","acknowledge","clarify","object","insist","confess","refill","drain","soak","twist","rotate","stack","pile","scoop","sprinkle","grasp","unfasten","crouch","tiptoe","stumble","slip","sprint","knead","whine","chuckle","whimper","exhale","inhale","hesitate","pause","resume","rephrase","mishear","misread","misremember","overhear","interrupt","respond","reply","debate","confront","settle","resolve","reconsider","rethink","recheck","double-check","verify","confirm","dismiss","accept","decline","assure","distrust","misjudge","underestimate","overestimate","prioritize","coordinate","assign","delegate","volunteer","participate","attend","host","escort","accompany","separate","reunite","reconnect","withdraw","approach","depart","remain","linger","rush","wander","stroll","step","lean","duck","dodge","clutch","release","tap","pat","stroke","rub","wipe","scrape","pour","spill","stir","shake","fold","unfold","fasten","loosen","tighten","wrap","unwrap","seal","unseal","sort","organize","arrange","rearrange","pack","unpack","load","unload","deliver","collect","fetch","store","discard","recycle","repair","maintain","inspect","monitor","adjust","operate","switch","connect","disconnect","restart","reset","scan","print","upload","download","browse","scroll","type","click","search"],
+            noun:["ambiguity","implication","nuance","emphasis","interpretation","assumption","inference","viewpoint","perspective","posture","frown","grin","gasp","sigh","whisper","murmur","clarity","urgency","reluctance","willingness","confusion","discomfort","distrust","empathy","generosity","hostility","disbelief","prohibition","circumstance","clue","hint","impression","errand","chore","collaboration","teamwork","priority","preference","intention","reaction","gesture","attitude","expectation","concern","response","remark","comment","statement","claim","denial","refusal","consent","restriction","exception","alternative","outcome","factor","source","evidence","proof","rumor","secret","memory","routine","assistance","cooperation","request","demand","offer","promise","warning","compliment","insult","criticism","praise","apology","forgiveness","gratitude","sympathy","resentment","patience","courage","shame","loneliness","curiosity","boredom","relief","panic","stress","pressure","shock","sorrow","delight","annoyance","frustration","confidence","insecurity","hesitation","reassurance","negotiation","compromise","reconciliation","resolution","boundary","privacy","permission","obligation","authorization","responsibility","deadline","schedule","appointment","reminder","notification","message","conversation","discussion","debate","argument","quarrel","misunderstanding","explanation","description","summary","translation","pronunciation","vocabulary","grammar","sentence","paragraph","context","reference","quotation","example","definition","meaning","topic","subject","detail","information","knowledge","logic","method","process","pattern","rule","strategy","goal","purpose","plan","decision","choice","option","possibility","probability","certainty","uncertainty","necessity","requirement","condition","consequence","cause","effect","problem","solution","mistake","error","success","failure","progress","improvement","experience","skill","ability"],
+            adjective:["ambiguous","explicit","implicit","precise","vague","sarcastic","ironic","literal","figurative","rational","hesitant","authentic","genuine","deliberate","accidental","mutual","tense","calm","uneasy","comfortable","uncomfortable","confident","insecure","reluctant","eager","willing","unwilling","supportive","cooperative","hostile","aggressive","forgiving","apologetic","respectful","disrespectful","trusting","suspicious","honest","dishonest","sincere","unclear","obvious","hidden","relevant","irrelevant","reasonable","unreasonable","logical","illogical","certain","uncertain","probable","unlikely","possible","impossible","necessary","unnecessary","optional","mandatory","available","unavailable","ready","unready","responsible","irresponsible","reliable","unreliable","careful","careless","temporary","permanent","immediate","eventual","initial","final","ongoing","pending","repeated","continuous"],
+            adverb:["sarcastically","literally","figuratively","precisely","vaguely","secretly","hesitantly","jointly","mutually","deliberately","accidentally","sincerely","openly","honestly","respectfully","reluctantly","eagerly","willingly","calmly","nervously","anxiously","confidently","firmly","softly","gently","quietly","loudly","briefly","directly","indirectly","clearly","seriously","casually","formally","informally","immediately","eventually","gradually","suddenly","closely","separately","together","partly","fully","roughly","nearly","exactly","approximately","probably","possibly","certainly","apparently","obviously","actually","basically","generally","specifically"]
+          };
+          const chosen=[];
+          for(const [pos,lemmas] of Object.entries(groups)){
+            for(const raw of lemmas){
+              const lemma=String(raw).toLowerCase();
+              const key=lemma+":"+pos;
+              if(!V.byKey[key]&&!chosen.some(e=>e.lemma===lemma&&e.pos===pos)){
+                chosen.push({lemma,pos,tags:["conversation","daily","reasoning","social","batch075"]});
+                if(chosen.length===200) break;
+              }
+            }
+            if(chosen.length===200) break;
+          }
+          if(chosen.length<200) throw new Error("Only "+chosen.length+" unique candidates available");
+          const byPos={};
+          for(const e of chosen)(byPos[e.pos]||(byPos[e.pos]=[])).push(e.lemma);
+          const lines=[];
+          lines.push('(() => {');
+          lines.push('  "use strict";');
+          lines.push('  const V = window.HMW?.Dialogue?.Vocabulary;');
+          lines.push('  if (!V) throw new Error("Vocabulary registry must load first.");');
+          lines.push('');
+          lines.push('  // Conversation, reasoning, social nuance and practical action vocabulary.');
+          lines.push('  const words = '+JSON.stringify(byPos,null,4).replace(/^/gm,'  ')+';');
+          lines.push('');
+          lines.push('  const entries = [];');
+          lines.push('  for (const [pos, lemmas] of Object.entries(words)) {');
+          lines.push('    for (const lemma of lemmas) {');
+          lines.push('      entries.push({');
+          lines.push('        lemma,');
+          lines.push('        pos,');
+          lines.push('        tags: ["conversation","daily","reasoning","social","batch075"]');
+          lines.push('      });');
+          lines.push('    }');
+          lines.push('  }');
+          lines.push('');
+          lines.push('  V.register(entries);');
+          lines.push('})();');
+          const out=path.join(lang,'vocabulary-075-conversation-reasoning.js');
+          fs.writeFileSync(out,lines.join('\n')+'\n');
+          cp.execSync('git config user.name "github-actions[bot]"');
+          cp.execSync('git config user.email "41898282+github-actions[bot]@users.noreply.github.com"');
+          cp.execSync('git add HMW/js/dialogue/language/vocabulary-075-conversation-reasoning.js');
+          cp.execSync('git commit -m "Add vocabulary batch 075"');
+          cp.execSync('git push');
+          for(const e of chosen)V.register([e]);
+          console.log('AUDIT_RESULT '+JSON.stringify({added:chosen.length,uniqueAfter:V.entries.length,byPos:Object.fromEntries(Object.entries(byPos).map(([k,v])=>[k,v.length])),first:chosen[0],last:chosen.at(-1)}));
+          NODE
