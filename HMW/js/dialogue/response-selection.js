@@ -69,7 +69,8 @@
     let ordered = [...new Set((meaningIds || []).filter(Boolean))];
 
     const hasSpecificAnswer = ordered.some(id => DIRECT_ANSWER.has(id));
-    if (hasSpecificAnswer) {
+    const hasSpecificRequestResponse = ordered.some(id => REQUEST_RESPONSE.has(id));
+    if (hasSpecificAnswer || hasSpecificRequestResponse) {
       ordered = ordered.filter(id =>
         id !== "ANSWER_UNKNOWN" &&
         id !== "ASK_FOR_ANSWER" &&
