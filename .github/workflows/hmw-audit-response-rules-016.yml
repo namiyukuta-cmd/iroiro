@@ -1,0 +1,153 @@
+name: Audit HMW response rules 016
+on:
+  push:
+    paths:
+      - '.github/workflows/hmw-audit-response-rules-016.yml'
+permissions:
+  contents: read
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Audit response rules
+        run: |
+          node <<'NODE'
+          const fs=require('fs'),path=require('path'),vm=require('vm');
+          const root=process.cwd();
+          const ctx={console};ctx.window=ctx;ctx.HMW={};vm.createContext(ctx);
+          const run=p=>vm.runInContext(fs.readFileSync(path.join(root,p),'utf8'),ctx,{filename:p});
+          const files=[
+            'HMW/js/dialogue/dialogue-input.js',
+            'HMW/js/dialogue/analysis-schema.js',
+            'HMW/js/dialogue/claim-rules.js',
+            'HMW/js/dialogue/dialogue-meanings.js',
+            'HMW/js/dialogue/language/lexical-target-rules.js',
+            'HMW/js/dialogue/response-rule-engine.js'
+          ];
+          for(let i=1;i<=16;i++){
+            const n=String(i).padStart(3,'0');
+            const found=fs.readdirSync(path.join(root,'HMW/js/dialogue'))
+              .find(name=>name.startsWith('response-rules-'+n+'-')&&name.endsWith('.js'));
+            if(!found) throw new Error('missing response rules file '+n);
+            files.push('HMW/js/dialogue/'+found);
+          }
+          files.push(
+            'HMW/js/dialogue/response-planner.js',
+            'HMW/js/dialogue/response-priority.js',
+            'HMW/js/dialogue/response-selection.js',
+            'HMW/js/dialogue/response-history.js',
+            'HMW/js/dialogue/dialogue-pipeline.js'
+          );
+          files.forEach(run);
+
+          const D=ctx.HMW.Dialogue;
+          const rules=D.RESPONSE_RULES||[];
+          const ids=rules.map(r=>r.id);
+          const meanings=D.MEANINGS||{};
+          const dupIds=ids.filter((id,i)=>ids.indexOf(id)!==i);
+          const missingMeaningIds=[...new Set(rules.flatMap(r=>r.meanings||[]).filter(id=>!meanings[id]))];
+
+          const cases=[
+            {
+              name:'first_meeting',
+              analysis:{intents:['greet'],focusConcepts:[]},
+              facts:{},policy:{},psych:{},
+              relationship:{stage:'stranger',familiarity:0,trust:0,goodwill:0,desire:0,conscience:50,malice:0,flags:{}},
+              context:{firstMeeting:true,privacy:'public',turnCount:1},
+              recent:[]
+            },
+            {
+              name:'unavailable_meet',
+              analysis:{intents:['ask_to_meet']},
+              facts:{},policy:{willingToMeet:true},psych:{},
+              relationship:{stage:'close',familiarity:80,trust:80,goodwill:80,desire:40,conscience:70,malice:0,flags:{}},
+              context:{availableNow:false},
+              recent:[]
+            },
+            {
+              name:'time_pressure_talk',
+              analysis:{intents:['ask_to_talk']},
+              facts:{},policy:{willingToTalk:true},psych:{},
+              relationship:{stage:'close',familiarity:80,trust:80,goodwill:80,desire:40,conscience:70,malice:0,flags:{}},
+              context:{timePressure:true,canTalkFreely:true},
+              recent:[]
+            },
+            {
+              name:'must_leave_stay',
+              analysis:{intents:['request_stay']},
+              facts:{},policy:{willingToStay:true},psych:{},
+              relationship:{stage:'partner',familiarity:90,trust:90,goodwill:90,desire:70,conscience:80,malice:0,flags:{}},
+              context:{mustLeaveNow:true},
+              recent:[]
+            },
+            {
+              name:'same_topic_relationship',
+              analysis:{focusConcepts:['relationship'],intents:['request_reassurance']},
+              facts:{},policy:{},psych:{care:60},
+              relationship:{stage:'partner',familiarity:90,trust:85,goodwill:90,desire:70,conscience:80,malice:0,flags:{}},
+              context:{sameTopicTurns:4,continueTopic:true,privacy:'private'},
+              recent:[]
+            },
+            {
+              name:'missing_context',
+              analysis:{intents:['ask_question'],questions:[{kind:'generic'}]},
+              facts:{},policy:{},psych:{},
+              relationship:{stage:'friend',familiarity:60,trust:60,goodwill:60,desire:20,conscience:60,malice:0,flags:{}},
+              context:{},
+              recent:[]
+            }
+          ];
+
+          const results=cases.map(c=>{
+            const plan=D.planResponse({
+              analysis:c.analysis,
+              characterFacts:c.facts,
+              characterPolicy:c.policy,
+              psychology:c.psych,
+              relationship:c.relationship,
+              conversationContext:c.context,
+              recentMeaningIds:c.recent
+            });
+            const prioritized=D.prioritizeResponseMeanings(plan.meaningIds);
+            const selected=D.selectResponseMeanings(prioritized,{boundaryActive:plan.boundaryActive,maxMeanings:5});
+            return {name:c.name,meaningIds:plan.meaningIds,matchedRuleIds:plan.matchedResponseRuleIds,selected};
+          });
+
+          const pipeline=D.runDialoguePipeline({
+            analysis:{intents:['ask_to_meet']},
+            characterFacts:{},
+            characterPolicy:{willingToMeet:true},
+            psychology:{},
+            relationship:{stage:'close',familiarity:80,trust:80,goodwill:80,desire:40,conscience:70,malice:0,flags:{}},
+            conversationContext:{availableNow:false},
+            recentMeaningIds:[]
+          });
+
+          const checks={
+            ruleCount:rules.length===1600,
+            uniqueRuleIds:new Set(ids).size===1600,
+            noMissingMeanings:missingMeaningIds.length===0,
+            firstMeeting:results[0].matchedRuleIds.includes('R1501_FIRST_MEETING_GREETING'),
+            unavailableMeet:results[1].selected.includes('DECLINE_REQUEST')&&!results[1].selected.includes('AGREE_REQUEST')&&results[1].meaningIds.includes('REQUEST_TIME'),
+            timePressureTalk:results[2].selected.includes('DECLINE_REQUEST')&&!results[2].selected.includes('AGREE_REQUEST')&&results[2].meaningIds.includes('REQUEST_TIME'),
+            mustLeaveStay:results[3].selected.includes('DECLINE_REQUEST')&&!results[3].selected.includes('AGREE_REQUEST')&&results[3].meaningIds.includes('REQUEST_TIME'),
+            sameTopic:results[4].matchedRuleIds.includes('R1540_SAME_TOPIC_4_RELATIONSHIP'),
+            missingContextNoLeak:!results[5].matchedRuleIds.some(id=>/^R15(1[1-9]|2[0-9]|3[1-9]|4[0-9])_/.test(id)),
+            pipelineContext:pipeline.plan.conversationContext?.availableNow===false&&pipeline.plan.selectedMeaningIds.includes('DECLINE_REQUEST')&&!pipeline.plan.selectedMeaningIds.includes('AGREE_REQUEST')
+          };
+
+          console.log('AUDIT_RESULT '+JSON.stringify({
+            ruleCount:rules.length,
+            uniqueRuleIds:new Set(ids).size,
+            dupIds,
+            missingMeaningIds,
+            checks,
+            results,
+            pipeline:{selected:pipeline.plan.selectedMeaningIds,matched:pipeline.plan.matchedResponseRuleIds,context:pipeline.plan.conversationContext}
+          }));
+          if(Object.values(checks).some(v=>v!==true)) process.exit(1);
+          NODE
