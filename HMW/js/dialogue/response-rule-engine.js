@@ -137,6 +137,18 @@
       if (!comparePath(ctx.relationship?.flags || {}, path, expected)) return false;
     }
 
+    for (const [path,expected] of Object.entries(w.contextEq || {})) {
+      if (!comparePath(ctx.conversationContext || {}, path, expected)) return false;
+    }
+    for (const [key,min] of Object.entries(w.contextMin || {})) {
+      const value = ctx.conversationContext?.[key];
+      if (!Number.isFinite(Number(value)) || Number(value) < Number(min)) return false;
+    }
+    for (const [key,max] of Object.entries(w.contextMax || {})) {
+      const value = ctx.conversationContext?.[key];
+      if (!Number.isFinite(Number(value)) || Number(value) > Number(max)) return false;
+    }
+
     const recentMeaningIds = arr(ctx.recentMeaningIds);
     if (w.historyAny && !hasAny(recentMeaningIds, w.historyAny)) return false;
     if (w.historyAll && !hasAll(recentMeaningIds, w.historyAll)) return false;
@@ -218,13 +230,14 @@
     characterPolicy = {},
     psychology = {},
     relationship = {},
+    conversationContext = {},
     recentMeaningIds = []
   } = {}) {
     const normalized = D.normalizeInputAnalysis
       ? D.normalizeInputAnalysis(analysis)
       : analysis;
 
-    const ctx = { analysis:normalized, characterFacts, characterPolicy, psychology, relationship, recentMeaningIds };
+    const ctx = { analysis:normalized, characterFacts, characterPolicy, psychology, relationship, conversationContext, recentMeaningIds };
     const meaningIds = [];
     const reasons = [];
     const matchedRuleIds = [];
