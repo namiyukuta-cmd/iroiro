@@ -287,6 +287,22 @@
       window.SHOP_CURRENCY.formatAmount(price) + 'で1個売れた。';
   }
 
+  function passerbyDelayMultiplier(){
+    const now=((Number(stateRef && stateRef.minutes)||0)%1440+1440)%1440;
+    let multiplier=1;
+
+    if(now<300 || now>=1320) multiplier*=2.6;
+    else if(now<480) multiplier*=1.35;
+    else if(now>=720 && now<900) multiplier*=1.35;
+    else if(now>=1020 && now<1260) multiplier*=0.85;
+
+    const weather=String(stateRef && stateRef.weather || '');
+    if(weather.includes('砂')) multiplier*=1.6;
+    else if(weather.includes('雨')) multiplier*=1.4;
+
+    return multiplier;
+  }
+
   function clearPasserby(){
     if(passerbyTimer){
       clearTimeout(passerbyTimer);
@@ -304,7 +320,8 @@
 
   function scheduleNextPasserby(delay=700){
     if(passerbyTimer) clearTimeout(passerbyTimer);
-    passerbyTimer=setTimeout(runPasserby, delay);
+    const adjusted=Math.max(250,Math.round(delay*passerbyDelayMultiplier()));
+    passerbyTimer=setTimeout(runPasserby, adjusted);
   }
 
   function showPasserbyConversation(stopAt){
