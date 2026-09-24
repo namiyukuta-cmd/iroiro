@@ -262,3 +262,99 @@
 .cycle-head b{font-size:9px !important}
 .cycle-track{gap:1px !important}
 .cycle-day{height:10px !important;border-radius:3px !important;font-size:6px !important}
+
+/* 2026-09-25 topbar reference match: compact spacing, normal readable size */
+.topbar{
+  grid-template-columns:.9fr .9fr .8fr 1.4fr !important;
+  gap:3px !important;
+}
+.status-box,.weather-box{
+  min-height:50px !important;
+  height:50px !important;
+  border-radius:10px !important;
+  padding:2px 3px !important;
+}
+.icon-status{padding:2px !important}
+.calendar-icon{
+  width:42px !important;
+  height:37px !important;
+  padding-bottom:3px !important;
+  border-width:2px !important;
+  border-radius:8px !important;
+}
+.calendar-icon::before{
+  left:-2px !important;
+  right:-2px !important;
+  top:-2px !important;
+  height:12px !important;
+  border-width:2px !important;
+  border-radius:8px 8px 3px 3px !important;
+}
+.calendar-icon::after{
+  top:-5px !important;
+  left:10px !important;
+  width:4px !important;
+  height:10px !important;
+  box-shadow:19px 0 0 #403b34 !important;
+}
+.calendar-icon b{font-size:21px !important}
+.alarm-icon{
+  width:40px !important;
+  height:40px !important;
+  border-width:2px !important;
+}
+.alarm-icon::before,.alarm-icon::after{
+  top:-5px !important;
+  width:13px !important;
+  height:8px !important;
+  border-width:2px !important;
+}
+.alarm-icon b{font-size:17px !important}
+.weather-box{font-size:30px !important}
+.money-status{
+  gap:7px !important;
+  padding:3px 7px !important;
+}
+.coin-icon{
+  width:25px !important;
+  height:25px !important;
+  border-width:2px !important;
+}
+.coin-icon::after{inset:5px !important}
+.money-status b{font-size:22px !important}
+
+.stats{
+  gap:3px !important;
+}
+.stat{
+  min-height:47px !important;
+  height:47px !important;
+  border-radius:9px !important;
+  padding:3px 1px !important;
+  font-size:14px !important;
+  line-height:1 !important;
+}
+.stat b{
+  margin-top:3px !important;
+  font-size:20px !important;
+  line-height:1 !important;
+}
+
+.cycle-row{
+  min-height:38px !important;
+  height:38px !important;
+  padding:1px 5px 3px !important;
+}
+.cycle-head{
+  height:auto !important;
+  padding:0 3px 2px !important;
+  font-size:13px !important;
+  line-height:1.1 !important;
+}
+.cycle-head b{font-size:13px !important}
+.cycle-track{gap:1px !important}
+.cycle-day{
+  height:15px !important;
+  border-radius:5px !important;
+  font-size:9px !important;
+}
