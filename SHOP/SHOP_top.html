@@ -271,6 +271,32 @@
       font-weight:900;
       white-space:nowrap;
     }
+    .action-speed{
+      position:absolute;
+      right:10px;
+      top:50px;
+      z-index:20;
+      display:flex;
+      gap:4px;
+      padding:4px;
+      border:2px solid #29261f;
+      border-radius:9px;
+      background:rgba(255,250,240,.9);
+    }
+    .action-speed-btn{
+      min-width:40px;
+      min-height:32px;
+      padding:2px 7px;
+      border:1px solid #6f624f;
+      border-radius:7px;
+      background:#fffaf0;
+      font-size:12px;
+      font-weight:900;
+    }
+    .action-speed-btn.active{
+      background:#d8c28f;
+      box-shadow:inset 0 0 0 2px rgba(47,41,35,.14);
+    }
     .passerby-sprite{
       position:absolute;
       bottom:0;
@@ -707,7 +733,7 @@
 <body>
 <script>
 (() => {
-  const SHOP_BUILD='20260924-time-speed-v1';
+  const SHOP_BUILD='20260924-realtime-clock-v1';
   const u=new URL(location.href);
   if(u.searchParams.get('build')!==SHOP_BUILD){
     u.searchParams.set('build',SHOP_BUILD);
@@ -728,6 +754,11 @@
       <div class="passerby-lane" id="passerbyLane" aria-label="人の行き交い">
         <button type="button" class="action-back" id="actionBack">戻る</button>
         <div class="action-head-title" id="actionTitle">物乞い中</div>
+        <div class="action-speed" aria-label="時間速度">
+          <button type="button" class="action-speed-btn active" data-action-speed="1" aria-pressed="true">×1</button>
+          <button type="button" class="action-speed-btn" data-action-speed="2" aria-pressed="false">×2</button>
+          <button type="button" class="action-speed-btn" data-action-speed="4" aria-pressed="false">×4</button>
+        </div>
         <div class="passerby-popup" id="passerbyPopup" aria-live="polite"></div>
       </div>
 
@@ -808,7 +839,7 @@
     for (const file of files) {
       await new Promise((resolve, reject) => {
         const script = document.createElement('script');
-        script.src = file + '?v=20260924-time-speed-v1&nocache=' + stamp;
+        script.src = file + '?v=20260924-realtime-clock-v1&nocache=' + stamp;
         script.onload = resolve;
         script.onerror = reject;
         document.body.appendChild(script);
