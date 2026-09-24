@@ -68,6 +68,46 @@
     REQUEST_STAY: {
       category: "closeness",
       meaningJa: "相手にここにいてほしいと求める"
+    },
+    APOLOGIZE: {
+      category: "repair",
+      meaningJa: "自分の行為について謝る"
+    },
+    ACCEPT_APOLOGY: {
+      category: "repair",
+      meaningJa: "相手の謝罪を受け入れる"
+    },
+    EXPRESS_HURT: {
+      category: "emotion",
+      meaningJa: "相手の言動で傷ついたことを伝える"
+    },
+    EXPRESS_ANGER: {
+      category: "emotion",
+      meaningJa: "現在怒っていることを明確に伝える"
+    },
+    REASSURE_NOT_LEAVING: {
+      category: "closeness",
+      meaningJa: "相手を見捨てて去るつもりがないと伝える"
+    },
+    ASK_TO_TALK: {
+      category: "clarity",
+      meaningJa: "会話を続けて話し合いたいと求める"
+    },
+    REQUEST_TIME: {
+      category: "distance",
+      meaningJa: "考えたり落ち着いたりするための時間を求める"
+    },
+    SAY_GOODBYE_TEMPORARY: {
+      category: "parting",
+      meaningJa: "関係を終わらせず、一時的な別れを告げる"
+    },
+    PROMISE_RETURN: {
+      category: "parting",
+      meaningJa: "あとで戻る、また会う意思を伝える"
+    },
+    ASK_NOT_TO_DISAPPEAR: {
+      category: "closeness",
+      meaningJa: "何も言わずにいなくならないでほしいと求める"
     }
   };
 })();
