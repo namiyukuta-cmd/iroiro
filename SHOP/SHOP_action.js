@@ -628,6 +628,8 @@
 
   function open(state,initialMode='beg'){
     stateRef=state || window.SHOP_STATE || {};
+    if(window.SHOP_LIFE && window.SHOP_LIFE.close) window.SHOP_LIFE.close();
+    if(window.SHOP_TRADE && window.SHOP_TRADE.close) window.SHOP_TRADE.close();
     const requestedMode=initialMode==='sell' ? 'sell' : 'beg';
 
     if(requestedMode==='sell' && !hasSellableItems()){
