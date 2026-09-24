@@ -148,6 +148,46 @@
     ASK_IF_OKAY: {
       category: "care",
       meaningJa: "相手が大丈夫か確認する"
+    },
+    EXPRESS_JOY: {
+      category: "positive",
+      meaningJa: "嬉しい気持ちを伝える"
+    },
+    EXPRESS_LONELINESS: {
+      category: "emotion",
+      meaningJa: "寂しさを伝える"
+    },
+    EXPRESS_ANXIETY: {
+      category: "emotion",
+      meaningJa: "不安を感じていることを伝える"
+    },
+    ASK_RELATIONSHIP_STATUS: {
+      category: "clarity",
+      meaningJa: "二人の関係をどう考えているか確認する"
+    },
+    ASK_FEELINGS: {
+      category: "clarity",
+      meaningJa: "相手が自分をどう思っているか尋ねる"
+    },
+    EXPRESS_WANT_TO_BE_TOGETHER: {
+      category: "closeness",
+      meaningJa: "相手と一緒にいたい気持ちを伝える"
+    },
+    ASK_TO_STAY_CLOSE: {
+      category: "closeness",
+      meaningJa: "近くにいてほしいと求める"
+    },
+    ASK_PERMISSION_TOUCH: {
+      category: "physical",
+      meaningJa: "相手に触れてよいか確認する"
+    },
+    ASK_PERMISSION_HUG: {
+      category: "physical",
+      meaningJa: "抱きしめてよいか確認する"
+    },
+    ASK_PERMISSION_KISS: {
+      category: "physical",
+      meaningJa: "キスしてよいか確認する"
     }
   };
 })();
