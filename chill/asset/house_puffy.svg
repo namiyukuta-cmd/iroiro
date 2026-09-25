@@ -1,0 +1,47 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 96 96" role="img" aria-label="丸い赤屋根の家">
+  <g stroke-linecap="round" stroke-linejoin="round">
+    <ellipse cx="48" cy="88" rx="37" ry="4" fill="#d8c7aa" opacity=".55"/>
+
+    <rect x="66" y="12" width="14" height="27" rx="4" fill="#e66a4f" stroke="#6b3522" stroke-width="3"/>
+    <rect x="64" y="9" width="18" height="8" rx="4" fill="#ff755c" stroke="#6b3522" stroke-width="3"/>
+    <path d="M68 13h9" fill="none" stroke="#ffb0a0" stroke-width="2"/>
+
+    <rect x="18" y="39" width="60" height="47" rx="12" fill="#c98558" opacity=".35"/>
+    <rect x="18" y="36" width="60" height="48" rx="12" fill="#ffe7b6" stroke="#6b3522" stroke-width="3"/>
+    <path d="M24 42c8-5 40-8 48-1" fill="none" stroke="#fff4d5" stroke-width="4" opacity=".8"/>
+
+    <path d="M10 44C13 31 24 18 36 11c9-5 18-6 27-2 12 5 23 18 25 33 1 6-3 10-8 9L55 41c-5-2-9-2-14 0L18 51c-6 2-10-1-8-7Z"
+      fill="#c84338" opacity=".35"/>
+    <path d="M10 40C13 28 24 16 36 9c9-5 18-6 27-2 12 5 23 18 25 32 1 6-3 10-8 9L55 38c-5-2-9-2-14 0L18 48c-6 2-10-2-8-8Z"
+      fill="#f25749" stroke="#6b271a" stroke-width="3"/>
+    <path d="M20 33c6-8 14-15 22-19 6-3 12-4 18-2" fill="none" stroke="#ff9a8b" stroke-width="4"/>
+
+    <path d="M29 84V64a11 11 0 0 1 22 0v20Z" fill="#b86935" stroke="#6b3522" stroke-width="3"/>
+    <path d="M33 65c2-5 6-8 10-8" fill="none" stroke="#d98d54" stroke-width="3"/>
+    <circle cx="46" cy="70" r="2.8" fill="#ffc33c" stroke="#8b4b20" stroke-width="1.5"/>
+
+    <circle cx="65" cy="63" r="11" fill="#78c8ef" stroke="#7b442c" stroke-width="3"/>
+    <path d="M65 53v20M55 63h20" fill="none" stroke="#7b442c" stroke-width="2.4"/>
+    <path d="M58 58c2-2 4-3 7-3" fill="none" stroke="#dff5ff" stroke-width="2.8"/>
+
+    <g>
+      <circle cx="17" cy="78" r="10" fill="#2e8b47" stroke="#215f34" stroke-width="2.5"/>
+      <circle cx="24" cy="79" r="10" fill="#4dbb52" stroke="#215f34" stroke-width="2.5"/>
+      <circle cx="12" cy="84" r="8" fill="#43aa4c" stroke="#215f34" stroke-width="2.5"/>
+      <circle cx="24" cy="86" r="8" fill="#55c75b" stroke="#215f34" stroke-width="2.5"/>
+      <circle cx="18" cy="78" r="3" fill="#8ddd54"/>
+      <circle cx="18" cy="83" r="4.2" fill="#fff"/>
+      <circle cx="18" cy="83" r="1.6" fill="#f7bf35"/>
+    </g>
+
+    <g>
+      <circle cx="80" cy="78" r="10" fill="#2e8b47" stroke="#215f34" stroke-width="2.5"/>
+      <circle cx="72" cy="81" r="10" fill="#4dbb52" stroke="#215f34" stroke-width="2.5"/>
+      <circle cx="85" cy="85" r="8" fill="#43aa4c" stroke="#215f34" stroke-width="2.5"/>
+      <circle cx="72" cy="87" r="8" fill="#55c75b" stroke="#215f34" stroke-width="2.5"/>
+      <circle cx="79" cy="78" r="3" fill="#8ddd54"/>
+      <circle cx="76" cy="84" r="4.2" fill="#fff"/>
+      <circle cx="76" cy="84" r="1.6" fill="#f7bf35"/>
+    </g>
+  </g>
+</svg>
