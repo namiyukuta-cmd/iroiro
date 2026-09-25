@@ -89,89 +89,87 @@
       "anchors": {
         "headCenter": [
           24,
-          18
+          27
         ],
         "headRadius": [
-          18,
-          17
+          15.5,
+          14.5
         ],
         "neckCenter": [
           24,
-          34
+          37
         ],
-        "shoulderY": 35,
-        "leftShoulderX": 17,
-        "rightShoulderX": 31,
-        "waistY": 52,
-        "leftHipX": 20,
-        "rightHipX": 28,
+        "shoulderY": 39,
+        "leftShoulderX": 14,
+        "rightShoulderX": 34,
+        "waistY": 53,
+        "leftHipX": 20.5,
+        "rightHipX": 27.5,
         "leftFootCenter": [
-          20,
-          66
+          20.5,
+          68
         ],
         "rightFootCenter": [
-          28,
-          66
+          27.5,
+          68
         ]
       },
       "zones": {
         "backHair": [
-          4,
-          1,
-          40,
-          60
+          6,
+          5,
+          36,
+          41
         ],
         "frontHair": [
-          6,
-          3,
-          36,
-          20
+          9,
+          11,
+          30,
+          17
         ],
         "face": [
-          6,
-          3,
-          36,
-          32
-        ],
-        "torsoClothes": [
-          11,
-          32,
-          26,
+          8.5,
+          12.5,
+          31,
           29
         ],
+        "torsoClothes": [
+          14,
+          37,
+          20,
+          19
+        ],
         "leftArm": [
-          7,
-          34,
-          10,
-          22
+          5.5,
+          38,
+          13,
+          10
         ],
         "rightArm": [
-          31,
-          34,
-          10,
-          22
+          29.5,
+          38,
+          13,
+          10
         ],
         "legs": [
-          15,
-          54,
           18,
-          14
+          59,
+          12,
+          10
         ]
       },
       "layerOrder": [
         "shadow",
         "backHair",
+        "sideHair",
         "legs",
-        "shoes",
         "neck",
         "torsoClothes",
         "arms",
-        "hands",
         "head",
-        "ears",
-        "face",
         "frontHair",
-        "highlights"
+        "chestParts",
+        "skirt"
       ],
       "stageAssets": {
         "atari": "character_atari.svg",
@@ -180,17 +178,22 @@
       },
       "headUse": "upperHalf",
       "rules": [
-        "Head occupies most of the upper 36px.",
+        "Canvas stays 48x72 and occupies 2x3 game grid cells.",
+        "Use internal construction bands at y=18,36,54 without changing the 24px game grid.",
+        "Head is the dominant shape and hangs the small body beneath it.",
         "Face center stays at x=24.",
-        "Neck is very short and is drawn behind the head.",
-        "Shoulders remain clearly narrower than the head.",
-        "Torso is a rounded trapezoid or rounded rectangle in the lower half.",
-        "Arms are capsule shapes.",
-        "Hands are small circles.",
-        "Legs are short rounded rectangles.",
-        "Feet align to the shared ground line.",
-        "Hair layer order is backHair, head, frontHair.",
-        "Clothes must use the fixed shoulder and waist anchors."
+        "Neck is very short and drawn behind the head.",
+        "Shoulders are much narrower than the head.",
+        "Arms extend diagonally outward as short capsule shapes.",
+        "Torso is short and compact.",
+        "Skirt is a wide trapezoid in the lower construction band.",
+        "Legs are two short rounded rectangles and meet the shared ground line.",
+        "Hair is split into backHair, sideHair and frontHair layers."
+      ],
+      "internalConstructionBands": [
+        18,
+        36,
+        54
       ]
     }
   },
