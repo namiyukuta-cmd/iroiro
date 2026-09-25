@@ -196,7 +196,8 @@
   }
 
   function travel(id) {
-    if (H.state.activeEvent || !H.state.knownLocations[id] || !D.locations[id]) return;
+    if (H.state.activeEvent || !D.locations[id]) return;
+    H.state.knownLocations[id] = true;
     H.state.location = id;
     locState(id).visits += 1;
     H.state.lastMessage = `${D.locations[id].name}へ移った。街の様子と、そこで今起きていることが変わる。`;
