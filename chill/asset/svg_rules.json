@@ -92,70 +92,70 @@
           18
         ],
         "headRadius": [
-          13,
-          14
+          18,
+          17
         ],
         "neckCenter": [
           24,
-          32
+          34
         ],
         "shoulderY": 35,
-        "leftShoulderX": 16,
-        "rightShoulderX": 32,
-        "waistY": 49,
-        "leftHipX": 19,
-        "rightHipX": 29,
+        "leftShoulderX": 17,
+        "rightShoulderX": 31,
+        "waistY": 52,
+        "leftHipX": 20,
+        "rightHipX": 28,
         "leftFootCenter": [
-          19,
-          64
+          20,
+          66
         ],
         "rightFootCenter": [
-          29,
-          64
+          28,
+          66
         ]
       },
       "zones": {
         "backHair": [
-          6,
-          2,
-          36,
-          40
+          4,
+          1,
+          40,
+          60
         ],
         "frontHair": [
-          9,
+          6,
           3,
-          30,
-          27
+          36,
+          20
         ],
         "face": [
-          12,
-          7,
-          24,
-          24
+          6,
+          3,
+          36,
+          32
         ],
         "torsoClothes": [
-          13,
+          11,
           32,
-          22,
-          22
+          26,
+          29
         ],
         "leftArm": [
           7,
           34,
           10,
-          24
+          22
         ],
         "rightArm": [
           31,
           34,
           10,
-          24
+          22
         ],
         "legs": [
           15,
-          50,
+          54,
           18,
-          18
+          14
         ]
       },
       "layerOrder": [
@@ -177,7 +177,21 @@
         "atari": "character_atari.svg",
         "base": "character_base.svg",
         "complete": "character_complete.svg"
-      }
+      },
+      "headUse": "upperHalf",
+      "rules": [
+        "Head occupies most of the upper 36px.",
+        "Face center stays at x=24.",
+        "Neck is very short and is drawn behind the head.",
+        "Shoulders remain clearly narrower than the head.",
+        "Torso is a rounded trapezoid or rounded rectangle in the lower half.",
+        "Arms are capsule shapes.",
+        "Hands are small circles.",
+        "Legs are short rounded rectangles.",
+        "Feet align to the shared ground line.",
+        "Hair layer order is backHair, head, frontHair.",
+        "Clothes must use the fixed shoulder and waist anchors."
+      ]
     }
   },
   "constructionRules": [
