@@ -16,52 +16,167 @@
   },
   "presets": {
     "furniture2x2": {
-      "viewBox": [0, 0, 48, 48],
-      "gridSize": [2, 2],
-      "center": [24, 24],
+      "viewBox": [
+        0,
+        0,
+        48,
+        48
+      ],
+      "gridSize": [
+        2,
+        2
+      ],
+      "center": [
+        24,
+        24
+      ],
       "leftMargin": 4,
       "rightMargin": 4,
       "topMargin": 3,
       "groundLineY": 44,
-      "shadow": { "cx": 24, "cy": 44, "rx": 15, "ry": 2.5 }
+      "shadow": {
+        "cx": 24,
+        "cy": 44,
+        "rx": 15,
+        "ry": 2.5
+      }
     },
     "large4x4": {
-      "viewBox": [0, 0, 96, 96],
-      "gridSize": [4, 4],
-      "center": [48, 48],
+      "viewBox": [
+        0,
+        0,
+        96,
+        96
+      ],
+      "gridSize": [
+        4,
+        4
+      ],
+      "center": [
+        48,
+        48
+      ],
       "leftMargin": 6,
       "rightMargin": 6,
       "topMargin": 5,
       "groundLineY": 90,
-      "shadow": { "cx": 48, "cy": 90, "rx": 28, "ry": 3 }
+      "shadow": {
+        "cx": 48,
+        "cy": 90,
+        "rx": 28,
+        "ry": 3
+      }
     },
     "character2x3": {
-      "viewBox": [0, 0, 48, 72],
-      "gridSize": [2, 3],
+      "viewBox": [
+        0,
+        0,
+        48,
+        72
+      ],
+      "gridSize": [
+        2,
+        3
+      ],
       "centerX": 24,
       "groundLineY": 68,
-      "shadow": { "cx": 24, "cy": 68, "rx": 12, "ry": 2 },
+      "shadow": {
+        "cx": 24,
+        "cy": 68,
+        "rx": 12,
+        "ry": 2
+      },
       "anchors": {
-        "headCenter": [24, 18],
-        "headRadius": [13, 14],
-        "neckCenter": [24, 32],
+        "headCenter": [
+          24,
+          18
+        ],
+        "headRadius": [
+          13,
+          14
+        ],
+        "neckCenter": [
+          24,
+          32
+        ],
         "shoulderY": 35,
         "leftShoulderX": 16,
         "rightShoulderX": 32,
         "waistY": 49,
         "leftHipX": 19,
         "rightHipX": 29,
-        "leftFootCenter": [19, 64],
-        "rightFootCenter": [29, 64]
+        "leftFootCenter": [
+          19,
+          64
+        ],
+        "rightFootCenter": [
+          29,
+          64
+        ]
       },
       "zones": {
-        "backHair": [6, 2, 36, 40],
-        "frontHair": [9, 3, 30, 27],
-        "face": [12, 7, 24, 24],
-        "torsoClothes": [13, 32, 22, 22],
-        "leftArm": [7, 34, 10, 24],
-        "rightArm": [31, 34, 10, 24],
-        "legs": [15, 50, 18, 18]
+        "backHair": [
+          6,
+          2,
+          36,
+          40
+        ],
+        "frontHair": [
+          9,
+          3,
+          30,
+          27
+        ],
+        "face": [
+          12,
+          7,
+          24,
+          24
+        ],
+        "torsoClothes": [
+          13,
+          32,
+          22,
+          22
+        ],
+        "leftArm": [
+          7,
+          34,
+          10,
+          24
+        ],
+        "rightArm": [
+          31,
+          34,
+          10,
+          24
+        ],
+        "legs": [
+          15,
+          50,
+          18,
+          18
+        ]
+      },
+      "layerOrder": [
+        "shadow",
+        "backHair",
+        "legs",
+        "shoes",
+        "neck",
+        "torsoClothes",
+        "arms",
+        "hands",
+        "head",
+        "ears",
+        "face",
+        "frontHair",
+        "highlights"
+      ],
+      "stageAssets": {
+        "atari": "character_atari.svg",
+        "base": "character_base.svg",
+        "complete": "character_complete.svg"
       }
     }
   },
