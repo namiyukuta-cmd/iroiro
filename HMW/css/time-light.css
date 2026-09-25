@@ -1,0 +1,16 @@
+/* Time-of-day lighting stays below all controls and never intercepts taps. */
+#game-app[data-time="morning"]{--time-shell:#eee1c9;--time-light:linear-gradient(145deg,rgba(255,233,172,.70),rgba(248,205,170,.16) 55%,rgba(113,173,177,.23));--time-sun:#fff0b6;--sun-x:12%;--sun-y:68%;--sun-glow:0 0 38px 20px #ffe3a577}
+#game-app[data-time="day"]{--time-shell:#e7eee0;--time-light:linear-gradient(180deg,rgba(149,212,242,.50),rgba(255,255,228,.12) 60%);--time-sun:#fffbd8;--sun-x:70%;--sun-y:22%;--sun-glow:0 0 42px 16px #fffbd866}
+#game-app[data-time="evening"]{--time-shell:#d6b7a5;--time-light:linear-gradient(180deg,rgba(105,68,117,.64),rgba(241,134,92,.66) 54%,rgba(215,124,54,.52));--time-sun:#ffc27c;--sun-x:74%;--sun-y:76%;--sun-glow:0 0 45px 22px #ff995a77}
+#game-app[data-time="night"]{--time-shell:#222c44;--time-light:linear-gradient(180deg,rgba(12,24,58,.94),rgba(27,44,73,.86) 65%,rgba(20,31,48,.85));--time-sun:#e3eaf3;--sun-x:72%;--sun-y:28%;--sun-glow:0 0 26px 8px #c4dcff33}
+#game-app[data-time]{background:var(--time-shell) !important;transition:background-color .35s}
+#game-app[data-time] .scene>.time-atmosphere{position:absolute;inset:0;z-index:1;pointer-events:none;border-radius:inherit;background:var(--time-light)}
+.time-atmosphere::before{content:"";position:absolute;width:36px;height:36px;left:var(--sun-x);top:var(--sun-y);border-radius:50%;background:var(--time-sun);box-shadow:var(--sun-glow)}
+#game-app[data-time="night"] .time-atmosphere::before{background:transparent;box-shadow:inset -10px -4px 0 0 #e3eaf3,6px 2px 25px #c4dcff33}
+#game-app[data-time="night"] .time-atmosphere::after{content:"";position:absolute;inset:0;background:radial-gradient(circle at 12% 15%,#edf3ff 0 1px,transparent 2px),radial-gradient(circle at 38% 31%,#edf3ff 0 1px,transparent 2px),radial-gradient(circle at 86% 12%,#edf3ff 0 1px,transparent 2px),radial-gradient(circle at 21% 60%,#edf3ff 0 1px,transparent 2px),radial-gradient(circle at 91% 58%,#edf3ff 0 1px,transparent 2px)}
+#game-app[data-weather="rain"] .time-atmosphere::before,#game-app[data-weather="rain"] .time-atmosphere::after{display:none}
+#game-app[data-weather="rain"] .time-atmosphere{box-shadow:inset 0 0 100px 30px #66748466}
+#game-app[data-time="night"] .cycle-row{color:#f0f3fa !important}
+#game-app[data-time="night"] .alarm-icon{background:#e1e7f5 !important}
+#game-app[data-time="evening"] .alarm-icon{background:#ffe0b8 !important}
+@media(prefers-reduced-motion:reduce){#game-app[data-time]{transition:none}}

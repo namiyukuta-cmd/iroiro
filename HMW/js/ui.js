@@ -208,10 +208,21 @@
   }
 
   function renderStatus() {
+    const time = ["morning", "day", "evening", "night"][H.state.slot] || "morning";
+    const app = $("game-app");
+    app.dataset.time = time;
+    app.dataset.weather = H.state.world.weather || "clear";
+    const scene = document.querySelector(".scene");
+    if (scene && !scene.querySelector(".time-atmosphere")) {
+      const light = document.createElement("div");
+      light.className = "time-atmosphere";
+      light.setAttribute("aria-hidden", "true");
+      scene.prepend(light);
+    }
     $("day-value").textContent = H.state.day;
     $("time-value").textContent = D.slots[H.state.slot];
     $("money-value").textContent = H.state.money;
-    $("weather").textContent = H.state.world.weather === "rain" ? "☂️" : H.state.world.weather === "cold" ? "❄️" : "☀️";
+    $("weather").textContent = H.state.world.weather === "rain" ? "☂️" : H.state.world.weather === "cold" ? "❄️" : ["🌅", "☀️", "🌇", "🌙"][H.state.slot] || "☀️";
     const s = H.state.stats;
     const fields = {
       health: ["体力", s.health],
