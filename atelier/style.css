@@ -3,3 +3,7 @@
 :root .layer-drawer .panel{width:min(320px,86vw);border-radius:22px 0 0 22px}
 
 html,body,#app,#workspace,#paper,canvas,#overlay{touch-action:none}input,select{touch-action:manipulation}
+
+/* Block native iOS selection/callout across the editor; form fields remain editable. */
+#app,#app *,#modal,#modal *{-webkit-user-select:none!important;user-select:none!important;-webkit-touch-callout:none!important;-webkit-user-drag:none}
+input,textarea{-webkit-user-select:text!important;user-select:text!important;-webkit-touch-callout:default!important}
