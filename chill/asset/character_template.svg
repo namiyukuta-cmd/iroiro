@@ -1,0 +1,46 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 72" role="img" aria-label="chill 共通人物素体テンプレート">
+  <g stroke="#6a3826" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+    <!-- 共通影: center(24,68), rx12, ry2 -->
+    <ellipse cx="24" cy="68" rx="12" ry="2" fill="#cdbb9d" opacity=".4" stroke="none"/>
+
+    <!-- 後ろ髪ゾーン x6..42 / y2..42 -->
+    <ellipse cx="24" cy="20" rx="16" ry="18" fill="#8d573c"/>
+
+    <!-- 頭: center(24,18), radius(13,14) -->
+    <ellipse cx="24" cy="18" rx="13" ry="14" fill="#ffe1b3"/>
+
+    <!-- 前髪ゾーン x9..39 / y3..30 -->
+    <path d="M12 14c3-8 9-11 16-10 6 1 10 5 11 11-5-2-9-5-12-9-2 5-7 8-15 8Z" fill="#8d573c"/>
+
+    <!-- 首: center(24,32) -->
+    <rect x="21" y="29" width="6" height="8" rx="3" fill="#ffe1b3"/>
+
+    <!-- 胴体服: x13..35 / y32..54 -->
+    <rect x="13" y="34" width="22" height="20" rx="8" fill="#fff8e8"/>
+
+    <!-- 腕: 左右ゾーン固定 -->
+    <rect x="9" y="36" width="8" height="20" rx="4" fill="#fff8e8" transform="rotate(7 13 46)"/>
+    <rect x="31" y="36" width="8" height="20" rx="4" fill="#fff8e8" transform="rotate(-7 35 46)"/>
+
+    <!-- 手 -->
+    <circle cx="11" cy="56" r="3.5" fill="#ffe1b3"/>
+    <circle cx="37" cy="56" r="3.5" fill="#ffe1b3"/>
+
+    <!-- 脚: 足元基準 y68 -->
+    <rect x="16" y="51" width="7" height="14" rx="3.5" fill="#8d573c"/>
+    <rect x="25" y="51" width="7" height="14" rx="3.5" fill="#8d573c"/>
+
+    <!-- 靴: centers(19,64),(29,64) -->
+    <ellipse cx="19" cy="64" rx="5" ry="3.5" fill="#70442f"/>
+    <ellipse cx="29" cy="64" rx="5" ry="3.5" fill="#70442f"/>
+
+    <!-- 顔 -->
+    <ellipse cx="19" cy="19" rx="1.5" ry="2.2" fill="#553022" stroke="none"/>
+    <ellipse cx="29" cy="19" rx="1.5" ry="2.2" fill="#553022" stroke="none"/>
+    <circle cx="15.5" cy="24" r="2.3" fill="#f6a391" stroke="none" opacity=".9"/>
+    <circle cx="32.5" cy="24" r="2.3" fill="#f6a391" stroke="none" opacity=".9"/>
+
+    <!-- 共通ハイライト -->
+    <path d="M14 11c3-4 6-6 10-6" fill="none" stroke="#ffffff" opacity=".7"/>
+  </g>
+</svg>
