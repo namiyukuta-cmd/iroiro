@@ -553,13 +553,8 @@
     }
     if (H.state.activeEvent) return info("移動", "現在の出来事への対応が先になる。");
     const current = H.state.location;
-    const currentLoc = D.locations[current];
-    const knownIds = Object.keys(D.locations).filter((id) =>
-      H.state.knownLocations[id] && D.locations[id]
-    );
-    const destinationIds = (currentLoc?.connections || []).filter((id) =>
-      H.state.knownLocations[id] && D.locations[id]
-    );
+    const allLocationIds = Object.keys(D.locations).filter((id) => D.locations[id]);
+    const destinationIds = allLocationIds.filter((id) => id !== current);
     const layout = {
       station_front:      [13, 17],
       shopping_street:    [38, 17],
@@ -577,11 +572,11 @@
     };
     const edgeKeys = new Set();
     const edges = [];
-    knownIds.forEach((id) => {
+    allLocationIds.forEach((id) => {
       const from = layout[id];
       if (!from) return;
       (D.locations[id].connections || []).forEach((toId) => {
-        if (!knownIds.includes(toId) || !layout[toId]) return;
+        if (!allLocationIds.includes(toId) || !layout[toId]) return;
         const key = [id, toId].sort().join("|");
         if (edgeKeys.has(key)) return;
         edgeKeys.add(key);
@@ -600,7 +595,7 @@
       const [x2, y2] = layout[toId];
       return `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}"></line>`;
     }).join("");
-    const nodeHtml = knownIds
+    const nodeHtml = allLocationIds
       .filter((id) => layout[id])
       .map((id) => {
         const [x, y] = layout[id];
