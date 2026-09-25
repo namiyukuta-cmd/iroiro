@@ -1,0 +1,79 @@
+{
+  "version": 1,
+  "grid": {
+    "cell": 24,
+    "snap": true
+  },
+  "style": {
+    "stroke": "#6a3826",
+    "strokeWidth": 3,
+    "strokeLinecap": "round",
+    "strokeLinejoin": "round",
+    "shadowFill": "#cdbb9d",
+    "shadowOpacity": 0.4,
+    "highlight": "#ffffff",
+    "highlightOpacity": 0.7
+  },
+  "presets": {
+    "furniture2x2": {
+      "viewBox": [0, 0, 48, 48],
+      "gridSize": [2, 2],
+      "center": [24, 24],
+      "leftMargin": 4,
+      "rightMargin": 4,
+      "topMargin": 3,
+      "groundLineY": 44,
+      "shadow": { "cx": 24, "cy": 44, "rx": 15, "ry": 2.5 }
+    },
+    "large4x4": {
+      "viewBox": [0, 0, 96, 96],
+      "gridSize": [4, 4],
+      "center": [48, 48],
+      "leftMargin": 6,
+      "rightMargin": 6,
+      "topMargin": 5,
+      "groundLineY": 90,
+      "shadow": { "cx": 48, "cy": 90, "rx": 28, "ry": 3 }
+    },
+    "character2x3": {
+      "viewBox": [0, 0, 48, 72],
+      "gridSize": [2, 3],
+      "centerX": 24,
+      "groundLineY": 68,
+      "shadow": { "cx": 24, "cy": 68, "rx": 12, "ry": 2 },
+      "anchors": {
+        "headCenter": [24, 18],
+        "headRadius": [13, 14],
+        "neckCenter": [24, 32],
+        "shoulderY": 35,
+        "leftShoulderX": 16,
+        "rightShoulderX": 32,
+        "waistY": 49,
+        "leftHipX": 19,
+        "rightHipX": 29,
+        "leftFootCenter": [19, 64],
+        "rightFootCenter": [29, 64]
+      },
+      "zones": {
+        "backHair": [6, 2, 36, 40],
+        "frontHair": [9, 3, 30, 27],
+        "face": [12, 7, 24, 24],
+        "torsoClothes": [13, 32, 22, 22],
+        "leftArm": [7, 34, 10, 24],
+        "rightArm": [31, 34, 10, 24],
+        "legs": [15, 50, 18, 18]
+      }
+    }
+  },
+  "constructionRules": [
+    "Every asset is designed inside its preset viewBox from the beginning.",
+    "Do not draw first and fit to the grid later.",
+    "The visual center must match the preset center.",
+    "Objects that stand on the ground must touch groundLineY.",
+    "Shadows use the preset ellipse and are not blurred.",
+    "Rounded rectangles, circles and ellipses are preferred; paths are only for shapes that cannot be made cleanly with primitives.",
+    "All outer outlines use the shared stroke and strokeWidth.",
+    "Highlights stay inside the object and never change the occupied grid size.",
+    "For characters, body anchors never move between hairstyles or outfits; hair and clothes must fit inside their assigned zones."
+  ]
+}
