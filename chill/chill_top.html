@@ -79,6 +79,9 @@ button{
 .obj{
   position:absolute;width:48px;height:48px;transform:translate(-50%,-50%);
   display:grid;place-items:center;z-index:4;
+  margin:0;padding:0;border:0;background:transparent;
+  appearance:none;-webkit-appearance:none;
+  box-shadow:none;
 }
 .obj.selected::after{
   content:"";position:absolute;inset:-5px;border:1px dashed #333;border-radius:8px;pointer-events:none;
@@ -398,7 +401,7 @@ function renderObjects(){
     b.style.top=o.y+'px';
     const art=document.createElement('img');
     art.className='puffy-art'+(o.type==='house'?' house-art':o.type==='tree'?' tree-art':'');
-    art.src=artAssets[o.type]+'?_nc=20260925-2148';
+    art.src=artAssets[o.type]+'?_nc=20260926-0632';
     art.alt='';
     b.appendChild(art);
     b.addEventListener('click',e=>{
@@ -481,14 +484,9 @@ ground.addEventListener('click',e=>{
 
   if(currentTool==='select')return;
   let o;
-  if(currentTool==='house'||currentTool==='tree'){
-    const size=96;
-    if(x+size>cell.width||y+size>cell.height)return;
-    o={id:nextId++,type:currentTool,x:x+size/2,y:y+size/2};
-  }else{
-    o={id:nextId++,type:currentTool,x:x+GRID/2,y:y+GRID/2};
-    clamp(o);
-  }
+  const size=(currentTool==='house'||currentTool==='tree')?96:48;
+  if(x+size>cell.width||y+size>cell.height)return;
+  o={id:nextId++,type:currentTool,x:x+size/2,y:y+size/2};
   objects.push(o);
   selectedId=o.id;
   currentTool='select';
@@ -514,7 +512,10 @@ sunBtn.addEventListener('click',e=>{
 function nudge(dx,dy){
   const o=objects.find(o=>o.id===selectedId);
   if(!o)return;
-  o.x+=dx;o.y+=dy;clamp(o);render();
+  o.x+=dx*GRID;
+  o.y+=dy*GRID;
+  clamp(o);
+  render();
 }
 document.getElementById('leftBtn').addEventListener('click',()=>nudge(-1,0));
 document.getElementById('rightBtn').addEventListener('click',()=>nudge(1,0));
