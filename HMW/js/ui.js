@@ -80,7 +80,7 @@
           disabled: H.state.daily.casualChecked
         });
         if (H.state.daily.casualOffer && !H.state.daily.casualDone) {
-          a.push({ label: "荷下ろしを手伝う", desc: "荷札を見て実際に仕分ける小仕事。", run: G.casualWork });
+          a.push({ label: "荷下ろしを手伝う", desc: "当日の荷下ろし仕事。", run: G.casualWork });
         }
       }
       a.push({ label: "人に小銭を頼む", desc: "収入になるが、この場所で続ければ警察の注意が増える。", run: G.beg, disabled: (H.state.daily.beg[id] || 0) >= 2 });
@@ -122,7 +122,7 @@
     if (id === "convenience_store") {
       a.push({ label: "買い物をする", desc: "食料・水・衛生用品を買う。", run: G.openShop });
       if (H.state.progression.clerk.cleanupUnlocked && slot >= 2 && !H.state.daily.clerkWork) {
-        a.push({ label: "店の裏を清掃する", desc: "汚れた場所を実際に片付ける小仕事。", run: G.clerkWork });
+        a.push({ label: "店の裏を清掃する", desc: "店の裏を清掃する小仕事。", run: G.clerkWork });
       }
     }
 
@@ -130,7 +130,7 @@
       const count = (H.state.inventory.aluminum_can || 0) + (H.state.inventory.scrap_piece || 0);
       a.push({ label: "廃品を売る", desc: `${count}点。持ち込み回数が信用として残る。`, run: G.sellScrap, disabled: !count });
       if (H.state.progression.recycler.sales >= 2 && !H.state.progression.recycler.trialDone) {
-        a.push({ label: "仕分けの試し仕事をする", desc: "回収物を実際に仕分ける。結果が継続仕事につながる。", run: G.recyclerTrial });
+        a.push({ label: "仕分けの試し仕事をする", desc: "回収所の試し仕事。終えると継続仕事につながる。", run: G.recyclerTrial });
       }
       if (H.state.progression.recycler.recurringWork) {
         a.push({ label: "仕分け仕事をする", desc: "回収物を仕分けて報酬を得る。", run: G.recyclerWork, disabled: H.state.daily.recyclerWork });
@@ -333,18 +333,50 @@
     };
   }
 
-  function openScenePopup(scene) {
+  function openScenePopup(scene, afterAction = null) {
     if (!scene) return;
     const actions = (scene.actions || []).map((action) => ({
       label: action.label,
       disabled: !!action.disabled,
       onClick: () => {
-        closeModal();
+        if (!afterAction) closeModal();
         action.run();
+        if (afterAction) afterAction();
       }
     }));
     openModal(scene.title, `<div class="scene-popup-text">${esc(scene.text)}</div>`, actions, true);
     $("modal-actions")?.classList.add("scene-popup-actions");
+  }
+
+  function reopenLocationPoint(locationId, pointId) {
+    if (H.state.location !== locationId) {
+      closeModal();
+      return;
+    }
+    if (H.state.activeEvent) {
+      closeModal();
+      return;
+    }
+    const point = (LOCATION_POINTS[locationId] || []).find((item) => item.id === pointId);
+    if (!point) {
+      closeModal();
+      return;
+    }
+    const liveScene = G.getCityScene?.();
+    const hasMergedScene = locationId === "station_front" && pointId === "loading" &&
+      liveScene && ["station_morning_work","daily_station_shortage"].includes(liveScene.id);
+    const actions = pointActions(locationId, pointId);
+    if (!hasMergedScene && !actions.length) {
+      closeModal();
+      return;
+    }
+    openLocationPoint(locationId, point);
+  }
+
+  function runPointAction(locationId, pointId, run) {
+    const result = run();
+    if (result === false) return;
+    reopenLocationPoint(locationId, pointId);
   }
 
   function pointActions(locationId, pointId) {
@@ -371,46 +403,46 @@
     }
 
     if (locationId === "station_front" && pointId === "board" && !H.state.knownLocations.charity_center) {
-      actions.push({ label:"掲示板を見る", onClick:() => { closeModal(); G.board(); } });
+      actions.push({ label:"掲示板を見る", onClick:() => runPointAction(locationId, pointId, G.board) });
     }
     if (locationId === "station_front" && pointId === "loading") {
       if (H.state.progression.informal.casualWorkKnown && !H.state.daily.casualChecked) {
-        actions.push({ label:"今日の募集を確認する", onClick:() => { closeModal(); G.checkCasualWork(); } });
+        actions.push({ label:"今日の募集を確認する", onClick:() => runPointAction(locationId, pointId, G.checkCasualWork) });
       }
       if (H.state.daily.casualOffer && !H.state.daily.casualDone) {
-        actions.push({ label:"荷下ろしを手伝う", onClick:() => { closeModal(); G.casualWork(); } });
+        actions.push({ label:"荷下ろしを手伝う", onClick:() => runPointAction(locationId, pointId, G.casualWork) });
       }
     }
     if (locationId === "station_front" && pointId === "bin" && !H.state.daily.scavenge[locationId]) {
-      actions.push({ label:"使える物を探す", onClick:() => { closeModal(); G.scavenge(); } });
+      actions.push({ label:"使える物を探す", onClick:() => runPointAction(locationId, pointId, G.scavenge) });
     }
     if (locationId === "shopping_street" && pointId === "shops" && !H.state.knownLocations.convenience_store) {
-      actions.push({ label:"店と裏道を確認する", onClick:() => { closeModal(); G.shoppingLook(); } });
+      actions.push({ label:"店と裏道を確認する", onClick:() => runPointAction(locationId, pointId, G.shoppingLook) });
     }
     if (locationId === "convenience_store" && pointId === "shelf") {
       actions.push({ label:"買い物をする", onClick:() => { closeModal(); G.openShop(); } });
     }
     if (locationId === "charity_center" && pointId === "food" && !H.state.daily.foodSupport && H.state.slot !== 3) {
-      actions.push({ label:"食料支援を受ける", onClick:() => { closeModal(); G.foodSupport(); } });
+      actions.push({ label:"食料支援を受ける", onClick:() => runPointAction(locationId, pointId, G.foodSupport) });
     }
     if (locationId === "charity_center" && pointId === "wash" && !H.state.daily.supportShowerLaundry && H.state.slot !== 3) {
-      actions.push({ label:"シャワーと洗濯を使う", onClick:() => { closeModal(); G.supportShowerLaundry(); } });
+      actions.push({ label:"シャワーと洗濯を使う", onClick:() => runPointAction(locationId, pointId, G.supportShowerLaundry) });
     }
     if (locationId === "public_toilet" && pointId === "sink" && !H.state.daily.wash[locationId]) {
-      actions.push({ label:"身支度する", onClick:() => { closeModal(); G.wash(); } });
+      actions.push({ label:"身支度する", onClick:() => runPointAction(locationId, pointId, G.wash) });
     }
     if (locationId === "public_toilet" && pointId === "rest" && !H.state.daily.rest[locationId]) {
-      actions.push({ label:"少し休む", onClick:() => { closeModal(); G.rest(); } });
+      actions.push({ label:"少し休む", onClick:() => runPointAction(locationId, pointId, G.rest) });
     }
     if (["park","riverside","residential_alley","industrial_street"].includes(locationId) &&
         ["bench","bank","alley","scrap"].includes(pointId) &&
         !H.state.daily.scavenge[locationId]) {
-      actions.push({ label:"使える物を探す", onClick:() => { closeModal(); G.scavenge(); } });
+      actions.push({ label:"使える物を探す", onClick:() => runPointAction(locationId, pointId, G.scavenge) });
     }
     if (["park","riverside","residential_alley","industrial_street"].includes(locationId) &&
         ["bench","rest","alley","warehouse"].includes(pointId) &&
         !H.state.daily.rest[locationId]) {
-      actions.push({ label:"休む", onClick:() => { closeModal(); G.rest(); } });
+      actions.push({ label:"休む", onClick:() => runPointAction(locationId, pointId, G.rest) });
     }
 
     return actions;
@@ -424,14 +456,10 @@
     const liveScene = G.getCityScene?.();
     if (locationId === "station_front" && point.id === "loading" &&
         liveScene && ["station_morning_work","daily_station_shortage"].includes(liveScene.id)) {
-      openScenePopup(liveScene);
+      openScenePopup(liveScene, () => reopenLocationPoint(locationId, point.id));
       return;
     }
     const actions = pointActions(locationId, point.id);
-    if (actions.length === 1) {
-      actions[0].onClick();
-      return;
-    }
     openModal(point.label, `<div class="point-popup-text">${esc(point.text)}</div>`, actions, true);
   }
 
@@ -442,7 +470,14 @@
     const points = LOCATION_POINTS[id] || [];
     box.innerHTML = "";
 
+    const liveScene = G.getCityScene?.();
     points.forEach((point) => {
+      const hasMergedScene = id === "station_front" && point.id === "loading" &&
+        liveScene && ["station_morning_work","daily_station_shortage"].includes(liveScene.id);
+      const hasActions = pointActions(id, point.id).length > 0;
+      const isActionHub = id === "station_front" && point.id === "street";
+      if (!hasMergedScene && !hasActions && !isActionHub) return;
+
       const button = document.createElement("button");
       button.className = "location-point-btn";
       button.type = "button";
