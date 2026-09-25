@@ -33,17 +33,36 @@ button{
   background-size:var(--grid) var(--grid);
 }
 #objectLayer{position:absolute;inset:0}
-#girl{
+#characterStages{
   position:absolute;
-  left:120px;
-  top:144px;
+  left:48px;
+  top:192px;
+  display:grid;
+  grid-template-columns:repeat(3,48px);
+  gap:24px;
+  z-index:5;
+  pointer-events:none;
+}
+.char-stage{
+  position:relative;
+  width:48px;
+  height:88px;
+}
+.char-stage img{
+  display:block;
   width:48px;
   height:72px;
-  transform:none;
   user-select:none;
   -webkit-user-drag:none;
-  pointer-events:none;
-  z-index:5;
+}
+.char-stage span{
+  display:block;
+  height:16px;
+  text-align:center;
+  font-size:9px;
+  line-height:16px;
+  color:#666;
+  white-space:nowrap;
 }
 #hint{
   position:absolute;left:50%;top:12px;transform:translateX(-50%);
@@ -184,7 +203,20 @@ button{
 <main id="game" aria-label="白い箱庭">
   <div id="ground" class="grid-on">
     <div id="objectLayer"></div>
-    <img id="girl" src="asset/character_template.svg?_nc=20260925-2200" alt="共通規格キャラクター">
+    <div id="characterStages" aria-label="人体アタリから完成まで">
+      <div class="char-stage">
+        <img src="asset/character_atari.svg?_nc=20260925-2237" alt="人体アタリ">
+        <span>アタリ</span>
+      </div>
+      <div class="char-stage">
+        <img src="asset/character_base.svg?_nc=20260925-2237" alt="共通素体">
+        <span>素体</span>
+      </div>
+      <div class="char-stage">
+        <img src="asset/character_complete.svg?_nc=20260925-2237" alt="完成キャラクター">
+        <span>完成</span>
+      </div>
+    </div>
     <div id="hint">土・種・ジョウロを選んでマスをタップ</div>
     <button id="sunBtn" type="button">☀︎ 太陽</button>
   </div>
