@@ -69,6 +69,9 @@ button{
 .table-art{width:42px;height:28px;border-top:4px solid #222;position:relative}
 .table-art::before,.table-art::after{content:"";position:absolute;top:0;bottom:0;width:3px;background:#222}
 .table-art::before{left:5px}.table-art::after{right:5px}
+.house-obj{width:96px;height:96px;z-index:3}
+.house-art{display:block;width:96px;height:96px;pointer-events:none;user-select:none;-webkit-user-drag:none}
+.obj.house-obj.selected::after{inset:-3px;border-radius:14px}
 
 .farm-plot{
   position:absolute;width:24px;height:24px;border:1px solid #666;padding:0;z-index:3;
@@ -216,6 +219,7 @@ button{
       <button class="tool" data-tool="chair" type="button">椅子</button>
       <button class="tool" data-tool="lamp" type="button">ランプ</button>
       <button class="tool" data-tool="table" type="button">机</button>
+      <button class="tool" data-tool="house" type="button">家</button>
       <button id="gridBtn" class="tool active" type="button">格子</button>
     </div>
     <div class="editrow">
@@ -268,8 +272,8 @@ const waterCount=document.getElementById('waterCount');
 const GRID=24;
 let currentTool='select';
 let selectedId=null;
-let nextId=1;
-let objects=[];
+let nextId=2;
+let objects=[{id:1,type:'house',x:72,y:72}];
 let plots=[];
 let inventory={soil:0,seed:0,can:0,water:0};
 let selectedInventory=null;
@@ -282,10 +286,14 @@ function gridCellFromPoint(clientX,clientY){
   const row=Math.floor(Math.max(0,clientY-r.top)/GRID);
   return {x:col*GRID,y:row*GRID,width:r.width,height:r.height};
 }
+function objectSize(o){
+  return o.type==='house'?96:48;
+}
 function clamp(o){
   const r=ground.getBoundingClientRect();
-  o.x=Math.max(24,Math.min(r.width-24,o.x));
-  o.y=Math.max(24,Math.min(r.height-24,o.y));
+  const half=objectSize(o)/2;
+  o.x=Math.max(half,Math.min(r.width-half,o.x));
+  o.y=Math.max(half,Math.min(r.height-half,o.y));
 }
 function renderInventory(){
   soilCount.textContent=inventory.soil>0?'×'+inventory.soil:'';
@@ -333,12 +341,20 @@ function renderObjects(){
   objects.forEach(o=>{
     const b=document.createElement('button');
     b.type='button';
-    b.className='obj'+(o.id===selectedId?' selected':'');
+    b.className='obj'+(o.id===selectedId?' selected':'')+(o.type==='house'?' house-obj':'');
     b.style.left=o.x+'px';
     b.style.top=o.y+'px';
-    const art=document.createElement('span');
-    art.className=artClass[o.type];
-    b.appendChild(art);
+    if(o.type==='house'){
+      const art=document.createElement('img');
+      art.className='house-art';
+      art.src='asset/house_puffy.svg?_nc=20260925-2135';
+      art.alt='';
+      b.appendChild(art);
+    }else{
+      const art=document.createElement('span');
+      art.className=artClass[o.type];
+      b.appendChild(art);
+    }
     b.addEventListener('click',e=>{
       e.stopPropagation();
       selectedId=o.id;
@@ -418,8 +434,15 @@ ground.addEventListener('click',e=>{
   }
 
   if(currentTool==='select')return;
-  const o={id:nextId++,type:currentTool,x:x+GRID/2,y:y+GRID/2};
-  clamp(o);
+  let o;
+  if(currentTool==='house'){
+    const size=96;
+    if(x+size>cell.width||y+size>cell.height)return;
+    o={id:nextId++,type:currentTool,x:x+size/2,y:y+size/2};
+  }else{
+    o={id:nextId++,type:currentTool,x:x+GRID/2,y:y+GRID/2};
+    clamp(o);
+  }
   objects.push(o);
   selectedId=o.id;
   currentTool='select';
