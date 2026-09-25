@@ -69,10 +69,10 @@ button{
 .table-art{width:42px;height:28px;border-top:4px solid #222;position:relative}
 .table-art::before,.table-art::after{content:"";position:absolute;top:0;bottom:0;width:3px;background:#222}
 .table-art::before{left:5px}.table-art::after{right:5px}
-.house-obj{width:96px;height:96px;z-index:3}
+.large-obj{width:96px;height:96px;z-index:3}
 .puffy-art{display:block;width:48px;height:48px;pointer-events:none;user-select:none;-webkit-user-drag:none}
-.house-art{width:96px;height:96px}
-.obj.house-obj.selected::after{inset:-3px;border-radius:14px}
+.house-art,.tree-art{width:96px;height:96px}
+.obj.large-obj.selected::after{inset:-3px;border-radius:14px}
 
 .farm-plot{
   position:absolute;width:24px;height:24px;border:1px solid #666;padding:0;z-index:3;
@@ -176,7 +176,7 @@ button{
 <main id="game" aria-label="白い箱庭">
   <div id="ground" class="grid-on">
     <div id="objectLayer"></div>
-    <img id="girl" src="asset/chill_girl_01.png?_nc=20260924-0418" alt="女の子">
+    <img id="girl" src="asset/character_puffy.svg?_nc=20260925-2136" alt="女の子">
     <div id="hint">土・種・ジョウロを選んでマスをタップ</div>
     <button id="sunBtn" type="button">☀︎ 太陽</button>
   </div>
@@ -221,6 +221,7 @@ button{
       <button class="tool" data-tool="lamp" type="button">ランプ</button>
       <button class="tool" data-tool="table" type="button">机</button>
       <button class="tool" data-tool="house" type="button">家</button>
+      <button class="tool" data-tool="tree" type="button">木</button>
       <button id="gridBtn" class="tool active" type="button">格子</button>
     </div>
     <div class="editrow">
@@ -273,8 +274,11 @@ const waterCount=document.getElementById('waterCount');
 const GRID=24;
 let currentTool='select';
 let selectedId=null;
-let nextId=2;
-let objects=[{id:1,type:'house',x:72,y:72}];
+let nextId=3;
+let objects=[
+  {id:1,type:'house',x:72,y:72},
+  {id:2,type:'tree',x:192,y:72}
+];
 let plots=[];
 let inventory={soil:0,seed:0,can:0,water:0};
 let selectedInventory=null;
@@ -284,7 +288,8 @@ const artAssets={
   chair:'asset/chair_puffy.svg',
   lamp:'asset/lamp_puffy.svg',
   table:'asset/table_puffy.svg',
-  house:'asset/house_puffy.svg'
+  house:'asset/house_puffy.svg',
+  tree:'asset/tree_puffy.svg'
 };
 
 function gridCellFromPoint(clientX,clientY){
@@ -294,7 +299,7 @@ function gridCellFromPoint(clientX,clientY){
   return {x:col*GRID,y:row*GRID,width:r.width,height:r.height};
 }
 function objectSize(o){
-  return o.type==='house'?96:48;
+  return (o.type==='house'||o.type==='tree')?96:48;
 }
 function clamp(o){
   const r=ground.getBoundingClientRect();
@@ -348,11 +353,11 @@ function renderObjects(){
   objects.forEach(o=>{
     const b=document.createElement('button');
     b.type='button';
-    b.className='obj'+(o.id===selectedId?' selected':'')+(o.type==='house'?' house-obj':'');
+    b.className='obj'+(o.id===selectedId?' selected':'')+((o.type==='house'||o.type==='tree')?' large-obj':'');
     b.style.left=o.x+'px';
     b.style.top=o.y+'px';
     const art=document.createElement('img');
-    art.className='puffy-art'+(o.type==='house'?' house-art':'');
+    art.className='puffy-art'+(o.type==='house'?' house-art':o.type==='tree'?' tree-art':'');
     art.src=artAssets[o.type]+'?_nc=20260925-2148';
     art.alt='';
     b.appendChild(art);
@@ -436,7 +441,7 @@ ground.addEventListener('click',e=>{
 
   if(currentTool==='select')return;
   let o;
-  if(currentTool==='house'){
+  if(currentTool==='house'||currentTool==='tree'){
     const size=96;
     if(x+size>cell.width||y+size>cell.height)return;
     o={id:nextId++,type:currentTool,x:x+size/2,y:y+size/2};
