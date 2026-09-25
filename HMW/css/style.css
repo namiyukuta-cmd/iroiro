@@ -1097,3 +1097,15 @@ body{
   }
 }
 /* end HMW quick travel popover v1 */
+
+
+/* 2026-09-25 all travel destinations */
+.travel-quick-list{
+  max-height:220px;
+  overflow-y:auto;
+  -webkit-overflow-scrolling:touch;
+  padding-right:2px;
+}
+@media(max-width:380px){
+  .travel-quick-list{max-height:190px}
+}
