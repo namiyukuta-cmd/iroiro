@@ -70,3 +70,8 @@ $('projectFile').onchange=async e=>{const f=e.target.files[0];e.target.value='';
 $('document').onclick=documentPanel;$('layers').onclick=layersPanel;$('undo').onclick=()=>history(true);$('redo').onclick=()=>history(false);$('prev').onclick=()=>{doc.page--;selected=null;crop=null;render()};$('next').onclick=()=>{doc.page++;selected=null;crop=null;render()};$('addSheet').onclick=()=>{if(doc.sheets.length>=60){toast('60シートまでです');return}checkpoint();doc.sheets.push(newSheet(sheet().w,sheet().h));doc.page=doc.sheets.length-1;selected=null;changed()};document.querySelectorAll('[data-tool]').forEach(b=>b.onclick=()=>setTool(b.dataset.tool));new ResizeObserver(layout).observe($('workspace'));
 document.addEventListener('keydown',e=>{if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='z'&&!/INPUT|TEXTAREA|SELECT/.test(e.target.tagName)){e.preventDefault();history(!e.shiftKey)}});
 render();
+
+// iOS Safari: editor UI must never enter native text/image selection mode.
+document.addEventListener('selectstart',e=>{if(!e.target.closest('input,textarea'))e.preventDefault()},{passive:false});
+document.addEventListener('contextmenu',e=>{if(!e.target.closest('input,textarea'))e.preventDefault()},{passive:false});
+document.addEventListener('dragstart',e=>e.preventDefault(),{passive:false});
