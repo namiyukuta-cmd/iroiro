@@ -1,25 +1,28 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 72" role="img" aria-label="2頭身 共通素体">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 72" role="img" aria-label="chill 2頭身 共通素体">
   <g stroke="#6a3826" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
-    <ellipse cx="24" cy="68" rx="10" ry="2" fill="#cdbb9d" opacity=".4" stroke="none"/>
+    <!-- 影 -->
+    <ellipse cx="24" cy="68" rx="10.5" ry="2" fill="#cdbb9d" opacity=".42" stroke="none"/>
 
-    <rect x="17" y="55" width="6" height="11" rx="3" fill="#f8ddcf"/>
-    <rect x="25" y="55" width="6" height="11" rx="3" fill="#f8ddcf"/>
-    <ellipse cx="20" cy="66" rx="4.5" ry="2.7" fill="#70442f"/>
-    <ellipse cx="28" cy="66" rx="4.5" ry="2.7" fill="#70442f"/>
+    <!-- 脚 -->
+    <rect x="18" y="59" width="5" height="10" rx="2.5" fill="#f3caa7"/>
+    <rect x="25" y="59" width="5" height="10" rx="2.5" fill="#f3caa7"/>
 
-    <rect x="21.5" y="31.5" width="5" height="6" rx="2.5" fill="#f8ddcf"/>
-    <path d="M17 35Q24 32 31 35L35 56Q24 59 13 56Z" fill="#fff8e8"/>
+    <!-- 首：頭の後ろ -->
+    <rect x="22" y="35" width="4" height="5" rx="2" fill="#f3caa7"/>
 
-    <rect x="8.5" y="36" width="6.5" height="17" rx="3.25" fill="#fff8e8" transform="rotate(14 11.75 44.5)"/>
-    <rect x="33" y="36" width="6.5" height="17" rx="3.25" fill="#fff8e8" transform="rotate(-14 36.25 44.5)"/>
-    <circle cx="11.5" cy="52.5" r="2.7" fill="#f8ddcf"/>
-    <circle cx="36.5" cy="52.5" r="2.7" fill="#f8ddcf"/>
+    <!-- 胴体 -->
+    <path d="M14 39Q24 36.5 34 39L33 54H15Z" fill="#fff8e8"/>
 
-    <ellipse cx="24" cy="18" rx="18" ry="17" fill="#f8ddcf"/>
+    <!-- 腕 -->
+    <rect x="5.5" y="40" width="12" height="5" rx="2.5"
+      fill="#f3caa7" transform="rotate(-24 14 42.5)"/>
+    <rect x="30.5" y="40" width="12" height="5" rx="2.5"
+      fill="#f3caa7" transform="rotate(24 34 42.5)"/>
 
-    <ellipse cx="18" cy="20" rx="1.5" ry="2.2" fill="#553022" stroke="none"/>
-    <ellipse cx="30" cy="20" rx="1.5" ry="2.2" fill="#553022" stroke="none"/>
-    <circle cx="13.5" cy="25" r="2.3" fill="#f6a391" stroke="none" opacity=".9"/>
-    <circle cx="34.5" cy="25" r="2.3" fill="#f6a391" stroke="none" opacity=".9"/>
+    <!-- 頭 -->
+    <ellipse cx="24" cy="27" rx="15.5" ry="14.5" fill="#f3caa7"/>
+
+    <!-- スカート -->
+    <path d="M14 53H34L40 61H8Z" fill="#fff8e8"/>
   </g>
 </svg>
