@@ -496,7 +496,8 @@
   }
 
   function getCityScene() {
-    return scenes.find((scene) => scene.when()) || getDailyCityScene();
+    const replaced = new Set(["station_police_first", "park_homeless_first", "charity_support_first", "industrial_thug_first"]);
+    return scenes.find((scene) => !replaced.has(scene.id) && scene.when()) || getDailyCityScene();
   }
 
   Object.assign(G, { getCityScene });

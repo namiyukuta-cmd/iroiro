@@ -203,6 +203,7 @@
     H.state.lastMessage = `${D.locations[id].name}へ移った。街の様子と、そこで今起きていることが変わる。`;
     closeModal();
     G.refresh?.();
+    G.tryFirstEncounter?.();
   }
 
   function stabilityScore() {

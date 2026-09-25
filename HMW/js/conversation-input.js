@@ -6,11 +6,7 @@
     supportPersonTalk: 'support_named', homelessTalk: 'homeless_named',
     policeTalk: 'police_named', thugTalk: 'thug_named', clerkTalk: 'clerk'
   };
-  for (const [method, characterId] of Object.entries(targets)) {
-    const original = G[method];
-    if (typeof original !== 'function') continue;
-    G[method] = function (...args) {
-      original.apply(this, args);
+  G.attachConversationInput = function (characterId) {
       const body = document.getElementById('modal-body');
       if (!body || !document.getElementById('modal-backdrop').classList.contains('open')) return;
       body.querySelector('.conversation-input')?.remove();
@@ -48,8 +44,9 @@
           status.textContent = 'この発言は記録済みです。返答には分析JSONが必要です。'; return;
         }
         H.state.pendingDialogue = { characterId, rawText, day: H.state.day, slot: H.state.slot, location: H.state.location, status: 'awaiting_analysis' };
+        const encounterNote = G.completeFirstEncounter?.(characterId) || '';
         H.addHistory(`発言（${H.DATA.people[characterId]?.name || characterId}へ／返答待ち）：${rawText}`);
-        status.textContent = '発言を記録しました。返答には分析JSONが必要です。保存はセーブボタンから行えます。';
+        status.textContent = encounterNote + '発言を記録しました。返答には分析JSONが必要です。保存はセーブボタンから行えます。';
       });
       copy.addEventListener('click', async () => {
         if (!input.value.trim()) { status.textContent = '会話を入力してください。'; return; }
@@ -58,7 +55,14 @@
         catch { status.textContent = 'コピーできませんでした。入力欄の文章を選択してコピーしてください。'; input.focus(); input.select(); }
       });
       form.append(label, input, submit, copy, status);
-      body.prepend(form);
+      body.append(form);
+  };
+  for (const [method, characterId] of Object.entries(targets)) {
+    const original = G[method];
+    if (typeof original !== 'function') continue;
+    G[method] = function (...args) {
+      original.apply(this, args);
+      G.attachConversationInput(characterId);
     };
   }
 })();

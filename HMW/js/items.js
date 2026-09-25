@@ -4,6 +4,7 @@
   HMW.DATA = HMW.DATA || {};
 
   HMW.DATA.items = {
+    aaron_name_tag: { name: "名札", description: "アーロンから受け取った名札。支援センターでの出会いの品。", unique: true },
     bread: { name: "パン", hunger: -14, price: 120 },
     rice_ball: { name: "おにぎり", hunger: -18, price: 170 },
     food_pack: { name: "支援食", hunger: -24, price: 0 },
