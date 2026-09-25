@@ -61,67 +61,6 @@
     return true;
   }
 
-  ) {
-    const symbols = ["▲", "●", "■"];
-    const bins = ["A", "B", "C"];
-    const shift = random(`${title}-mapping`, 0, 2);
-    const mapping = {};
-    symbols.forEach((symbol, i) => { mapping[symbol] = bins[(i + shift) % 3]; });
-    const queue = Array.from({ length: rounds }, (_, i) => symbols[random(`${title}-parcel-${i}`, 0, 2)]);
-    let index = 0;
-    let score = 0;
-
-    openModal(title, "", [], true);
-    const body = $("modal-body");
-    body.innerHTML = `<div class="work-card"><p><b>仕分け表</b>　${symbols.map((s) => `${s}→${mapping[s]}`).join("　")}</p><div class="work-progress" id="hmw-work-progress"></div><div class="parcel-symbol" id="hmw-parcel"></div><div class="job-bins" id="hmw-job-bins"></div><div class="activity-result" id="hmw-work-result">荷札を見て置き場を選ぶ。</div></div>`;
-    const parcel = document.getElementById("hmw-parcel");
-    const progress = document.getElementById("hmw-work-progress");
-    const result = document.getElementById("hmw-work-result");
-    const binBox = document.getElementById("hmw-job-bins");
-
-    bins.forEach((bin) => {
-      const b = document.createElement("button");
-      b.className = "work-bin";
-      b.textContent = `置き場 ${bin}`;
-      b.addEventListener("click", () => answer(bin));
-      binBox.appendChild(b);
-    });
-
-    function draw() {
-      progress.textContent = `${index + 1} / ${rounds}　正解 ${score}`;
-      parcel.textContent = queue[index];
-    }
-
-    function answer(bin) {
-      const symbol = queue[index];
-      if (mapping[symbol] === bin) {
-        score += 1;
-        result.textContent = "正しい置き場。";
-      } else {
-        result.textContent = `違う置き場だった。${symbol} は ${mapping[symbol]}。`;
-      }
-      index += 1;
-      if (index >= rounds) return finish();
-      draw();
-    }
-
-    function finish() {
-      parcel.textContent = "完了";
-      binBox.innerHTML = "";
-      const pay = payBase + score * payPerCorrect;
-      result.textContent = `${rounds}個を仕分けた。正解 ${score}/${rounds}。報酬 ${pay}円。`;
-      const finish = document.createElement("button");
-      finish.className = "modal-btn good";
-      finish.textContent = "仕事を終える";
-      finish.addEventListener("click", () => {
-        closeModal();
-        onFinish(pay, score, rounds);
-      });
-      $("modal-actions").appendChild(finish);
-    }
-
-    draw();
-  }
 
   function startCasualWork() {
     if (!H.state.daily.casualOffer || H.state.daily.casualDone) return false;
