@@ -39,12 +39,12 @@
   }
 
   function casualWork() {
-    if (!H.state.daily.casualOffer || H.state.daily.casualDone) return;
+    if (!H.state.daily.casualOffer || H.state.daily.casualDone) return false;
     if (H.state.stats.fatigue > 82 || H.state.stats.hunger > 86 || H.state.stats.health < 30) {
       info("小仕事", "今日は体調条件に届かない。募集そのものは今日中なら残っている。");
-      return;
+      return false;
     }
-    G.startCasualWork();
+    return G.startCasualWork();
   }
 
   function beg() {
