@@ -551,37 +551,87 @@
       closeTravelPopover();
       return;
     }
-
     if (H.state.activeEvent) return info("移動", "現在の出来事への対応が先になる。");
-
     const current = H.state.location;
     const currentLoc = D.locations[current];
-    const connectedIds = (currentLoc?.connections || []).filter((id) =>
+    const knownIds = Object.keys(D.locations).filter((id) =>
       H.state.knownLocations[id] && D.locations[id]
     );
-
-    // Usually only adjacent known places are shown. If old save data has no
-    // connection information available, fall back to other known places.
-    const destinationIds = connectedIds.length
-      ? connectedIds
-      : Object.keys(D.locations).filter((id) =>
-          id !== current && H.state.knownLocations[id]
-        );
-
+    const destinationIds = (currentLoc?.connections || []).filter((id) =>
+      H.state.knownLocations[id] && D.locations[id]
+    );
+    const layout = {
+      station_front:      [13, 17],
+      shopping_street:    [38, 17],
+      park:               [69, 17],
+      police_station:     [12, 38],
+      labor_office:       [34, 38],
+      public_toilet:      [56, 38],
+      convenience_store:  [82, 38],
+      residential_alley:  [23, 62],
+      charity_center:     [53, 62],
+      underpass:          [78, 62],
+      industrial_street:  [23, 84],
+      recycling_yard:     [52, 84],
+      riverside:          [78, 84]
+    };
+    const edgeKeys = new Set();
+    const edges = [];
+    knownIds.forEach((id) => {
+      const from = layout[id];
+      if (!from) return;
+      (D.locations[id].connections || []).forEach((toId) => {
+        if (!knownIds.includes(toId) || !layout[toId]) return;
+        const key = [id, toId].sort().join("|");
+        if (edgeKeys.has(key)) return;
+        edgeKeys.add(key);
+        edges.push([id, toId]);
+      });
+    });
+    const destinationHtml = destinationIds.length
+      ? destinationIds.map((id) =>
+          `<button class="travel-quick-destination" type="button" data-travel-id="${esc(id)}">
+             <span>${esc(D.locations[id].name)}</span>
+           </button>`
+        ).join("")
+      : `<div class="travel-quick-empty">今行ける場所はない</div>`;
+    const lineHtml = edges.map(([fromId, toId]) => {
+      const [x1, y1] = layout[fromId];
+      const [x2, y2] = layout[toId];
+      return `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}"></line>`;
+    }).join("");
+    const nodeHtml = knownIds
+      .filter((id) => layout[id])
+      .map((id) => {
+        const [x, y] = layout[id];
+        const currentClass = id === current ? " current" : "";
+        const connectedClass = destinationIds.includes(id) ? " connected" : "";
+        return `<div class="travel-quick-map-node${currentClass}${connectedClass}" style="left:${x}%;top:${y}%">
+          <span></span>
+          <small>${esc(D.locations[id].name)}</small>
+        </div>`;
+      }).join("");
     const popover = ensureTravelPopover();
     const moveButton = $("side-move");
-
-    popover.innerHTML = destinationIds.length
-      ? `<div class="travel-quick-title">どこへ行く？</div>
-         <div class="travel-quick-grid">
-           ${destinationIds.map((id) =>
-             `<button class="travel-quick-destination" type="button" data-travel-id="${esc(id)}">
-                <span>${esc(D.locations[id].name)}</span>
-              </button>`
-           ).join("")}
-         </div>`
-      : `<div class="travel-quick-empty">今行ける場所はない</div>`;
-
+    popover.innerHTML = `
+      <div class="travel-quick-shell">
+        <div class="travel-quick-map-wrap">
+          <div class="travel-quick-map-title">地図</div>
+          <div class="travel-quick-map">
+            <svg class="travel-quick-map-lines" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
+              ${lineHtml}
+            </svg>
+            ${nodeHtml}
+          </div>
+        </div>
+        <div class="travel-quick-list-wrap">
+          <div class="travel-quick-list-title">移動先</div>
+          <div class="travel-quick-list">
+            ${destinationHtml}
+          </div>
+        </div>
+      </div>
+    `;
     popover.querySelectorAll(".travel-quick-destination").forEach((button) => {
       button.addEventListener("click", () => {
         const id = button.dataset.travelId;
@@ -590,7 +640,6 @@
         travel(id);
       });
     });
-
     popover.classList.add("open");
     popover.setAttribute("aria-hidden", "false");
     $("game-app")?.classList.add("travel-open");
