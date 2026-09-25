@@ -1,32 +1,21 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 72" role="img" aria-label="2x3マス人体アタリ">
   <g fill="none" stroke-linecap="round" stroke-linejoin="round">
-    <!-- 2x3マス境界 -->
     <rect x=".5" y=".5" width="47" height="71" rx="2" stroke="#b7c4d0" stroke-width="1"/>
     <path d="M24 0v72M0 24h48M0 48h48" stroke="#d9e1e7" stroke-width="1"/>
-    <!-- 中心線・接地線 -->
     <path d="M24 2v66" stroke="#7c8fa0" stroke-width="1" stroke-dasharray="2 2"/>
     <path d="M4 68h40" stroke="#d88470" stroke-width="1.5"/>
-    <!-- 頭 -->
     <ellipse cx="24" cy="18" rx="13" ry="14" fill="#f5d0bf" fill-opacity=".65" stroke="#9d5f53" stroke-width="1.5"/>
-    <!-- 首 -->
     <rect x="21" y="29" width="6" height="7" rx="2.5" fill="#f1c6b5" fill-opacity=".65" stroke="#9d5f53" stroke-width="1.3"/>
-    <!-- 胸郭 -->
     <rect x="14" y="34" width="20" height="15" rx="6" fill="#cbdcf4" fill-opacity=".7" stroke="#5e7fa8" stroke-width="1.5"/>
-    <!-- 骨盤 -->
     <rect x="16" y="47" width="16" height="9" rx="4" fill="#d6c9ef" fill-opacity=".7" stroke="#7862a2" stroke-width="1.5"/>
-    <!-- 腕 -->
     <rect x="8" y="35" width="7" height="20" rx="3.5" fill="#cfe8d5" fill-opacity=".7" stroke="#5f8b68" stroke-width="1.5" transform="rotate(5 11.5 45)"/>
     <rect x="33" y="35" width="7" height="20" rx="3.5" fill="#cfe8d5" fill-opacity=".7" stroke="#5f8b68" stroke-width="1.5" transform="rotate(-5 36.5 45)"/>
-    <!-- 手 -->
     <circle cx="10" cy="56" r="3" fill="#f5d0bf" fill-opacity=".75" stroke="#9d5f53" stroke-width="1.3"/>
     <circle cx="38" cy="56" r="3" fill="#f5d0bf" fill-opacity=".75" stroke="#9d5f53" stroke-width="1.3"/>
-    <!-- 脚 -->
     <rect x="16" y="54" width="7" height="11" rx="3.2" fill="#f2ddad" fill-opacity=".75" stroke="#9b7a39" stroke-width="1.4"/>
     <rect x="25" y="54" width="7" height="11" rx="3.2" fill="#f2ddad" fill-opacity=".75" stroke="#9b7a39" stroke-width="1.4"/>
-    <!-- 足 -->
     <ellipse cx="19" cy="65" rx="5" ry="2.8" fill="#e0bf8c" fill-opacity=".75" stroke="#8c6838" stroke-width="1.4"/>
     <ellipse cx="29" cy="65" rx="5" ry="2.8" fill="#e0bf8c" fill-opacity=".75" stroke="#8c6838" stroke-width="1.4"/>
-    <!-- アンカー -->
     <g fill="#fff" stroke="#3f4f5d" stroke-width="1">
       <circle cx="24" cy="18" r="1.7"/>
       <circle cx="16" cy="35" r="1.7"/><circle cx="32" cy="35" r="1.7"/>
