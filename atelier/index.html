@@ -6,7 +6,7 @@
 <meta name="theme-color" content="#eeeae3">
 <meta http-equiv="Cache-Control" content="no-cache,no-store,must-revalidate">
 <title>てのひらアトリエ</title>
-<link rel="stylesheet" href="style.css?v=20260925-1">
+<script>const styleLink=document.createElement('link');styleLink.rel='stylesheet';styleLink.href='style.css?v='+Date.now();document.head.append(styleLink);</script>
 </head>
 <body>
 <main id="app">
@@ -18,5 +18,7 @@
 </main>
 <input id="files" type="file" accept="image/*" multiple hidden><input id="projectFile" type="file" accept=".json,application/json" hidden>
 <div id="modal"></div><div id="toast" role="status" hidden></div>
-<script src="core.js?v=20260925-1"></script><script src="app.js?v=20260925-1"></script>
+<script>
+(async()=>{for(const file of ['core.js','app.js'])await new Promise((resolve,reject)=>{const script=document.createElement('script');script.src=file+'?v='+Date.now();script.onload=resolve;script.onerror=reject;document.body.append(script)})})().catch(()=>{document.getElementById('hint').textContent='読み込みに失敗しました。通信を確認して再読み込みしてください。'});
+</script>
 </body></html>
