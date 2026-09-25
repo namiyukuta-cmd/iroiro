@@ -1177,3 +1177,8 @@ body{
   }
 }
 /* end HMW no-scroll travel layout */
+
+.conversation-markers{display:inline-flex;align-items:center;gap:2px;font-style:normal;vertical-align:middle}
+.conversation-marker{display:inline-flex;align-items:center;justify-content:center;width:15px;height:15px;flex:0 0 15px;border:1px solid #52664e;border-radius:50%;background:#fffdf3;color:#30482e;font-size:10px;line-height:1;font-weight:800;box-sizing:border-box}
+.travel-quick-destination .conversation-markers{margin-left:3px}
+.map-conversation-markers{position:absolute;left:calc(50% + 12px);top:-3px;white-space:nowrap}

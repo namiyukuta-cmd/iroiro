@@ -36,29 +36,42 @@
   }
 
 
-  function peopleActions() {
-    const id = H.state.location;
+  function peopleActions(id = H.state.location) {
     const slot = H.state.slot;
     const a = [];
     if (id === "charity_center" && slot !== 3) {
-      a.push({ label: "名前付き支援員と話す", desc: "これまでの相談内容を踏まえて話す。", run: G.supportPersonTalk, disabled: !!H.state.daily.talk.support_named });
+      a.push({ label: "名前付き支援員と話す", desc: "これまでの相談内容を踏まえて話す。", personId: "support_named", run: G.supportPersonTalk, disabled: !!H.state.daily.talk.support_named });
     }
     if ((id === "park" && slot >= 2) || id === "underpass") {
-      a.push({ label: "名前付きホームレスと話す", desc: "顔見知りになるほど、寝場所や回収所の情報が具体的になる。", run: G.homelessTalk });
+      a.push({ label: "名前付きホームレスと話す", desc: "顔見知りになるほど、寝場所や回収所の情報が具体的になる。", personId: "homeless_named", run: G.homelessTalk });
     }
     if ((id === "station_front" && slot >= 1) || id === "police_station") {
-      a.push({ label: "名前付き警官と話す", desc: "支援先・巡回・距離の取り方が、前の接触から続く。", run: G.policeTalk, disabled: !!H.state.daily.talk.police_named });
+      a.push({ label: "名前付き警官と話す", desc: "支援先・巡回・距離の取り方が、前の接触から続く。", personId: "police_named", run: G.policeTalk, disabled: !!H.state.daily.talk.police_named });
     }
     if ((id === "underpass" && slot >= 2) || (id === "industrial_street" && slot >= 2)) {
-      a.push({ label: "名前付き不良と話す", desc: "寝場所・危ない仕事・借りが後に残る。", run: G.thugTalk, disabled: !!H.state.daily.talk.thug_named });
+      a.push({ label: "名前付き不良と話す", desc: "寝場所・危ない仕事・借りが後に残る。", personId: "thug_named", run: G.thugTalk, disabled: !!H.state.daily.talk.thug_named });
       if (H.state.progression.thug.carryKnown) {
         a.push({ label: "中身不明の荷運びを受ける", desc: "900円。警察注意と相手への借りが残る。", run: G.thugJob });
       }
     }
     if (id === "convenience_store") {
-      a.push({ label: "店員と話す", desc: "同じ店を使った履歴が、小仕事や対応の変化につながる。", run: G.clerkTalk, disabled: !!H.state.daily.talk.clerk });
+      a.push({ label: "店員と話す", desc: "同じ店を使った履歴が、小仕事や対応の変化につながる。", personId: "clerk", run: G.clerkTalk, disabled: !!H.state.daily.talk.clerk });
     }
     return a;
+  }
+
+
+  function conversationMarkers(locationId) {
+    const initials = { support_named: "A", homeless_named: "S", police_named: "M", thug_named: "L", clerk: "店" };
+    return peopleActions(locationId).filter((action) => action.personId && !action.disabled).map((action) => {
+      const id = action.personId;
+      const relation = H.state.relationships?.[id] || {};
+      const met = relation.met === true || Number(relation.lastContactDay) > 0 ||
+        Number(relation.familiarity) > 0 || !!H.state.daily.talk[id];
+      const label = met ? (initials[id] || Array.from(D.people[id]?.name || "?")[0]) : "?";
+      const title = met ? `${D.people[id]?.name || label}：会話可能` : "未対面の人物：会話可能";
+      return `<b class="conversation-marker" title="${esc(title)}" aria-label="${esc(title)}">${esc(label)}</b>`;
+    }).join("");
   }
 
   function locationActions() {
@@ -176,7 +189,7 @@
     }
 
     if (id === "police_station") {
-      a.push({ label: "名前付き警官に用件を伝える", desc: "前の接触を踏まえて、支援先や巡回を聞ける。", run: G.policeTalk, disabled: !!H.state.daily.talk.police_named });
+      a.push({ label: "名前付き警官に用件を伝える", desc: "前の接触を踏まえて、支援先や巡回を聞ける。", personId: "police_named", run: G.policeTalk, disabled: !!H.state.daily.talk.police_named });
     }
 
     return a;
@@ -630,7 +643,7 @@
     const destinationHtml = destinationIds.length
       ? destinationIds.map((id) =>
           `<button class="travel-quick-destination" type="button" data-travel-id="${esc(id)}" aria-pressed="false">
-             <span>${esc(D.locations[id].name)}</span>
+             <span>${esc(D.locations[id].name)}</span><i class="conversation-markers">${conversationMarkers(id)}</i>
            </button>`
         ).join("")
       : `<div class="travel-quick-empty">今行ける場所はない</div>`;
@@ -647,6 +660,7 @@
         const connectedClass = destinationIds.includes(id) ? " connected" : "";
         return `<div class="travel-quick-map-node${currentClass}${connectedClass}" data-location-id="${esc(id)}" style="left:${x}%;top:${y}%">
           <span></span>
+          <i class="conversation-markers map-conversation-markers">${conversationMarkers(id)}</i>
           <small>${esc(D.locations[id].name)}</small>
         </div>`;
       }).join("");
