@@ -205,6 +205,22 @@
     station_front: "駅前にいる。ここには掲示板だけでなく、仕事を探す人、通勤客、店の搬入口、休める場所がある。"
   };
 
+  const LOCATION_POINT_ICONS = {
+    station_front: { street:"🛣️", board:"📌", loading:"📦", bench:"🪑", bin:"♻️" },
+    shopping_street: { shops:"🏪", alley:"↪️" },
+    park: { bench:"🪑", water:"🚰", notice:"📋" },
+    convenience_store: { shelf:"🛒", counter:"🧾", back:"📦" },
+    charity_center: { desk:"💬", food:"🍞", wash:"🚿" },
+    public_toilet: { sink:"🚰", rest:"☕" },
+    labor_office: { desk:"🧑‍💼" },
+    underpass: { entrance:"🌉", pillars:"🧱", sleep:"🛏️" },
+    riverside: { bank:"🌊", rest:"🪑" },
+    industrial_street: { scrap:"🔩", warehouse:"🏭" },
+    recycling_yard: { scale:"⚖️" },
+    residential_alley: { alley:"🏘️" },
+    police_station: { desk:"👮" }
+  };
+
   const LOCATION_POINTS = {
     station_front: [
       { id:"street", label:"公道", text:"駅前の公道。人に小銭を頼む、周囲を探すなど、この場所でできる行動を選べる。" },
@@ -400,7 +416,10 @@
       const button = document.createElement("button");
       button.className = "location-point-btn";
       button.type = "button";
-      button.textContent = point.label;
+      button.dataset.locationId = id;
+      button.dataset.pointId = point.id;
+      const icon = LOCATION_POINT_ICONS[id]?.[point.id] || "•";
+      button.innerHTML = `<span class="point-icon" aria-hidden="true">${icon}</span><span class="point-label">${esc(point.label)}</span>`;
       button.addEventListener("click", () => openLocationPoint(id, point));
       box.appendChild(button);
     });
@@ -431,6 +450,8 @@
 
   function renderScene() {
     const loc = D.locations[H.state.location];
+    const sceneEl = document.querySelector(".scene");
+    if (sceneEl) sceneEl.dataset.location = H.state.location;
     $("location-name").textContent = loc.name;
     const housingGoalText = $("housing-goal-text");
     if (housingGoalText) housingGoalText.textContent = H.getHousingGoalText?.() || "";
