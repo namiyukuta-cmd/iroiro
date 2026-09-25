@@ -6,6 +6,7 @@
   const { $, escapeHtml: esc, openModal, closeModal, info, travel } = G;
   let autoSaveEnabled = false;
   let travelPopoverOpen = false;
+  let selectedTravelDestination = null;
 
   function ensureTravelPopover() {
     let popover = $("travel-popover");
@@ -29,6 +30,8 @@
     }
     $("game-app")?.classList.remove("travel-open");
     $("side-move")?.setAttribute("aria-expanded", "false");
+    $("side-move")?.classList.remove("travel-confirm-ready");
+    selectedTravelDestination = null;
     travelPopoverOpen = false;
   }
 
@@ -548,7 +551,13 @@
 
   function openMap() {
     if (travelPopoverOpen) {
-      closeTravelPopover();
+      if (selectedTravelDestination) {
+        const destinationId = selectedTravelDestination;
+        closeTravelPopover();
+        travel(destinationId);
+      } else {
+        closeTravelPopover();
+      }
       return;
     }
     if (H.state.activeEvent) return info("移動", "現在の出来事への対応が先になる。");
@@ -585,7 +594,7 @@
     });
     const destinationHtml = destinationIds.length
       ? destinationIds.map((id) =>
-          `<button class="travel-quick-destination" type="button" data-travel-id="${esc(id)}">
+          `<button class="travel-quick-destination" type="button" data-travel-id="${esc(id)}" aria-pressed="false">
              <span>${esc(D.locations[id].name)}</span>
            </button>`
         ).join("")
@@ -601,7 +610,7 @@
         const [x, y] = layout[id];
         const currentClass = id === current ? " current" : "";
         const connectedClass = destinationIds.includes(id) ? " connected" : "";
-        return `<div class="travel-quick-map-node${currentClass}${connectedClass}" style="left:${x}%;top:${y}%">
+        return `<div class="travel-quick-map-node${currentClass}${connectedClass}" data-location-id="${esc(id)}" style="left:${x}%;top:${y}%">
           <span></span>
           <small>${esc(D.locations[id].name)}</small>
         </div>`;
@@ -631,8 +640,20 @@
       button.addEventListener("click", () => {
         const id = button.dataset.travelId;
         if (!id) return;
-        closeTravelPopover();
-        travel(id);
+
+        selectedTravelDestination = id;
+
+        popover.querySelectorAll(".travel-quick-destination").forEach((item) => {
+          const selected = item.dataset.travelId === id;
+          item.classList.toggle("selected", selected);
+          item.setAttribute("aria-pressed", selected ? "true" : "false");
+        });
+
+        popover.querySelectorAll(".travel-quick-map-node").forEach((node) => {
+          node.classList.toggle("selected", node.dataset.locationId === id);
+        });
+
+        $("side-move")?.classList.add("travel-confirm-ready");
       });
     });
     popover.classList.add("open");
