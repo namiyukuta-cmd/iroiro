@@ -70,7 +70,8 @@ button{
 .table-art::before,.table-art::after{content:"";position:absolute;top:0;bottom:0;width:3px;background:#222}
 .table-art::before{left:5px}.table-art::after{right:5px}
 .house-obj{width:96px;height:96px;z-index:3}
-.house-art{display:block;width:96px;height:96px;pointer-events:none;user-select:none;-webkit-user-drag:none}
+.puffy-art{display:block;width:48px;height:48px;pointer-events:none;user-select:none;-webkit-user-drag:none}
+.house-art{width:96px;height:96px}
 .obj.house-obj.selected::after{inset:-3px;border-radius:14px}
 
 .farm-plot{
@@ -278,7 +279,13 @@ let plots=[];
 let inventory={soil:0,seed:0,can:0,water:0};
 let selectedInventory=null;
 
-const artClass={box:'box-art',chair:'chair-art',lamp:'lamp-art',table:'table-art'};
+const artAssets={
+  box:'asset/box_puffy.svg',
+  chair:'asset/chair_puffy.svg',
+  lamp:'asset/lamp_puffy.svg',
+  table:'asset/table_puffy.svg',
+  house:'asset/house_puffy.svg'
+};
 
 function gridCellFromPoint(clientX,clientY){
   const r=ground.getBoundingClientRect();
@@ -344,17 +351,11 @@ function renderObjects(){
     b.className='obj'+(o.id===selectedId?' selected':'')+(o.type==='house'?' house-obj':'');
     b.style.left=o.x+'px';
     b.style.top=o.y+'px';
-    if(o.type==='house'){
-      const art=document.createElement('img');
-      art.className='house-art';
-      art.src='asset/house_puffy.svg?_nc=20260925-2135';
-      art.alt='';
-      b.appendChild(art);
-    }else{
-      const art=document.createElement('span');
-      art.className=artClass[o.type];
-      b.appendChild(art);
-    }
+    const art=document.createElement('img');
+    art.className='puffy-art'+(o.type==='house'?' house-art':'');
+    art.src=artAssets[o.type]+'?_nc=20260925-2148';
+    art.alt='';
+    b.appendChild(art);
     b.addEventListener('click',e=>{
       e.stopPropagation();
       selectedId=o.id;
