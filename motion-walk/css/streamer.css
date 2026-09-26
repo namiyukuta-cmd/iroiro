@@ -725,13 +725,18 @@ body{
   }
 }
 
-/* 家事用カメラ：映像解析専用 */
+/* 家事用カメラ：映像を確認しながら動作検出 */
 #cameraVideo{
   position:fixed;
-  width:1px;
-  height:1px;
-  left:-10px;
-  top:-10px;
-  opacity:0;
+  right:8px;
+  bottom:58px;
+  width:120px;
+  height:160px;
+  object-fit:cover;
+  background:#000;
+  border:2px solid #fff;
+  border-radius:8px;
+  z-index:100;
   pointer-events:none;
+  transform:scaleX(-1);
 }
