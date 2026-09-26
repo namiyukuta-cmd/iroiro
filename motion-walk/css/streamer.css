@@ -147,7 +147,7 @@ body{
 .girl{
   position:absolute;
   left:50%;
-  bottom:-13px;
+  bottom:2px;
   width:132px;
   height:235px;
   transform:translateX(-50%);
