@@ -7,6 +7,6 @@ const patrons=[
 {id:'rom',name:'ROM専',personality:'ほとんど発言しない観察型。たまに現れて短い一言と投げ銭だけ残す。',affection:0,totalTips:0,lines:['見てる','おつ','よかった','また来る']}
 ];
 function pick(){const weights=patrons.map(p=>1+p.affection*.08),sum=weights.reduce((a,b)=>a+b,0);let r=Math.random()*sum;for(let i=0;i<patrons.length;i++){r-=weights[i];if(r<=0)return patrons[i]}return patrons[0]}
-function tip(p){const amount=p.affection>=18?500:p.affection>=10?300:p.affection>=5?200:100;p.affection+=2;p.totalTips+=amount;return{patron:p,amount,line:p.lines[Math.floor(Math.random()*p.lines.length)]}}
+function tip(p){const amount=p.affection>=18?500:p.affection>=13?300:p.affection>=8?200:p.affection>=4?100:50;p.affection+=2;p.totalTips+=amount;return{patron:p,amount,line:p.lines[Math.floor(Math.random()*p.lines.length)]}}
 return{all:patrons,pick,tip};
 })();
