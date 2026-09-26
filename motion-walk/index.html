@@ -279,7 +279,22 @@ const se={
   evade(){noise(.075,.03,5000);tone(1100,.055,'sine',.018,-500)},
   chest(){tone(330,.06,'square',.025,100);setTimeout(()=>tone(520,.09,'sine',.035,180),70)},
   discover(){tone(660,.07,'sine',.035,160);setTimeout(()=>tone(990,.12,'sine',.035,180),80)},
-  victory(){[523,659,784,1047].forEach((n,i)=>setTimeout(()=>tone(n,.14,'triangle',.045,20),i*90))}
+  victory(){[523,659,784,1047].forEach((n,i)=>setTimeout(()=>tone(n,.14,'triangle',.045,20),i*90))},
+  request(){tone(740,.07,'sine',.032,130);setTimeout(()=>tone(980,.11,'triangle',.035,80),85)},
+  complete(){tone(440,.08,'triangle',.035,80);setTimeout(()=>tone(660,.1,'triangle',.04,120),90);setTimeout(()=>tone(880,.14,'sine',.04,40),190)},
+  affection(){tone(700,.055,'sine',.025,120);setTimeout(()=>tone(920,.08,'sine',.03,160),65)},
+  money(){tone(1200,.045,'square',.02,100);setTimeout(()=>tone(1560,.06,'sine',.026,80),55)},
+  client(id){
+    const voices={
+      clinic_staff:[390,'sine',-35], hooded_man:[145,'triangle',-20],
+      mechanic:[115,'sawtooth',-28], resident:[520,'sine',55],
+      researcher:[340,'triangle',12], repairer:[230,'square',45],
+      requester:[175,'sine',-45], tailor:[300,'triangle',-18]
+    };
+    const v=voices[id]||[260,'sine',0];
+    tone(v[0],.075,v[1],.022,v[2]);
+    setTimeout(()=>tone(v[0]*1.08,.055,v[1],.016,-v[2]*.25),70);
+  }
 };
 function playBattleDemo(){
   se.encounter();
@@ -388,6 +403,7 @@ async function showNextJob(){
   showClientFace(currentJob.clientId);
   updateUI();
   jobPopup.style.display='flex';
+  se.request();
   jobPopupTitle.textContent=currentJob.special ? '特別依頼が入った。' : '依頼が入った。';
   jobPopupText.textContent='';
   await wait(900);
@@ -415,12 +431,15 @@ async function finishJob(){
   jobPopupTitle.textContent='到着';
   const npc=window.DeliveryNPC.get(currentJob.clientId);
   jobPopupText.textContent=npc.name+'「'+window.DeliveryNPC.lineFor(npc)+'」';
-  se.discover();
+  se.client(currentJob.clientId);
   await wait(1100);
   if(!running)return;
   money+=currentJob.pay;
   deliveries++;
   const updatedNpc=window.DeliveryNPC.completeDelivery(currentJob.clientId);
+  se.complete();
+  setTimeout(()=>se.money(),180);
+  setTimeout(()=>se.affection(),360);
   jobPopupTitle.textContent='配達完了';
   jobPopupText.textContent='無事に配達が終わった。　+'+currentJob.pay+'円　'+updatedNpc.name+' 好感度 '+updatedNpc.affection+(updatedNpc.specialUnlocked?'　特別依頼解放！':'');
   updateUI();
