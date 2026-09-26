@@ -350,11 +350,13 @@ function wait(ms){return new Promise(r=>setTimeout(r,ms));}
 async function showNextJob(){
   if(!running)return;
   jobActive=false;
-  currentJob=jobs[jobSequence++%jobs.length];
+  const baseJob=jobs[jobSequence++%jobs.length];
+  const special=window.DeliveryNPC.getSpecial(baseJob.clientId);
+  currentJob=special ? {...special,clientId:baseJob.clientId,special:true} : baseJob;
   jobMeters=0;
   updateUI();
   jobPopup.style.display='flex';
-  jobPopupTitle.textContent='依頼が入った。';
+  jobPopupTitle.textContent=currentJob.special ? '特別依頼が入った。' : '依頼が入った。';
   jobPopupText.textContent='';
   await wait(900);
   if(!running)return;
@@ -380,7 +382,7 @@ async function finishJob(){
   jobPopup.style.display='flex';
   jobPopupTitle.textContent='到着';
   const npc=window.DeliveryNPC.get(currentJob.clientId);
-  jobPopupText.textContent=npc.name+'「ありがとう」';
+  jobPopupText.textContent=npc.name+'「'+window.DeliveryNPC.lineFor(npc)+'」';
   se.discover();
   await wait(1100);
   if(!running)return;
@@ -388,7 +390,7 @@ async function finishJob(){
   deliveries++;
   const updatedNpc=window.DeliveryNPC.completeDelivery(currentJob.clientId);
   jobPopupTitle.textContent='配達完了';
-  jobPopupText.textContent='無事に配達が終わった。　+'+currentJob.pay+'円　'+updatedNpc.name+' 好感度 '+updatedNpc.affection;
+  jobPopupText.textContent='無事に配達が終わった。　+'+currentJob.pay+'円　'+updatedNpc.name+' 好感度 '+updatedNpc.affection+(updatedNpc.specialUnlocked?'　特別依頼解放！':'');
   updateUI();
   await wait(1400);
   if(!running)return;
