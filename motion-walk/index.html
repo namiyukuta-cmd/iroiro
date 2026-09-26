@@ -39,11 +39,14 @@ transform:translateY(0);will-change:transform}
 #pulse{position:absolute;left:50%;top:62%;width:34px;height:34px;border:2px solid #f6efd0;border-radius:50%;transform:translate(-50%,-50%) scale(1);opacity:0;z-index:4;pointer-events:none}
 #pulse.go{animation:pulse .35s ease-out}
 @keyframes pulse{0%{opacity:.9;transform:translate(-50%,-50%) scale(.8)}100%{opacity:0;transform:translate(-50%,-50%) scale(2.2)}}
-#cameraBtn{position:absolute;right:12px;top:12px;z-index:12;border:1px solid #666b4c;background:#202419;color:#f4f0df;border-radius:10px;padding:8px 10px;font-size:12px}\n#cameraBox{position:absolute;right:12px;top:54px;width:140px;height:190px;z-index:11;display:none;border:2px solid #666b4c;border-radius:12px;overflow:hidden;background:#000}
+#soundBtn{position:absolute;left:12px;top:12px;z-index:12;border:1px solid #666b4c;background:#202419;color:#f4f0df;border-radius:10px;padding:8px 10px;font-size:12px}
+#cameraBtn{position:absolute;right:12px;top:12px;z-index:12;border:1px solid #666b4c;background:#202419;color:#f4f0df;border-radius:10px;padding:8px 10px;font-size:12px}
+#cameraBox{position:absolute;right:12px;top:54px;width:140px;height:190px;z-index:11;display:none;border:2px solid #666b4c;border-radius:12px;overflow:hidden;background:#000}
 #cameraView{width:100%;height:100%;object-fit:cover;transform:scaleX(-1)}
 #motionZone{position:absolute;left:18%;right:18%;top:12%;bottom:12%;border:2px dashed #f0e7c2;border-radius:10px;pointer-events:none}
 #cameraMeter{position:absolute;left:6px;right:6px;bottom:6px;height:7px;border-radius:999px;background:#111a;overflow:hidden}
-#cameraMeterFill{height:100%;width:0;background:#f0e7c2}\n#message{position:absolute;left:50%;top:12px;transform:translateX(-50%);max-width:86%;padding:7px 12px;border-radius:10px;background:#11150dcc;border:1px solid #4e543d;font-size:13px;text-align:center;z-index:8}
+#cameraMeterFill{height:100%;width:0;background:#f0e7c2}
+#message{position:absolute;left:50%;top:12px;transform:translateX(-50%);max-width:86%;padding:7px 12px;border-radius:10px;background:#11150dcc;border:1px solid #4e543d;font-size:13px;text-align:center;z-index:8}
 #startPanel{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;padding:24px;background:#151812e8;z-index:20}
 .panel{width:min(92vw,380px);background:#272c20;border:1px solid #61674b;border-radius:18px;padding:20px}
 .panel h2{margin:0 0 10px;font-size:22px}
@@ -76,12 +79,15 @@ footer{padding:9px 12px max(10px,env(safe-area-inset-bottom));background:#202419
   <div id="world">
     <div id="road"></div>
     <div id="scenery"></div>
-    <button id="cameraBtn" type="button">家事カメラ ON</button>\n    <div id="cameraBox">
+    <button id="soundBtn" type="button">SE ON</button>
+    <button id="cameraBtn" type="button">家事カメラ ON</button>
+    <div id="cameraBox">
       <video id="cameraView" autoplay playsinline muted></video>
       <div id="motionZone"></div>
       <div id="cameraMeter"><div id="cameraMeterFill"></div></div>
     </div>
-    <canvas id="motionCanvas" width="48" height="64" hidden></canvas>\n    <div id="message">iPhoneを持って体を動かしてください</div>
+    <canvas id="motionCanvas" width="48" height="64" hidden></canvas>
+    <div id="message">iPhoneを持って体を動かしてください</div>
     <div id="pulse"></div>
     <div id="player"></div>
   </div>
@@ -128,12 +134,17 @@ const road=$('road');
 const scenery=$('scenery');
 const pulse=$('pulse');
 const message=$('message');
-const sensitivity=$('sensitivity');\nconst cameraBtn=$('cameraBtn');\nconst cameraView=$('cameraView');
+const sensitivity=$('sensitivity');
+const soundBtn=$('soundBtn');
+const cameraBtn=$('cameraBtn');
+const cameraView=$('cameraView');
 const cameraBox=$('cameraBox');
 const motionCanvas=$('motionCanvas');
 const cameraMeterFill=$('cameraMeterFill');
 
 let running=false;
+let soundOn=true;
+let audioCtx=null;
 let rawMotions=0;
 let gameSteps=0;
 let lastImpulse=0;
@@ -145,7 +156,8 @@ let wakeLock=null;
 let activeMs=0;
 let activeStartedAt=null;
 let timerId=null;
-let gameStarted=false;\nlet cameraStream=null;
+let gameStarted=false;
+let cameraStream=null;
 let cameraMotionTimer=null;
 let previousFrame=null;
 let lastCameraImpulse=0;
@@ -153,6 +165,46 @@ const CAMERA_THRESHOLD=18;
 const CAMERA_INTERVAL=180;
 const CAMERA_REFRACTORY=420;
 const MOTIONS_PER_STEP=6;
+
+function audio(){
+  if(!audioCtx) audioCtx=new (window.AudioContext||window.webkitAudioContext)();
+  if(audioCtx.state==='suspended') audioCtx.resume();
+  return audioCtx;
+}
+function tone(freq,duration=0.08,type='sine',gain=.06,slide=0){
+  if(!soundOn)return;
+  const a=audio(),t=a.currentTime,o=a.createOscillator(),g=a.createGain();
+  o.type=type;o.frequency.setValueAtTime(freq,t);
+  if(slide)o.frequency.exponentialRampToValueAtTime(Math.max(30,freq+slide),t+duration);
+  g.gain.setValueAtTime(gain,t);g.gain.exponentialRampToValueAtTime(.0001,t+duration);
+  o.connect(g).connect(a.destination);o.start(t);o.stop(t+duration);
+}
+function noise(duration=.09,gain=.045,cutoff=1800){
+  if(!soundOn)return;
+  const a=audio(),len=Math.ceil(a.sampleRate*duration),buf=a.createBuffer(1,len,a.sampleRate),d=buf.getChannelData(0);
+  for(let i=0;i<len;i++)d[i]=(Math.random()*2-1)*(1-i/len);
+  const s=a.createBufferSource(),f=a.createBiquadFilter(),g=a.createGain();
+  s.buffer=buf;f.type='lowpass';f.frequency.value=cutoff;g.gain.value=gain;
+  s.connect(f).connect(g).connect(a.destination);s.start();
+}
+const se={
+  foot(){tone(115,.045,'sine',.025,-35)},
+  encounter(){tone(150,.18,'sawtooth',.07,-70);setTimeout(()=>tone(85,.24,'square',.045,-30),90)},
+  slash(){noise(.11,.055,3200);tone(760,.07,'sawtooth',.025,-560)},
+  hit(){noise(.08,.065,650);tone(95,.09,'square',.035,-35)},
+  evade(){noise(.075,.03,5000);tone(1100,.055,'sine',.018,-500)},
+  chest(){tone(330,.06,'square',.025,100);setTimeout(()=>tone(520,.09,'sine',.035,180),70)},
+  discover(){tone(660,.07,'sine',.035,160);setTimeout(()=>tone(990,.12,'sine',.035,180),80)},
+  victory(){[523,659,784,1047].forEach((n,i)=>setTimeout(()=>tone(n,.14,'triangle',.045,20),i*90))}
+};
+function playBattleDemo(){
+  se.encounter();
+  setTimeout(()=>se.slash(),420);
+  setTimeout(()=>se.hit(),610);
+  setTimeout(()=>se.evade(),850);
+  setTimeout(()=>se.slash(),1080);
+  setTimeout(()=>se.victory(),1320);
+}
 
 const objects=[];
 function buildScenery(){
@@ -192,6 +244,7 @@ function updateUI(){
 }
 
 function animateStep(){
+  se.foot();
   roadOffset=(roadOffset+34)%52;
   sceneryOffset=(sceneryOffset+34)%1296;
   road.style.transform='translateY('+roadOffset+'px)';
@@ -200,7 +253,16 @@ function animateStep(){
   void pulse.offsetWidth;
   pulse.classList.add('go');
 
-  if(gameSteps%10===0){
+  if(gameSteps%24===0){
+    message.textContent='敵が現れた！';
+    playBattleDemo();
+    setTimeout(()=>{ if(running) message.textContent='敵を倒した！'; },1750);
+    setTimeout(()=>{ if(running) message.textContent='そのまま動くと先へ進みます'; },2700);
+  }else if(gameSteps%15===0){
+    message.textContent='何かを発見した！';
+    se.discover();
+    setTimeout(()=>{ if(running) message.textContent='そのまま動くと先へ進みます'; },1200);
+  }else if(gameSteps%10===0){
     message.textContent=gameSteps+'歩進みました';
     setTimeout(()=>{ if(running) message.textContent='そのまま動くと先へ進みます'; },1200);
   }
@@ -372,7 +434,13 @@ function stop(){
   startPanel.style.display='flex';
 }
 
-cameraBtn.addEventListener('click',toggleCamera);\nstartBtn.addEventListener('click',start);
+soundBtn.addEventListener('click',()=>{
+  soundOn=!soundOn;
+  soundBtn.textContent=soundOn?'SE ON':'SE OFF';
+  if(soundOn){ audio(); se.chest(); }
+});
+cameraBtn.addEventListener('click',toggleCamera);
+startBtn.addEventListener('click',start);
 stopBtn.addEventListener('click',stop);
 
 document.addEventListener('visibilitychange',()=>{
