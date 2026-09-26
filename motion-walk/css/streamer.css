@@ -129,8 +129,8 @@ body{
 
 .phone{
   position:absolute;
-  right:40%;
-  bottom:3%;
+  right:50%;
+  bottom:-3%;
   width:12px;
   height:29px;
   background:#24242a;
