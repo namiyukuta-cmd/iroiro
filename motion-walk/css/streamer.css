@@ -129,7 +129,7 @@ body{
 
 .phone{
   position:absolute;
-  right:12%;
+  right:40%;
   bottom:3%;
   width:12px;
   height:29px;
@@ -160,7 +160,7 @@ body{
 .girl{
   position:absolute;
   left:50%;
-  bottom:16px;
+  bottom:26px;
   width:132px;
   height:235px;
   transform:translateX(-50%);
