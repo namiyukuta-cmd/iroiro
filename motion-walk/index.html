@@ -16,7 +16,7 @@ header{padding:max(10px,env(safe-area-inset-top)) 14px 8px;border-bottom:1px sol
 .topline{display:flex;align-items:center;justify-content:space-between;gap:10px}
 h1{font-size:18px;margin:0;letter-spacing:.04em}
 .status{font-size:12px;padding:5px 9px;border:1px solid #666b4c;border-radius:999px;background:#2b3021}
-.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:8px}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:8px}
 .stat{background:#171a13;border:1px solid #3d4231;border-radius:10px;padding:6px 8px;text-align:center}
 .stat b{display:block;font-size:20px;line-height:1.1}
 .stat span{font-size:10px;color:#bfc3aa}
@@ -63,6 +63,7 @@ footer{padding:9px 12px max(10px,env(safe-area-inset-bottom));background:#202419
     <div class="stat"><b id="motionCount">0</b><span>うごき</span></div>
     <div class="stat"><b id="stepCount">0</b><span>ゲーム歩</span></div>
     <div class="stat"><b id="distanceCount">0</b><span>m 相当</span></div>
+    <div class="stat"><b id="timeCount">00:00</b><span>リアル運動時間</span></div>
   </div>
 </header>
 
@@ -110,6 +111,7 @@ const status=$('sensorStatus');
 const motionEl=$('motionCount');
 const stepEl=$('stepCount');
 const distanceEl=$('distanceCount');
+const timeEl=$('timeCount');
 const goalText=$('goalText');
 const barFill=$('barFill');
 const road=$('road');
@@ -127,6 +129,9 @@ let smoothedDelta=0;
 let roadOffset=0;
 let sceneryOffset=0;
 let wakeLock=null;
+let activeMs=0;
+let activeStartedAt=null;
+let timerId=null;
 const MOTIONS_PER_STEP=6;
 
 const objects=[];
@@ -144,6 +149,17 @@ function buildScenery(){
   }
 }
 buildScenery();
+
+function elapsedMs(){
+  return activeMs+(running && activeStartedAt!==null ? performance.now()-activeStartedAt : 0);
+}
+function updateTime(){
+  const total=Math.floor(elapsedMs()/1000);
+  const h=Math.floor(total/3600);
+  const m=Math.floor((total%3600)/60);
+  const s=total%60;
+  timeEl.textContent=h>0 ? String(h).padStart(2,'0')+':'+String(m).padStart(2,'0')+':'+String(s).padStart(2,'0') : String(m).padStart(2,'0')+':'+String(s).padStart(2,'0');
+}
 
 function updateUI(){
   motionEl.textContent=rawMotions;
@@ -231,6 +247,10 @@ async function start(){
     }
 
     running=true;
+    activeStartedAt=performance.now();
+    clearInterval(timerId);
+    timerId=setInterval(updateTime,1000);
+    updateTime();
     lastMag=null;
     smoothedDelta=0;
     window.addEventListener('devicemotion',motionHandler,{passive:true});
@@ -245,6 +265,11 @@ async function start(){
 }
 
 function stop(){
+  if(running && activeStartedAt!==null) activeMs+=performance.now()-activeStartedAt;
+  activeStartedAt=null;
+  clearInterval(timerId);
+  timerId=null;
+  updateTime();
   running=false;
   window.removeEventListener('devicemotion',motionHandler);
   try{ wakeLock?.release(); }catch(e){}
@@ -262,6 +287,7 @@ document.addEventListener('visibilitychange',()=>{
 });
 
 updateUI();
+updateTime();
 })();
 </script>
 </body>
