@@ -17,7 +17,7 @@ header{padding:max(10px,env(safe-area-inset-top)) 14px 8px;border-bottom:1px sol
 .topline{display:flex;align-items:center;justify-content:space-between;gap:10px}
 h1{font-size:18px;margin:0;letter-spacing:.04em}
 .status{font-size:12px;padding:5px 9px;border:1px solid #666b4c;border-radius:999px;background:#2b3021}
-.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:8px}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-top:8px}
 .stat{background:#171a13;border:1px solid #3d4231;border-radius:10px;padding:6px 8px;text-align:center}
 .stat b{display:block;font-size:20px;line-height:1.1}
 .stat span{font-size:10px;color:#bfc3aa}
@@ -58,6 +58,15 @@ main{position:relative;overflow:hidden;min-height:0}
 #cameraMeter{position:absolute;left:6px;right:6px;bottom:6px;height:7px;border-radius:999px;background:#111a;overflow:hidden}
 #cameraMeterFill{height:100%;width:0;background:#f0e7c2}
 #message{position:absolute;left:50%;top:12px;transform:translateX(-50%);max-width:86%;padding:7px 12px;border-radius:10px;background:#11150dcc;border:1px solid #4e543d;font-size:13px;text-align:center;z-index:8}
+#jobHud{position:absolute;left:12px;right:12px;bottom:12px;z-index:9;background:#090b16dd;border:1px solid #35dff0;border-radius:10px;padding:8px 10px;font-size:11px;box-shadow:0 0 12px #20d9ff33}
+#jobLine{display:flex;justify-content:space-between;gap:8px;margin-bottom:5px}
+#jobBar{height:7px;border-radius:999px;background:#24283a;overflow:hidden}
+#jobFill{height:100%;width:0;background:linear-gradient(90deg,#25e6ff,#ff35cb)}
+#jobPopup{position:absolute;inset:0;z-index:19;display:none;align-items:center;justify-content:center;padding:24px;background:#070914d9}
+#jobCard{width:min(88vw,350px);border:1px solid #35dff0;background:#101426;padding:18px;border-radius:14px;box-shadow:0 0 24px #25e6ff44}
+#jobCard small{color:#35dff0;letter-spacing:.12em}
+#jobCard h2{font-size:20px;margin:8px 0}
+#jobCard p{margin:7px 0;line-height:1.5}
 #startPanel{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;padding:24px;background:#151812e8;z-index:20}
 .panel{width:min(92vw,380px);background:#272c20;border:1px solid #61674b;border-radius:18px;padding:20px}
 .panel h2{margin:0 0 10px;font-size:22px}
@@ -79,9 +88,9 @@ footer{padding:9px 12px max(10px,env(safe-area-inset-bottom));background:#202419
 <header>
   <div class="topline"><h1>うごく探索</h1><div id="sensorStatus" class="status">待機中</div></div>
   <div class="stats">
-    <div class="stat"><b id="motionCount">0</b><span>うごき</span></div>
-    <div class="stat"><b id="stepCount">0</b><span>ゲーム歩</span></div>
-    <div class="stat"><b id="distanceCount">0</b><span>m 相当</span></div>
+    <div class="stat"><b id="distanceCount">0.00</b><span>総運動 km</span></div>
+    <div class="stat"><b id="moneyCount">0</b><span>所持金 円</span></div>
+    <div class="stat"><b id="deliveryCount">0</b><span>配達完了</span></div>
     <div class="stat"><b id="timeCount">00:00</b><span>リアル運動時間</span></div>
   </div>
 </header>
@@ -101,6 +110,11 @@ footer{padding:9px 12px max(10px,env(safe-area-inset-bottom));background:#202419
     </div>
     <canvas id="motionCanvas" width="48" height="64" hidden></canvas>
     <div id="message">iPhoneを持って体を動かしてください</div>
+    <div id="jobHud">
+      <div id="jobLine"><span id="jobName">依頼待機中</span><b id="jobDistance">0.00 / 0.00 km</b></div>
+      <div id="jobBar"><div id="jobFill"></div></div>
+    </div>
+    <div id="jobPopup"><div id="jobCard"><small>DELIVERY NETWORK</small><h2 id="jobPopupTitle">依頼が入った。</h2><p id="jobPopupText"></p></div></div>
     <div id="pulse"></div>
     <div id="player"></div>
   </div>
@@ -137,8 +151,15 @@ const startPanel=$('startPanel');
 const startBtn=$('startBtn');
 const stopBtn=$('stopBtn');
 const status=$('sensorStatus');
-const motionEl=$('motionCount');
-const stepEl=$('stepCount');
+const moneyEl=$('moneyCount');
+const deliveryEl=$('deliveryCount');
+const jobHud=$('jobHud');
+const jobName=$('jobName');
+const jobDistanceEl=$('jobDistance');
+const jobFill=$('jobFill');
+const jobPopup=$('jobPopup');
+const jobPopupTitle=$('jobPopupTitle');
+const jobPopupText=$('jobPopupText');
 const distanceEl=$('distanceCount');
 const timeEl=$('timeCount');
 const goalText=$('goalText');
@@ -160,6 +181,24 @@ let soundOn=false;
 let audioCtx=null;
 let rawMotions=0;
 let gameSteps=0;
+let totalMeters=0;
+let money=0;
+let deliveries=0;
+let currentJob=null;
+let jobMeters=0;
+let jobActive=false;
+let jobSequence=0;
+const METERS_PER_GAME_STEP=7.5;
+const jobs=[
+  {item:'医療用ナノパック',from:'第9区診療所',to:'ネオン市場',km:.18,pay:48,client:'診療所員'},
+  {item:'暗号化データケース',from:'NOVA端末局',to:'第3高架下',km:.24,pay:52,client:'フードの男'},
+  {item:'交換用義肢パーツ',from:'機械街',to:'南ブロック工房',km:.31,pay:55,client:'整備士'},
+  {item:'温かい食事パック',from:'24H屋台',to:'居住塔C-17',km:.14,pay:45,client:'住民'},
+  {item:'冷却セル',from:'港湾倉庫',to:'NEXUS研究棟',km:.36,pay:58,client:'研究員'},
+  {item:'旧型ドローン部品',from:'スクラップ市場',to:'第6修理区',km:.21,pay:50,client:'修理屋'},
+  {item:'密封された小箱',from:'地下商店街',to:'雨路地42番',km:.27,pay:53,client:'依頼人'},
+  {item:'合成繊維ロール',from:'工業区',to:'東区仕立屋',km:.33,pay:56,client:'店主'}
+];
 let lastImpulse=0;
 let lastMag=null;
 let smoothedDelta=0;
@@ -288,13 +327,73 @@ function updateTime(){
 }
 
 function updateUI(){
-  motionEl.textContent=rawMotions;
-  stepEl.textContent=gameSteps;
-  distanceEl.textContent=Math.round(gameSteps*0.75);
+  distanceEl.textContent=(totalMeters/1000).toFixed(2);
+  moneyEl.textContent=money;
+  deliveryEl.textContent=deliveries;
   const rem=MOTIONS_PER_STEP-(rawMotions%MOTIONS_PER_STEP || (rawMotions===0?0:MOTIONS_PER_STEP));
   const inStep=rawMotions%MOTIONS_PER_STEP;
   barFill.style.width=((inStep/MOTIONS_PER_STEP)*100)+'%';
   goalText.textContent=inStep===0 ? '次まで '+MOTIONS_PER_STEP : '次まで '+(MOTIONS_PER_STEP-inStep);
+  if(currentJob){
+    jobName.textContent=currentJob.item+' → '+currentJob.to;
+    jobDistanceEl.textContent=(jobMeters/1000).toFixed(2)+' / '+currentJob.km.toFixed(2)+' km';
+    jobFill.style.width=Math.min(100,jobMeters/(currentJob.km*1000)*100)+'%';
+  }else{
+    jobName.textContent='依頼待機中';
+    jobDistanceEl.textContent='0.00 / 0.00 km';
+    jobFill.style.width='0%';
+  }
+}
+
+function wait(ms){return new Promise(r=>setTimeout(r,ms));}
+async function showNextJob(){
+  if(!running)return;
+  jobActive=false;
+  currentJob=jobs[jobSequence++%jobs.length];
+  jobMeters=0;
+  updateUI();
+  jobPopup.style.display='flex';
+  jobPopupTitle.textContent='依頼が入った。';
+  jobPopupText.textContent='';
+  await wait(900);
+  if(!running)return;
+  jobPopupText.textContent=currentJob.from+'から「'+currentJob.item+'」を受け取った。';
+  await wait(1300);
+  if(!running)return;
+  jobPopupText.textContent=currentJob.to+'まで配達。　報酬 '+currentJob.pay+'円';
+  await wait(1500);
+  if(!running)return;
+  jobPopupTitle.textContent='配達開始';
+  await wait(650);
+  if(!running)return;
+  jobPopup.style.display='none';
+  jobMeters=0;
+  jobActive=true;
+  updateUI();
+}
+async function finishJob(){
+  if(!jobActive || !currentJob)return;
+  jobActive=false;
+  jobMeters=currentJob.km*1000;
+  updateUI();
+  jobPopup.style.display='flex';
+  jobPopupTitle.textContent='到着';
+  jobPopupText.textContent=currentJob.client+'「ありがとう」';
+  se.discover();
+  await wait(1100);
+  if(!running)return;
+  money+=currentJob.pay;
+  deliveries++;
+  jobPopupTitle.textContent='配達完了';
+  jobPopupText.textContent='無事に配達が終わった。　+'+currentJob.pay+'円';
+  updateUI();
+  await wait(1400);
+  if(!running)return;
+  currentJob=null;
+  jobPopup.style.display='none';
+  updateUI();
+  await wait(700);
+  if(running)showNextJob();
 }
 
 function animateStep(){
@@ -326,6 +425,11 @@ function registerMotion(){
   rawMotions++;
   if(rawMotions%MOTIONS_PER_STEP===0){
     gameSteps++;
+    totalMeters+=METERS_PER_GAME_STEP;
+    if(jobActive && currentJob){
+      jobMeters+=METERS_PER_GAME_STEP;
+      if(jobMeters>=currentJob.km*1000) finishJob();
+    }
     animateStep();
     try{ if(navigator.vibrate) navigator.vibrate(25); }catch(e){}
   }
@@ -438,6 +542,13 @@ async function start(){
       activeMs=0;
       rawMotions=0;
       gameSteps=0;
+      totalMeters=0;
+      money=0;
+      deliveries=0;
+      currentJob=null;
+      jobMeters=0;
+      jobActive=false;
+      jobSequence=0;
       roadOffset=0;
       sceneryOffset=0;
       road.style.transform='translateY(0)';
@@ -470,8 +581,9 @@ async function start(){
     window.addEventListener('devicemotion',motionHandler,{passive:true});
     startPanel.style.display='none';
     status.textContent='計測中';
-    message.textContent='iPhoneを持って体を動かしてください';
+    message.textContent='動いた距離は総運動距離に加算されます';
     await requestWakeLock();
+    if(!currentJob) setTimeout(()=>{if(running)showNextJob();},500);
   }catch(err){
     status.textContent='開始失敗';
     message.textContent='センサーを開始できませんでした';
@@ -485,6 +597,8 @@ function stop(){
   timerId=null;
   updateTime();
   running=false;
+  jobActive=false;
+  jobPopup.style.display='none';
   window.removeEventListener('devicemotion',motionHandler);
   try{ wakeLock?.release(); }catch(e){}
   wakeLock=null;
