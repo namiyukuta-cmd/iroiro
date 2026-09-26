@@ -435,6 +435,7 @@ async function startCamera() {
       });
 
     video.srcObject = cameraStream;
+    video.classList.add("cameraOn");
 
     await video.play();
 
