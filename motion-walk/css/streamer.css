@@ -20,7 +20,6 @@ body{
   flex-direction:column;
 }
 
-
 /* =========================
    最上部
 ========================= */
@@ -52,7 +51,6 @@ body{
   color:#fff;
 }
 
-
 /* =========================
    配信画面＋右側スパチャ金額
 ========================= */
@@ -65,7 +63,6 @@ body{
   background:#0d0d12;
   border-bottom:1px solid #333;
 }
-
 
 /* 配信画面 */
 
@@ -87,7 +84,6 @@ body{
   inset:0;
 }
 
-
 /* 窓：さらに小さく */
 
 .window{
@@ -101,7 +97,6 @@ body{
   box-shadow:0 0 0 2px #9a8e7c;
 }
 
-
 /* 棚 */
 
 .shelf{
@@ -114,7 +109,6 @@ body{
   box-shadow:0 30px #765e49;
 }
 
-
 /* 植物 */
 
 .plant{
@@ -123,7 +117,6 @@ body{
   bottom:24%;
   font-size:30px;
 }
-
 
 /* スマホ */
 
@@ -151,7 +144,6 @@ body{
   border:1px solid #777;
 }
 
-
 /* =========================
    配信者
    大きくして、下へ
@@ -174,7 +166,6 @@ body{
   object-position:center bottom;
 }
 
-
 /* LIVE */
 
 .live{
@@ -188,7 +179,6 @@ body{
   font-size:11px;
   font-weight:900;
 }
-
 
 /* =========================
    いいね
@@ -212,7 +202,6 @@ body{
   font-weight:1000;
 }
 
-
 /* 視聴・登録などのポップ */
 
 .pop{
@@ -231,7 +220,6 @@ body{
 .pop.go{
   animation:pop .7s;
 }
-
 
 /* =========================
    5つのスパチャ金額
@@ -273,7 +261,6 @@ body{
   gap:3px;
 }
 
-
 /* 金額マス 32×32 */
 
 .tipicon{
@@ -292,7 +279,6 @@ body{
 
   font-weight:1000;
 }
-
 
 /* 金額 */
 
@@ -313,7 +299,6 @@ body{
   letter-spacing:-1px;
 }
 
-
 /* 円 */
 
 .tipYen{
@@ -326,7 +311,6 @@ body{
 
   font-weight:1000;
 }
-
 
 /* 金額色 */
 
@@ -359,7 +343,6 @@ body{
   animation:tipHit .65s ease;
 }
 
-
 /* =========================
    配信画面は右金額列の分だけ
    少し右側を空ける
@@ -368,7 +351,6 @@ body{
 .stageRow{
   padding-right:42px;
 }
-
 
 /* =========================
    SUPER CHAT勢＋投げ銭総額
@@ -388,7 +370,6 @@ body{
 
   border-bottom:1px solid #333;
 }
-
 
 /* SUPER CHAT勢 */
 
@@ -419,7 +400,6 @@ body{
 
   font-weight:800;
 }
-
 
 /* スパチャ勢アイコン */
 
@@ -453,7 +433,6 @@ body{
   animation:patronIn .35s ease-out;
 }
 
-
 /* 投げ銭総額 */
 
 .tiptotal{
@@ -484,7 +463,6 @@ body{
   font-size:15px;
   line-height:1;
 }
-
 
 /* =========================
    コメント
@@ -533,7 +511,6 @@ body{
   user-select:text;
 }
 
-
 /* 通常コメント */
 
 .comment{
@@ -556,7 +533,6 @@ body{
 
   font-weight:900;
 }
-
 
 /* スパチャコメント */
 
@@ -583,7 +559,6 @@ body{
   font-size:13px;
 }
 
-
 /* =========================
    6動作進行バー
 ========================= */
@@ -605,7 +580,6 @@ body{
 
   transition:width .15s;
 }
-
 
 /* =========================
    最下部
@@ -669,7 +643,6 @@ body{
   border-color:#d53f63;
 }
 
-
 /* =========================
    アニメーション
 ========================= */
@@ -695,7 +668,6 @@ body{
       translate(-50%,-25px);
   }
 }
-
 
 @keyframes tipHit{
   0%,
@@ -729,7 +701,6 @@ body{
   }
 }
 
-
 @keyframes patronIn{
   0%{
     transform:
@@ -752,4 +723,15 @@ body{
 
     opacity:1;
   }
+}
+
+/* 家事用カメラ：映像解析専用 */
+#cameraVideo{
+  position:fixed;
+  width:1px;
+  height:1px;
+  left:-10px;
+  top:-10px;
+  opacity:0;
+  pointer-events:none;
 }
