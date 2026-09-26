@@ -72,7 +72,11 @@ main{position:relative;overflow:hidden;min-height:0}
 #jobBar{height:7px;border-radius:999px;background:#24283a;overflow:hidden}
 #jobFill{height:100%;width:0;background:linear-gradient(90deg,#25e6ff,#ff35cb)}
 #jobPopup{position:absolute;inset:0;z-index:19;display:none;align-items:center;justify-content:center;padding:24px;background:#070914d9}
-#jobCard{width:min(88vw,350px);border:1px solid #35dff0;background:#101426;padding:18px;border-radius:14px;box-shadow:0 0 24px #25e6ff44}
+#jobCard{width:min(88vw,350px);border:1px solid #35dff0;background:#101426;padding:14px;border-radius:14px;box-shadow:0 0 24px #25e6ff44}
+#clientRow{display:flex;gap:12px;align-items:center}
+#clientFace{width:86px;height:86px;flex:0 0 86px;overflow:hidden;border:1px solid #35dff0;border-radius:10px;background:#080b14;position:relative}
+#clientFace img{position:absolute;width:100%;height:200%;left:0;top:0;object-fit:contain;object-position:50% 0}
+#clientWords{min-width:0;flex:1}
 #jobCard small{color:#35dff0;letter-spacing:.12em}
 #jobCard h2{font-size:20px;margin:8px 0}
 #jobCard p{margin:7px 0;line-height:1.5}
@@ -123,7 +127,7 @@ footer{padding:9px 12px max(10px,env(safe-area-inset-bottom));background:#202419
       <div id="jobLine"><span id="jobName">依頼待機中</span><b id="jobDistance">0.00 / 0.00 km</b></div>
       <div id="jobBar"><div id="jobFill"></div></div>
     </div>
-    <div id="jobPopup"><div id="jobCard"><small>DELIVERY NETWORK</small><h2 id="jobPopupTitle">依頼が入った。</h2><p id="jobPopupText"></p></div></div>
+    <div id="jobPopup"><div id="jobCard"><small>DELIVERY NETWORK</small><div id="clientRow"><div id="clientFace"><img id="clientFaceImg" alt=""></div><div id="clientWords"><h2 id="jobPopupTitle">依頼が入った。</h2><p id="jobPopupText"></p></div></div></div></div>
     <div id="pulse"></div>
     <div id="player"><i class="leg l"></i><i class="leg r"></i></div>
   </div>
@@ -170,6 +174,7 @@ const jobFill=$('jobFill');
 const jobPopup=$('jobPopup');
 const jobPopupTitle=$('jobPopupTitle');
 const jobPopupText=$('jobPopupText');
+const clientFaceImg=$('clientFaceImg');
 const distanceEl=$('distanceCount');
 const timeEl=$('timeCount');
 const goalText=$('goalText');
@@ -200,6 +205,22 @@ let jobMeters=0;
 let jobActive=false;
 let jobSequence=0;
 const METERS_PER_GAME_STEP=7.5;
+const clientImages={
+  clinic_staff:'mira_01.png',
+  hooded_man:'veil_01.png',
+  mechanic:'roake_01.png',
+  resident:'nia.png',
+  researcher:'sera_01.png',
+  repairer:'buzz_01.png',
+  requester:'cyan_01.png',
+  tailor:'eda_02.png'
+};
+function showClientFace(clientId){
+  const file=clientImages[clientId];
+  if(!file){clientFaceImg.removeAttribute('src');return;}
+  clientFaceImg.src='./assets/'+file;
+  clientFaceImg.alt=(window.DeliveryNPC.get(clientId)?.name||'依頼人');
+}
 const jobs=[
   {item:'医療用ナノパック',from:'第9区診療所',to:'ネオン市場',km:.18,pay:48,clientId:'clinic_staff'},
   {item:'暗号化データケース',from:'NOVA端末局',to:'第3高架下',km:.24,pay:52,clientId:'hooded_man'},
@@ -364,6 +385,7 @@ async function showNextJob(){
   const special=window.DeliveryNPC.getSpecial(baseJob.clientId);
   currentJob=special ? {...special,clientId:baseJob.clientId,special:true} : baseJob;
   jobMeters=0;
+  showClientFace(currentJob.clientId);
   updateUI();
   jobPopup.style.display='flex';
   jobPopupTitle.textContent=currentJob.special ? '特別依頼が入った。' : '依頼が入った。';
