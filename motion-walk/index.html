@@ -92,7 +92,7 @@ footer{padding:9px 12px max(10px,env(safe-area-inset-bottom));background:#202419
     <div id="goalText">次まで 6</div>
   </div>
   <div class="controls">
-    <input id="sensitivity" type="range" min="14" max="36" value="24" aria-label="感度">
+    <input id="sensitivity" type="range" min="10" max="32" value="20" aria-label="感度">
     <button id="stopBtn" type="button">停止</button>
   </div>
 </footer>
@@ -197,11 +197,11 @@ function motionHandler(e){
     return;
   }
 
-  smoothedDelta=smoothedDelta*0.80+mag*0.20;
+  smoothedDelta=smoothedDelta*0.76+mag*0.24;
   const threshold=Number(sensitivity.value)/10;
   const now=performance.now();
 
-  if(smoothedDelta>threshold && now-lastImpulse>420){
+  if(smoothedDelta>threshold && now-lastImpulse>360){
     lastImpulse=now;
     registerMotion();
   }
