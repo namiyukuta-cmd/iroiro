@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+<meta http-equiv="Cache-Control" content="no-store,no-cache,must-revalidate,max-age=0">
+<title>配信者ホーム</title>
+<style>
+*{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#0e0e13;color:#fff;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+body{height:100dvh}.app{height:100%;display:flex;flex-direction:column}
+.head{height:72px;padding:8px 12px;background:#17171e;border-bottom:1px solid #333;display:flex;align-items:center;justify-content:space-between}
+.channel b{font-size:20px}.channel span{display:block;color:#999;font-size:12px;margin-top:3px}.livebtn{border:0;border-radius:10px;background:#d84c59;color:#fff;font-weight:800;font-size:16px;padding:12px 16px}
+.stats{height:82px;display:grid;grid-template-columns:repeat(3,1fr);background:#13131a;border-bottom:1px solid #292933}
+.stat{display:flex;flex-direction:column;align-items:center;justify-content:center;border-right:1px solid #292933;color:#aaa;font-size:11px}.stat:last-child{border:0}.stat b{color:#fff;font-size:23px;margin-top:2px}
+.main{flex:1;min-height:0;padding:12px;display:flex;flex-direction:column;gap:10px}
+.card{background:#191921;border:1px solid #30303b;border-radius:12px;padding:12px}.title{font-size:12px;color:#999;margin-bottom:8px}.big{font-size:25px;font-weight:800}.sub{font-size:12px;color:#aaa;margin-top:3px}
+.patrons{display:flex;gap:7px;min-height:52px;overflow:hidden}.p{width:52px;height:52px;border-radius:10px;background:#292934;display:flex;align-items:center;justify-content:center;text-align:center;font-size:10px;font-weight:700;flex:0 0 52px}
+.history{flex:1;min-height:0}.empty{height:100%;min-height:90px;border:1px dashed #383844;border-radius:9px;display:flex;align-items:center;justify-content:center;color:#777;font-size:13px}
+.foot{padding:8px 12px calc(8px + env(safe-area-inset-bottom));font-size:11px;color:#666;text-align:center}
+</style>
+</head>
+<body><div class="app">
+<header class="head"><div class="channel"><b>エアロビ配信</b><span>配信していません</span></div><button class="livebtn" onclick="location.href='./streamer.html?v=4'">配信を始める</button></header>
+<section class="stats"><div class="stat">登録者数<b id="subs">3</b></div><div class="stat">総再生数<b id="plays">12</b></div><div class="stat">累計投げ銭<b>¥<span id="tips">0</span></b></div></section>
+<main class="main">
+<section class="card"><div class="title">チャンネル</div><div class="big">底辺エアロビ配信者</div><div class="sub">身体を動かして配信を育てる</div></section>
+<section class="card"><div class="title">スパチャ勢</div><div id="patrons" class="patrons"><div class="sub">まだいません</div></div></section>
+<section class="card history"><div class="title">配信履歴</div><div class="empty">まだ配信履歴はありません</div></section>
+</main>
+<div class="foot">配信外ホーム</div>
+</div>
+<script src="./js/stream-patrons.js?v=1"></script>
+<script>
+(()=>{const ps=(window.STREAM_PATRONS&&STREAM_PATRONS.patrons)||[];const known=ps.filter(p=>(p.totalTips||0)>0).slice(0,6);const box=document.getElementById('patrons');if(known.length){box.innerHTML='';known.forEach(p=>{const d=document.createElement('div');d.className='p';d.textContent=p.name;box.appendChild(d)})}document.getElementById('tips').textContent=ps.reduce((n,p)=>n+(p.totalTips||0),0)})();
+</script></body></html>
