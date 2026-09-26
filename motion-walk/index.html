@@ -142,6 +142,7 @@ footer{padding:9px 12px max(10px,env(safe-area-inset-bottom));background:#202419
 </footer>
 </div>
 
+<script src="./js/clients.js"></script>
 <script>
 (()=>{
 'use strict';
@@ -190,14 +191,14 @@ let jobActive=false;
 let jobSequence=0;
 const METERS_PER_GAME_STEP=7.5;
 const jobs=[
-  {item:'医療用ナノパック',from:'第9区診療所',to:'ネオン市場',km:.18,pay:48,client:'診療所員'},
-  {item:'暗号化データケース',from:'NOVA端末局',to:'第3高架下',km:.24,pay:52,client:'フードの男'},
-  {item:'交換用義肢パーツ',from:'機械街',to:'南ブロック工房',km:.31,pay:55,client:'整備士'},
-  {item:'温かい食事パック',from:'24H屋台',to:'居住塔C-17',km:.14,pay:45,client:'住民'},
-  {item:'冷却セル',from:'港湾倉庫',to:'NEXUS研究棟',km:.36,pay:58,client:'研究員'},
-  {item:'旧型ドローン部品',from:'スクラップ市場',to:'第6修理区',km:.21,pay:50,client:'修理屋'},
-  {item:'密封された小箱',from:'地下商店街',to:'雨路地42番',km:.27,pay:53,client:'依頼人'},
-  {item:'合成繊維ロール',from:'工業区',to:'東区仕立屋',km:.33,pay:56,client:'店主'}
+  {item:'医療用ナノパック',from:'第9区診療所',to:'ネオン市場',km:.18,pay:48,clientId:'clinic_staff'},
+  {item:'暗号化データケース',from:'NOVA端末局',to:'第3高架下',km:.24,pay:52,clientId:'hooded_man'},
+  {item:'交換用義肢パーツ',from:'機械街',to:'南ブロック工房',km:.31,pay:55,clientId:'mechanic'},
+  {item:'温かい食事パック',from:'24H屋台',to:'居住塔C-17',km:.14,pay:45,clientId:'resident'},
+  {item:'冷却セル',from:'港湾倉庫',to:'NEXUS研究棟',km:.36,pay:58,clientId:'researcher'},
+  {item:'旧型ドローン部品',from:'スクラップ市場',to:'第6修理区',km:.21,pay:50,clientId:'repairer'},
+  {item:'密封された小箱',from:'地下商店街',to:'雨路地42番',km:.27,pay:53,clientId:'requester'},
+  {item:'合成繊維ロール',from:'工業区',to:'東区仕立屋',km:.33,pay:56,clientId:'tailor'}
 ];
 let lastImpulse=0;
 let lastMag=null;
@@ -378,14 +379,16 @@ async function finishJob(){
   updateUI();
   jobPopup.style.display='flex';
   jobPopupTitle.textContent='到着';
-  jobPopupText.textContent=currentJob.client+'「ありがとう」';
+  const npc=window.DeliveryNPC.get(currentJob.clientId);
+  jobPopupText.textContent=npc.name+'「ありがとう」';
   se.discover();
   await wait(1100);
   if(!running)return;
   money+=currentJob.pay;
   deliveries++;
+  const updatedNpc=window.DeliveryNPC.completeDelivery(currentJob.clientId);
   jobPopupTitle.textContent='配達完了';
-  jobPopupText.textContent='無事に配達が終わった。　+'+currentJob.pay+'円';
+  jobPopupText.textContent='無事に配達が終わった。　+'+currentJob.pay+'円　'+updatedNpc.name+' 好感度 '+updatedNpc.affection;
   updateUI();
   await wait(1400);
   if(!running)return;
@@ -549,6 +552,7 @@ async function start(){
       jobMeters=0;
       jobActive=false;
       jobSequence=0;
+      window.DeliveryNPC.reset();
       roadOffset=0;
       sceneryOffset=0;
       road.style.transform='translateY(0)';
