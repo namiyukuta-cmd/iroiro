@@ -1,0 +1,268 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+<meta http-equiv="Cache-Control" content="no-cache,no-store,must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
+<title>うごく探索</title>
+<style>
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#151812;color:#f4f0df;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;touch-action:manipulation}
+button{font:inherit}
+#app{width:100%;height:100dvh;display:grid;grid-template-rows:auto 1fr auto;overflow:hidden;background:linear-gradient(#1d2117,#12150f)}
+header{padding:max(10px,env(safe-area-inset-top)) 14px 8px;border-bottom:1px solid #454936;background:#202419}
+.topline{display:flex;align-items:center;justify-content:space-between;gap:10px}
+h1{font-size:18px;margin:0;letter-spacing:.04em}
+.status{font-size:12px;padding:5px 9px;border:1px solid #666b4c;border-radius:999px;background:#2b3021}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:8px}
+.stat{background:#171a13;border:1px solid #3d4231;border-radius:10px;padding:6px 8px;text-align:center}
+.stat b{display:block;font-size:20px;line-height:1.1}
+.stat span{font-size:10px;color:#bfc3aa}
+main{position:relative;overflow:hidden;min-height:0}
+#world{position:absolute;inset:0;overflow:hidden;background:linear-gradient(90deg,#29311e 0 21%,#6f6a4e 21% 79%,#29311e 79% 100%)}
+#road{position:absolute;left:21%;right:21%;top:-160px;height:calc(100% + 320px);background:
+linear-gradient(90deg,transparent 0 48%,rgba(230,220,170,.42) 48% 52%,transparent 52% 100%),
+repeating-linear-gradient(0deg,rgba(255,255,255,.045) 0 2px,transparent 2px 52px);
+transform:translateY(0);will-change:transform}
+#scenery{position:absolute;inset:-120px 0;will-change:transform}
+.rock,.bush,.sign{position:absolute;transform:translate(-50%,-50%)}
+.rock{width:24px;height:17px;border-radius:50% 45% 40% 55%;background:#666854;border:2px solid #2b2d24}
+.bush{width:30px;height:22px;border-radius:50%;background:#3e542b;border:2px solid #213018}
+.sign{width:28px;height:32px}
+.sign:before{content:"";position:absolute;left:12px;top:14px;width:4px;height:18px;background:#34291c}
+.sign:after{content:"";position:absolute;left:2px;top:0;width:24px;height:16px;background:#8a7148;border:2px solid #3c3020;border-radius:2px}
+#player{position:absolute;left:50%;top:62%;width:34px;height:34px;transform:translate(-50%,-50%);border-radius:50%;background:#8e62c9;border:3px solid #241d2e;box-shadow:0 4px 10px #0008;z-index:5}
+#player:after{content:"";position:absolute;width:12px;height:8px;left:8px;top:-8px;border-radius:50% 50% 0 0;background:#8e62c9;border:3px solid #241d2e;border-bottom:0}
+#pulse{position:absolute;left:50%;top:62%;width:34px;height:34px;border:2px solid #f6efd0;border-radius:50%;transform:translate(-50%,-50%) scale(1);opacity:0;z-index:4;pointer-events:none}
+#pulse.go{animation:pulse .35s ease-out}
+@keyframes pulse{0%{opacity:.9;transform:translate(-50%,-50%) scale(.8)}100%{opacity:0;transform:translate(-50%,-50%) scale(2.2)}}
+#message{position:absolute;left:50%;top:12px;transform:translateX(-50%);max-width:86%;padding:7px 12px;border-radius:10px;background:#11150dcc;border:1px solid #4e543d;font-size:13px;text-align:center;z-index:8}
+#startPanel{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;padding:24px;background:#151812e8;z-index:20}
+.panel{width:min(92vw,380px);background:#272c20;border:1px solid #61674b;border-radius:18px;padding:20px}
+.panel h2{margin:0 0 10px;font-size:22px}
+.panel p{margin:7px 0;color:#d4d7c2;font-size:14px;line-height:1.55}
+.primary{width:100%;margin-top:15px;padding:14px;border:0;border-radius:13px;background:#f0e7c2;color:#1c1e17;font-weight:800;font-size:18px}
+.smallnote{font-size:11px!important;color:#aeb39e!important}
+footer{padding:9px 12px max(10px,env(safe-area-inset-bottom));background:#202419;border-top:1px solid #454936}
+.goalrow{display:flex;align-items:center;gap:8px}
+.bar{height:12px;flex:1;background:#11140e;border:1px solid #50563f;border-radius:999px;overflow:hidden}
+#barFill{height:100%;width:0;background:#d8cf9a}
+#goalText{min-width:84px;text-align:right;font-size:12px}
+.controls{display:grid;grid-template-columns:1fr auto;gap:8px;margin-top:8px}
+#sensitivity{width:100%;accent-color:#d8cf9a}
+#stopBtn{border:1px solid #5f654b;background:#181b14;color:#e9e5d4;border-radius:9px;padding:7px 12px}
+</style>
+</head>
+<body>
+<div id="app">
+<header>
+  <div class="topline"><h1>うごく探索</h1><div id="sensorStatus" class="status">待機中</div></div>
+  <div class="stats">
+    <div class="stat"><b id="motionCount">0</b><span>うごき</span></div>
+    <div class="stat"><b id="stepCount">0</b><span>ゲーム歩</span></div>
+    <div class="stat"><b id="distanceCount">0</b><span>m 相当</span></div>
+  </div>
+</header>
+
+<main>
+  <div id="world">
+    <div id="road"></div>
+    <div id="scenery"></div>
+    <div id="message">iPhoneを持って体を動かしてください</div>
+    <div id="pulse"></div>
+    <div id="player"></div>
+  </div>
+
+  <div id="startPanel">
+    <div class="panel">
+      <h2>動いたぶんだけ進む</h2>
+      <p>その場の足踏みでも、軽いステップでもOKです。iPhoneが一定の揺れを感じると「うごき」として数えます。</p>
+      <p>6回のうごきでゲーム内を1歩進みます。</p>
+      <button id="startBtn" class="primary">運動開始</button>
+      <p class="smallnote">iPhoneでは最初に「動作と方向」への許可確認が出ることがあります。Safariでこのページを開いたまま使ってください。</p>
+    </div>
+  </div>
+</main>
+
+<footer>
+  <div class="goalrow">
+    <div class="bar"><div id="barFill"></div></div>
+    <div id="goalText">次まで 6</div>
+  </div>
+  <div class="controls">
+    <input id="sensitivity" type="range" min="8" max="28" value="16" aria-label="感度">
+    <button id="stopBtn" type="button">停止</button>
+  </div>
+</footer>
+</div>
+
+<script>
+(()=>{
+'use strict';
+
+const $=id=>document.getElementById(id);
+const startPanel=$('startPanel');
+const startBtn=$('startBtn');
+const stopBtn=$('stopBtn');
+const status=$('sensorStatus');
+const motionEl=$('motionCount');
+const stepEl=$('stepCount');
+const distanceEl=$('distanceCount');
+const goalText=$('goalText');
+const barFill=$('barFill');
+const road=$('road');
+const scenery=$('scenery');
+const pulse=$('pulse');
+const message=$('message');
+const sensitivity=$('sensitivity');
+
+let running=false;
+let rawMotions=0;
+let gameSteps=0;
+let lastImpulse=0;
+let lastMag=null;
+let smoothedDelta=0;
+let roadOffset=0;
+let sceneryOffset=0;
+let wakeLock=null;
+const MOTIONS_PER_STEP=6;
+
+const objects=[];
+function buildScenery(){
+  const types=['rock','bush','bush','rock','sign','bush'];
+  for(let i=0;i<18;i++){
+    const el=document.createElement('div');
+    el.className=types[i%types.length];
+    const left=(i%2===0)?(8+(i*13)%11):(82+(i*7)%10);
+    const top=30+i*72;
+    el.style.left=left+'%';
+    el.style.top=top+'px';
+    scenery.appendChild(el);
+    objects.push(el);
+  }
+}
+buildScenery();
+
+function updateUI(){
+  motionEl.textContent=rawMotions;
+  stepEl.textContent=gameSteps;
+  distanceEl.textContent=Math.round(gameSteps*0.75);
+  const rem=MOTIONS_PER_STEP-(rawMotions%MOTIONS_PER_STEP || (rawMotions===0?0:MOTIONS_PER_STEP));
+  const inStep=rawMotions%MOTIONS_PER_STEP;
+  barFill.style.width=((inStep/MOTIONS_PER_STEP)*100)+'%';
+  goalText.textContent=inStep===0 ? '次まで '+MOTIONS_PER_STEP : '次まで '+(MOTIONS_PER_STEP-inStep);
+}
+
+function animateStep(){
+  roadOffset=(roadOffset+34)%52;
+  sceneryOffset=(sceneryOffset+34)%1296;
+  road.style.transform='translateY('+roadOffset+'px)';
+  scenery.style.transform='translateY('+sceneryOffset+'px)';
+  pulse.classList.remove('go');
+  void pulse.offsetWidth;
+  pulse.classList.add('go');
+
+  if(gameSteps%10===0){
+    message.textContent=gameSteps+'歩進みました';
+    setTimeout(()=>{ if(running) message.textContent='そのまま動くと先へ進みます'; },1200);
+  }
+}
+
+function registerMotion(){
+  rawMotions++;
+  if(rawMotions%MOTIONS_PER_STEP===0){
+    gameSteps++;
+    animateStep();
+    try{ if(navigator.vibrate) navigator.vibrate(25); }catch(e){}
+  }
+  updateUI();
+}
+
+function motionHandler(e){
+  if(!running)return;
+  const a=e.acceleration;
+  const g=e.accelerationIncludingGravity;
+  let mag=0;
+
+  if(a && [a.x,a.y,a.z].every(v=>typeof v==='number')){
+    mag=Math.hypot(a.x,a.y,a.z);
+  }else if(g && [g.x,g.y,g.z].every(v=>typeof v==='number')){
+    const gm=Math.hypot(g.x,g.y,g.z);
+    if(lastMag===null){lastMag=gm;return;}
+    mag=Math.abs(gm-lastMag)*3;
+    lastMag=gm;
+  }else{
+    return;
+  }
+
+  smoothedDelta=smoothedDelta*0.72+mag*0.28;
+  const threshold=Number(sensitivity.value)/10;
+  const now=performance.now();
+
+  if(smoothedDelta>threshold && now-lastImpulse>320){
+    lastImpulse=now;
+    registerMotion();
+  }
+}
+
+async function requestWakeLock(){
+  try{
+    if('wakeLock' in navigator) wakeLock=await navigator.wakeLock.request('screen');
+  }catch(e){}
+}
+
+async function start(){
+  try{
+    if(typeof DeviceMotionEvent==='undefined'){
+      status.textContent='センサー非対応';
+      message.textContent='このブラウザでは動作センサーを使えません';
+      return;
+    }
+
+    if(typeof DeviceMotionEvent.requestPermission==='function'){
+      const permission=await DeviceMotionEvent.requestPermission();
+      if(permission!=='granted'){
+        status.textContent='許可なし';
+        message.textContent='動作センサーの許可が必要です';
+        return;
+      }
+    }
+
+    running=true;
+    lastMag=null;
+    smoothedDelta=0;
+    window.addEventListener('devicemotion',motionHandler,{passive:true});
+    startPanel.style.display='none';
+    status.textContent='計測中';
+    message.textContent='iPhoneを持って体を動かしてください';
+    await requestWakeLock();
+  }catch(err){
+    status.textContent='開始失敗';
+    message.textContent='センサーを開始できませんでした';
+  }
+}
+
+function stop(){
+  running=false;
+  window.removeEventListener('devicemotion',motionHandler);
+  try{ wakeLock?.release(); }catch(e){}
+  wakeLock=null;
+  status.textContent='停止中';
+  startBtn.textContent='再開';
+  startPanel.style.display='flex';
+}
+
+startBtn.addEventListener('click',start);
+stopBtn.addEventListener('click',stop);
+
+document.addEventListener('visibilitychange',()=>{
+  if(document.visibilityState==='visible' && running) requestWakeLock();
+});
+
+updateUI();
+})();
+</script>
+</body>
+</html>
