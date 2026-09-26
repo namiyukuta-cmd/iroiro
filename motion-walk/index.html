@@ -79,7 +79,7 @@ footer{padding:9px 12px max(10px,env(safe-area-inset-bottom));background:#202419
   <div id="world">
     <div id="road"></div>
     <div id="scenery"></div>
-    <button id="soundBtn" type="button">SE ON</button>
+    <button id="soundBtn" type="button">SE OFF</button>
     <button id="cameraBtn" type="button">家事カメラ ON</button>
     <div id="cameraBox">
       <video id="cameraView" autoplay playsinline muted></video>
@@ -143,7 +143,7 @@ const motionCanvas=$('motionCanvas');
 const cameraMeterFill=$('cameraMeterFill');
 
 let running=false;
-let soundOn=true;
+let soundOn=false;
 let audioCtx=null;
 let rawMotions=0;
 let gameSteps=0;
@@ -374,6 +374,11 @@ async function requestWakeLock(){
 
 async function start(){
   try{
+    // iOS requires audio initialization inside a direct user gesture.
+    // Keep it isolated from motion permission so audio failure can never block game start.
+    if(soundOn){
+      try{ audio(); }catch(e){ soundOn=false; soundBtn.textContent='SE OFF'; }
+    }
     if(!gameStarted){
       gameStarted=true;
       activeMs=0;
@@ -435,9 +440,20 @@ function stop(){
 }
 
 soundBtn.addEventListener('click',()=>{
-  soundOn=!soundOn;
-  soundBtn.textContent=soundOn?'SE ON':'SE OFF';
-  if(soundOn){ audio(); se.chest(); }
+  if(!soundOn){
+    try{
+      soundOn=true;
+      audio();
+      soundBtn.textContent='SE ON';
+      se.chest();
+    }catch(e){
+      soundOn=false;
+      soundBtn.textContent='SE不可';
+    }
+  }else{
+    soundOn=false;
+    soundBtn.textContent='SE OFF';
+  }
 });
 cameraBtn.addEventListener('click',toggleCamera);
 startBtn.addEventListener('click',start);
