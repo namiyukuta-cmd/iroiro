@@ -20,6 +20,19 @@ let audio = null;
 let sound = true;
 let pose = false;
 
+/* =========================
+   入力モード・カメラ
+========================= */
+
+let inputMode = "motion";
+
+let cameraStream = null;
+let cameraTimer = null;
+let cameraCanvas = null;
+let cameraContext = null;
+let previousFrame = null;
+
+let lastCameraAction = 0;
 
 /* =========================
    SE
@@ -47,7 +60,6 @@ function tone(frequency) {
   oscillator.stop(audio.currentTime + 0.1);
 }
 
-
 /* =========================
    匿名視聴者名
 ========================= */
@@ -57,7 +69,6 @@ function anonName() {
     Math.floor(Math.random() * 90) + 10
   );
 }
-
 
 /* =========================
    コメント追加
@@ -100,7 +111,6 @@ function addComment(
     comments.scrollHeight;
 }
 
-
 /* =========================
    スパチャ
 ========================= */
@@ -120,7 +130,6 @@ function superChat(result) {
     amountIcon.classList.add("hit");
   }
 
-
   const patronBar =
     $("patronbar");
 
@@ -138,7 +147,6 @@ function superChat(result) {
 
     patronBar.appendChild(badge);
 
-
     /* 最大6人表示 */
     const badges =
       patronBar.querySelectorAll(
@@ -149,7 +157,6 @@ function superChat(result) {
       badges[0].remove();
     }
 
-
     /* 一定時間後に消える */
     setTimeout(() => {
       if (badge.isConnected) {
@@ -157,7 +164,6 @@ function superChat(result) {
       }
     }, 6500);
   }
-
 
   /* スパチャ通知 */
   addComment(
@@ -169,7 +175,6 @@ function superChat(result) {
     amount
   );
 
-
   /* スパチャ勢本人のコメント */
   addComment(
     result.line,
@@ -178,14 +183,12 @@ function superChat(result) {
   );
 }
 
-
 /* =========================
    1動作
 ========================= */
 
 function action() {
   raw++;
-
 
   /* 6動作までの進行 */
   const fill = $("fill");
@@ -194,7 +197,6 @@ function action() {
     fill.style.width =
       ((raw % 6) / 6) * 100 + "%";
   }
-
 
   /* ポーズ切替 */
   pose = !pose;
@@ -208,7 +210,6 @@ function action() {
         ? "./assets/streamer_up.png?v=1"
         : "./assets/streamer_down.png?v=1";
   }
-
 
   /* 6動作ごとにゲーム進行 */
   if (raw % 6 !== 0) {
@@ -230,7 +231,6 @@ function action() {
     fill.style.width = "100%";
   }
 
-
   /* =========================
      いいね
   ========================= */
@@ -249,7 +249,6 @@ function action() {
     show("+1 いいね");
   }
 
-
   /* =========================
      視聴者
   ========================= */
@@ -267,7 +266,6 @@ function action() {
 
     show("+1 視聴者");
   }
-
 
   /* =========================
      登録者
@@ -289,7 +287,6 @@ function action() {
 
     show("+1 登録");
   }
-
 
   /* =========================
      スパチャ
@@ -330,7 +327,6 @@ function action() {
     superChat(result);
   }
 
-
   /* =========================
      一般コメント
   ========================= */
@@ -344,9 +340,7 @@ function action() {
     );
   }
 
-
   tone(520);
-
 
   setTimeout(() => {
     if (fill) {
@@ -354,7 +348,6 @@ function action() {
     }
   }, 180);
 }
-
 
 /* =========================
    画面上のポップ表示
@@ -375,7 +368,6 @@ function show(text) {
 
   pop.classList.add("go");
 }
-
 
 /* =========================
    スマホ動作検出
@@ -415,6 +407,244 @@ function motion(event) {
   }
 }
 
+/* =========================
+   家事用カメラ動作検出
+========================= */
+
+async function startCamera() {
+  const video = $("cameraVideo");
+
+  if (!video) return false;
+
+  if (
+    !navigator.mediaDevices ||
+    !navigator.mediaDevices.getUserMedia
+  ) {
+    return false;
+  }
+
+  try {
+    cameraStream =
+      await navigator.mediaDevices.getUserMedia({
+        video: {
+          facingMode: "user",
+          width: { ideal: 320 },
+          height: { ideal: 240 }
+        },
+        audio: false
+      });
+
+    video.srcObject = cameraStream;
+
+    await video.play();
+
+    cameraCanvas =
+      document.createElement("canvas");
+
+    cameraCanvas.width = 80;
+    cameraCanvas.height = 60;
+
+    cameraContext =
+      cameraCanvas.getContext(
+        "2d",
+        {
+          willReadFrequently: true
+        }
+      );
+
+    previousFrame = null;
+
+    clearInterval(cameraTimer);
+
+    cameraTimer =
+      setInterval(
+        detectCameraMotion,
+        180
+      );
+
+    return true;
+
+  } catch (error) {
+    stopCamera();
+    return false;
+  }
+}
+
+function stopCamera() {
+  clearInterval(cameraTimer);
+  cameraTimer = null;
+
+  if (cameraStream) {
+    cameraStream
+      .getTracks()
+      .forEach(
+        track => track.stop()
+      );
+  }
+
+  cameraStream = null;
+  previousFrame = null;
+  cameraCanvas = null;
+  cameraContext = null;
+
+  const video = $("cameraVideo");
+
+  if (video) {
+    video.pause();
+    video.srcObject = null;
+  }
+}
+
+function detectCameraMotion() {
+  if (
+    !running ||
+    inputMode !== "camera"
+  ) {
+    return;
+  }
+
+  const video =
+    $("cameraVideo");
+
+  if (
+    !video ||
+    !cameraCanvas ||
+    !cameraContext ||
+    video.readyState < 2
+  ) {
+    return;
+  }
+
+  cameraContext.drawImage(
+    video,
+    0,
+    0,
+    cameraCanvas.width,
+    cameraCanvas.height
+  );
+
+  const frame =
+    cameraContext.getImageData(
+      0,
+      0,
+      cameraCanvas.width,
+      cameraCanvas.height
+    ).data;
+
+  if (!previousFrame) {
+    previousFrame =
+      new Uint8ClampedArray(frame);
+
+    return;
+  }
+
+  let changedPixels = 0;
+
+  const totalPixels =
+    cameraCanvas.width *
+    cameraCanvas.height;
+
+  for (
+    let i = 0;
+    i < frame.length;
+    i += 4
+  ) {
+    const difference =
+      Math.abs(
+        frame[i] -
+        previousFrame[i]
+      ) +
+      Math.abs(
+        frame[i + 1] -
+        previousFrame[i + 1]
+      ) +
+      Math.abs(
+        frame[i + 2] -
+        previousFrame[i + 2]
+      );
+
+    if (difference > 75) {
+      changedPixels++;
+    }
+  }
+
+  previousFrame =
+    new Uint8ClampedArray(frame);
+
+  const movement =
+    changedPixels /
+    totalPixels;
+
+  const now =
+    performance.now();
+
+  /*
+    画面の約4%以上が変化し、
+    前回カウントから450ms以上経過
+  */
+  if (
+    movement > 0.04 &&
+    now - lastCameraAction > 450
+  ) {
+    lastCameraAction = now;
+
+    action();
+  }
+}
+
+/* =========================
+   モーション / カメラ切替
+========================= */
+
+async function toggleCameraMode() {
+  const button =
+    $("cameraMode");
+
+  if (inputMode === "motion") {
+
+    const started =
+      await startCamera();
+
+    if (!started) {
+      if (button) {
+        button.textContent =
+          "カメラ失敗";
+      }
+
+      return;
+    }
+
+    inputMode = "camera";
+
+    window.removeEventListener(
+      "devicemotion",
+      motion
+    );
+
+    if (button) {
+      button.textContent =
+        "カメラ ON";
+    }
+
+    return;
+  }
+
+  stopCamera();
+
+  inputMode = "motion";
+
+  if (running) {
+    window.addEventListener(
+      "devicemotion",
+      motion
+    );
+  }
+
+  if (button) {
+    button.textContent =
+      "カメラ";
+  }
+}
 
 /* =========================
    配信時間
@@ -454,7 +684,6 @@ function clock() {
   }
 }
 
-
 /* =========================
    配信開始・停止
 ========================= */
@@ -470,7 +699,6 @@ async function toggleStream() {
         new AudioContextClass();
     }
   }
-
 
   /* iPhone モーション許可 */
   if (
@@ -497,7 +725,6 @@ async function toggleStream() {
     }
   }
 
-
   /* 配信開始 */
   if (!running) {
     running = true;
@@ -515,10 +742,12 @@ async function toggleStream() {
         500
       );
 
-    window.addEventListener(
-      "devicemotion",
-      motion
-    );
+if (inputMode === "motion") {
+  window.addEventListener(
+    "devicemotion",
+    motion
+  );
+}
 
     const startButton =
       $("start");
@@ -527,7 +756,6 @@ async function toggleStream() {
       startButton.textContent =
         "停止";
     }
-
 
     viewers =
       Math.max(
@@ -551,7 +779,6 @@ async function toggleStream() {
     return;
   }
 
-
   /* 配信停止 */
   running = false;
 
@@ -559,20 +786,33 @@ async function toggleStream() {
 
   timer = null;
 
-  window.removeEventListener(
-    "devicemotion",
-    motion
-  );
+window.removeEventListener(
+  "devicemotion",
+  motion
+);
 
-  const startButton =
-    $("start");
+/* カメラモードならカメラも停止 */
+if (inputMode === "camera") {
+  stopCamera();
+  inputMode = "motion";
+
+  const cameraButton =
+    $("cameraMode");
+
+  if (cameraButton) {
+    cameraButton.textContent =
+      "カメラ";
+  }
+}
+
+const startButton =
+  $("start");
 
   if (startButton) {
     startButton.textContent =
       "再開";
   }
 }
-
 
 /* =========================
    SE ON / OFF
@@ -591,7 +831,6 @@ function toggleSound() {
         : "SE OFF";
   }
 }
-
 
 /* =========================
    ボタン接続
@@ -615,4 +854,20 @@ if (soundButton) {
     "click",
     toggleSound
   );
+}
+
+const cameraButton =
+
+  $("cameraMode");
+
+if (cameraButton) {
+
+  cameraButton.addEventListener(
+
+    "click",
+
+    toggleCameraMode
+
+  );
+
 }
