@@ -1,311 +1,113 @@
 <!doctype html>
 <html lang="ja">
-
 <head>
-  <meta charset="utf-8">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+<meta http-equiv="Cache-Control" content="no-cache,no-store,must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
 
-  <meta
-    name="viewport"
-    content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no"
-  >
+<title>底辺エアロビ配信</title>
 
-  <meta
-    http-equiv="Cache-Control"
-    content="no-cache,no-store,must-revalidate"
-  >
-
-  <meta
-    http-equiv="Pragma"
-    content="no-cache"
-  >
-
-  <meta
-    http-equiv="Expires"
-    content="0"
-  >
-
-  <title>底辺エアロビ配信</title>
-
-  <link
-    rel="stylesheet"
-    href="./css/streamer.css?v=1"
-  >
+<link rel="stylesheet" href="./css/streamer.css?v=2">
 </head>
-
 
 <body>
 
-  <!-- =====================
-       最上部ステータス
-  ====================== -->
+<!-- 配信情報 -->
+<div class="top">
+  <div class="s">登録者<b id="subs">3</b></div>
+  <div class="s">再生数<b id="plays">12</b></div>
+  <div class="s">視聴者<b id="viewers">0</b></div>
+  <div class="s">配信時間<b id="time">00:00</b></div>
+</div>
 
-  <div class="top">
-
-    <div class="s">
-      登録者数
-      <b>
-        <span id="subs">3</span>
-      </b>
+<!-- 配信画面 -->
+<div class="stageRow">
+  <div class="stream">
+    <div class="room">
+      <div class="window"></div>
+      <div class="shelf"></div>
+      <div class="plant">🌿</div>
+      <div class="phone"></div>
     </div>
 
-    <div class="s">
-      総再生数
-      <b>
-        <span id="plays">12</span>
-      </b>
+    <div class="live">LIVE</div>
+
+    <div class="girl">
+      <img id="streamerPose" src="./assets/streamer_down.png?v=1" alt="">
     </div>
 
-    <div class="s">
-      視聴者数
-      <b>
-        <span id="viewers">0</span>
-      </b>
-    </div>
+    <div class="likeOverlay">♥ <span id="likes">0</span></div>
 
-    <div class="s">
-      配信時間
-      <b id="time">00:00</b>
-    </div>
+    <div id="pop" class="pop"></div>
+  </div>
+</div>
 
+<!-- 配信画面右側：スパチャ金額 -->
+<div class="tiprail">
+  <div id="tip50" class="tipicon tip50">
+    <span class="tipNum">50</span>
+    <span class="tipYen">円</span>
   </div>
 
-
-  <!-- =====================
-       配信画面
-  ====================== -->
-
-  <div class="stageRow">
-
-    <div class="stream">
-
-      <div class="room">
-
-        <div class="window"></div>
-
-        <div class="shelf"></div>
-
-        <div class="plant">
-          🪴
-        </div>
-
-        <div class="phone"></div>
-
-      </div>
-
-
-      <div class="live">
-        ● LIVE
-      </div>
-
-
-      <div
-        id="girl"
-        class="girl"
-      >
-        <img
-          id="streamerPose"
-          src="./assets/streamer_down.png?v=2"
-          alt="配信者"
-        >
-      </div>
-
-
-      <!-- 画面左下のいいね -->
-
-      <div class="likeOverlay">
-        🖤
-        <span id="likes">0</span>
-      </div>
-
-
-      <!-- 視聴者・登録・スパチャ等のポップ -->
-
-      <div
-        id="pop"
-        class="pop"
-      >
-        +1 視聴
-      </div>
-
-    </div>
-
+  <div id="tip100" class="tipicon tip100">
+    <span class="tipNum">100</span>
+    <span class="tipYen">円</span>
   </div>
 
-
-  <!-- =====================
-       SUPER CHAT
-  ====================== -->
-
-  <div class="superArea">
-
-    <div
-      id="patronbar"
-      class="patronbar"
-    >
-
-      <div class="patronhint">
-        SUPER<br>
-        CHAT
-      </div>
-
-    </div>
-
-
-    <div class="tiptotal">
-      投げ銭
-
-      <b>
-        ¥<span id="tips">0</span>
-      </b>
-    </div>
-
+  <div id="tip200" class="tipicon tip200">
+    <span class="tipNum">200</span>
+    <span class="tipYen">円</span>
   </div>
 
-
-  <!-- =====================
-       スパチャ金額
-       横一列・32×32
-  ====================== -->
-
-  <div class="tiprail">
-
-    <div
-      id="tip50"
-      class="tipicon tip50"
-    >
-      <span class="tipNum">
-        50
-      </span>
-
-      <span class="tipYen">
-        円
-      </span>
-    </div>
-
-
-    <div
-      id="tip100"
-      class="tipicon tip100"
-    >
-      <span class="tipNum">
-        100
-      </span>
-
-      <span class="tipYen">
-        円
-      </span>
-    </div>
-
-
-    <div
-      id="tip200"
-      class="tipicon tip200"
-    >
-      <span class="tipNum">
-        200
-      </span>
-
-      <span class="tipYen">
-        円
-      </span>
-    </div>
-
-
-    <div
-      id="tip300"
-      class="tipicon tip300"
-    >
-      <span class="tipNum">
-        300
-      </span>
-
-      <span class="tipYen">
-        円
-      </span>
-    </div>
-
-
-    <div
-      id="tip500"
-      class="tipicon tip500"
-    >
-      <span class="tipNum">
-        500
-      </span>
-
-      <span class="tipYen">
-        円
-      </span>
-    </div>
-
+  <div id="tip300" class="tipicon tip300">
+    <span class="tipNum">300</span>
+    <span class="tipYen">円</span>
   </div>
 
+  <div id="tip500" class="tipicon tip500">
+    <span class="tipNum">500</span>
+    <span class="tipYen">円</span>
+  </div>
+</div>
 
-  <!-- =====================
-       コメント
-  ====================== -->
-
-  <div class="chat">
-
-    <div class="chatTitle">
-      コメント
-    </div>
-
-    <div
-      id="comments"
-      class="comments"
-    ></div>
-
+<!-- スパチャ勢＋投げ銭総額 -->
+<div class="superArea">
+  <div id="patronbar" class="patronbar">
+    <div class="patronhint">SUPER<br>CHAT</div>
   </div>
 
-
-  <!-- =====================
-       6動作進行
-  ====================== -->
-
-  <div class="bar">
-    <div
-      id="fill"
-      class="fill"
-    ></div>
+  <div class="tiptotal">
+    投げ銭
+    <b>¥<span id="tips">0</span></b>
   </div>
+</div>
 
+<!-- コメント -->
+<div class="chat">
+  <div class="chatTitle">コメント</div>
+  <div id="comments" class="comments"></div>
+</div>
 
-  <!-- =====================
-       最下部操作
-  ====================== -->
+<!-- 6動作進行 -->
+<div class="bar">
+  <div id="fill" class="fill"></div>
+</div>
 
-  <div class="panel">
-
-    <div class="controls">
-
-      <a href="./top.html">
-        戻る
-      </a>
-
-      <button id="sound">
-        SE ON
-      </button>
-
-      <button id="start">
-        配信開始
-      </button>
-
-    </div>
-
+<!-- 操作 -->
+<div class="panel">
+  <div class="controls">
+    <a href="./top.html">戻る</a>
+    <button id="sound" type="button">SE ON</button>
+    <button id="start" type="button">配信開始</button>
   </div>
+</div>
 
-
-  <!-- =====================
-       JavaScript
-  ====================== -->
-
-  <script src="./js/stream-patrons.js?v=1"></script>
-
-  <script src="./js/stream-comments.js?v=1"></script>
-
-  <script src="./js/streamer-game.js?v=1"></script>
+<!-- データ・ゲーム処理 -->
+<script src="./js/stream-patrons.js?v=1"></script>
+<script src="./js/stream-comments.js?v=1"></script>
+<script src="./js/streamer-game.js?v=1"></script>
 
 </body>
-
 </html>
