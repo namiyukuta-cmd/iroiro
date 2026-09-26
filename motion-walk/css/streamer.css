@@ -727,11 +727,15 @@ body{
 
 /* 家事用カメラ：映像を確認しながら動作検出 */
 #cameraVideo{
+  display:none;
   position:fixed;
+
   right:8px;
   bottom:58px;
+
   width:120px;
   height:160px;
+
   object-fit:cover;
   background:#000;
   border:2px solid #fff;
@@ -739,4 +743,8 @@ body{
   z-index:100;
   pointer-events:none;
   transform:scaleX(-1);
+}
+
+#cameraVideo.cameraOn{
+  display:block;
 }
