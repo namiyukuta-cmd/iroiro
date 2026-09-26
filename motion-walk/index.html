@@ -39,7 +39,11 @@ transform:translateY(0);will-change:transform}
 #pulse{position:absolute;left:50%;top:62%;width:34px;height:34px;border:2px solid #f6efd0;border-radius:50%;transform:translate(-50%,-50%) scale(1);opacity:0;z-index:4;pointer-events:none}
 #pulse.go{animation:pulse .35s ease-out}
 @keyframes pulse{0%{opacity:.9;transform:translate(-50%,-50%) scale(.8)}100%{opacity:0;transform:translate(-50%,-50%) scale(2.2)}}
-#cameraBtn{position:absolute;right:12px;top:12px;z-index:12;border:1px solid #666b4c;background:#202419;color:#f4f0df;border-radius:10px;padding:8px 10px;font-size:12px}\n#cameraView{position:absolute;right:12px;top:54px;width:120px;max-height:180px;object-fit:cover;border:2px solid #666b4c;border-radius:12px;background:#000;z-index:11;display:none;transform:scaleX(-1)}\n#message{position:absolute;left:50%;top:12px;transform:translateX(-50%);max-width:86%;padding:7px 12px;border-radius:10px;background:#11150dcc;border:1px solid #4e543d;font-size:13px;text-align:center;z-index:8}
+#cameraBtn{position:absolute;right:12px;top:12px;z-index:12;border:1px solid #666b4c;background:#202419;color:#f4f0df;border-radius:10px;padding:8px 10px;font-size:12px}\n#cameraBox{position:absolute;right:12px;top:54px;width:140px;height:190px;z-index:11;display:none;border:2px solid #666b4c;border-radius:12px;overflow:hidden;background:#000}
+#cameraView{width:100%;height:100%;object-fit:cover;transform:scaleX(-1)}
+#motionZone{position:absolute;left:18%;right:18%;top:12%;bottom:12%;border:2px dashed #f0e7c2;border-radius:10px;pointer-events:none}
+#cameraMeter{position:absolute;left:6px;right:6px;bottom:6px;height:7px;border-radius:999px;background:#111a;overflow:hidden}
+#cameraMeterFill{height:100%;width:0;background:#f0e7c2}\n#message{position:absolute;left:50%;top:12px;transform:translateX(-50%);max-width:86%;padding:7px 12px;border-radius:10px;background:#11150dcc;border:1px solid #4e543d;font-size:13px;text-align:center;z-index:8}
 #startPanel{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;padding:24px;background:#151812e8;z-index:20}
 .panel{width:min(92vw,380px);background:#272c20;border:1px solid #61674b;border-radius:18px;padding:20px}
 .panel h2{margin:0 0 10px;font-size:22px}
@@ -72,7 +76,12 @@ footer{padding:9px 12px max(10px,env(safe-area-inset-bottom));background:#202419
   <div id="world">
     <div id="road"></div>
     <div id="scenery"></div>
-    <button id="cameraBtn" type="button">カメラ ON</button>\n    <video id="cameraView" autoplay playsinline muted></video>\n    <div id="message">iPhoneを持って体を動かしてください</div>
+    <button id="cameraBtn" type="button">家事カメラ ON</button>\n    <div id="cameraBox">
+      <video id="cameraView" autoplay playsinline muted></video>
+      <div id="motionZone"></div>
+      <div id="cameraMeter"><div id="cameraMeterFill"></div></div>
+    </div>
+    <canvas id="motionCanvas" width="48" height="64" hidden></canvas>\n    <div id="message">iPhoneを持って体を動かしてください</div>
     <div id="pulse"></div>
     <div id="player"></div>
   </div>
@@ -120,6 +129,9 @@ const scenery=$('scenery');
 const pulse=$('pulse');
 const message=$('message');
 const sensitivity=$('sensitivity');\nconst cameraBtn=$('cameraBtn');\nconst cameraView=$('cameraView');
+const cameraBox=$('cameraBox');
+const motionCanvas=$('motionCanvas');
+const cameraMeterFill=$('cameraMeterFill');
 
 let running=false;
 let rawMotions=0;
@@ -134,6 +146,12 @@ let activeMs=0;
 let activeStartedAt=null;
 let timerId=null;
 let gameStarted=false;\nlet cameraStream=null;
+let cameraMotionTimer=null;
+let previousFrame=null;
+let lastCameraImpulse=0;
+const CAMERA_THRESHOLD=18;
+const CAMERA_INTERVAL=180;
+const CAMERA_REFRACTORY=420;
 const MOTIONS_PER_STEP=6;
 
 const objects=[];
@@ -225,20 +243,61 @@ function motionHandler(e){
   }
 }
 
+function stopCameraMotion(){
+  clearInterval(cameraMotionTimer);
+  cameraMotionTimer=null;
+  previousFrame=null;
+  cameraMeterFill.style.width='0%';
+}
+
+function analyzeCameraMotion(){
+  if(!cameraStream || cameraView.readyState<2)return;
+  const ctx=motionCanvas.getContext('2d',{willReadFrequently:true});
+  const w=motionCanvas.width,h=motionCanvas.height;
+  ctx.save();
+  ctx.translate(w,0);ctx.scale(-1,1);
+  ctx.drawImage(cameraView,0,0,w,h);
+  ctx.restore();
+  const frame=ctx.getImageData(0,0,w,h).data;
+  if(!previousFrame){previousFrame=new Uint8ClampedArray(frame);return;}
+  const x0=Math.floor(w*.18),x1=Math.ceil(w*.82),y0=Math.floor(h*.12),y1=Math.ceil(h*.88);
+  let changed=0,total=0;
+  for(let y=y0;y<y1;y+=2){
+    for(let x=x0;x<x1;x+=2){
+      const i=(y*w+x)*4;
+      const diff=(Math.abs(frame[i]-previousFrame[i])+Math.abs(frame[i+1]-previousFrame[i+1])+Math.abs(frame[i+2]-previousFrame[i+2]))/3;
+      if(diff>24)changed++;
+      total++;
+    }
+  }
+  previousFrame.set(frame);
+  const score=total?changed/total*100:0;
+  cameraMeterFill.style.width=Math.min(100,score*3)+'%';
+  const now=performance.now();
+  if(running && score>CAMERA_THRESHOLD && now-lastCameraImpulse>CAMERA_REFRACTORY){
+    lastCameraImpulse=now;
+    registerMotion();
+  }
+}
+
 async function toggleCamera(){
   if(cameraStream){
     cameraStream.getTracks().forEach(track=>track.stop());
     cameraStream=null;
     cameraView.srcObject=null;
-    cameraView.style.display='none';
-    cameraBtn.textContent='カメラ ON';
+    cameraBox.style.display='none';
+    stopCameraMotion();
+    cameraBtn.textContent='家事カメラ ON';
     return;
   }
   try{
     cameraStream=await navigator.mediaDevices.getUserMedia({video:{facingMode:'user'},audio:false});
     cameraView.srcObject=cameraStream;
-    cameraView.style.display='block';
-    cameraBtn.textContent='カメラ OFF';
+    cameraBox.style.display='block';
+    cameraBtn.textContent='家事カメラ OFF';
+    previousFrame=null;
+    clearInterval(cameraMotionTimer);
+    cameraMotionTimer=setInterval(analyzeCameraMotion,CAMERA_INTERVAL);
   }catch(e){
     cameraBtn.textContent='カメラ不可';
     message.textContent='カメラを開始できませんでした';
