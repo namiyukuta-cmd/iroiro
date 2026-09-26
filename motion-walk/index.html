@@ -39,7 +39,7 @@ transform:translateY(0);will-change:transform}
 #pulse{position:absolute;left:50%;top:62%;width:34px;height:34px;border:2px solid #f6efd0;border-radius:50%;transform:translate(-50%,-50%) scale(1);opacity:0;z-index:4;pointer-events:none}
 #pulse.go{animation:pulse .35s ease-out}
 @keyframes pulse{0%{opacity:.9;transform:translate(-50%,-50%) scale(.8)}100%{opacity:0;transform:translate(-50%,-50%) scale(2.2)}}
-#message{position:absolute;left:50%;top:12px;transform:translateX(-50%);max-width:86%;padding:7px 12px;border-radius:10px;background:#11150dcc;border:1px solid #4e543d;font-size:13px;text-align:center;z-index:8}
+#cameraBtn{position:absolute;right:12px;top:12px;z-index:12;border:1px solid #666b4c;background:#202419;color:#f4f0df;border-radius:10px;padding:8px 10px;font-size:12px}\n#cameraView{position:absolute;right:12px;top:54px;width:120px;max-height:180px;object-fit:cover;border:2px solid #666b4c;border-radius:12px;background:#000;z-index:11;display:none;transform:scaleX(-1)}\n#message{position:absolute;left:50%;top:12px;transform:translateX(-50%);max-width:86%;padding:7px 12px;border-radius:10px;background:#11150dcc;border:1px solid #4e543d;font-size:13px;text-align:center;z-index:8}
 #startPanel{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;padding:24px;background:#151812e8;z-index:20}
 .panel{width:min(92vw,380px);background:#272c20;border:1px solid #61674b;border-radius:18px;padding:20px}
 .panel h2{margin:0 0 10px;font-size:22px}
@@ -72,7 +72,7 @@ footer{padding:9px 12px max(10px,env(safe-area-inset-bottom));background:#202419
   <div id="world">
     <div id="road"></div>
     <div id="scenery"></div>
-    <div id="message">iPhoneを持って体を動かしてください</div>
+    <button id="cameraBtn" type="button">カメラ ON</button>\n    <video id="cameraView" autoplay playsinline muted></video>\n    <div id="message">iPhoneを持って体を動かしてください</div>
     <div id="pulse"></div>
     <div id="player"></div>
   </div>
@@ -119,7 +119,7 @@ const road=$('road');
 const scenery=$('scenery');
 const pulse=$('pulse');
 const message=$('message');
-const sensitivity=$('sensitivity');
+const sensitivity=$('sensitivity');\nconst cameraBtn=$('cameraBtn');\nconst cameraView=$('cameraView');
 
 let running=false;
 let rawMotions=0;
@@ -133,7 +133,7 @@ let wakeLock=null;
 let activeMs=0;
 let activeStartedAt=null;
 let timerId=null;
-let gameStarted=false;
+let gameStarted=false;\nlet cameraStream=null;
 const MOTIONS_PER_STEP=6;
 
 const objects=[];
@@ -225,6 +225,26 @@ function motionHandler(e){
   }
 }
 
+async function toggleCamera(){
+  if(cameraStream){
+    cameraStream.getTracks().forEach(track=>track.stop());
+    cameraStream=null;
+    cameraView.srcObject=null;
+    cameraView.style.display='none';
+    cameraBtn.textContent='カメラ ON';
+    return;
+  }
+  try{
+    cameraStream=await navigator.mediaDevices.getUserMedia({video:{facingMode:'user'},audio:false});
+    cameraView.srcObject=cameraStream;
+    cameraView.style.display='block';
+    cameraBtn.textContent='カメラ OFF';
+  }catch(e){
+    cameraBtn.textContent='カメラ不可';
+    message.textContent='カメラを開始できませんでした';
+  }
+}
+
 async function requestWakeLock(){
   try{
     if('wakeLock' in navigator) wakeLock=await navigator.wakeLock.request('screen');
@@ -293,7 +313,7 @@ function stop(){
   startPanel.style.display='flex';
 }
 
-startBtn.addEventListener('click',start);
+cameraBtn.addEventListener('click',toggleCamera);\nstartBtn.addEventListener('click',start);
 stopBtn.addEventListener('click',stop);
 
 document.addEventListener('visibilitychange',()=>{
