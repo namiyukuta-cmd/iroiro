@@ -31,10 +31,24 @@ main{position:relative;overflow:hidden;min-height:0}
 .skybridge{position:absolute;height:8px;background:#242943;border:1px solid #555d80;box-shadow:0 0 8px #2ad9ff66}
 #horizonGlow{position:absolute;left:30%;right:30%;top:31%;height:30%;background:radial-gradient(ellipse,#cf35ff55 0,#1b9dff22 35%,transparent 70%);filter:blur(8px)}
 #cityLines{position:absolute;inset:0;background:linear-gradient(90deg,transparent 49.7%,#45eaff33 50%,transparent 50.3%);pointer-events:none}
+.tower{position:absolute;bottom:39%;background:#14182b;border:1px solid #333a5d;clip-path:polygon(8% 0,92% 0,100% 100%,0 100%);box-shadow:0 0 14px #000}
+.tower:after{content:"";position:absolute;inset:7px;background:repeating-linear-gradient(0deg,#23dcff55 0 2px,transparent 2px 11px)}
+.antenna{position:absolute;width:2px;background:#ff37cf;box-shadow:0 0 7px #ff37cf}
+.lamp{position:absolute;width:5px;height:5px;border-radius:50%;background:#40edff;box-shadow:0 0 9px #40edff}
+.pipe{position:absolute;height:5px;background:#3c4055;border:1px solid #111522}
+.vendor{position:absolute;width:54px;height:34px;background:#262139;border:2px solid #ff37cf;box-shadow:0 0 10px #ff37cf55}
+.vendor:before{content:"";position:absolute;left:-4px;right:-4px;top:-10px;height:9px;background:repeating-linear-gradient(90deg,#25e6ff 0 8px,#ff35cb 8px 16px)}
+.crate{position:absolute;width:18px;height:14px;background:#4a3c35;border:2px solid #191513}
+.drone{position:absolute;width:22px;height:7px;border-radius:6px;background:#373d58;border:1px solid #58eaff;box-shadow:0 0 8px #58eaff}
+.drone:before,.drone:after{content:"";position:absolute;top:2px;width:8px;height:2px;background:#ff3dc8}
+.drone:before{left:-7px}.drone:after{right:-7px}
+.cable{position:absolute;height:1px;background:#586078;transform-origin:left center}
+.roadmark{position:absolute;width:4px;height:18px;background:#58eaff88;box-shadow:0 0 5px #58eaff}
 #player{position:absolute;left:50%;top:62%;width:34px;height:34px;transform:translate(-50%,-50%);border-radius:50%;background:#8e62c9;border:3px solid #241d2e;box-shadow:0 4px 10px #0008;z-index:5}
 #player:after{content:"";position:absolute;width:12px;height:8px;left:8px;top:-8px;border-radius:50% 50% 0 0;background:#8e62c9;border:3px solid #241d2e;border-bottom:0}
 #pulse{position:absolute;left:50%;top:62%;width:34px;height:34px;border:2px solid #f6efd0;border-radius:50%;transform:translate(-50%,-50%) scale(1);opacity:0;z-index:4;pointer-events:none}
 #pulse.go{animation:pulse .35s ease-out}
+@keyframes droneFloat{from{transform:translateY(-3px)}to{transform:translateY(5px)}}
 @keyframes pulse{0%{opacity:.9;transform:translate(-50%,-50%) scale(.8)}100%{opacity:0;transform:translate(-50%,-50%) scale(2.2)}}
 #soundBtn{position:absolute;left:12px;top:12px;z-index:12;border:1px solid #666b4c;background:#202419;color:#f4f0df;border-radius:10px;padding:8px 10px;font-size:12px}
 #cameraBtn{position:absolute;right:12px;top:12px;z-index:12;border:1px solid #666b4c;background:#202419;color:#f4f0df;border-radius:10px;padding:8px 10px;font-size:12px}
@@ -232,6 +246,33 @@ function buildScenery(){
     el.style.left=v[0]+'%';el.style.top=v[1]+'%';el.style.width=v[2]+'%';
     scenery.appendChild(el);
   });
+  [[34,27,8,24],[45,22,7,19],[55,25,9,23]].forEach(v=>{
+    const el=document.createElement('div');el.className='tower';
+    el.style.left=v[0]+'%';el.style.width=v[2]+'%';el.style.height=v[3]+'%';scenery.appendChild(el);
+  });
+  [[39,17,8],[52,14,11],[63,20,7]].forEach(v=>{
+    const el=document.createElement('div');el.className='antenna';
+    el.style.left=v[0]+'%';el.style.top=v[1]+'%';el.style.height=v[2]+'%';scenery.appendChild(el);
+  });
+  [[31,55],[66,49],[12,61],[83,57],[42,41],[58,38]].forEach(v=>{
+    const el=document.createElement('div');el.className='lamp';el.style.left=v[0]+'%';el.style.top=v[1]+'%';scenery.appendChild(el);
+  });
+  [[2,66,20],[78,69,18],[7,78,17]].forEach(v=>{
+    const el=document.createElement('div');el.className='pipe';el.style.left=v[0]+'%';el.style.top=v[1]+'%';el.style.width=v[2]+'%';scenery.appendChild(el);
+  });
+  [[5,71],[82,75]].forEach(v=>{
+    const el=document.createElement('div');el.className='vendor';el.style.left=v[0]+'%';el.style.top=v[1]+'%';scenery.appendChild(el);
+  });
+  [[15,82],[20,84],[76,85],[81,82]].forEach(v=>{
+    const el=document.createElement('div');el.className='crate';el.style.left=v[0]+'%';el.style.top=v[1]+'%';scenery.appendChild(el);
+  });
+  [[24,22],[70,18],[61,31]].forEach((v,i)=>{
+    const el=document.createElement('div');el.className='drone';el.style.left=v[0]+'%';el.style.top=v[1]+'%';el.style.animation='droneFloat '+(2.5+i*.5)+'s ease-in-out infinite alternate';scenery.appendChild(el);
+  });
+  for(let i=0;i<12;i++){
+    const el=document.createElement('div');el.className='roadmark';
+    el.style.left=(46+(i%2)*8)+'%';el.style.top=(58+i*4)+'%';scenery.appendChild(el);
+  }
 }
 buildScenery();
 
