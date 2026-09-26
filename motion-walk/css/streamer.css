@@ -1,1 +1,602 @@
+* {
+  box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+}
 
+html,
+body {
+  margin: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background: #101014;
+  color: #f8f5ef;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+body {
+  height: 100dvh;
+  display: flex;
+  flex-direction: column;
+}
+
+
+/* =========================
+   最上部ステータス
+========================= */
+
+.top {
+  height: 9%;
+  flex: 0 0 9%;
+  padding: 0 2px;
+  background: #17171e;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0;
+  align-items: center;
+  border-bottom: 1px solid #444;
+}
+
+.s {
+  font-size: 13px;
+  color: #aaa;
+  text-align: center;
+  line-height: 1;
+}
+
+.s b {
+  display: block;
+  margin-top: 2px;
+  font-size: 24px;
+  line-height: 1;
+  color: #fff;
+}
+
+
+/* =========================
+   配信画面
+========================= */
+
+.stageRow {
+  height: 29%;
+  flex: 0 0 29%;
+  background: #0d0d12;
+  border-bottom: 1px solid #333;
+}
+
+.stream {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background:
+    linear-gradient(
+      #e9dfd0 0 70%,
+      #b8a98f 70%
+    );
+}
+
+.room {
+  position: absolute;
+  inset: 0;
+}
+
+
+/* 窓：元より2段階小さめ */
+
+.window {
+  position: absolute;
+  left: 7%;
+  top: 9%;
+  width: 19%;
+  height: 22%;
+  background: #95b8c7;
+  border: 5px solid #eee;
+  box-shadow: 0 0 0 2px #9a8e7c;
+}
+
+
+/* 棚 */
+
+.shelf {
+  position: absolute;
+  right: 5%;
+  top: 15%;
+  width: 22%;
+  height: 6px;
+  background: #765e49;
+  box-shadow: 0 32px #765e49;
+}
+
+
+/* 植物 */
+
+.plant {
+  position: absolute;
+  right: 9%;
+  bottom: 25%;
+  font-size: 32px;
+}
+
+
+/* スマホ */
+
+.phone {
+  position: absolute;
+  right: 7%;
+  bottom: 7%;
+  width: 18px;
+  height: 54px;
+  background: #24242a;
+  border-radius: 5px;
+  box-shadow: 0 0 0 3px #555;
+}
+
+
+/* 配信者
+   大きさは以前より1段階大きく。
+   足元を画面下端に合わせる。
+*/
+
+.girl {
+  position: absolute;
+  left: 50%;
+  bottom: -1px;
+  width: 126px;
+  height: 235px;
+  transform: translateX(-50%) scale(.90);
+  transform-origin: 50% 100%;
+}
+
+.girl img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  object-position: center bottom;
+}
+
+
+/* LIVE */
+
+.live {
+  position: absolute;
+  left: 8px;
+  top: 8px;
+  z-index: 5;
+  background: #e73359;
+  border-radius: 5px;
+  padding: 4px 7px;
+  font-size: 11px;
+  font-weight: 900;
+}
+
+
+/* いいね
+   専用DIVは作らず配信画面に重ねる
+*/
+
+.likeOverlay {
+  position: absolute;
+  left: 9px;
+  bottom: 8px;
+  z-index: 10;
+  color: #111;
+  font-size: 22px;
+  line-height: 1;
+  font-weight: 1000;
+  letter-spacing: -1px;
+}
+
+.likeOverlay span {
+  font-size: 24px;
+  font-weight: 1000;
+}
+
+
+/* 視聴・登録などのポップ */
+
+.pop {
+  position: absolute;
+  left: 50%;
+  top: 22%;
+  z-index: 10;
+  transform: translateX(-50%);
+  font-size: 21px;
+  font-weight: 900;
+  color: #fff;
+  text-shadow: 0 2px 4px #000;
+  opacity: 0;
+}
+
+.pop.go {
+  animation: pop .7s;
+}
+
+
+/* =========================
+   スパチャエリア
+   配信画面の直下
+========================= */
+
+.superArea {
+  height: 54px;
+  flex: 0 0 54px;
+  display: flex;
+  align-items: center;
+  background: #111118;
+  border-bottom: 1px solid #333;
+}
+
+
+/* SUPER CHAT + 人物 */
+
+.patronbar {
+  flex: 1;
+  min-width: 0;
+  height: 100%;
+  padding: 3px 3px 3px 6px;
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  overflow: hidden;
+}
+
+.patronhint {
+  width: 29px;
+  flex: 0 0 29px;
+  font-size: 8px;
+  line-height: 1.05;
+  color: #777;
+  font-weight: 800;
+}
+
+.patronicon {
+  width: 44px;
+  height: 44px;
+  flex: 0 0 44px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2px;
+  text-align: center;
+  white-space: pre-line;
+  font-size: 9px;
+  line-height: 1.05;
+  font-weight: 900;
+  color: #fff;
+  box-shadow: 0 0 0 1px #fff4;
+  animation: patronIn .35s ease-out;
+}
+
+
+/* 累計投げ銭 */
+
+.tiptotal {
+  width: 57px;
+  height: 100%;
+  flex: 0 0 57px;
+  border-left: 1px solid #333;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-size: 8px;
+  line-height: 1;
+  color: #aaa;
+}
+
+.tiptotal b {
+  margin-top: 3px;
+  font-size: 14px;
+  line-height: 1;
+  color: #ffd46d;
+}
+
+
+/* =========================
+   スパチャ金額
+
+   横並びのまま。
+   32×32。
+========================= */
+
+.tiprail {
+  height: 38px;
+  flex: 0 0 38px;
+  padding: 3px 8px;
+  background: #17171e;
+  border-bottom: 1px solid #333;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+}
+
+.tipicon {
+  position: relative;
+  width: 32px;
+  height: 32px;
+  flex: 0 0 32px;
+  overflow: hidden;
+  border-radius: 4px;
+  border: 1px solid #ffffff45;
+  color: #fff;
+  font-weight: 1000;
+}
+
+.tipNum {
+  position: absolute;
+  top: 3px;
+  left: 0;
+  width: 100%;
+  text-align: center;
+  font-size: 14px;
+  line-height: 14px;
+  font-weight: 1000;
+  letter-spacing: -1px;
+}
+
+.tipYen {
+  position: absolute;
+  right: 2px;
+  bottom: 2px;
+  font-size: 7px;
+  line-height: 7px;
+  font-weight: 1000;
+}
+
+.tipicon.hit {
+  animation: tipHit .65s ease;
+}
+
+
+/* 金額別カラー */
+
+.tip50,
+.sc50 {
+  background: #58718d;
+}
+
+.tip100,
+.sc100 {
+  background: #2c8c68;
+}
+
+.tip200,
+.sc200 {
+  background: #3977c9;
+}
+
+.tip300,
+.sc300 {
+  background: #9b54b7;
+}
+
+.tip500,
+.sc500 {
+  background: #d04b57;
+}
+
+
+/* =========================
+   コメント
+   ここを大きく取る
+========================= */
+
+.chat {
+  flex: 1 1 auto;
+  min-height: 0;
+  background: #0e0e13;
+  border-bottom: 1px solid #333;
+  display: flex;
+  flex-direction: column;
+}
+
+.chatTitle {
+  height: 29px;
+  flex: 0 0 29px;
+  padding: 7px 9px 4px;
+  border-bottom: 1px solid #292931;
+  color: #aaa;
+  font-size: 13px;
+  line-height: 1;
+  font-weight: 900;
+}
+
+.comments {
+  flex: 1;
+  min-height: 0;
+  padding: 4px 7px 8px;
+  overflow-y: auto;
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
+  user-select: text;
+}
+
+
+/* 通常コメント */
+
+.comment {
+  padding: 8px 7px;
+  border-bottom: 1px solid #26262d;
+  font-size: 16px;
+  line-height: 1.3;
+  font-weight: 650;
+}
+
+.commentName {
+  margin-right: 7px;
+  color: #a9a9b4;
+  font-size: 13px;
+  font-weight: 900;
+}
+
+
+/* スパチャコメント */
+
+.comment.superchat {
+  margin: 4px 0;
+  padding: 9px 8px;
+  border: 0;
+  border-radius: 7px;
+  color: #fff;
+  font-size: 16px;
+  line-height: 1.3;
+  font-weight: 800;
+}
+
+.comment.superchat .commentName {
+  color: #fff;
+  font-size: 13px;
+}
+
+
+/* =========================
+   6動作進行バー
+========================= */
+
+.bar {
+  height: 4px;
+  flex: 0 0 4px;
+  background: #292931;
+  overflow: hidden;
+}
+
+.fill {
+  width: 0;
+  height: 100%;
+  background: #e25a78;
+  transition: width .15s;
+}
+
+
+/* =========================
+   最下部
+
+   大きくしない。
+   今日の運動・いいね欄は無し。
+========================= */
+
+.panel {
+  height: 51px;
+  flex: 0 0 51px;
+  padding:
+    4px
+    8px
+    calc(4px + env(safe-area-inset-bottom));
+  background: #121217;
+}
+
+.controls {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  gap: 5px;
+}
+
+.controls button,
+.controls a {
+  flex: 1;
+  min-width: 0;
+  height: 100%;
+  margin: 0;
+  padding: 0 4px;
+  border: 1px solid #555;
+  border-radius: 7px;
+  background: #24242b;
+  color: #fff;
+  text-align: center;
+  text-decoration: none;
+  font-size: 11px;
+  font-weight: 900;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+#start {
+  background: #d53f63;
+  border-color: #d53f63;
+}
+
+
+/* =========================
+   アニメーション
+========================= */
+
+@keyframes pop {
+  0% {
+    opacity: 1;
+    transform:
+      translate(-50%, 15px)
+      scale(.8);
+  }
+
+  60% {
+    opacity: 1;
+    transform:
+      translate(-50%, -10px)
+      scale(1.15);
+  }
+
+  100% {
+    opacity: 0;
+    transform:
+      translate(-50%, -25px);
+  }
+}
+
+@keyframes tipHit {
+  0%,
+  100% {
+    transform: translate(0);
+  }
+
+  15% {
+    transform:
+      translate(-4px, 2px)
+      rotate(-5deg);
+  }
+
+  30% {
+    transform:
+      translate(4px, -2px)
+      rotate(5deg);
+  }
+
+  45% {
+    transform:
+      translate(-3px, -2px);
+  }
+
+  60% {
+    transform:
+      translate(3px, 2px);
+    box-shadow: 0 0 18px #fff;
+  }
+}
+
+@keyframes patronIn {
+  0% {
+    transform:
+      translateY(28px)
+      scale(.5);
+    opacity: 0;
+  }
+
+  70% {
+    transform:
+      translateY(-4px)
+      scale(1.08);
+    opacity: 1;
+  }
+
+  100% {
+    transform: none;
+    opacity: 1;
+  }
+}
