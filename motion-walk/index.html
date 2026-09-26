@@ -44,8 +44,17 @@ main{position:relative;overflow:hidden;min-height:0}
 .drone:before{left:-7px}.drone:after{right:-7px}
 .cable{position:absolute;height:1px;background:#586078;transform-origin:left center}
 .roadmark{position:absolute;width:4px;height:18px;background:#58eaff88;box-shadow:0 0 5px #58eaff}
-#player{position:absolute;left:50%;top:62%;width:34px;height:34px;transform:translate(-50%,-50%);border-radius:50%;background:#8e62c9;border:3px solid #241d2e;box-shadow:0 4px 10px #0008;z-index:5}
-#player:after{content:"";position:absolute;width:12px;height:8px;left:8px;top:-8px;border-radius:50% 50% 0 0;background:#8e62c9;border:3px solid #241d2e;border-bottom:0}
+#player{position:absolute;left:50%;top:62%;width:30px;height:42px;transform:translate(-50%,-50%);z-index:5}
+#player:before{content:"";position:absolute;left:7px;top:0;width:16px;height:16px;border-radius:50%;background:#9a67d8;border:3px solid #241d2e;box-sizing:border-box}
+#player:after{content:"";position:absolute;left:5px;top:14px;width:20px;height:20px;border-radius:8px 8px 5px 5px;background:#8e62c9;border:3px solid #241d2e;box-sizing:border-box}
+#player .leg{position:absolute;top:31px;width:7px;height:12px;background:#7650b2;border:2px solid #241d2e;border-radius:0 0 4px 4px;transform-origin:50% 0}
+#player .leg.l{left:6px}#player .leg.r{right:6px}
+#player.walk{animation:playerBob .34s ease-in-out}
+#player.walk .leg.l{animation:legL .34s ease-in-out}
+#player.walk .leg.r{animation:legR .34s ease-in-out}
+@keyframes playerBob{0%,100%{transform:translate(-50%,-50%)}50%{transform:translate(-50%,-56%)}}
+@keyframes legL{0%,100%{transform:rotate(0)}50%{transform:rotate(24deg)}}
+@keyframes legR{0%,100%{transform:rotate(0)}50%{transform:rotate(-24deg)}}
 #pulse{position:absolute;left:50%;top:62%;width:34px;height:34px;border:2px solid #f6efd0;border-radius:50%;transform:translate(-50%,-50%) scale(1);opacity:0;z-index:4;pointer-events:none}
 #pulse.go{animation:pulse .35s ease-out}
 @keyframes droneFloat{from{transform:translateY(-3px)}to{transform:translateY(5px)}}
@@ -116,7 +125,7 @@ footer{padding:9px 12px max(10px,env(safe-area-inset-bottom));background:#202419
     </div>
     <div id="jobPopup"><div id="jobCard"><small>DELIVERY NETWORK</small><h2 id="jobPopupTitle">依頼が入った。</h2><p id="jobPopupText"></p></div></div>
     <div id="pulse"></div>
-    <div id="player"></div>
+    <div id="player"><i class="leg l"></i><i class="leg r"></i></div>
   </div>
 
   <div id="startPanel">
@@ -168,6 +177,7 @@ const barFill=$('barFill');
 const road=$('road');
 const scenery=$('scenery');
 const pulse=$('pulse');
+const player=$('player');
 const message=$('message');
 const sensitivity=$('sensitivity');
 const soundBtn=$('soundBtn');
@@ -403,8 +413,11 @@ async function finishJob(){
 
 function animateStep(){
   se.foot();
-  roadOffset=(roadOffset+34)%52;
-  sceneryOffset=(sceneryOffset+3)%36;
+  player.classList.remove('walk');
+  void player.offsetWidth;
+  player.classList.add('walk');
+  roadOffset=(roadOffset+46)%92;
+  sceneryOffset=(sceneryOffset+10)%80;
   road.style.transform='translateY('+roadOffset+'px)';
   scenery.style.transform='translateY('+sceneryOffset+'px) scale('+(1+Math.min(gameSteps,60)*0.0015)+')';
   pulse.classList.remove('go');
