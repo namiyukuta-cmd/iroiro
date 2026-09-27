@@ -8,6 +8,9 @@ let subs = 3;
 let plays = 12;
 let likes = 0;
 let tips = 0;
+const YEN_PER_ACTION = 10;
+let sessionStartRaw = 0;
+let elapsedMs = 0;
 let viewers = 0;
 
 let startAt = 0;
@@ -74,121 +77,59 @@ function anonName() {
    コメント追加
 ========================= */
 
-function addComment(
-  text,
-  name = anonName(),
-  superAmount = 0
-) {
+function addComment(text, name = anonName(), color = "") {
   const comments = $("comments");
-
   if (!comments) return;
-
   const row = document.createElement("div");
-
-  row.className =
-    "comment" +
-    (
-      superAmount
-        ? " superchat sc" + superAmount
-        : ""
-    );
-
+  row.className = "comment";
+  if (color) row.style.setProperty("--commenter-color", color);
   const nameElement = document.createElement("span");
   nameElement.className = "commentName";
   nameElement.textContent = name;
-
   const messageElement = document.createElement("span");
   messageElement.textContent = text;
-
-  row.append(
-    nameElement,
-    messageElement
-  );
-
+  row.append(nameElement, messageElement);
   comments.appendChild(row);
-
-  comments.scrollTop =
-    comments.scrollHeight;
+  while (comments.children.length > 100) comments.firstElementChild.remove();
+  comments.scrollTop = comments.scrollHeight;
 }
 
-/* =========================
-   スパチャ
-========================= */
-
-function superChat(result) {
+function regularComment(result) {
   const patron = result.patron;
-  const amount = result.amount;
-
-  const amountIcon =
-    $("tip" + amount);
-
-  if (amountIcon) {
-    amountIcon.classList.remove("hit");
-
-    void amountIcon.offsetWidth;
-
-    amountIcon.classList.add("hit");
+  const icon = $("commenter-" + patron.id);
+  if (icon) {
+    icon.classList.remove("hit");
+    void icon.offsetWidth;
+    icon.classList.add("hit");
   }
-
-  const patronBar =
-    $("patronbar");
-
-  if (patronBar) {
-    const badge =
-      document.createElement("div");
-
-    badge.className =
-      "patronicon sc" + amount;
-
-    badge.textContent =
-      patron.name +
-      "\n¥" +
-      amount;
-
-    patronBar.appendChild(badge);
-
-    /* 最大6人表示 */
-    const badges =
-      patronBar.querySelectorAll(
-        ".patronicon"
-      );
-
-    if (badges.length > 6) {
-      badges[0].remove();
-    }
-
-    /* 一定時間後に消える */
-    setTimeout(() => {
-      if (badge.isConnected) {
-        badge.remove();
-      }
-    }, 6500);
-  }
-
-  /* スパチャ通知 */
-  addComment(
-    patron.name +
-      "さんが¥" +
-      amount +
-      "スパチャしました",
-    patron.name,
-    amount
-  );
-
-  /* スパチャ勢本人のコメント */
-  addComment(
-    result.line,
-    patron.name,
-    amount
-  );
+  const bar = $("patronbar");
+  if (bar) bar.textContent = patron.name + "さんがコメント";
+  addComment(result.line, patron.name, patron.color);
 }
+
+function renderCommenters() {
+  const rail = $("commenterRail");
+  if (!rail || typeof StreamPatrons === "undefined") return;
+  StreamPatrons.all.forEach(patron => {
+    const icon = document.createElement("div");
+    icon.id = "commenter-" + patron.id;
+    icon.className = "tipicon commenterIcon";
+    icon.style.backgroundColor = patron.color;
+    icon.textContent = patron.name;
+    icon.title = patron.name;
+    rail.appendChild(icon);
+  });
+}
+renderCommenters();
 
 /* =========================
    1動作
 ========================= */
 
 function action() {
+  if (!running) return;
   raw++;
+  if ($("exerciseCount")) $("exerciseCount").textContent = raw - sessionStartRaw;
 
   /* 6動作までの進行 */
   const fill = $("fill");
@@ -288,43 +229,9 @@ function action() {
     show("+1 登録");
   }
 
-  /* =========================
-     スパチャ
-  ========================= */
-
-  if (
-    Math.random() < 0.75 &&
-    subs >= 1 &&
-    typeof StreamPatrons !== "undefined"
-  ) {
-    const result =
-      StreamPatrons.tip(
-        StreamPatrons.pick()
-      );
-
-    const patron =
-      result.patron;
-
-    const amount =
-      result.amount;
-
-    tips += amount;
-
-    const tipsElement =
-      $("tips");
-
-    if (tipsElement) {
-      tipsElement.textContent =
-        tips;
-    }
-
-    show(
-      patron.name +
-      " ¥" +
-      amount
-    );
-
-    superChat(result);
+  // 常連のコメントは収益に影響しない。
+  if (Math.random() < 0.75 && typeof StreamPatrons !== "undefined") {
+    regularComment(StreamPatrons.comment(StreamPatrons.pick()));
   }
 
   /* =========================
@@ -491,6 +398,7 @@ function stopCamera() {
   const video = $("cameraVideo");
 
   if (video) {
+    video.classList.remove("cameraOn");
     video.pause();
     video.srcObject = null;
   }
@@ -656,7 +564,7 @@ function clock() {
 
   const seconds =
     Math.floor(
-      (Date.now() - startAt) /
+      (elapsedMs + Date.now() - startAt) /
       1000
     );
 
@@ -704,6 +612,7 @@ async function toggleStream() {
   /* iPhone モーション許可 */
   if (
     !running &&
+    inputMode === "motion" &&
     typeof DeviceMotionEvent !==
       "undefined" &&
     typeof DeviceMotionEvent
@@ -730,10 +639,10 @@ async function toggleStream() {
   if (!running) {
     running = true;
 
-    if (!startAt) {
-      startAt =
-        Date.now();
-    }
+    startAt = Date.now();
+    sessionStartRaw = raw;
+    if ($("exerciseCount")) $("exerciseCount").textContent = "0";
+    if ($("sessionResult")) $("sessionResult").textContent = "収益は停止時に確定（1動作＝10円）";
 
     clearInterval(timer);
 
@@ -780,8 +689,18 @@ if (inputMode === "motion") {
     return;
   }
 
-  /* 配信停止 */
+  /* 配信停止：今回の動作だけを精算する。 */
+  clock();
+  elapsedMs += Date.now() - startAt;
+  startAt = 0;
   running = false;
+  const sessionActions = raw - sessionStartRaw;
+  const earned = sessionActions * YEN_PER_ACTION;
+  tips += earned;
+  if ($("tips")) $("tips").textContent = tips.toLocaleString("ja-JP");
+  if ($("sessionResult")) $("sessionResult").textContent =
+    "今回 " + sessionActions + "動作 × 10円 ＝ " + earned.toLocaleString("ja-JP") + "円";
+  show("今回の収益 ¥" + earned.toLocaleString("ja-JP"));
 
   clearInterval(timer);
 

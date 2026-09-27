@@ -9,7 +9,7 @@
 
 <title>底辺エアロビ配信</title>
 
-<link rel="stylesheet" href="./css/streamer.css?v=12">
+<link rel="stylesheet" href="./css/streamer.css?v=13">
 </head>
 
 <body>
@@ -44,44 +44,15 @@
   </div>
 </div>
 
-<!-- 配信画面右側：スパチャ金額 -->
-<div class="tiprail">
-  <div id="tip50" class="tipicon tip50">
-    <span class="tipNum">50</span>
-    <span class="tipYen">円</span>
-  </div>
-
-  <div id="tip100" class="tipicon tip100">
-    <span class="tipNum">100</span>
-    <span class="tipYen">円</span>
-  </div>
-
-  <div id="tip200" class="tipicon tip200">
-    <span class="tipNum">200</span>
-    <span class="tipYen">円</span>
-  </div>
-
-  <div id="tip300" class="tipicon tip300">
-    <span class="tipNum">300</span>
-    <span class="tipYen">円</span>
-  </div>
-
-  <div id="tip500" class="tipicon tip500">
-    <span class="tipNum">500</span>
-    <span class="tipYen">円</span>
-  </div>
-</div>
-
-<!-- スパチャ勢＋投げ銭総額 -->
+<!-- コメント者ごとに固定した色 -->
+<div id="commenterRail" class="tiprail" aria-label="常連コメント者"></div>
 <div class="superArea">
-  <div id="patronbar" class="patronbar">
-    <div class="patronhint">SUPER<br>CHAT</div>
+  <div class="activitySummary">
+    <div id="patronbar" class="patronbar">コメントを待っています</div>
+    <div>今回の動作 <b id="exerciseCount">0</b>回</div>
+    <div id="sessionResult" role="status">収益は停止時に確定（1動作＝10円）</div>
   </div>
-
-  <div class="tiptotal">
-    投げ銭
-    <b>¥<span id="tips">0</span></b>
-  </div>
+  <div class="tiptotal">確定収益<b>¥<span id="tips">0</span></b></div>
 </div>
 
 <!-- コメント -->
@@ -108,9 +79,9 @@
 <video id="cameraVideo" playsinline muted></video>
 
 <!-- データ・ゲーム処理 -->
-<script src="./js/stream-patrons.js?v=1"></script>
-<script src="./js/stream-comments.js?v=1"></script>
-<script src="./js/streamer-game.js?v=3"></script>
+<script src="./js/stream-patrons.js?v=2"></script>
+<script src="./js/stream-comments.js?v=2"></script>
+<script src="./js/streamer-game.js?v=4"></script>
 
 </body>
 </html>
