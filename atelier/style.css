@@ -22,3 +22,12 @@ input,textarea{-webkit-user-select:text!important;user-select:text!important;-we
 .card-bg-actions{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:4px}.card-bg-actions .option{padding:6px;min-height:36px;font-size:11px}
 .card-fields input[hidden]{display:none!important}
 @media(max-height:650px){.card-fields{gap:5px}.card-fields select,.card-fields input[type=text],.card-fields textarea{padding:5px!important}.card-bg-actions .option{min-height:32px}.card-editor{gap:8px}}
+
+
+/* All controls follow the same visual viewport as the canvas. */
+#app{overflow:hidden;min-width:0}#modal{z-index:10;pointer-events:none}#modal .shade{position:absolute;pointer-events:auto}
+#workspace{min-height:0}.sheetbar{padding:0 8px;gap:2px}.sheetbar .pill{font-size:9px;margin-right:auto}.sheetbar .card-entry{padding:0 8px}
+.image-layout-editor{display:grid;grid-template-columns:minmax(60px,1fr) minmax(0,2fr);gap:10px;align-items:start}
+#imageLayoutPreview{width:100%;height:auto;background:conic-gradient(#e3e4e0 25%,#fff 0 50%,#e3e4e0 0 75%,#fff 0);background-size:12px 12px}
+.image-layout-editor .row label{display:block;min-width:0;font-size:11px}.image-layout-editor input[type=number]{padding:5px!important}.image-layout-editor select{padding:6px!important}.image-layout-editor label{margin:6px 0}
+@media(max-width:360px){.sheetbar .pill{display:none}.sheetbar .card-entry:first-of-type{margin-right:auto}}
