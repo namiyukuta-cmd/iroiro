@@ -13,3 +13,12 @@ input,textarea{-webkit-user-select:text!important;user-select:text!important;-we
 .card-editor{display:grid;grid-template-columns:minmax(70px,1fr) minmax(0,2fr);gap:12px;align-items:start}
 #cardPreview{width:100%;height:auto;background:conic-gradient(#e3e4e0 25%,#fff 0 50%,#e3e4e0 0 75%,#fff 0);background-size:12px 12px;border:1px solid #dcded5}
 .card-fields{display:grid;gap:8px;min-width:0}.card-fields input[type=text],.card-fields textarea{width:100%;font:inherit;font-size:14px;resize:none;border:1px solid #d4dbcf;border-radius:8px;padding:8px;background:#fff;color:var(--ink);touch-action:manipulation}.card-fields label{margin:0}.card-fields select{padding:8px;font-size:12px}
+
+/* iOS zooms focused form controls below 16px. Keep all editor inputs readable. */
+#modal input:not([type=checkbox]):not([type=color]):not([type=range]),#modal textarea,#modal select,#options input{font-size:16px!important}
+#modal .shade{min-width:0;overflow:hidden}
+#modal .panel{min-width:0;flex-shrink:1;max-width:100%}
+#modal .panel-head{min-width:0}#modal .panel-head h2{min-width:0;flex:1}#modal .panel-head button{flex:0 0 44px}
+.card-bg-actions{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:4px}.card-bg-actions .option{padding:6px;min-height:36px;font-size:11px}
+.card-fields input[hidden]{display:none!important}
+@media(max-height:650px){.card-fields{gap:5px}.card-fields select,.card-fields input[type=text],.card-fields textarea{padding:5px!important}.card-bg-actions .option{min-height:32px}.card-editor{gap:8px}}

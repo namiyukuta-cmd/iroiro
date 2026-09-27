@@ -18,8 +18,17 @@ function restore(state){const d=JSON.parse(state);doc=d.doc;selected=d.selected;
 function history(back){if(busy)return;const from=back?undo:redo,to=back?redo:undo;if(!from.length)return;to.push(snapshot());restore(from.pop());collect();toast(back?'元に戻しました':'やり直しました')}
 function toast(t){clearTimeout(toastTimer);$('toast').textContent=t;$('toast').hidden=false;toastTimer=setTimeout(()=>$('toast').hidden=true,3300)}
 function setBusy(value,text){busy=value;$('app').inert=value;if(text)$('hint').textContent=text}
-function closePanel(){$('modal').innerHTML=''}
-function panel(title,html){$('modal').innerHTML=`<div class="shade ${title==='レイヤー'?'layer-drawer':''}"><section class="panel" role="dialog" aria-modal="true" aria-label="${title}"><div class="panel-head"><h2>${title}</h2><button id="closePanel" aria-label="閉じる">×</button></div>${html}</section></div>`;$('closePanel').onclick=closePanel;$('closePanel').focus()}
+function closePanel(){document.activeElement?.blur?.();$('modal').innerHTML='';}
+function panel(title,html){$('modal').innerHTML=`<div class="shade ${title==='レイヤー'?'layer-drawer':''}"><section class="panel" role="dialog" aria-modal="true" aria-label="${title}"><div class="panel-head"><h2>${title}</h2><button id="closePanel" aria-label="閉じる">×</button></div>${html}</section></div>`;$('closePanel').onclick=closePanel;$('closePanel').focus({preventScroll:true});const shade=$('modal').firstElementChild;shade.addEventListener('click',e=>{if(e.target===shade)closePanel()});fitPanelViewport();}
+// Keep dialogs inside the visible viewport, even if Safari is already zoomed.
+function fitPanelViewport(){
+ const shade=$('modal').firstElementChild,v=window.visualViewport;if(!shade||!v)return;
+ Object.assign(shade.style,{inset:'auto',left:v.offsetLeft+'px',top:v.offsetTop+'px',width:v.width+'px',height:v.height+'px'});
+ const panel=shade.querySelector('.panel');if(panel){panel.style.transform='';panel.style.transformOrigin='center bottom';const maxH=v.height-24,maxW=v.width-24;const scale=Math.min(1,maxH/panel.scrollHeight,maxW/panel.scrollWidth);panel.style.transform=`scale(${scale})`;}
+}
+window.visualViewport?.addEventListener('resize',fitPanelViewport);
+window.visualViewport?.addEventListener('scroll',fitPanelViewport);
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closePanel()});
 function escapeHTML(t){return t.replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
 function layout(){const p=sheet(),r=$('workspace').getBoundingClientRect(),pad=r.height<240?20:36,scale=Math.min((r.width-pad)/p.w,(r.height-pad)/p.h);$('paper').style.width=Math.max(1,p.w*scale)+'px';$('paper').style.height=Math.max(1,p.h*scale)+'px'}
 function render(){const p=sheet();if(canvas.width!==p.w||canvas.height!==p.h){canvas.width=overlay.width=p.w;canvas.height=overlay.height=p.h}C.render(ctx,p,assets);$('dimensions').textContent=`${p.w} × ${p.h} px${p.bg?'':' · 透過'}`;$('page').textContent=`${doc.page+1} / ${doc.sheets.length}`;$('prev').disabled=doc.page===0;$('next').disabled=doc.page===doc.sheets.length-1;$('undo').disabled=!undo.length;$('redo').disabled=!redo.length;$('empty').hidden=p.layers.length>0||tool==='pen';document.querySelectorAll('[data-tool]').forEach(b=>b.classList.toggle('active',b.dataset.tool===tool));options();layout();drawOverlay();hint()}
@@ -29,43 +38,50 @@ function options(){const current=layer();if(tool==='move'&&current?.shape==='rec
 function transform(f,a){const l=layer();if(!l){toast('画像を選んでください');return}checkpoint();l.scale=Math.max(.01,Math.min(30,l.scale*f));l.rotation=(l.rotation+a)%360;changed()}
 function setTool(t){if(busy)return;if(t==='add'){panel('追加','<div class="grid"><button id="addImages" class="option">画像を追加</button><button id="addShape" class="option">図形挿入</button><button id="addCardLayout" class="option">カードレイアウト</button></div>');$('addImages').onclick=()=>{$('files').click()};$('addShape').onclick=shapePanel;$('addCardLayout').onclick=cardLayoutPanel;return}if(t==='align'){alignPanel();return}if(t==='shape'){shapeFormatPanel();return}if(t==='split'){splitPanel();return}if(t==='save'){savePanel();return}tool=t;crop=null;render()}
 function point(e){const r=overlay.getBoundingClientRect();return{x:(e.clientX-r.left)*sheet().w/r.width,y:(e.clientY-r.top)*sheet().h/r.height}}
-function topAt(p){return [...sheet().layers].reverse().find(l=>C.hit(l,p))}
+function topAt(p){return [...sheet().layers].reverse().find(l=>!l.cardDecoration&&!l.cardBackground&&C.hit(l,p))}
 function addPaint(){const a=register(makeCanvas(sheet().w,sheet().h)),l=makeLayer(a,'描画');sheet().layers.push(l);selected=l.id;return l}
 function drawRectangleAsset(l){const c=makeCanvas(l.w,l.h),cx=c.getContext('2d'),st=l.shapeStyle||{fill:'#ffffff',stroke:'#384b43',strokeWidth:4,fillEnabled:true,strokeEnabled:true};if(st.fillEnabled){cx.fillStyle=st.fill;cx.fillRect(0,0,l.w,l.h)}if(st.strokeEnabled&&st.strokeWidth>0){cx.strokeStyle=st.stroke;cx.lineWidth=Math.min(st.strokeWidth,Math.min(l.w,l.h));const d=cx.lineWidth/2;cx.strokeRect(d,d,Math.max(0,l.w-cx.lineWidth),Math.max(0,l.h-cx.lineWidth))}l.asset=register(c)}
 function addRectangle(){if(doc.sheets.flatMap(p=>p.layers).length>=60){toast('60レイヤーまでです');return}const p=sheet(),w=Math.max(40,Math.round(p.w*.55)),h=Math.max(40,Math.round(p.h*.22)),l={id:uid(),asset:0,name:'四角形',w,h,x:p.w/2,y:p.h/2,scale:1,rotation:0,visible:true,opacity:1,frame:null,shape:'rectangle',shapeStyle:{fill:'#ffffff',stroke:'#384b43',strokeWidth:4,fillEnabled:true,strokeEnabled:true}};drawRectangleAsset(l);checkpoint();sheet().layers.push(l);selected=l.id;closePanel();tool='move';changed();shapeFormatPanel();toast('四角形を追加しました')}
 function shapeFormatPanel(){const l=layer();if(!l||l.shape!=='rectangle'){toast('四角形を選んでください');return}const st=l.shapeStyle;panel('図形の書式',`<p>Excelの図形と同じように、塗り・枠線・サイズを変更できます。</p><label><input id="shapeFillOn" type="checkbox" ${st.fillEnabled?'checked':''}>塗りつぶし</label><input id="shapeFill" type="color" value="${st.fill}"><label><input id="shapeStrokeOn" type="checkbox" ${st.strokeEnabled?'checked':''}>枠線</label><input id="shapeStroke" type="color" value="${st.stroke}"><label>枠線の太さ <input id="shapeStrokeWidth" type="range" min="0" max="40" value="${st.strokeWidth}"><span id="shapeStrokeValue">${st.strokeWidth}</span></label><div class="row"><label>幅<input id="shapeW" type="number" min="1" max="4096" value="${l.w}"></label><label>高さ<input id="shapeH" type="number" min="1" max="4096" value="${l.h}"></label></div><label>透明度 <input id="shapeOpacity" type="range" min="0" max="100" value="${Math.round(l.opacity*100)}"><span id="shapeOpacityValue">${Math.round(l.opacity*100)}%</span></label><button id="applyShape" class="primary full">適用する</button>`);$('shapeStrokeWidth').oninput=e=>$('shapeStrokeValue').textContent=e.target.value;$('shapeOpacity').oninput=e=>$('shapeOpacityValue').textContent=e.target.value+'%';$('applyShape').onclick=()=>{const w=+$('shapeW').value,h=+$('shapeH').value;if(!Number.isFinite(w)||!Number.isFinite(h)||w<1||h<1||w>4096||h>4096){toast('幅・高さは1〜4096pxで指定してください');return}checkpoint();l.w=Math.round(w);l.h=Math.round(h);l.shapeStyle={fill:$('shapeFill').value,stroke:$('shapeStroke').value,strokeWidth:+$('shapeStrokeWidth').value,fillEnabled:$('shapeFillOn').checked,strokeEnabled:$('shapeStrokeOn').checked};l.opacity=+$('shapeOpacity').value/100;drawRectangleAsset(l);closePanel();changed()}}
 function cardLayoutPanel(){
  const current=sheet(),editing=!!current.card;
+ const oldBackground=current.layers.find(l=>l.cardBackground);let backgroundCanvas=oldBackground?assets.get(oldBackground.asset):null;
  const initial=editing?current.card:{type:'detail',title:'',description:'',color:'#111111',fit:'contain'};
  panel('カードレイアウト',`<div class="card-editor"><canvas id="cardPreview" width="180" height="255" aria-label="カードのプレビュー"></canvas><div class="card-fields">
  <select id="cardType" aria-label="カードのレイアウト">${Object.entries(CardLayout.styles).map(([v,t])=>`<option value="${v}">${t}</option>`).join('')}</select>
  <input id="cardTitle" type="text" maxlength="60" placeholder="名前" aria-label="カードの名前">
- <textarea id="cardDescription" rows="3" maxlength="300" placeholder="説明" aria-label="カードの説明"></textarea>
+ <textarea id="cardDescription" rows="2" maxlength="300" placeholder="説明" aria-label="カードの説明"></textarea>
  <div class="row"><label>枠色<input id="cardColor" type="color"></label></div>
  <select id="cardFit" aria-label="画像の合わせ方"><option value="contain">画像全体を収める</option><option value="cover">画像を枠いっぱいに</option></select>
+ <div class="card-bg-actions"><button id="chooseCardBackground" class="option" type="button">背景画像を選ぶ</button><button id="removeCardBackground" class="option" type="button">背景なし</button></div>
+ <input id="cardBackgroundFile" type="file" accept="image/*" hidden>
  </div></div><p class="quiet">${editing?'このカードの枠・文字を変更します。':'595×842pxの新しいシートに作成します。選択中の画像をコピーできます。'}</p>
  ${editing?'':'<label><input id="cardCopy" type="checkbox" checked>選択中の画像を使う</label>'}
  <button id="applyCardLayout" class="primary full">${editing?'カードを更新':'カードを作る'}</button>`);
  $('cardType').value=CardLayout.styles[initial.type]?initial.type:'detail';$('cardTitle').value=initial.title||'';$('cardDescription').value=initial.description||'';$('cardColor').value=/^#[0-9a-f]{6}$/i.test(initial.color)?initial.color:'#111111';$('cardFit').value=initial.fit==='cover'?'cover':'contain';
- const source=layer();if(!editing)$('cardCopy').disabled=!source;
+ const source=layer()&&!layer().cardDecoration&&!layer().cardBackground?layer():null;if(!editing)$('cardCopy').disabled=!source;
  function settings(){return{type:$('cardType').value,title:$('cardTitle').value,description:$('cardDescription').value,color:$('cardColor').value,fit:$('cardFit').value};}
- function preview(){const st=settings(),cv=$('cardPreview'),cx=cv.getContext('2d');cv.width=editing?current.w:595;cv.height=editing?current.h:842;CardLayout.draw(cx,cv.width,cv.height,st);const sample=editing?current.layers.find(l=>!l.cardDecoration):($('cardCopy').checked?source:null);if(sample){const box=CardLayout.geometry(cv.width,cv.height,st.type).image;C.drawLayer(cx,{...sample,...C.placement({width:sample.w,height:sample.h},box,st.fit),visible:true},assets);} $('cardTitle').disabled=st.type==='full';$('cardDescription').disabled=st.type!=='detail';}
+ function preview(){const st=settings(),cv=$('cardPreview'),cx=cv.getContext('2d');cv.width=editing?current.w:595;cv.height=editing?current.h:842;CardLayout.draw(cx,cv.width,cv.height,st);if(backgroundCanvas){cx.save();cx.globalCompositeOperation='destination-over';const z=C.fit(backgroundCanvas.width,backgroundCanvas.height,{w:cv.width,h:cv.height},'cover');cx.drawImage(backgroundCanvas,(cv.width-backgroundCanvas.width*z)/2,(cv.height-backgroundCanvas.height*z)/2,backgroundCanvas.width*z,backgroundCanvas.height*z);cx.restore();}const sample=editing?current.layers.find(l=>!l.cardDecoration&&!l.cardBackground):($('cardCopy').checked?source:null);if(sample){const box=CardLayout.geometry(cv.width,cv.height,st.type).image;C.drawLayer(cx,{...sample,...C.placement({width:sample.w,height:sample.h},box,st.fit),visible:true},assets);} $('cardTitle').disabled=st.type==='full';$('cardDescription').disabled=st.type!=='detail';}
  for(const id of ['cardType','cardTitle','cardDescription','cardColor','cardFit','cardCopy'])if($(id))$(id).oninput=preview;
- preview();
+ $('chooseCardBackground').onclick=()=>$('cardBackgroundFile').click();
+ $('removeCardBackground').onclick=()=>{backgroundCanvas=null;preview();};
+ $('cardBackgroundFile').onchange=async e=>{const file=e.target.files[0];e.target.value='';if(!file)return;const panelElement=$('cardPreview');const apply=$('applyCardLayout');apply.disabled=true;try{if(file.size>32*1024*1024)throw Error('32MBを超えています');const image=await readImage(file);if([...assets.values()].reduce((n,a)=>n+a.width*a.height,0)+image.width*image.height>60000000)throw Error('画像容量が上限を超えています');if($('cardPreview')!==panelElement)return;backgroundCanvas=image;preview();}catch(err){toast('背景を読み込めませんでした：'+err.message);}finally{if($('cardPreview')===panelElement)apply.disabled=false;}};
+ preview();fitPanelViewport();
  $('applyCardLayout').onclick=()=>{
   const st=settings(),copy=!editing&&$('cardCopy').checked&&source;
   const count=doc.sheets.reduce((n,p)=>n+p.layers.length,0),existing=current.layers.find(l=>l.cardDecoration);
-  if((!editing&&doc.sheets.length>=60)||count+(editing?(existing?0:1):(copy?2:1))>60){toast('シート・レイヤーは60までです');return;}
+  if((!editing&&doc.sheets.length>=60)||count+(editing?(existing?0:1)-(oldBackground?1:0):(copy?2:1))+(backgroundCanvas?1:0)>60){toast('シート・レイヤーは60までです');return;}
   checkpoint();
   if(!editing){doc.sheets.push(newSheet());doc.page=doc.sheets.length-1;}
   const p=sheet(),previous=p.card;p.card=st;
   const cv=makeCanvas(p.w,p.h);CardLayout.draw(cv.getContext('2d'),p.w,p.h,st);
   const frame=makeLayer(register(cv),'カードの枠・文字');frame.cardDecoration=true;
-  p.layers=p.layers.filter(l=>!l.cardDecoration);p.layers.unshift(frame);
+  p.layers=p.layers.filter(l=>!l.cardDecoration&&!l.cardBackground);p.layers.unshift(frame);
+  if(backgroundCanvas){const bg=makeLayer(register(backgroundCanvas),'カード背景');bg.cardBackground=true;Object.assign(bg,C.placement(backgroundCanvas,{x:0,y:0,w:p.w,h:p.h},'cover'));p.layers.unshift(bg);}
   const box=CardLayout.geometry(p.w,p.h,st.type).image;
-  if(copy){const image={...source,id:uid(),name:source.name,cardDecoration:false};Object.assign(image,C.placement({width:image.w,height:image.h},box,st.fit));p.layers.push(image);}
-  if(editing&&(previous.type!==st.type||previous.fit!==st.fit))for(const l of p.layers.filter(l=>!l.cardDecoration))Object.assign(l,C.placement({width:l.w,height:l.h},box,st.fit));
-  selected=p.layers.find(l=>!l.cardDecoration)?.id??null;tool='move';closePanel();changed();toast(editing?'カードを更新しました':'カードを作成しました。「追加」で画像を入れられます');
+  if(copy){const image={...source,id:uid(),name:source.name,cardDecoration:false,cardBackground:false};Object.assign(image,C.placement({width:image.w,height:image.h},box,st.fit));p.layers.push(image);}
+  if(editing&&(previous.type!==st.type||previous.fit!==st.fit))for(const l of p.layers.filter(l=>!l.cardDecoration&&!l.cardBackground))Object.assign(l,C.placement({width:l.w,height:l.h},box,st.fit));
+  selected=p.layers.find(l=>!l.cardDecoration&&!l.cardBackground)?.id??null;tool='move';closePanel();changed();toast(editing?'カードを更新しました':'カードを作成しました。「追加」で画像を入れられます');
  };
 }
 $('cardLayout').onclick=cardLayoutPanel;
