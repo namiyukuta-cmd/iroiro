@@ -20,27 +20,39 @@ function toast(t){clearTimeout(toastTimer);$('toast').textContent=t;$('toast').h
 function setBusy(value,text){busy=value;$('app').inert=value;if(text)$('hint').textContent=text}
 function closePanel(){document.activeElement?.blur?.();$('modal').innerHTML='';}
 function panel(title,html){$('modal').innerHTML=`<div class="shade ${title==='レイヤー'?'layer-drawer':''}"><section class="panel" role="dialog" aria-modal="true" aria-label="${title}"><div class="panel-head"><h2>${title}</h2><button id="closePanel" aria-label="閉じる">×</button></div>${html}</section></div>`;$('closePanel').onclick=closePanel;$('closePanel').focus({preventScroll:true});const shade=$('modal').firstElementChild;shade.addEventListener('click',e=>{if(e.target===shade)closePanel()});fitPanelViewport();}
-// Normalize the entire editor to the actually visible screen, including Safari zoom.
-function viewportMetrics(){const v=window.visualViewport,z=v?.scale||1;return{x:v?.offsetLeft||0,y:v?.offsetTop||0,w:(v?.width||window.innerWidth)*z,h:(v?.height||window.innerHeight)*z,z};}
+// Queue resize work and skip unchanged geometry. Never counter-scale the page.
+let viewportFrame=0,lastViewportKey='',lastPaperKey='';
+function viewportMetrics(){const v=window.visualViewport;return{w:document.documentElement.clientWidth||window.innerWidth,h:v&&Math.abs((v.scale||1)-1)<.01?v.height:window.innerHeight};}
 function syncEditorViewport(){
- const v=viewportMetrics();
- for(const id of ['app','modal'])Object.assign($(id).style,{position:'fixed',left:v.x+'px',top:v.y+'px',width:v.w+'px',height:v.h+'px',maxWidth:'none',margin:'0',transform:`scale(${1/v.z})`,transformOrigin:'top left'});
- layout();fitPanelViewport();
+ if(viewportFrame)return;
+ viewportFrame=requestAnimationFrame(()=>{
+  viewportFrame=0;const v=viewportMetrics(),w=Math.round(v.w),h=Math.round(v.h),key=w+','+h;
+  if(key===lastViewportKey)return;
+  lastViewportKey=key;
+  for(const id of ['app','modal'])Object.assign($(id).style,{position:'fixed',left:'0',top:'0',width:'100%',height:h+'px',maxWidth:'none',margin:'0',transform:'none'});
+  layout();fitPanelViewport();
+ });
 }
 function fitPanelViewport(){
  const shade=$('modal').firstElementChild;if(!shade)return;const p=shade.querySelector('.panel');if(!p)return;
  const v=viewportMetrics();Object.assign(shade.style,{inset:'0',width:'100%',height:'100%'});
- p.style.maxHeight='none';p.style.transform='';p.style.transformOrigin='center bottom';
- const z=Math.min(1,Math.max(1,v.h-24)/p.scrollHeight,Math.max(1,v.w-24)/p.scrollWidth);p.style.transform=`scale(${z})`;
+ p.style.maxHeight='none';p.style.transform='none';p.style.transformOrigin='center bottom';
+ const z=Math.min(1,Math.max(1,v.h-24)/p.scrollHeight,Math.max(1,v.w-24)/p.scrollWidth);
+ if(z<1)p.style.transform=`scale(${z})`;
 }
 window.visualViewport?.addEventListener('resize',syncEditorViewport);
-window.visualViewport?.addEventListener('scroll',syncEditorViewport);
 window.addEventListener('resize',syncEditorViewport);
 window.addEventListener('pageshow',syncEditorViewport);
 document.addEventListener('keydown',e=>{if(e.key==='Escape')closePanel()});
 for(const name of ['gesturestart','gesturechange'])document.addEventListener(name,e=>e.preventDefault(),{passive:false});
 function escapeHTML(t){return t.replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
-function layout(){const p=sheet(),r={width:$('workspace').clientWidth,height:$('workspace').clientHeight},pad=r.height<240?20:36,scale=Math.min((r.width-pad)/p.w,(r.height-pad)/p.h);$('paper').style.width=Math.max(1,p.w*scale)+'px';$('paper').style.height=Math.max(1,p.h*scale)+'px'}
+function layout(){
+ const p=sheet(),w=$('workspace').clientWidth,h=$('workspace').clientHeight,key=[w,h,p.w,p.h].join(',');
+ if(key===lastPaperKey)return;
+ lastPaperKey=key;const pad=h<240?20:36,scale=Math.max(0,Math.min((w-pad)/p.w,(h-pad)/p.h));
+ $('paper').style.width=Math.max(1,p.w*scale)+'px';
+ $('paper').style.height=Math.max(1,p.h*scale)+'px';
+}
 function render(){const p=sheet();if(canvas.width!==p.w||canvas.height!==p.h){canvas.width=overlay.width=p.w;canvas.height=overlay.height=p.h}C.render(ctx,p,assets);$('dimensions').textContent=`${p.w} × ${p.h} px${p.bg?'':' · 透過'}`;$('page').textContent=`${doc.page+1} / ${doc.sheets.length}`;$('prev').disabled=doc.page===0;$('next').disabled=doc.page===doc.sheets.length-1;$('undo').disabled=!undo.length;$('redo').disabled=!redo.length;$('empty').hidden=p.layers.length>0||tool==='pen';document.querySelectorAll('[data-tool]').forEach(b=>b.classList.toggle('active',b.dataset.tool===tool));options();layout();drawOverlay();hint()}
 function hint(){const l=layer();$('hint').textContent=tool==='crop'?'指で四角く囲む →「切り抜く」で確定':tool==='pen'?'選択中のレイヤーに描画 · 空のときは描画レイヤーを追加':tool==='eraser'?'選択したレイヤーだけを消します':l?`${l.name} · 1本指で移動／2本指で拡大・回転`:'画像をタップして選択 · 追加でまとめて読み込み'}
 function drawOverlay(){ui.clearRect(0,0,overlay.width,overlay.height);const scale=overlay.width/Math.max(1,overlay.clientWidth),p=sheet();ui.lineWidth=scale;ui.strokeStyle='#418b80';if(guide&&p.grid>1){ui.save();ui.setLineDash([5*scale,4*scale]);for(const r of C.cells(p.w,p.h,p.grid))ui.strokeRect(r.x,r.y,r.w,r.h);ui.restore()}if(guide&&p.imageLayout){ui.save();ui.setLineDash([5*scale,4*scale]);for(const box of imageSlots(p,p.imageLayout))ui.strokeRect(box.x,box.y,box.w,box.h);ui.restore()}const l=layer();if(l&&tool==='move'){ui.save();if(l.frame){ui.strokeStyle='#d09b58';ui.strokeRect(l.frame.x,l.frame.y,l.frame.w,l.frame.h)}ui.translate(l.x,l.y);ui.rotate(l.rotation*Math.PI/180);ui.strokeStyle='#388a77';ui.strokeRect(-l.w*l.scale/2,-l.h*l.scale/2,l.w*l.scale,l.h*l.scale);for(const [x,y] of (l.shape==='rectangle'?[[-1,-1],[0,-1],[1,-1],[1,0],[1,1],[0,1],[-1,1],[-1,0]]:[[-1,-1],[1,-1],[1,1],[-1,1]])){ui.fillStyle='white';ui.fillRect(x*l.w*l.scale/2-4*scale,y*l.h*l.scale/2-4*scale,8*scale,8*scale);ui.strokeRect(x*l.w*l.scale/2-4*scale,y*l.h*l.scale/2-4*scale,8*scale,8*scale)}ui.restore()}if(crop){const r=cropRect();ui.fillStyle='#398a7433';ui.fillRect(r.x,r.y,r.w,r.h);ui.strokeStyle='#327d68';ui.strokeRect(r.x,r.y,r.w,r.h)}}
