@@ -11,7 +11,7 @@
 <body>
 <main id="app">
  <header><button id="document" aria-label="キャンバス設定">▤</button><div class="title">てのひらアトリエ<small id="dimensions">595 × 842</small></div><button id="undo" aria-label="元に戻す">↶</button><button id="redo" aria-label="やり直す">↷</button><button id="layers" aria-label="レイヤー">▱</button></header>
- <div class="sheetbar"><span class="pill">端末内で編集</span><button id="prev" aria-label="前のシート">‹</button><span id="page">1 / 1</span><button id="next" aria-label="次のシート">›</button><button id="addSheet" aria-label="シート追加">＋</button></div>
+ <div class="sheetbar"><span class="pill">端末内で編集</span><button id="cardLayout" class="card-entry">カード</button><button id="prev" aria-label="前のシート">‹</button><span id="page">1 / 1</span><button id="next" aria-label="次のシート">›</button><button id="addSheet" aria-label="シート追加">＋</button></div>
  <section id="workspace"><div id="paper"><canvas id="canvas" aria-label="画像編集キャンバス"></canvas><canvas id="overlay" aria-label="指で画像を移動・描画できます"></canvas></div><div id="empty"><span>＋</span><strong>画像をならべて、描き足す。</strong><p>「追加」から画像をまとめて読み込み</p></div></section>
  <div id="hint" role="status">画像を追加するか「描く」で始められます</div>
  <section class="controls"><div id="options"></div><nav id="tools"><button data-tool="add"><b>＋</b>追加</button><button data-tool="move" class="active"><b>✥</b>移動</button><button data-tool="pen"><b>✎</b>描く</button><button data-tool="eraser"><b>▱</b>消す</button><button data-tool="crop"><b>⌗</b>切抜</button><button data-tool="align"><b>▦</b>整列</button><button data-tool="split"><b>⊞</b>分割</button><button data-tool="save" class="save"><b>↓</b>保存</button></nav></section>
@@ -19,6 +19,7 @@
 <input id="files" type="file" accept="image/*" multiple hidden><input id="projectFile" type="file" accept=".json,application/json" hidden>
 <div id="modal"></div><div id="toast" role="status" hidden></div>
 <script>
-(async()=>{for(const file of ['core.js','app.js'])await new Promise((resolve,reject)=>{const script=document.createElement('script');script.src=file+'?v='+Date.now();script.onload=resolve;script.onerror=reject;document.body.append(script)})})().catch(()=>{document.getElementById('hint').textContent='読み込みに失敗しました。通信を確認して再読み込みしてください。'});
+(async()=>{for(const file of ['core.js','card-layout.js','app.js'])await new Promise((resolve,reject)=>{const script=document.createElement('script');script.src=file+'?v='+Date.now();script.onload=resolve;script.onerror=reject;document.body.append(script)})})().catch(()=>{document.getElementById('hint').textContent='読み込みに失敗しました。通信を確認して再読み込みしてください。'});
 </script>
 </body></html>
+

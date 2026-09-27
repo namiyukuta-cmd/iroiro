@@ -7,3 +7,9 @@ html,body,#app,#workspace,#paper,canvas,#overlay{touch-action:none}input,select{
 /* Block native iOS selection/callout across the editor; form fields remain editable. */
 #app,#app *,#modal,#modal *{-webkit-user-select:none!important;user-select:none!important;-webkit-touch-callout:none!important;-webkit-user-drag:none}
 input,textarea{-webkit-user-select:text!important;user-select:text!important;-webkit-touch-callout:default!important}
+
+
+.sheetbar .card-entry{width:auto;padding:0 10px;font-size:12px;background:#d0e5d8;color:#295c49;font-weight:600}
+.card-editor{display:grid;grid-template-columns:minmax(70px,1fr) minmax(0,2fr);gap:12px;align-items:start}
+#cardPreview{width:100%;height:auto;background:conic-gradient(#e3e4e0 25%,#fff 0 50%,#e3e4e0 0 75%,#fff 0);background-size:12px 12px;border:1px solid #dcded5}
+.card-fields{display:grid;gap:8px;min-width:0}.card-fields input[type=text],.card-fields textarea{width:100%;font:inherit;font-size:14px;resize:none;border:1px solid #d4dbcf;border-radius:8px;padding:8px;background:#fff;color:var(--ink);touch-action:manipulation}.card-fields label{margin:0}.card-fields select{padding:8px;font-size:12px}
