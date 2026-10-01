@@ -3,10 +3,10 @@
   const continueButton = document.getElementById("continueButton");
 
   newGameButton?.addEventListener("click", () => {
-    console.log("初めから");
+    location.href = "../index.html?_nc=" + Date.now();
   });
 
   continueButton?.addEventListener("click", () => {
-    console.log("続きから");
+    location.href = "../index.html?_nc=" + Date.now();
   });
 })();
