@@ -1,0 +1,35 @@
+.scene-area{
+  position:relative;
+}
+
+.shop-home-actions{
+  position:absolute;
+  left:50%;
+  top:50%;
+  z-index:180;
+  width:min(78%,320px);
+  transform:translate(-50%,-50%);
+  display:grid;
+  gap:14px;
+  pointer-events:auto;
+}
+
+.shop-home-btn{
+  width:100%;
+  min-height:64px;
+  border:2px solid #29261f;
+  border-radius:12px;
+  background:#fffaf0;
+  color:#211f1a;
+  font:inherit;
+  font-size:20px;
+  font-weight:900;
+  cursor:pointer;
+  box-shadow:0 3px 8px rgba(0,0,0,.18);
+  -webkit-tap-highlight-color:transparent;
+}
+
+.shop-home-btn:active{
+  transform:scale(.98);
+  background:#e0d6be;
+}
