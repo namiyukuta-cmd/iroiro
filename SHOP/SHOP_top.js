@@ -1,17 +1,17 @@
 (() => {
   'use strict';
 
-  const stockButton = document.getElementById('shopStockButton');
-  const openButton = document.getElementById('shopOpenButton');
+  const stockButton = document.getElementById('stockButton');
+  const openShopButton = document.getElementById('openShopButton');
 
-  stockButton?.addEventListener('click', () => {
-    window.dispatchEvent(new CustomEvent('shop-home-action', {
+  stockButton.addEventListener('click', () => {
+    window.dispatchEvent(new CustomEvent('shop-top-action', {
       detail: { action: 'stock' }
     }));
   });
 
-  openButton?.addEventListener('click', () => {
-    window.dispatchEvent(new CustomEvent('shop-home-action', {
+  openShopButton.addEventListener('click', () => {
+    window.dispatchEvent(new CustomEvent('shop-top-action', {
       detail: { action: 'open' }
     }));
   });
