@@ -7,6 +7,7 @@
   <meta http-equiv="Pragma" content="no-cache" />
   <meta http-equiv="Expires" content="0" />
   <title>SHOP</title>
+  <link rel="stylesheet" href="./SHOP_home.css?v=20261002-home-buttons-1" />
   <style>
     *{box-sizing:border-box}
     html,body{margin:0;width:100%;height:100%;background:#d8d0bb;color:#211f1a}
@@ -772,6 +773,10 @@
     </section>
 
     <main class="scene-area">
+      <div class="shop-home-actions" id="shopHomeActions" aria-label="店の操作">
+        <button type="button" class="shop-home-btn" id="shopStockButton" data-shop-home-action="stock">仕入れ</button>
+        <button type="button" class="shop-home-btn" id="shopOpenButton" data-shop-home-action="open">店を開く</button>
+      </div>
       <section class="town-panel" aria-label="町">
         <div class="scene-name" id="sceneName"></div>
         <div class="town-scroll" id="townScroll">
@@ -837,7 +842,8 @@
       './SHOP_life.js',
       './SHOP_action.js',
       './SHOP_save.js',
-      './SHOP_app.js'
+      './SHOP_app.js',
+      './SHOP_home.js'
     ];
     for (const file of files) {
       await new Promise((resolve, reject) => {
