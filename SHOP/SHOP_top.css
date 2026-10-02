@@ -1,53 +1,35 @@
-*{
-  box-sizing:border-box;
-  -webkit-tap-highlight-color:transparent;
+.scene-area{
+  position:relative;
 }
 
-html,
-body{
-  margin:0;
-  width:100%;
-  height:100%;
-}
-
-body{
-  min-height:100dvh;
-  overflow:hidden;
-  background:#eee8d8;
-  color:#211f1a;
-  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
-}
-
-button{
-  font:inherit;
-  color:inherit;
-}
-
-.shop-top{
-  width:min(100%,520px);
-  height:100dvh;
-  margin:0 auto;
-  padding:
-    max(20px,env(safe-area-inset-top))
-    18px
-    max(20px,env(safe-area-inset-bottom));
+.shop-home-actions{
+  position:absolute;
+  left:50%;
+  top:50%;
+  z-index:180;
+  width:min(78%,320px);
+  transform:translate(-50%,-50%);
   display:grid;
-  align-content:center;
-  gap:16px;
+  gap:14px;
+  pointer-events:auto;
 }
 
-.shop-top-button{
+.shop-home-btn{
   width:100%;
-  min-height:68px;
+  min-height:64px;
   border:2px solid #29261f;
   border-radius:12px;
   background:#fffaf0;
+  color:#211f1a;
+  font:inherit;
   font-size:20px;
   font-weight:900;
   cursor:pointer;
+  box-shadow:0 3px 8px rgba(0,0,0,.18);
+  -webkit-tap-highlight-color:transparent;
 }
 
-.shop-top-button:active{
-  transform:scale(.985);
+.shop-home-btn:active{
+  transform:scale(.98);
   background:#e0d6be;
 }
