@@ -1,20 +1,860 @@
 <!doctype html>
 <html lang="ja">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
-  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-  <meta http-equiv="Pragma" content="no-cache">
-  <meta http-equiv="Expires" content="0">
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no" />
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+  <meta http-equiv="Pragma" content="no-cache" />
+  <meta http-equiv="Expires" content="0" />
   <title>SHOP</title>
-  <link rel="stylesheet" href="./SHOP_top.css?v=20261002-top-home-1">
+  <link rel="stylesheet" href="./SHOP_top.css?v=20261002-top-buttons-1" />
+  <style>
+    *{box-sizing:border-box}
+    html,body{margin:0;width:100%;height:100%;background:#d8d0bb;color:#211f1a}
+    body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;overflow:hidden}
+    button,a{font:inherit;color:inherit}
+    .app{
+      width:min(100%,520px);
+      height:100dvh;
+      margin:0 auto;
+      display:grid;
+      grid-template-rows:auto minmax(0,1fr) auto auto;
+      background:#eee8d8;
+      border-left:1px solid rgba(41,38,31,.28);
+      border-right:1px solid rgba(41,38,31,.28);
+    }
+
+    .top-status{
+      padding:max(10px,env(safe-area-inset-top)) 12px 10px;
+      border-bottom:2px solid #29261f;
+      display:grid;
+      grid-template-columns:minmax(0,1.45fr) minmax(0,1.25fr) minmax(0,.8fr) minmax(0,.65fr);
+      gap:6px;
+      background:#e9e1cf;
+    }
+    .status-cell{
+      min-width:0;
+      padding:7px 5px;
+      text-align:center;
+      border:1px solid #6e6659;
+      border-radius:8px;
+      background:#f8f3e8;
+    }
+    .status-label{
+      display:block;
+      font-size:11px;
+      font-weight:800;
+      color:#3f3a32;
+      line-height:1.15;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+    .status-value{
+      display:block;
+      margin-top:5px;
+      font-size:16px;
+      font-weight:900;
+      line-height:1.05;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+    #dayLabel,#timeLabel{font-size:11px}
+    #dayText{font-size:15px}
+    #timeText{font-size:17px}
+    #tempText{font-size:17px}
+    #weatherText{font-size:24px;line-height:1}
+
+    .scene-area{
+      min-height:0;
+      display:block;
+      background:#cfc6b3;
+    }
+
+    .town-panel{
+      position:relative;
+      width:100%;
+      height:100%;
+      min-height:0;
+      border-bottom:2px solid #29261f;
+      background:#bdb39f;
+      overflow:hidden;
+    }
+    .town-scroll{
+      width:100%;
+      height:100%;
+      overflow:hidden;
+    }
+    .town-strip{
+      position:relative;
+      width:100%;
+      height:100%;
+      min-width:0;
+      background:#9cc9df;
+      background-size:cover;
+      background-position:center 62%;
+      background-repeat:no-repeat;
+      overflow:hidden;
+    }
+    .scene-layer{
+      position:absolute;
+      inset:0;
+      overflow:hidden;
+      pointer-events:none;
+    }
+    .scene-layer-far{z-index:0}
+    .scene-layer-house{z-index:20}
+    .scene-layer-backgroundNpc{z-index:40}
+    .scene-layer-interactive{z-index:60}
+    .scene-layer-player{z-index:100}
+    .pickup-marker{
+      position:absolute;
+      z-index:90;
+      transform:translate(-50%,0);
+      border:0;
+      padding:8px;
+      margin:0;
+      background:transparent;
+      color:#fff4a6;
+      font-size:30px;
+      line-height:1;
+      font-weight:900;
+      text-shadow:0 0 4px #fff,0 0 8px #ffe45c,0 0 14px #ffd000;
+      pointer-events:auto;
+      cursor:pointer;
+      animation:pickupGlow 1.15s ease-in-out infinite alternate;
+    }
+    .pickup-marker:active{transform:translate(-50%,0) scale(.88)}
+    @keyframes pickupGlow{
+      from{opacity:.65;filter:brightness(.9)}
+      to{opacity:1;filter:brightness(1.35)}
+    }
+    .scene-object{
+      position:absolute;
+      bottom:0;
+      display:block;
+      max-width:none;
+      object-fit:contain;
+      object-position:center bottom;
+      pointer-events:none;
+      user-select:none;
+      -webkit-user-drag:none;
+      filter:drop-shadow(0 2px 2px rgba(47,34,22,.18));
+    }
+    .layer-people,.layer-backgroundNpc{
+      filter:drop-shadow(2px 3px 3px rgba(0,0,0,.28));
+    }
+    .selectable-npc{
+      filter:
+        drop-shadow(2px 0 0 #ffe600)
+        drop-shadow(-2px 0 0 #ffe600)
+        drop-shadow(0 2px 0 #ffe600)
+        drop-shadow(0 -2px 0 #ffe600)
+        drop-shadow(3px 3px 3px rgba(0,0,0,.32));
+    }
+    .selectable-place{
+      animation:selectablePlaceGlow 1.5s ease-in-out infinite alternate;
+    }
+    @keyframes selectablePlaceGlow{
+      from{
+        filter:
+          drop-shadow(0 0 2px rgba(255,245,190,.72))
+          drop-shadow(0 2px 2px rgba(47,34,22,.20));
+      }
+      to{
+        filter:
+          drop-shadow(0 0 7px rgba(255,232,120,.98))
+          drop-shadow(0 0 13px rgba(255,217,80,.58))
+          drop-shadow(0 2px 3px rgba(47,34,22,.24));
+      }
+    }
+
+    .scene-nav-layer{
+      position:absolute;
+      inset:0;
+      z-index:140;
+      pointer-events:none;
+    }
+    .scene-nav-btn{
+      position:absolute;
+      bottom:12px;
+      width:52px;
+      height:44px;
+      border:2px solid #2f2923;
+      border-radius:12px;
+      background:rgba(238,232,216,.92);
+      color:#2f2923;
+      display:grid;
+      place-items:center;
+      font-size:30px;
+      font-weight:900;
+      line-height:1;
+      box-shadow:0 2px 3px rgba(0,0,0,.18);
+      pointer-events:auto;
+      cursor:pointer;
+      -webkit-tap-highlight-color:transparent;
+    }
+    .scene-nav-btn:active{
+      transform:scale(.94);
+      background:#ded3bd;
+    }
+    .scene-nav-prev{left:14px}
+    .scene-nav-next{right:14px}
+    .scene-nav-facilities{
+      position:absolute;
+      left:50%;
+      bottom:12px;
+      transform:translateX(-50%);
+      display:flex;
+      gap:8px;
+      align-items:center;
+      justify-content:center;
+      pointer-events:none;
+    }
+    .scene-nav-facility-btn{
+      position:relative;
+      left:auto;
+      right:auto;
+      bottom:auto;
+      width:auto;
+      min-width:72px;
+      height:44px;
+      padding:0 12px;
+      font-size:14px;
+      white-space:nowrap;
+      pointer-events:auto;
+    }
+
+    .action-screen{
+      min-height:0;
+      display:none;
+      grid-template-rows:minmax(0,1.25fr) minmax(118px,.75fr);
+      background:
+        linear-gradient(180deg,rgba(255,248,224,.34),rgba(176,126,74,.16)),
+        #e5c999;
+      overflow:hidden;
+      border-bottom:2px solid #29261f;
+    }
+    .app.action-open .scene-area{display:none}
+    .action-screen.is-open{display:grid}
+
+    .passerby-lane{
+      position:relative;
+      min-height:0;
+      overflow:hidden;
+      border-bottom:2px solid #29261f;
+      background:
+        linear-gradient(180deg,#f3e5c6 0%,#ead1a5 58%,#d7af7f 100%);
+    }
+    .action-back{
+      position:absolute;
+      left:10px;
+      top:10px;
+      z-index:20;
+      min-height:38px;
+      padding:5px 11px;
+      border:2px solid #29261f;
+      border-radius:9px;
+      background:rgba(255,250,240,.92);
+      font-size:12px;
+      font-weight:900;
+    }
+    .action-head-title{
+      position:absolute;
+      right:10px;
+      top:10px;
+      z-index:20;
+      padding:6px 10px;
+      border-radius:7px;
+      background:rgba(255,250,240,.88);
+      font-size:15px;
+      font-weight:900;
+      white-space:nowrap;
+    }
+    .action-speed{
+      position:absolute;
+      right:10px;
+      top:50px;
+      z-index:20;
+      display:flex;
+      gap:4px;
+      padding:4px;
+      border:2px solid #29261f;
+      border-radius:9px;
+      background:rgba(255,250,240,.9);
+    }
+    .action-speed-btn{
+      min-width:40px;
+      min-height:32px;
+      padding:2px 7px;
+      border:1px solid #6f624f;
+      border-radius:7px;
+      background:#fffaf0;
+      font-size:12px;
+      font-weight:900;
+    }
+    .action-speed-btn.active{
+      background:#d8c28f;
+      box-shadow:inset 0 0 0 2px rgba(47,41,35,.14);
+    }
+    .passerby-sprite{
+      position:absolute;
+      bottom:0;
+      left:-20%;
+      height:90%;
+      width:auto;
+      max-width:none;
+      object-fit:contain;
+      object-position:center bottom;
+      user-select:none;
+      -webkit-user-drag:none;
+      pointer-events:none;
+      filter:drop-shadow(2px 3px 3px rgba(0,0,0,.22));
+      z-index:2;
+    }
+    .passerby-popup{
+      position:absolute;
+      top:18%;
+      left:50%;
+      z-index:8;
+      max-width:62%;
+      padding:8px 10px;
+      border:2px solid #29261f;
+      border-radius:10px;
+      background:#fffaf0;
+      font-size:12px;
+      font-weight:800;
+      line-height:1.45;
+      transform:translateX(-50%);
+      display:none;
+      pointer-events:none;
+    }
+    .passerby-popup.is-open{display:block}
+    .passerby-popup::after{
+      content:'';
+      position:absolute;
+      left:50%;
+      bottom:-8px;
+      width:12px;
+      height:12px;
+      border-right:2px solid #29261f;
+      border-bottom:2px solid #29261f;
+      background:#fffaf0;
+      transform:translateX(-50%) rotate(45deg);
+    }
+
+    .action-body{
+      position:relative;
+      min-height:0;
+      overflow:hidden;
+      background:
+        linear-gradient(180deg,#dfbd8d 0%,#e7cca2 50%,#dfba87 100%);
+    }
+    .action-main{
+      position:absolute;
+      inset:0;
+      min-width:0;
+      min-height:0;
+      overflow:hidden;
+    }
+
+    /* 物乞い：中央の商品欄は出さず、砂地＋壺だけ */
+    .beg-pot{
+      position:absolute;
+      left:18%;
+      bottom:18%;
+      transform:translateX(-50%);
+      width:84px;
+      height:62px;
+      border:3px solid #29261f;
+      border-radius:17px 17px 50% 50%;
+      background:#c9a46d;
+    }
+    .beg-pot::before{
+      content:'';
+      position:absolute;
+      left:14px;
+      right:14px;
+      top:-14px;
+      height:14px;
+      border:3px solid #29261f;
+      border-bottom:0;
+      background:#d6b682;
+      transform:perspective(70px) rotateX(35deg);
+    }
+
+    /* 物売り：このモードだけ中央に商品欄を出す */
+    .sell-grid{
+      position:absolute;
+      left:53%;
+      top:50%;
+      transform:translate(-50%,-50%);
+      width:min(72%,390px);
+      height:84%;
+      display:grid;
+      grid-template-columns:repeat(4,minmax(0,1fr));
+      grid-template-rows:repeat(2,minmax(0,1fr));
+      gap:6px;
+      padding:7px;
+      border:2px solid #6f624f;
+      border-radius:8px;
+      background:rgba(248,243,232,.94);
+    }
+    .sell-cell{
+      min-width:0;
+      min-height:0;
+      border:1px solid #9a8f79;
+      border-radius:7px;
+      display:grid;
+      place-items:center;
+      padding:5px;
+      text-align:center;
+      font-size:11px;
+      font-weight:800;
+      line-height:1.2;
+      background:#fffaf0;
+      overflow:hidden;
+    }
+    .sell-cell.empty{
+      color:#a49b89;
+      background:#e3dac7;
+    }
+    .sell-cell.selected{
+      outline:3px solid #7a5e22;
+      outline-offset:-3px;
+      background:#fff4d0;
+    }
+
+    .action-dialog{
+      position:absolute;
+      left:7%;
+      right:7%;
+      top:6%;
+      z-index:10;
+      padding:12px;
+      border:3px solid #29261f;
+      border-radius:12px;
+      background:#fffaf0;
+      font-weight:800;
+      display:none;
+    }
+    .action-dialog.is-open{display:block}
+
+    .town-placeholder{
+      position:absolute;
+      inset:0;
+      display:grid;
+      place-items:center;
+      color:#5d5548;
+      font-weight:900;
+      letter-spacing:.08em;
+      background:
+        linear-gradient(rgba(55,48,39,.06) 1px,transparent 1px),
+        linear-gradient(90deg,rgba(55,48,39,.05) 1px,transparent 1px);
+      background-size:28px 28px;
+    }
+    .scene-name{
+      position:absolute;
+      left:10px;
+      top:10px;
+      z-index:2;
+      padding:6px 9px;
+      border:1px solid #29261f;
+      border-radius:8px;
+      background:rgba(248,243,232,.9);
+      font-size:13px;
+      font-weight:900;
+      pointer-events:none;
+    }
+
+    .utility-panel{
+      height:188px;
+      min-height:188px;
+      display:grid;
+      grid-template-columns:34% minmax(0,1fr);
+      border-top:2px solid #29261f;
+      background:#eee8d8;
+      overflow:hidden;
+    }
+    .player-panel{
+      min-width:0;
+      min-height:0;
+      padding:8px;
+      display:grid;
+      grid-template-rows:auto minmax(0,1fr) auto;
+      gap:6px;
+      border-right:2px solid #29261f;
+      background:#eee8d8;
+    }
+    .money-box{
+      min-height:28px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      gap:6px;
+      border:1px solid #8e846f;
+      border-radius:8px;
+      background:#f8f3e8;
+      font-size:12px;
+      font-weight:900;
+    }
+    .portrait{
+      min-height:0;
+      border:2px solid #29261f;
+      border-radius:10px;
+      background:#f8f3e8;
+      display:grid;
+      place-items:center;
+      overflow:hidden;
+      font-size:12px;
+      font-weight:900;
+      color:#746c5f;
+    }
+    .portrait img{width:100%;height:100%;object-fit:cover;display:block}
+    .stats{display:grid;gap:4px}
+    .stat-row{
+      display:grid;
+      grid-template-columns:30px minmax(0,1fr) 28px;
+      gap:4px;
+      align-items:center;
+      font-size:10px;
+      font-weight:900;
+    }
+    .bar{
+      height:9px;
+      border:1px solid #29261f;
+      border-radius:999px;
+      overflow:hidden;
+      background:#d7cebb;
+    }
+    .bar-fill{height:100%;width:0%;background:#514a40}
+    .stat-num{text-align:right;font-variant-numeric:tabular-nums}
+
+    .quick-panel{
+      min-width:0;
+      min-height:0;
+      display:grid;
+      grid-template-rows:minmax(0,1fr) 48px;
+      background:#e9e1cf;
+      overflow:hidden;
+    }
+    .quick-inventory{
+      min-height:0;
+      padding:8px;
+      display:grid;
+      grid-template-columns:repeat(4,minmax(0,1fr));
+      grid-auto-rows:minmax(44px,1fr);
+      gap:6px;
+      align-content:start;
+      overflow:hidden;
+    }
+    .quick-slot{
+      min-width:0;
+      min-height:0;
+      border:1px solid #9a8f79;
+      border-radius:7px;
+      background:#f8f3e8;
+      display:grid;
+      place-items:center;
+      padding:4px;
+      text-align:center;
+      font-size:10px;
+      font-weight:800;
+      line-height:1.15;
+      overflow:hidden;
+    }
+    .quick-slot.is-empty{
+      color:#a49b89;
+      background:#e3dac7;
+    }
+    .quick-slot.is-usable{
+      cursor:pointer;
+      border:2px solid #6f624f;
+      background:#fff7dd;
+    }
+    .quick-slot.is-usable:active{
+      transform:scale(.97);
+      background:#efe1b9;
+    }
+
+    .well-choice-panel{
+      position:absolute;
+      left:50%;
+      top:50%;
+      z-index:220;
+      width:min(84%,330px);
+      transform:translate(-50%,-50%);
+      padding:14px;
+      border:3px solid #29261f;
+      border-radius:12px;
+      background:rgba(255,250,240,.97);
+      box-shadow:0 8px 24px rgba(0,0,0,.28);
+    }
+    .well-choice-title{
+      margin-bottom:6px;
+      text-align:center;
+      font-size:17px;
+      font-weight:900;
+    }
+    .well-choice-message{
+      min-height:38px;
+      display:grid;
+      place-items:center;
+      margin-bottom:10px;
+      text-align:center;
+      font-size:13px;
+      font-weight:800;
+      line-height:1.4;
+    }
+    .well-choice-actions{
+      display:grid;
+      gap:8px;
+    }
+    .well-choice-btn{
+      min-height:44px;
+      border:2px solid #29261f;
+      border-radius:9px;
+      background:#fffaf0;
+      font-size:14px;
+      font-weight:900;
+    }
+    .well-choice-btn:active{background:#e0d6be}
+    .well-choice-btn:disabled{opacity:.45}
+
+    .stall-choice-panel{
+      position:absolute;
+      left:50%;
+      top:50%;
+      z-index:220;
+      width:min(90%,350px);
+      max-height:88%;
+      overflow-y:auto;
+      transform:translate(-50%,-50%);
+      padding:12px;
+      border:3px solid #29261f;
+      border-radius:12px;
+      background:rgba(255,250,240,.98);
+      box-shadow:0 8px 24px rgba(0,0,0,.28);
+    }
+    .stall-choice-title{
+      margin-bottom:4px;
+      text-align:center;
+      font-size:17px;
+      font-weight:900;
+    }
+    .stall-choice-message{
+      min-height:30px;
+      display:grid;
+      place-items:center;
+      margin-bottom:8px;
+      text-align:center;
+      font-size:12px;
+      font-weight:800;
+      line-height:1.35;
+    }
+    .stall-choice-actions{
+      display:grid;
+      gap:6px;
+    }
+    .stall-choice-btn{
+      min-height:40px;
+      padding:5px 8px;
+      border:2px solid #29261f;
+      border-radius:9px;
+      background:#fffaf0;
+      font-size:12px;
+      font-weight:900;
+      line-height:1.25;
+    }
+    .stall-choice-btn:active{background:#e0d6be}
+    .stall-choice-btn:disabled{opacity:.45}
+
+    .quick-actions{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      border-top:1px solid #afa592;
+      background:#e9e1cf;
+    }
+    .quick-action-btn{
+      border:0;
+      border-right:1px solid #afa592;
+      background:#fffaf0;
+      font-weight:900;
+      font-size:13px;
+    }
+    .quick-action-btn:last-child{border-right:0}
+    .quick-action-btn:active{background:#e0d6be}
+    .quick-action-btn:disabled{opacity:.42}
+
+    #saveStatus:empty{display:none}
+    #saveStatus{
+      min-height:26px;
+      margin:0;
+      padding:4px 12px;
+      border-top:1px solid #afa592;
+      background:#eee8d8;
+      color:#5b5548;
+      font-size:12px;
+      font-weight:700;
+    }
+
+    .bottom-menu{
+      padding:10px 10px max(10px,env(safe-area-inset-bottom));
+      border-top:2px solid #29261f;
+      background:#e9e1cf;
+      display:grid;
+      grid-template-columns:repeat(5,minmax(0,1fr));
+      gap:7px;
+    }
+    .menu-btn,.menu-link{
+      min-height:48px;
+      border:2px solid #29261f;
+      border-radius:9px;
+      background:#fffaf0;
+      text-decoration:none;
+      display:grid;
+      place-items:center;
+      text-align:center;
+      font-size:13px;
+      font-weight:900;
+      padding:4px;
+    }
+    .menu-btn:active,.menu-link:active{transform:scale(.98);background:#e0d6be}
+    .menu-btn:disabled{opacity:.5}
+
+    @media(max-height:700px){
+      .utility-panel{height:166px;min-height:166px}
+      .quick-inventory{grid-auto-rows:minmax(38px,1fr);padding:6px;gap:5px}
+      .bottom-menu{padding-top:7px}
+      .menu-btn,.menu-link{min-height:43px}
+    }
+  </style>
 </head>
 <body>
-  <main class="shop-top">
-    <button type="button" class="shop-top-button" id="stockButton">仕入れ</button>
-    <button type="button" class="shop-top-button" id="openShopButton">店を開く</button>
-  </main>
+<script>
+(() => {
+  const SHOP_BUILD='20260924-trade-route-v1';
+  const u=new URL(location.href);
+  if(u.searchParams.get('build')!==SHOP_BUILD){
+    u.searchParams.set('build',SHOP_BUILD);
+    location.replace(u.toString());
+  }
+})();
+</script>
+  <div class="app">
+    <header class="top-status" aria-label="日時と天候">
+      <div class="status-cell"><span class="status-label" id="dayLabel"></span><span class="status-value" id="dayText"></span></div>
+      <div class="status-cell"><span class="status-label" id="timeLabel"></span><span class="status-value" id="timeText"></span></div>
+      <div class="status-cell"><span class="status-label" id="tempLabel"></span><span class="status-value" id="tempText"></span></div>
+      <div class="status-cell"><span class="status-label" id="weatherLabel"></span><span class="status-value" id="weatherText"></span></div>
 
-  <script src="./SHOP_top.js?v=20261002-top-home-1"></script>
+    </header>
+
+    <section class="action-screen" id="actionScreen" aria-label="行動">
+      <div class="passerby-lane" id="passerbyLane" aria-label="人の行き交い">
+        <button type="button" class="action-back" id="actionBack">戻る</button>
+        <div class="action-head-title" id="actionTitle">物乞い中</div>
+        <div class="action-speed" aria-label="時間速度">
+          <button type="button" class="action-speed-btn active" data-action-speed="1" aria-pressed="true">×1</button>
+          <button type="button" class="action-speed-btn" data-action-speed="2" aria-pressed="false">×2</button>
+          <button type="button" class="action-speed-btn" data-action-speed="4" aria-pressed="false">×4</button>
+        </div>
+        <div class="passerby-popup" id="passerbyPopup" aria-live="polite"></div>
+      </div>
+
+      <div class="action-body">
+        <div class="action-main">
+          <div class="action-dialog" id="actionDialog"></div>
+          <div class="beg-pot" id="begPot" aria-label="物乞いの壺"></div>
+          <div class="sell-grid" id="sellGrid" aria-label="売る物"></div>
+        </div>
+      </div>
+    </section>
+
+    <main class="scene-area">
+      <div class="shop-home-actions" id="shopHomeActions" aria-label="店の操作">
+        <button type="button" class="shop-home-btn" id="shopStockButton" data-shop-home-action="stock">仕入れ</button>
+        <button type="button" class="shop-home-btn" id="shopOpenButton" data-shop-home-action="open">店を開く</button>
+      </div>
+      <section class="town-panel" aria-label="町">
+        <div class="scene-name" id="sceneName"></div>
+        <div class="town-scroll" id="townScroll">
+          <div class="town-strip" id="townStrip">
+            <div class="town-placeholder" id="townPlaceholder"></div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <section class="utility-panel" aria-label="主人公情報と持ち物・行動">
+      <aside class="player-panel" aria-label="主人公の状態">
+        <div class="money-box"><span>所持金</span><span id="moneyText">0</span><span>信用</span><span id="reputationText">0</span></div>
+        <div class="portrait" id="portrait"></div>
+        <div class="stats">
+          <div class="stat-row">
+            <span id="hpLabel"></span>
+            <div class="bar"><div class="bar-fill" id="hpBar"></div></div>
+            <span class="stat-num" id="hpText"></span>
+          </div>
+          <div class="stat-row">
+            <span id="hungerLabel"></span>
+            <div class="bar"><div class="bar-fill" id="hungerBar"></div></div>
+            <span class="stat-num" id="hungerText"></span>
+          </div>
+          <div class="stat-row">
+            <span id="thirstLabel"></span>
+            <div class="bar"><div class="bar-fill" id="thirstBar"></div></div>
+            <span class="stat-num" id="thirstText"></span>
+          </div>
+        </div>
+      </aside>
+
+      <section class="quick-panel" aria-label="持ち物と行動">
+        <div class="quick-inventory" id="quickInventory"></div>
+        <div class="quick-actions">
+          <button type="button" class="quick-action-btn" id="quickBegButton">物乞い</button>
+          <button type="button" class="quick-action-btn" id="quickSellButton">物を売る</button>
+        </div>
+      </section>
+    </section>
+
+    <p id="saveStatus" aria-live="polite"></p>
+    <nav class="bottom-menu" id="bottomMenu" aria-label="メニュー"></nav>
+  </div>
+  <script>
+  (async () => {
+    const stamp = Date.now();
+    const files = [
+      './SHOP_data.js',
+      './SHOP_calendar.js',
+      './SHOP_weather.js',
+      './SHOP_temperature.js',
+      './SHOP_survival.js',
+      './SHOP_time.js',
+      './SHOP_currency.js',
+      './SHOP_items.js',
+      './SHOP_food.js',
+      './SHOP_well.js',
+      './SHOP_stall.js',
+      './SHOP_society.js',
+      './SHOP_trade.js',
+      './SHOP_life.js',
+      './SHOP_action.js',
+      './SHOP_save.js',
+      './SHOP_app.js',
+      './SHOP_top.js'
+    ];
+    for (const file of files) {
+      await new Promise((resolve, reject) => {
+        const script = document.createElement('script');
+        script.src = file + '?v=20260924-trade-route-v1&nocache=' + stamp;
+        script.onload = resolve;
+        script.onerror = reject;
+        document.body.appendChild(script);
+      });
+    }
+  })();
+  </script>
 </body>
 </html>
