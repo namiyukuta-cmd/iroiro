@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta name="theme-color" content="#ece8df">
+<title>3D住人テスト</title>
+<style>
+*{box-sizing:border-box}html,body{margin:0;background:#ece8df;color:#28251f;font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Yu Gothic",sans-serif}
+main{max-width:520px;margin:0 auto;padding:12px}
+h1{font-size:18px;margin:0 0 8px}
+p{font-size:12px;color:#706a60;margin:0 0 10px}
+model-viewer{display:block;width:100%;height:62dvh;min-height:420px;background:#f8f5ee;border:1px solid #cfc8bb;border-radius:14px}
+.info{margin-top:10px;padding:10px;border:1px solid #cfc8bb;background:#f8f5ee;border-radius:12px;font-size:12px;line-height:1.6}
+</style>
+<script type="module" src="https://cdn.jsdelivr.net/npm/@google/model-viewer@4.1.0/dist/model-viewer.min.js"></script>
+</head>
+<body>
+<main>
+<h1>3D住人ベース</h1>
+<p>指で回転・拡大できます。</p>
+<model-viewer src="models/sim_base.gltf" camera-controls auto-rotate shadow-intensity="0.7" exposure="1.0" interaction-prompt="none" alt="ローポリの人型3Dモデル"></model-viewer>
+<div class="info">共通素体の初版です。頭・首・胴・骨盤・左右の腕・左右の脚・左右の靴を別ノードにしています。次に顔・服のスキン画像を貼れるようにできます。</div>
+</main>
+</body>
+</html>
