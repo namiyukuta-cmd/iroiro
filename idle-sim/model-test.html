@@ -4,24 +4,102 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
 <meta name="theme-color" content="#ece8df">
 <title>3D住人テスト</title>
 <style>
-*{box-sizing:border-box}html,body{margin:0;background:#ece8df;color:#28251f;font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Yu Gothic",sans-serif}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;background:#ece8df;color:#28251f;font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Yu Gothic",sans-serif}
+body{min-height:100dvh}
 main{max-width:520px;margin:0 auto;padding:12px}
-h1{font-size:18px;margin:0 0 8px}
-p{font-size:12px;color:#706a60;margin:0 0 10px}
-model-viewer{display:block;width:100%;height:62dvh;min-height:420px;background:#f8f5ee;border:1px solid #cfc8bb;border-radius:14px}
-.info{margin-top:10px;padding:10px;border:1px solid #cfc8bb;background:#f8f5ee;border-radius:12px;font-size:12px;line-height:1.6}
+h1{font-size:18px;margin:0 0 4px}
+.lead{font-size:12px;color:#706a60;margin:0 0 10px}
+.stage{position:relative;width:100%;height:430px;background:#f8f5ee;border:1px solid #cfc8bb;border-radius:14px;overflow:hidden}
+canvas{display:block;width:100%;height:100%;touch-action:none}
+.badge{position:absolute;left:10px;top:10px;padding:5px 8px;border-radius:999px;background:rgba(248,245,238,.9);border:1px solid #d7d0c3;font-size:10px;color:#6e685e;pointer-events:none}
+.controls{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
+.field{display:flex;flex-direction:column;gap:4px}
+.field label{font-size:10px;color:#716b61}
+select,button{width:100%;min-height:44px;border:1px solid #bdb5a8;border-radius:10px;background:#faf8f2;color:#28251f;font:inherit;font-size:14px;padding:0 10px}
+button{font-weight:700}
+.wide{grid-column:1/-1}
+.info{margin-top:10px;padding:10px;border:1px solid #cfc8bb;background:#f8f5ee;border-radius:12px;font-size:11px;line-height:1.6;color:#625d54}
+.status{font-weight:700;color:#302d28;margin-bottom:3px}
+@media(max-width:360px){main{padding:8px}.stage{height:390px}.controls{gap:6px}}
+@media(prefers-reduced-motion:reduce){canvas{scroll-behavior:auto}}
 </style>
-<script type="module" src="https://cdn.jsdelivr.net/npm/@google/model-viewer@4.1.0/dist/model-viewer.min.js"></script>
+<script type="importmap">
+{
+  "imports":{
+    "three":"https://cdn.jsdelivr.net/npm/three@0.169.0/build/three.module.js",
+    "three/addons/":"https://cdn.jsdelivr.net/npm/three@0.169.0/examples/jsm/"
+  }
+}
+</script>
 </head>
 <body>
 <main>
 <h1>3D住人ベース</h1>
-<p>指で回転・拡大できます。</p>
-<model-viewer src="models/sim_base.gltf" camera-controls auto-rotate shadow-intensity="0.7" exposure="1.0" interaction-prompt="none" alt="ローポリの人型3Dモデル"></model-viewer>
-<div class="info">共通素体の初版です。頭・首・胴・骨盤・左右の腕・左右の脚・左右の靴を別ノードにしています。次に顔・服のスキン画像を貼れるようにできます。</div>
+<p class="lead">共通素体に、肌・顔・服・3D髪型を別々に組み合わせます。</p>
+
+<section class="stage" aria-label="3D住人プレビュー">
+  <canvas id="simCanvas"></canvas>
+  <div class="badge">指で回転・拡大</div>
+</section>
+
+<section class="controls" aria-label="見た目設定">
+  <div class="field">
+    <label for="skin">肌テクスチャ</label>
+    <select id="skin">
+      <option value="warm">ウォーム</option>
+      <option value="light">ライト</option>
+      <option value="deep">ディープ</option>
+    </select>
+  </div>
+  <div class="field">
+    <label for="face">顔テクスチャ</label>
+    <select id="face">
+      <option value="soft">ソフト</option>
+      <option value="sharp">シャープ</option>
+      <option value="cheerful">朗らか</option>
+    </select>
+  </div>
+  <div class="field">
+    <label for="outfit">服テクスチャ</label>
+    <select id="outfit">
+      <option value="green">グリーン</option>
+      <option value="red">レンガ色</option>
+      <option value="blue">ブルー</option>
+    </select>
+  </div>
+  <div class="field">
+    <label for="hair">3D髪型</label>
+    <select id="hair">
+      <option value="short">ショート</option>
+      <option value="bob">ボブ</option>
+      <option value="bun">まとめ髪</option>
+    </select>
+  </div>
+  <div class="field">
+    <label for="hairColor">髪色</label>
+    <select id="hairColor">
+      <option value="brown">ブラウン</option>
+      <option value="black">ブラック</option>
+      <option value="auburn">赤茶</option>
+    </select>
+  </div>
+  <div class="field">
+    <label>&nbsp;</label>
+    <button type="button" id="randomBtn">ランダム</button>
+  </div>
+</section>
+
+<section class="info">
+  <div class="status" id="layerStatus"></div>
+  体の形は共通のまま、各レイヤーを独立交換します。顔や服を増やしても他のパーツを描き直す必要がありません。
+</section>
 </main>
+<script type="module" src="js/character3d.js?v=20261003-1"></script>
 </body>
 </html>
