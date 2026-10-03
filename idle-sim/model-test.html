@@ -45,7 +45,7 @@ button{font-weight:700}
 <body>
 <main>
 <h1>3D住人・スキン方式</h1>
-<p class="lead">初代シムズに近い考え方で、3Dの形と表面画像を分離しています。Bodyは共通、HeadとHairはメッシュ交換、服と肌はBodyテクスチャ、顔・耳・側頭部・頭頂・後頭部は1枚のHeadテクスチャとしてHeadメッシュ全体へ巻き付けます。</p>
+<p class="lead">初代シムズに近い考え方で、3Dの形と表面画像を分離しています。Bodyは1つの共通メッシュへ1枚のBodyテクスチャをUVで巻き付け、Headも1枚のHeadテクスチャを全体へ巻き付けます。HeadとHairはメッシュ交換です。</p>
 
 <section class="stage" aria-label="3D住人プレビュー">
   <canvas id="simCanvas"></canvas>
@@ -126,9 +126,9 @@ button{font-weight:700}
 
 <section class="info">
   <div class="status" id="layerStatus"></div>
-  <div class="arch">構造：共通Bodyメッシュ ＋ 交換Headメッシュ ＋ 交換Hairメッシュ ＋ Bodyテクスチャ ＋ Headテクスチャ。顔だけの板ポリゴンは使わず、1枚の展開テクスチャをHead全体へUVで巻き付けています。</div>
+  <div class="arch">構造：共通Bodyメッシュ1個 ＋ Bodyテクスチャ1枚 ＋ 交換Headメッシュ ＋ Headテクスチャ1枚 ＋ 交換Hairメッシュ。BodyもHeadも、部位ごとの別マテリアルではなく展開テクスチャをUVで全体へ巻き付けています。</div>
 </section>
 </main>
-<script type="module" src="js/character3d.js?v=20261003-3"></script>
+<script type="module" src="js/character3d.js?v=20261003-4"></script>
 </body>
 </html>
