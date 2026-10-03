@@ -1,0 +1,19 @@
+CC0 human base used for idle-sim rigged-test
+
+Source repository:
+https://github.com/UMRAM-Bilkent/supine-human-model
+
+Source file:
+assets/human.glb
+
+The source repository documents this file as the original CC0 Quaternius
+character, rigged and skinned, with walk/idle animations.
+
+License:
+Creative Commons CC0 1.0 / public domain dedication.
+
+Original source credited by the repository:
+Quaternius - https://quaternius.com/
+
+Imported into this repository unchanged as:
+idle-sim/models/cc0-human-rigged.glb
