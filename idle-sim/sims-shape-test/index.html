@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+<meta http-equiv="Cache-Control" content="no-cache,no-store,must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
+<title>シム寄り人体ベース実験</title>
+<style>
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;background:#ece9e1;color:#27241f;font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Yu Gothic",sans-serif}
+body{min-height:100dvh}
+main{width:min(100%,560px);margin:auto;padding:10px}
+h1{font-size:18px;margin:2px 0 4px}
+p{font-size:12px;line-height:1.5;color:#686158;margin:0 0 8px}
+.stage{height:570px;max-height:68dvh;border:1px solid #c8c0b3;border-radius:14px;overflow:hidden;background:#f8f5ee;position:relative}
+canvas{width:100%;height:100%;display:block;touch-action:none}
+.badge{position:absolute;left:8px;top:8px;padding:6px 9px;border-radius:999px;border:1px solid #d0c8bc;background:rgba(248,245,238,.94);font-size:11px}
+.controls{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:8px}
+button{min-height:44px;border:1px solid #bbb3a7;border-radius:10px;background:#faf8f2;color:#28251f;font:inherit;font-size:12px;font-weight:700}
+button.on{background:#ddd7cb}
+.note{margin-top:8px;padding:9px 10px;border:1px solid #cec6b9;border-radius:10px;background:#f8f5ee;font-size:11px;line-height:1.5;color:#625d54}
+</style>
+<script type="importmap">
+{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.169.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.169.0/examples/jsm/"}}
+</script>
+</head>
+<body>
+<main>
+<h1>シム寄り人体ベース実験</h1>
+<p>既存のゲーム用人体＋Humanoid骨格を土台にして、頭を小さく・脚を長く・腰を締めたシルエットへ変形しています。座標から人体を作る実験ではありません。</p>
+<section class="stage">
+<canvas id="c"></canvas>
+<div class="badge" id="status">読み込み中…</div>
+</section>
+<section class="controls">
+<button id="male" class="on">男性</button>
+<button id="female">女性</button>
+<button id="walk">歩く</button>
+<button id="base">元の体型</button>
+<button id="sims" class="on">シム寄り</button>
+<button id="slim">細身</button>
+<button id="front">正面</button>
+<button id="side">横</button>
+<button id="reset">初期視点</button>
+</section>
+<div class="note">元モデルは Quaternius「Universal Base Characters」Standard版（CC0）。既存の箱ポリ版・前の人体実験は変更していません。</div>
+</main>
+<script type="module" src="./sims-shape-test.js?v=20261003-1"></script>
+</body>
+</html>

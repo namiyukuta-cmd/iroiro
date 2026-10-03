@@ -1,0 +1,14 @@
+Quaternius Universal Base Characters — Standard (free)
+License: CC0 1.0 Universal
+Official pack: https://quaternius.itch.io/universal-base-characters
+
+Files in this repository:
+- idle-sim/models/ubc-male.glb
+- idle-sim/models/ubc-female.glb
+
+These GLBs were sourced from the public BeefTV repository's converted copies:
+https://github.com/glanderness/BeefTV
+The conversion preserves the mesh, skin and 65-joint skeleton and omits the original images/materials.
+BeefTV's own license note identifies the source as:
+Base Characters/Godot - UE/Superhero_Male_FullBody.gltf
+and the corresponding female base from Quaternius Universal Base Characters Standard.
