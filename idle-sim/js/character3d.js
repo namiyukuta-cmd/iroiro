@@ -95,58 +95,177 @@ function shade(hex, amount){
   return '#' + ((1<<24) + (c(r)<<16) + (c(g)<<8) + c(b)).toString(16).slice(1);
 }
 
-function makeBodyAtlas(){
-  const c = document.createElement('canvas');
-  c.width = 512;
-  c.height = 512;
-  const ctx = c.getContext('2d');
-  const skin = skins[state.skin];
-  const outfit = outfits[state.bodyTexture];
+const BODY_UV = {
+  torsoFront:[176,64,96,112],
+  torsoBack:[272,64,96,112],
+  armOuterL:[80,64,48,112],
+  armInnerL:[128,64,48,112],
+  armOuterR:[368,64,48,112],
+  armInnerR:[416,64,48,112],
+  legFrontL:[176,176,48,144],
+  legBackL:[224,176,48,144],
+  legFrontR:[272,176,48,144],
+  legBackR:[320,176,48,144],
+  handL:[80,176,48,48],
+  handR:[416,176,48,48],
+  footL:[176,320,48,32],
+  footR:[224,320,48,32],
+  pelvisFront:[176,32,96,32],
+  pelvisBack:[272,32,96,32],
+  neck:[224,0,32,32]
+};
 
-  ctx.fillStyle = '#9f9a90';
+function makeBodyAtlas(){
+  const c=document.createElement('canvas');
+  c.width=512;
+  c.height=512;
+  const ctx=c.getContext('2d');
+  const skin=skins[state.skin];
+  const outfit=outfits[state.bodyTexture];
+
+  ctx.fillStyle=shade(skin,-10);
   ctx.fillRect(0,0,512,512);
 
-  // torso
-  ctx.fillStyle = outfit.shirt;
-  ctx.fillRect(0,0,256,256);
-  ctx.fillStyle = outfit.trim;
-  ctx.fillRect(112,0,32,72);
-  ctx.globalAlpha = .16;
-  ctx.fillStyle = '#ffffff';
-  for(let y=12;y<256;y+=20) ctx.fillRect(0,y,256,2);
-  ctx.globalAlpha = 1;
+  // common skin base
+  ctx.fillStyle=skin;
+  ctx.fillRect(0,0,512,512);
 
-  // arms: upper cloth, lower skin
-  ctx.fillStyle = outfit.shirt;
-  ctx.fillRect(256,0,128,126);
-  ctx.fillStyle = skin;
-  ctx.fillRect(256,126,128,130);
+  // torso front/back
+  ctx.fillStyle=outfit.shirt;
+  ctx.fillRect(...BODY_UV.torsoFront);
+  ctx.fillStyle=shade(outfit.shirt,-9);
+  ctx.fillRect(...BODY_UV.torsoBack);
+
+  // neckline / front detail
+  ctx.fillStyle=outfit.trim;
+  ctx.fillRect(218,64,12,34);
+  ctx.fillRect(224,64,22,52);
+
+  // pelvis
+  ctx.fillStyle=shade(outfit.pants,7);
+  ctx.fillRect(...BODY_UV.pelvisFront);
+  ctx.fillStyle=outfit.pants;
+  ctx.fillRect(...BODY_UV.pelvisBack);
+
+  // arms
+  ctx.fillStyle=outfit.shirt;
+  ctx.fillRect(...BODY_UV.armOuterL);
+  ctx.fillRect(...BODY_UV.armInnerL);
+  ctx.fillRect(...BODY_UV.armOuterR);
+  ctx.fillRect(...BODY_UV.armInnerR);
 
   // legs
-  ctx.fillStyle = outfit.pants;
-  ctx.fillRect(0,256,256,256);
-  ctx.globalAlpha = .13;
-  ctx.fillStyle = '#ffffff';
-  for(let x=18;x<256;x+=28) ctx.fillRect(x,256,2,256);
-  ctx.globalAlpha = 1;
+  ctx.fillStyle=shade(outfit.pants,5);
+  ctx.fillRect(...BODY_UV.legFrontL);
+  ctx.fillRect(...BODY_UV.legFrontR);
+  ctx.fillStyle=outfit.pants;
+  ctx.fillRect(...BODY_UV.legBackL);
+  ctx.fillRect(...BODY_UV.legBackR);
 
-  // hands / neck / skin region
-  ctx.fillStyle = skin;
-  ctx.fillRect(256,256,128,128);
+  // hands and neck stay skin colored
+  ctx.fillStyle=shade(skin,-3);
+  ctx.fillRect(...BODY_UV.handL);
+  ctx.fillRect(...BODY_UV.handR);
+  ctx.fillRect(...BODY_UV.neck);
 
   // shoes
-  ctx.fillStyle = outfit.shoes;
-  ctx.fillRect(384,256,128,128);
-  ctx.fillStyle = shade(outfit.shoes,18);
-  ctx.fillRect(384,350,128,34);
+  ctx.fillStyle=outfit.shoes;
+  ctx.fillRect(...BODY_UV.footL);
+  ctx.fillRect(...BODY_UV.footR);
 
-  // spare region / palette
-  ctx.fillStyle = shade(skin,-8);
-  ctx.fillRect(256,384,128,128);
-  ctx.fillStyle = shade(outfit.shirt,-10);
-  ctx.fillRect(384,384,128,128);
+  // painted-in shading, like classic skins
+  ctx.globalAlpha=.16;
+  ctx.fillStyle='#000000';
+  ctx.fillRect(176,96,96,10);
+  ctx.fillRect(176,151,96,9);
+  ctx.fillRect(272,151,96,9);
+  ctx.fillRect(217,176,5,144);
+  ctx.fillRect(317,176,5,144);
+  ctx.fillRect(103,64,5,112);
+  ctx.fillRect(391,64,5,112);
+  ctx.globalAlpha=1;
+
+  // front marker intentionally mirrored by UV on the model
+  ctx.fillStyle='#111111';
+  ctx.font='bold 14px sans-serif';
+  ctx.fillText('F',247,84);
 
   return c;
+}
+
+function bodyGeometry(){
+  const pos=[],norm=[],uv=[],idx=[];
+
+  function addFace(verts,normal,rect,flipX=false){
+    const base=pos.length/3;
+    verts.forEach(v=>pos.push(...v));
+    for(let i=0;i<4;i++) norm.push(...normal);
+
+    const [x,y,w,h]=rect;
+    let u0=x/512;
+    let u1=(x+w)/512;
+    const v0=1-(y+h)/512;
+    const v1=1-y/512;
+    if(flipX) [u0,u1]=[u1,u0];
+
+    uv.push(u0,v0, u1,v0, u1,v1, u0,v1);
+    idx.push(base,base+1,base+2, base,base+2,base+3);
+  }
+
+  function box(cx,cy,cz,w,h,d,front,back,left,right,top,bottom,flipFront=false){
+    const hx=w/2,hy=h/2,hz=d/2;
+    addFace([[cx+hx,cy-hy,cz+hz],[cx+hx,cy-hy,cz-hz],[cx+hx,cy+hy,cz-hz],[cx+hx,cy+hy,cz+hz]],[1,0,0],right);
+    addFace([[cx-hx,cy-hy,cz-hz],[cx-hx,cy-hy,cz+hz],[cx-hx,cy+hy,cz+hz],[cx-hx,cy+hy,cz-hz]],[-1,0,0],left);
+    addFace([[cx-hx,cy+hy,cz+hz],[cx+hx,cy+hy,cz+hz],[cx+hx,cy+hy,cz-hz],[cx-hx,cy+hy,cz-hz]],[0,1,0],top);
+    addFace([[cx-hx,cy-hy,cz-hz],[cx+hx,cy-hy,cz-hz],[cx+hx,cy-hy,cz+hz],[cx-hx,cy-hy,cz+hz]],[0,-1,0],bottom);
+    addFace([[cx-hx,cy-hy,cz+hz],[cx+hx,cy-hy,cz+hz],[cx+hx,cy+hy,cz+hz],[cx-hx,cy+hy,cz+hz]],[0,0,1],front,flipFront);
+    addFace([[cx+hx,cy-hy,cz-hz],[cx-hx,cy-hy,cz-hz],[cx-hx,cy+hy,cz-hz],[cx+hx,cy+hy,cz-hz]],[0,0,-1],back);
+  }
+
+  box(0,1.03,0,.60,.61,.31,
+    BODY_UV.torsoFront,BODY_UV.torsoBack,
+    BODY_UV.torsoFront,BODY_UV.torsoFront,
+    BODY_UV.torsoFront,BODY_UV.torsoFront,true);
+
+  box(0,.65,0,.49,.23,.29,
+    BODY_UV.pelvisFront,BODY_UV.pelvisBack,
+    BODY_UV.pelvisFront,BODY_UV.pelvisFront,
+    BODY_UV.pelvisFront,BODY_UV.pelvisFront,true);
+
+  box(0,1.34,0,.17,.15,.17,
+    BODY_UV.neck,BODY_UV.neck,BODY_UV.neck,BODY_UV.neck,BODY_UV.neck,BODY_UV.neck);
+
+  box(-.40,.965,0,.15,.68,.16,
+    BODY_UV.armOuterL,BODY_UV.armInnerL,BODY_UV.armOuterL,BODY_UV.armInnerL,BODY_UV.armOuterL,BODY_UV.armOuterL);
+
+  box(.40,.965,0,.15,.68,.16,
+    BODY_UV.armOuterR,BODY_UV.armInnerR,BODY_UV.armInnerR,BODY_UV.armOuterR,BODY_UV.armOuterR,BODY_UV.armOuterR);
+
+  box(-.40,.56,.01,.16,.14,.17,
+    BODY_UV.handL,BODY_UV.handL,BODY_UV.handL,BODY_UV.handL,BODY_UV.handL,BODY_UV.handL);
+
+  box(.40,.56,.01,.16,.14,.17,
+    BODY_UV.handR,BODY_UV.handR,BODY_UV.handR,BODY_UV.handR,BODY_UV.handR,BODY_UV.handR);
+
+  box(-.14,.28,0,.21,.62,.22,
+    BODY_UV.legFrontL,BODY_UV.legBackL,BODY_UV.legFrontL,BODY_UV.legBackL,BODY_UV.legFrontL,BODY_UV.legFrontL,true);
+
+  box(.14,.28,0,.21,.62,.22,
+    BODY_UV.legFrontR,BODY_UV.legBackR,BODY_UV.legBackR,BODY_UV.legFrontR,BODY_UV.legFrontR,BODY_UV.legFrontR,true);
+
+  box(-.14,-.075,.075,.24,.14,.39,
+    BODY_UV.footL,BODY_UV.footL,BODY_UV.footL,BODY_UV.footL,BODY_UV.footL,BODY_UV.footL);
+
+  box(.14,-.075,.075,.24,.14,.39,
+    BODY_UV.footR,BODY_UV.footR,BODY_UV.footR,BODY_UV.footR,BODY_UV.footR,BODY_UV.footR);
+
+  const g=new THREE.BufferGeometry();
+  g.setAttribute('position',new THREE.Float32BufferAttribute(pos,3));
+  g.setAttribute('normal',new THREE.Float32BufferAttribute(norm,3));
+  g.setAttribute('uv',new THREE.Float32BufferAttribute(uv,2));
+  g.setIndex(idx);
+  g.computeBoundingSphere();
+  return g;
 }
 
 const HEAD_UV = {
@@ -342,32 +461,25 @@ function addBox(parent,name,w,h,d,x,y,z,material){
 
 function buildBody(bodyAtlas){
   disposeGroup(bodyGroup);
-  bodyGroup = new THREE.Group();
-  bodyGroup.name = 'BodyMesh';
+  bodyGroup=new THREE.Group();
+  bodyGroup.name='BodyMesh';
   person.add(bodyGroup);
 
-  const torsoMat = textureMaterial(atlasTexture(bodyAtlas,0,0,256,256));
-  const armUpperMat = textureMaterial(atlasTexture(bodyAtlas,256,0,128,126));
-  const armLowerMat = textureMaterial(atlasTexture(bodyAtlas,256,126,128,130));
-  const legMat = textureMaterial(atlasTexture(bodyAtlas,0,256,256,256));
-  const skinMat = textureMaterial(atlasTexture(bodyAtlas,256,256,128,128));
-  const shoeMat = textureMaterial(atlasTexture(bodyAtlas,384,256,128,128),.85);
+  const bodyTex=canvasTexture(bodyAtlas);
+  currentTextures.push(bodyTex);
 
-  addBox(bodyGroup,'neck',.17,.15,.17,0,1.34,0,skinMat);
-  addBox(bodyGroup,'torso',.60,.61,.31,0,1.03,0,torsoMat);
-  addBox(bodyGroup,'pelvis',.49,.23,.29,0,.65,0,legMat);
+  const bodyMat=new THREE.MeshStandardMaterial({
+    map:bodyTex,
+    color:0xffffff,
+    roughness:.95,
+    metalness:0
+  });
 
-  addBox(bodyGroup,'upperArmL',.17,.34,.18,-.40,1.13,0,armUpperMat);
-  addBox(bodyGroup,'upperArmR',.17,.34,.18,.40,1.13,0,armUpperMat);
-  addBox(bodyGroup,'lowerArmL',.15,.34,.16,-.40,.80,0,armLowerMat);
-  addBox(bodyGroup,'lowerArmR',.15,.34,.16,.40,.80,0,armLowerMat);
-  addBox(bodyGroup,'handL',.16,.14,.17,-.40,.56,.01,skinMat);
-  addBox(bodyGroup,'handR',.16,.14,.17,.40,.56,.01,skinMat);
-
-  addBox(bodyGroup,'legL',.21,.62,.22,-.14,.28,0,legMat);
-  addBox(bodyGroup,'legR',.21,.62,.22,.14,.28,0,legMat);
-  addBox(bodyGroup,'shoeL',.24,.14,.39,-.14,-.075,.075,shoeMat);
-  addBox(bodyGroup,'shoeR',.24,.14,.39,.14,-.075,.075,shoeMat);
+  const mesh=new THREE.Mesh(bodyGeometry(),bodyMat);
+  mesh.name='BodyMesh_shared';
+  mesh.castShadow=true;
+  mesh.receiveShadow=true;
+  bodyGroup.add(mesh);
 }
 
 function buildHead(faceCanvas){
