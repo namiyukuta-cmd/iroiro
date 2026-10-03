@@ -95,189 +95,276 @@ function shade(hex, amount){
   return '#' + ((1<<24) + (c(r)<<16) + (c(g)<<8) + c(b)).toString(16).slice(1);
 }
 
-function makeBodyAtlas(){
-  const c = document.createElement('canvas');
-  c.width = 512;
-  c.height = 512;
-  const ctx = c.getContext('2d');
-  const skin = skins[state.skin];
-  const outfit = outfits[state.bodyTexture];
+const BODY_UV={
+  torso:[8,8,236,236],
+  arm:[252,8,112,236],
+  skin:[372,8,132,236],
+  legs:[8,252,236,252],
+  shoes:[252,252,112,112],
+  spare:[372,252,132,252]
+};
 
-  ctx.fillStyle = '#9f9a90';
+function makeBodyAtlas(){
+  const c=document.createElement('canvas');
+  c.width=512;c.height=512;
+  const ctx=c.getContext('2d');
+  const skin=skins[state.skin];
+  const outfit=outfits[state.bodyTexture];
+
+  ctx.fillStyle=shade(skin,-8);
   ctx.fillRect(0,0,512,512);
 
-  // torso
-  ctx.fillStyle = outfit.shirt;
-  ctx.fillRect(0,0,256,256);
-  ctx.fillStyle = outfit.trim;
-  ctx.fillRect(112,0,32,72);
-  ctx.globalAlpha = .16;
-  ctx.fillStyle = '#ffffff';
-  for(let y=12;y<256;y+=20) ctx.fillRect(0,y,256,2);
-  ctx.globalAlpha = 1;
+  // torso island
+  ctx.fillStyle=outfit.shirt;
+  ctx.fillRect(...BODY_UV.torso);
+  const [tx,ty,tw,th]=BODY_UV.torso;
+  const torsoShade=ctx.createLinearGradient(tx,ty,tx+tw,ty);
+  torsoShade.addColorStop(0,'rgba(0,0,0,.18)');
+  torsoShade.addColorStop(.32,'rgba(255,255,255,.05)');
+  torsoShade.addColorStop(.68,'rgba(255,255,255,.05)');
+  torsoShade.addColorStop(1,'rgba(0,0,0,.18)');
+  ctx.fillStyle=torsoShade;ctx.fillRect(tx,ty,tw,th);
+  ctx.fillStyle=outfit.trim;
+  ctx.beginPath();
+  ctx.moveTo(105,8);ctx.lineTo(147,8);ctx.lineTo(140,54);ctx.lineTo(112,54);ctx.closePath();ctx.fill();
 
-  // arms: upper cloth, lower skin
-  ctx.fillStyle = outfit.shirt;
-  ctx.fillRect(256,0,128,126);
-  ctx.fillStyle = skin;
-  ctx.fillRect(256,126,128,130);
+  // arms island: upper sleeve, lower skin
+  const [ax,ay,aw,ah]=BODY_UV.arm;
+  ctx.fillStyle=outfit.shirt;ctx.fillRect(ax,ay,aw,74);
+  ctx.fillStyle=skin;ctx.fillRect(ax,ay+74,aw,ah-74);
+  const armShade=ctx.createLinearGradient(ax,ay,ax+aw,ay);
+  armShade.addColorStop(0,'rgba(0,0,0,.16)');
+  armShade.addColorStop(.5,'rgba(255,255,255,.04)');
+  armShade.addColorStop(1,'rgba(0,0,0,.16)');
+  ctx.fillStyle=armShade;ctx.fillRect(ax,ay,aw,ah);
 
-  // legs
-  ctx.fillStyle = outfit.pants;
-  ctx.fillRect(0,256,256,256);
-  ctx.globalAlpha = .13;
-  ctx.fillStyle = '#ffffff';
-  for(let x=18;x<256;x+=28) ctx.fillRect(x,256,2,256);
-  ctx.globalAlpha = 1;
+  // exposed skin / neck / hands
+  ctx.fillStyle=skin;ctx.fillRect(...BODY_UV.skin);
 
-  // hands / neck / skin region
-  ctx.fillStyle = skin;
-  ctx.fillRect(256,256,128,128);
+  // legs island
+  ctx.fillStyle=outfit.pants;ctx.fillRect(...BODY_UV.legs);
+  const [lx,ly,lw,lh]=BODY_UV.legs;
+  const legShade=ctx.createLinearGradient(lx,ly,lx+lw,ly);
+  legShade.addColorStop(0,'rgba(0,0,0,.18)');
+  legShade.addColorStop(.5,'rgba(255,255,255,.04)');
+  legShade.addColorStop(1,'rgba(0,0,0,.18)');
+  ctx.fillStyle=legShade;ctx.fillRect(lx,ly,lw,lh);
 
   // shoes
-  ctx.fillStyle = outfit.shoes;
-  ctx.fillRect(384,256,128,128);
-  ctx.fillStyle = shade(outfit.shoes,18);
-  ctx.fillRect(384,350,128,34);
+  ctx.fillStyle=outfit.shoes;ctx.fillRect(...BODY_UV.shoes);
+  ctx.fillStyle=shade(outfit.shoes,18);ctx.fillRect(252,334,112,30);
 
-  // spare region / palette
-  ctx.fillStyle = shade(skin,-8);
-  ctx.fillRect(256,384,128,128);
-  ctx.fillStyle = shade(outfit.shirt,-10);
-  ctx.fillRect(384,384,128,128);
+  // spare / palette
+  ctx.fillStyle=shade(outfit.shirt,-9);ctx.fillRect(...BODY_UV.spare);
 
   return c;
 }
 
-const HEAD_UV = {
-  front:[80,72,96,112],
-  left:[32,72,48,112],
-  right:[176,72,48,112],
-  top:[80,24,96,48],
-  bottom:[80,184,96,48],
-  back:[80,232,96,24]
-};
+function rectUV(rect,u,v,size=512){
+  const [x,y,w,h]=rect;
+  return [(x+u*w)/size,1-(y+v*h)/size];
+}
 
-function makeFaceCanvas(){
-  const c = document.createElement('canvas');
-  c.width = 256;
-  c.height = 256;
-  const ctx = c.getContext('2d');
-  const skin = skins[state.skin];
+function addRingSurface(buffers,rings,segments,rect,closeTop=true,closeBottom=true){
+  const {pos,uv,idx}=buffers;
+  const base=pos.length/3;
 
-  ctx.fillStyle = shade(skin,-14);
-  ctx.fillRect(0,0,256,256);
+  rings.forEach((r,ri)=>{
+    for(let i=0;i<=segments;i++){
+      const t=i/segments;
+      const a=t*Math.PI*2;
+      const x=r.cx+Math.sin(a)*r.rx;
+      const z=r.cz+Math.cos(a)*r.rz;
+      pos.push(x,r.y,z);
+      const [u,v]=rectUV(rect,t,ri/(rings.length-1));
+      uv.push(u,v);
+    }
+  });
 
-  // scalp / top
-  ctx.fillStyle = shade(skin,5);
-  ctx.fillRect(...HEAD_UV.top);
-
-  // back of head
-  ctx.fillStyle = shade(skin,-10);
-  ctx.fillRect(...HEAD_UV.back);
-
-  // side of head
-  ctx.fillStyle = shade(skin,-3);
-  ctx.fillRect(...HEAD_UV.left);
-  ctx.fillRect(...HEAD_UV.right);
-
-  // underside / jaw
-  ctx.fillStyle = shade(skin,-18);
-  ctx.fillRect(...HEAD_UV.bottom);
-
-  // face front
-  const [fx,fy,fw,fh] = HEAD_UV.front;
-  const g = ctx.createLinearGradient(fx,fy,fx+fw,fy+fh);
-  g.addColorStop(0,shade(skin,7));
-  g.addColorStop(.58,skin);
-  g.addColorStop(1,shade(skin,-12));
-  ctx.fillStyle = g;
-  ctx.fillRect(fx,fy,fw,fh);
-
-  // ears on the side panels
-  ctx.fillStyle = shade(skin,-18);
-  ctx.beginPath();ctx.ellipse(56,128,10,18,0,0,Math.PI*2);ctx.fill();
-  ctx.beginPath();ctx.ellipse(200,128,10,18,0,0,Math.PI*2);ctx.fill();
-  ctx.fillStyle = shade(skin,-30);
-  ctx.beginPath();ctx.ellipse(56,128,4,9,0,0,Math.PI*2);ctx.fill();
-  ctx.beginPath();ctx.ellipse(200,128,4,9,0,0,Math.PI*2);ctx.fill();
-
-  // subtle cheeks
-  ctx.globalAlpha = .16;
-  ctx.fillStyle = '#b95f60';
-  ctx.beginPath();ctx.arc(101,143,12,0,Math.PI*2);ctx.fill();
-  ctx.beginPath();ctx.arc(155,143,12,0,Math.PI*2);ctx.fill();
-  ctx.globalAlpha = 1;
-
-  // face features are painted only in the front UV island
-  ctx.fillStyle = '#2b2623';
-  if(state.faceTexture === 'soft'){
-    ctx.fillRect(100,116,17,5);
-    ctx.fillRect(139,116,17,5);
-    ctx.fillRect(106,112,4,13);
-    ctx.fillRect(146,112,4,13);
-    ctx.strokeStyle = '#70453d';
-    ctx.lineWidth = 4;
-    ctx.beginPath();
-    ctx.arc(128,151,22,.20*Math.PI,.80*Math.PI);
-    ctx.stroke();
-  }else if(state.faceTexture === 'sharp'){
-    ctx.save();ctx.translate(108,119);ctx.rotate(-.16);ctx.fillRect(-11,-3,22,6);ctx.restore();
-    ctx.save();ctx.translate(148,119);ctx.rotate(.16);ctx.fillRect(-11,-3,22,6);ctx.restore();
-    ctx.fillStyle = '#69423b';
-    ctx.fillRect(114,160,28,5);
-  }else{
-    ctx.beginPath();ctx.arc(108,119,6,0,Math.PI*2);ctx.fill();
-    ctx.beginPath();ctx.arc(148,119,6,0,Math.PI*2);ctx.fill();
-    ctx.strokeStyle = '#70453d';
-    ctx.lineWidth = 4;
-    ctx.beginPath();
-    ctx.arc(128,151,25,.12*Math.PI,.88*Math.PI);
-    ctx.stroke();
+  for(let r=0;r<rings.length-1;r++){
+    const row0=base+r*(segments+1);
+    const row1=row0+(segments+1);
+    for(let i=0;i<segments;i++){
+      idx.push(row0+i,row1+i,row0+i+1);
+      idx.push(row0+i+1,row1+i,row1+i+1);
+    }
   }
 
-  // nose and brows
-  ctx.strokeStyle = shade(skin,-32);
-  ctx.lineWidth = 3;
-  ctx.beginPath();ctx.moveTo(128,126);ctx.lineTo(124,145);ctx.lineTo(132,147);ctx.stroke();
-  ctx.strokeStyle = '#5b4438';
-  ctx.lineWidth = 3;
-  ctx.beginPath();ctx.moveTo(98,108);ctx.lineTo(117,106);ctx.stroke();
-  ctx.beginPath();ctx.moveTo(139,106);ctx.lineTo(158,108);ctx.stroke();
+  const addCap=(ringIndex,flip)=>{
+    const ring=rings[ringIndex];
+    const center=pos.length/3;
+    pos.push(ring.cx,ring.y,ring.cz);
+    const [cu,cv]=rectUV(rect,.5,ringIndex===0?0:1);
+    uv.push(cu,cv);
+    const row=base+ringIndex*(segments+1);
+    for(let i=0;i<segments;i++){
+      if(flip) idx.push(center,row+i+1,row+i);
+      else idx.push(center,row+i,row+i+1);
+    }
+  };
+  if(closeTop)addCap(0,true);
+  if(closeBottom)addCap(rings.length-1,false);
+}
 
-  // neck transition along lower front
-  ctx.fillStyle = shade(skin,-8);
-  ctx.fillRect(115,174,26,10);
+function addWedge(buffers,{cx,cy,cz,w,h,d,front,rect}){
+  const {pos,uv,idx}=buffers;
+  const b=pos.length/3;
+  const x0=cx-w/2,x1=cx+w/2;
+  const y0=cy-h/2,y1=cy+h/2;
+  const z0=cz-d/2,z1=cz+d/2;
+  const tip=front?z1:z0;
+  const heel=front?z0:z1;
+  const verts=[
+    [x0,y0,heel],[x1,y0,heel],[x1,y1,heel],[x0,y1,heel],
+    [x0,y0,tip],[x1,y0,tip],[x1,y1-.025,tip],[x0,y1-.025,tip]
+  ];
+  verts.forEach(v=>pos.push(...v));
+  const uvPts=[[0,1],[1,1],[1,0],[0,0],[0,1],[1,1],[1,0],[0,0]];
+  uvPts.forEach(p=>uv.push(...rectUV(rect,p[0],p[1])));
+  const faces=[
+    [0,1,2,0,2,3],[4,6,5,4,7,6],
+    [0,4,5,0,5,1],[3,2,6,3,6,7],
+    [1,5,6,1,6,2],[0,3,7,0,7,4]
+  ];
+  faces.flat().forEach(i=>idx.push(b+i));
+}
+
+function bodyGeometry(){
+  const buffers={pos:[],uv:[],idx:[]};
+
+  // torso: shoulder -> chest -> waist -> hips
+  addRingSurface(buffers,[
+    {cx:0,cz:0,y:1.31,rx:.34,rz:.145},
+    {cx:0,cz:.006,y:1.17,rx:.315,rz:.165},
+    {cx:0,cz:.008,y:.96,rx:.255,rz:.145},
+    {cx:0,cz:.006,y:.80,rx:.225,rz:.135},
+    {cx:0,cz:.005,y:.65,rx:.285,rz:.155}
+  ],8,BODY_UV.torso,true,true);
+
+  // neck
+  addRingSurface(buffers,[
+    {cx:0,cz:0,y:1.405,rx:.085,rz:.075},
+    {cx:0,cz:0,y:1.31,rx:.095,rz:.082}
+  ],8,BODY_UV.skin,true,false);
+
+  // arms: no spikes, several gradual rings
+  for(const side of [-1,1]){
+    const rect=BODY_UV.arm;
+    addRingSurface(buffers,[
+      {cx:side*.36,cz:0,y:1.235,rx:.090,rz:.083},
+      {cx:side*.385,cz:.004,y:1.08,rx:.083,rz:.076},
+      {cx:side*.40,cz:.008,y:.89,rx:.072,rz:.067},
+      {cx:side*.405,cz:.012,y:.70,rx:.062,rz:.060}
+    ],6,rect,true,false);
+    addRingSurface(buffers,[
+      {cx:side*.405,cz:.012,y:.70,rx:.064,rz:.060},
+      {cx:side*.405,cz:.025,y:.57,rx:.068,rz:.055},
+      {cx:side*.405,cz:.03,y:.515,rx:.062,rz:.050}
+    ],6,BODY_UV.skin,false,true);
+  }
+
+  // legs: thigh -> knee -> calf -> ankle
+  for(const side of [-1,1]){
+    addRingSurface(buffers,[
+      {cx:side*.155,cz:.004,y:.65,rx:.135,rz:.120},
+      {cx:side*.145,cz:.012,y:.47,rx:.120,rz:.108},
+      {cx:side*.135,cz:.016,y:.31,rx:.098,rz:.092},
+      {cx:side*.132,cz:.020,y:.17,rx:.089,rz:.082},
+      {cx:side*.13,cz:.024,y:.045,rx:.078,rz:.074}
+    ],8,BODY_UV.legs,true,true);
+    addWedge(buffers,{
+      cx:side*.13,cy:-.02,cz:.09,w:.18,h:.12,d:.32,front:true,rect:BODY_UV.shoes
+    });
+  }
+
+  const g=new THREE.BufferGeometry();
+  g.setAttribute('position',new THREE.Float32BufferAttribute(buffers.pos,3));
+  g.setAttribute('uv',new THREE.Float32BufferAttribute(buffers.uv,2));
+  g.setIndex(buffers.idx);
+  g.computeVertexNormals();
+  g.computeBoundingSphere();
+  return g;
+}
+
+function makeFaceCanvas(){
+  const c=document.createElement('canvas');
+  c.width=256;c.height=256;
+  const ctx=c.getContext('2d');
+  const skin=skins[state.skin];
+
+  ctx.fillStyle=skin;ctx.fillRect(0,0,256,256);
+
+  // wrap shading
+  const wrap=ctx.createLinearGradient(0,0,256,0);
+  wrap.addColorStop(0,'rgba(0,0,0,.18)');
+  wrap.addColorStop(.18,'rgba(0,0,0,.06)');
+  wrap.addColorStop(.5,'rgba(255,255,255,.07)');
+  wrap.addColorStop(.82,'rgba(0,0,0,.06)');
+  wrap.addColorStop(1,'rgba(0,0,0,.18)');
+  ctx.fillStyle=wrap;ctx.fillRect(0,0,256,256);
+
+  // ears at quarter turns of the wrapped UV
+  ctx.fillStyle=shade(skin,-18);
+  ctx.beginPath();ctx.ellipse(64,135,10,19,0,0,Math.PI*2);ctx.fill();
+  ctx.beginPath();ctx.ellipse(192,135,10,19,0,0,Math.PI*2);ctx.fill();
+  ctx.fillStyle=shade(skin,-30);
+  ctx.beginPath();ctx.ellipse(64,135,4,9,0,0,Math.PI*2);ctx.fill();
+  ctx.beginPath();ctx.ellipse(192,135,4,9,0,0,Math.PI*2);ctx.fill();
+
+  // front face centred at u=.5
+  ctx.globalAlpha=.15;ctx.fillStyle='#b95f60';
+  ctx.beginPath();ctx.ellipse(103,151,13,10,0,0,Math.PI*2);ctx.fill();
+  ctx.beginPath();ctx.ellipse(153,151,13,10,0,0,Math.PI*2);ctx.fill();
+  ctx.globalAlpha=1;
+
+  ctx.fillStyle='#2b2623';
+  if(state.faceTexture==='soft'){
+    ctx.fillRect(101,118,16,4);ctx.fillRect(139,118,16,4);
+    ctx.fillRect(107,114,4,12);ctx.fillRect(145,114,4,12);
+    ctx.strokeStyle='#70453d';ctx.lineWidth=4;
+    ctx.beginPath();ctx.arc(128,158,23,.20*Math.PI,.80*Math.PI);ctx.stroke();
+  }else if(state.faceTexture==='sharp'){
+    ctx.save();ctx.translate(109,120);ctx.rotate(-.15);ctx.fillRect(-10,-3,20,6);ctx.restore();
+    ctx.save();ctx.translate(147,120);ctx.rotate(.15);ctx.fillRect(-10,-3,20,6);ctx.restore();
+    ctx.fillStyle='#69423b';ctx.fillRect(115,166,26,4);
+  }else{
+    ctx.beginPath();ctx.arc(109,120,5,0,Math.PI*2);ctx.fill();
+    ctx.beginPath();ctx.arc(147,120,5,0,Math.PI*2);ctx.fill();
+    ctx.strokeStyle='#70453d';ctx.lineWidth=4;
+    ctx.beginPath();ctx.arc(128,157,26,.12*Math.PI,.88*Math.PI);ctx.stroke();
+  }
+
+  ctx.strokeStyle=shade(skin,-32);ctx.lineWidth=3;
+  ctx.beginPath();ctx.moveTo(128,128);ctx.lineTo(124,148);ctx.lineTo(132,151);ctx.stroke();
+  ctx.strokeStyle='#5b4438';ctx.lineWidth=3;
+  ctx.beginPath();ctx.moveTo(99,109);ctx.lineTo(117,107);ctx.stroke();
+  ctx.beginPath();ctx.moveTo(139,107);ctx.lineTo(157,109);ctx.stroke();
 
   return c;
 }
 
 function headGeometry(width,height,depth){
-  const hx=width/2, hy=height/2, hz=depth/2;
-  const faces=[
-    {name:'right', normal:[1,0,0], p:[[hx,-hy,hz],[hx,-hy,-hz],[hx,hy,-hz],[hx,hy,hz]]},
-    {name:'left', normal:[-1,0,0], p:[[-hx,-hy,-hz],[-hx,-hy,hz],[-hx,hy,hz],[-hx,hy,-hz]]},
-    {name:'top', normal:[0,1,0], p:[[-hx,hy,hz],[hx,hy,hz],[hx,hy,-hz],[-hx,hy,-hz]]},
-    {name:'bottom', normal:[0,-1,0], p:[[-hx,-hy,-hz],[hx,-hy,-hz],[hx,-hy,hz],[-hx,-hy,hz]]},
-    {name:'front', normal:[0,0,1], p:[[-hx,-hy,hz],[hx,-hy,hz],[hx,hy,hz],[-hx,hy,hz]]},
-    {name:'back', normal:[0,0,-1], p:[[hx,-hy,-hz],[-hx,-hy,-hz],[-hx,hy,-hz],[hx,hy,-hz]]}
-  ];
-  const pos=[],norm=[],uv=[],idx=[];
-  faces.forEach((face,fi)=>{
-    const base=fi*4;
-    face.p.forEach(p=>pos.push(...p));
-    for(let i=0;i<4;i++)norm.push(...face.normal);
-    const [x,y,w,h]=HEAD_UV[face.name];
-    const u0=x/256, u1=(x+w)/256;
-    const v0=1-(y+h)/256, v1=1-y/256;
-    uv.push(u0,v0, u1,v0, u1,v1, u0,v1);
-    idx.push(base,base+1,base+2, base,base+2,base+3);
-  });
+  const buffers={pos:[],uv:[],idx:[]};
+  const rings=[
+    {y:.50,rx:.22,rz:.16},
+    {y:.39,rx:.42,rz:.33},
+    {y:.18,rx:.50,rz:.45},
+    {y:-.05,rx:.47,rz:.47},
+    {y:-.25,rx:.40,rz:.40},
+    {y:-.42,rx:.29,rz:.31},
+    {y:-.50,rx:.16,rz:.20}
+  ].map(r=>({
+    cx:0,cz:0,
+    y:r.y*height,
+    rx:r.rx*width,
+    rz:r.rz*depth
+  }));
+  addRingSurface(buffers,rings,12,[0,0,256,256],true,true);
   const g=new THREE.BufferGeometry();
-  g.setAttribute('position',new THREE.Float32BufferAttribute(pos,3));
-  g.setAttribute('normal',new THREE.Float32BufferAttribute(norm,3));
-  g.setAttribute('uv',new THREE.Float32BufferAttribute(uv,2));
-  g.setIndex(idx);
+  g.setAttribute('position',new THREE.Float32BufferAttribute(buffers.pos,3));
+  g.setAttribute('uv',new THREE.Float32BufferAttribute(buffers.uv,2));
+  g.setIndex(buffers.idx);
+  g.computeVertexNormals();
   g.computeBoundingSphere();
   return g;
 }
@@ -342,32 +429,24 @@ function addBox(parent,name,w,h,d,x,y,z,material){
 
 function buildBody(bodyAtlas){
   disposeGroup(bodyGroup);
-  bodyGroup = new THREE.Group();
-  bodyGroup.name = 'BodyMesh';
+  bodyGroup=new THREE.Group();
+  bodyGroup.name='BodyMesh';
   person.add(bodyGroup);
 
-  const torsoMat = textureMaterial(atlasTexture(bodyAtlas,0,0,256,256));
-  const armUpperMat = textureMaterial(atlasTexture(bodyAtlas,256,0,128,126));
-  const armLowerMat = textureMaterial(atlasTexture(bodyAtlas,256,126,128,130));
-  const legMat = textureMaterial(atlasTexture(bodyAtlas,0,256,256,256));
-  const skinMat = textureMaterial(atlasTexture(bodyAtlas,256,256,128,128));
-  const shoeMat = textureMaterial(atlasTexture(bodyAtlas,384,256,128,128),.85);
+  const bodyTex=canvasTexture(bodyAtlas);
+  currentTextures.push(bodyTex);
+  const bodyMat=new THREE.MeshStandardMaterial({
+    map:bodyTex,
+    color:0xffffff,
+    roughness:.96,
+    metalness:0
+  });
 
-  addBox(bodyGroup,'neck',.17,.15,.17,0,1.34,0,skinMat);
-  addBox(bodyGroup,'torso',.60,.61,.31,0,1.03,0,torsoMat);
-  addBox(bodyGroup,'pelvis',.49,.23,.29,0,.65,0,legMat);
-
-  addBox(bodyGroup,'upperArmL',.17,.34,.18,-.40,1.13,0,armUpperMat);
-  addBox(bodyGroup,'upperArmR',.17,.34,.18,.40,1.13,0,armUpperMat);
-  addBox(bodyGroup,'lowerArmL',.15,.34,.16,-.40,.80,0,armLowerMat);
-  addBox(bodyGroup,'lowerArmR',.15,.34,.16,.40,.80,0,armLowerMat);
-  addBox(bodyGroup,'handL',.16,.14,.17,-.40,.56,.01,skinMat);
-  addBox(bodyGroup,'handR',.16,.14,.17,.40,.56,.01,skinMat);
-
-  addBox(bodyGroup,'legL',.21,.62,.22,-.14,.28,0,legMat);
-  addBox(bodyGroup,'legR',.21,.62,.22,.14,.28,0,legMat);
-  addBox(bodyGroup,'shoeL',.24,.14,.39,-.14,-.075,.075,shoeMat);
-  addBox(bodyGroup,'shoeR',.24,.14,.39,.14,-.075,.075,shoeMat);
+  const mesh=new THREE.Mesh(bodyGeometry(),bodyMat);
+  mesh.name='BodyMesh_lowpoly';
+  mesh.castShadow=true;
+  mesh.receiveShadow=true;
+  bodyGroup.add(mesh);
 }
 
 function buildHead(faceCanvas){
@@ -400,39 +479,64 @@ function buildHead(faceCanvas){
 
 function buildHair(){
   disposeGroup(hairGroup);
-  hairGroup = new THREE.Group();
-  hairGroup.name = 'HairMesh';
+  hairGroup=new THREE.Group();
+  hairGroup.name='HairMesh';
   person.add(hairGroup);
 
-  const mat = new THREE.MeshStandardMaterial({
+  const mat=new THREE.MeshStandardMaterial({
     color:hairColors[state.hairColor],
-    roughness:.96,
-    metalness:0
+    roughness:.98,
+    metalness:0,
+    flatShading:true
   });
 
-  const piece = (w,h,d,x,y,z,geometry=null)=>{
-    const mesh = new THREE.Mesh(geometry || new THREE.BoxGeometry(w,h,d),mat);
-    mesh.position.set(x,y,z);
-    mesh.castShadow = true;
-    hairGroup.add(mesh);
+  const makePart=(rings,segments=8)=>{
+    const b={pos:[],uv:[],idx:[]};
+    addRingSurface(b,rings,segments,[0,0,256,256],true,true);
+    const g=new THREE.BufferGeometry();
+    g.setAttribute('position',new THREE.Float32BufferAttribute(b.pos,3));
+    g.setAttribute('uv',new THREE.Float32BufferAttribute(b.uv,2));
+    g.setIndex(b.idx);g.computeVertexNormals();
+    const m=new THREE.Mesh(g,mat);m.castShadow=true;hairGroup.add(m);return m;
   };
 
-  if(state.hairMesh === 'short'){
-    piece(.49,.14,.43,0,1.94,-.005);
-    piece(.08,.24,.42,-.225,1.82,-.01);
-    piece(.08,.24,.42,.225,1.82,-.01);
-    piece(.45,.20,.08,0,1.82,-.205);
-  }else if(state.hairMesh === 'bob'){
-    piece(.50,.15,.44,0,1.94,-.005);
-    piece(.10,.47,.43,-.225,1.73,-.01);
-    piece(.10,.47,.43,.225,1.73,-.01);
-    piece(.46,.42,.10,0,1.73,-.205);
+  makePart([
+    {cx:0,cz:-.01,y:1.96,rx:.11,rz:.09},
+    {cx:0,cz:-.005,y:1.91,rx:.22,rz:.19},
+    {cx:0,cz:-.01,y:1.82,rx:.245,rz:.215},
+    {cx:0,cz:-.025,y:1.76,rx:.23,rz:.205}
+  ],10);
+
+  if(state.hairMesh==='bob'){
+    for(const side of [-1,1]){
+      makePart([
+        {cx:side*.215,cz:-.01,y:1.82,rx:.055,rz:.07},
+        {cx:side*.225,cz:-.015,y:1.62,rx:.060,rz:.075},
+        {cx:side*.215,cz:-.02,y:1.49,rx:.050,rz:.065}
+      ],6);
+    }
+    makePart([
+      {cx:0,cz:-.19,y:1.80,rx:.17,rz:.055},
+      {cx:0,cz:-.20,y:1.60,rx:.18,rz:.060},
+      {cx:0,cz:-.18,y:1.48,rx:.14,rz:.050}
+    ],8);
+  }else if(state.hairMesh==='bun'){
+    makePart([
+      {cx:0,cz:-.17,y:1.82,rx:.16,rz:.055},
+      {cx:0,cz:-.18,y:1.63,rx:.16,rz:.060},
+      {cx:0,cz:-.17,y:1.52,rx:.11,rz:.050}
+    ],8);
+    makePart([
+      {cx:0,cz:-.07,y:2.03,rx:.07,rz:.06},
+      {cx:0,cz:-.08,y:2.08,rx:.13,rz:.11},
+      {cx:0,cz:-.08,y:2.14,rx:.07,rz:.06}
+    ],8);
   }else{
-    piece(.49,.14,.43,0,1.94,-.005);
-    piece(.08,.28,.42,-.225,1.82,-.01);
-    piece(.08,.28,.42,.225,1.82,-.01);
-    piece(.45,.30,.09,0,1.80,-.205);
-    piece(0,0,0,0,2.09,-.08,new THREE.IcosahedronGeometry(.16,1));
+    makePart([
+      {cx:0,cz:-.18,y:1.82,rx:.15,rz:.05},
+      {cx:0,cz:-.19,y:1.69,rx:.14,rz:.055},
+      {cx:0,cz:-.17,y:1.61,rx:.10,rz:.045}
+    ],8);
   }
 }
 
