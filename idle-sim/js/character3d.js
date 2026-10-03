@@ -149,57 +149,137 @@ function makeBodyAtlas(){
   return c;
 }
 
+const HEAD_UV = {
+  front:[80,72,96,112],
+  left:[32,72,48,112],
+  right:[176,72,48,112],
+  top:[80,24,96,48],
+  bottom:[80,184,96,48],
+  back:[80,232,96,24]
+};
+
 function makeFaceCanvas(){
   const c = document.createElement('canvas');
   c.width = 256;
   c.height = 256;
   const ctx = c.getContext('2d');
   const skin = skins[state.skin];
-  ctx.fillStyle = skin;
+
+  ctx.fillStyle = shade(skin,-14);
   ctx.fillRect(0,0,256,256);
 
+  // scalp / top
+  ctx.fillStyle = shade(skin,5);
+  ctx.fillRect(...HEAD_UV.top);
+
+  // back of head
+  ctx.fillStyle = shade(skin,-10);
+  ctx.fillRect(...HEAD_UV.back);
+
+  // side of head
+  ctx.fillStyle = shade(skin,-3);
+  ctx.fillRect(...HEAD_UV.left);
+  ctx.fillRect(...HEAD_UV.right);
+
+  // underside / jaw
+  ctx.fillStyle = shade(skin,-18);
+  ctx.fillRect(...HEAD_UV.bottom);
+
+  // face front
+  const [fx,fy,fw,fh] = HEAD_UV.front;
+  const g = ctx.createLinearGradient(fx,fy,fx+fw,fy+fh);
+  g.addColorStop(0,shade(skin,7));
+  g.addColorStop(.58,skin);
+  g.addColorStop(1,shade(skin,-12));
+  ctx.fillStyle = g;
+  ctx.fillRect(fx,fy,fw,fh);
+
+  // ears on the side panels
+  ctx.fillStyle = shade(skin,-18);
+  ctx.beginPath();ctx.ellipse(56,128,10,18,0,0,Math.PI*2);ctx.fill();
+  ctx.beginPath();ctx.ellipse(200,128,10,18,0,0,Math.PI*2);ctx.fill();
+  ctx.fillStyle = shade(skin,-30);
+  ctx.beginPath();ctx.ellipse(56,128,4,9,0,0,Math.PI*2);ctx.fill();
+  ctx.beginPath();ctx.ellipse(200,128,4,9,0,0,Math.PI*2);ctx.fill();
+
+  // subtle cheeks
   ctx.globalAlpha = .16;
   ctx.fillStyle = '#b95f60';
-  ctx.beginPath(); ctx.arc(45,150,24,0,Math.PI*2); ctx.fill();
-  ctx.beginPath(); ctx.arc(211,150,24,0,Math.PI*2); ctx.fill();
+  ctx.beginPath();ctx.arc(101,143,12,0,Math.PI*2);ctx.fill();
+  ctx.beginPath();ctx.arc(155,143,12,0,Math.PI*2);ctx.fill();
   ctx.globalAlpha = 1;
 
+  // face features are painted only in the front UV island
   ctx.fillStyle = '#2b2623';
   if(state.faceTexture === 'soft'){
-    ctx.fillRect(55,91,27,8);
-    ctx.fillRect(174,91,27,8);
-    ctx.fillRect(65,86,7,18);
-    ctx.fillRect(184,86,7,18);
+    ctx.fillRect(100,116,17,5);
+    ctx.fillRect(139,116,17,5);
+    ctx.fillRect(106,112,4,13);
+    ctx.fillRect(146,112,4,13);
     ctx.strokeStyle = '#70453d';
-    ctx.lineWidth = 7;
+    ctx.lineWidth = 4;
     ctx.beginPath();
-    ctx.arc(128,156,35,.22*Math.PI,.78*Math.PI);
+    ctx.arc(128,151,22,.20*Math.PI,.80*Math.PI);
     ctx.stroke();
-  } else if(state.faceTexture === 'sharp'){
-    ctx.save();ctx.translate(68,94);ctx.rotate(-.16);ctx.fillRect(-18,-4,36,8);ctx.restore();
-    ctx.save();ctx.translate(188,94);ctx.rotate(.16);ctx.fillRect(-18,-4,36,8);ctx.restore();
+  }else if(state.faceTexture === 'sharp'){
+    ctx.save();ctx.translate(108,119);ctx.rotate(-.16);ctx.fillRect(-11,-3,22,6);ctx.restore();
+    ctx.save();ctx.translate(148,119);ctx.rotate(.16);ctx.fillRect(-11,-3,22,6);ctx.restore();
     ctx.fillStyle = '#69423b';
-    ctx.fillRect(101,171,54,7);
-  } else {
-    ctx.beginPath();ctx.arc(68,96,10,0,Math.PI*2);ctx.fill();
-    ctx.beginPath();ctx.arc(188,96,10,0,Math.PI*2);ctx.fill();
+    ctx.fillRect(114,160,28,5);
+  }else{
+    ctx.beginPath();ctx.arc(108,119,6,0,Math.PI*2);ctx.fill();
+    ctx.beginPath();ctx.arc(148,119,6,0,Math.PI*2);ctx.fill();
     ctx.strokeStyle = '#70453d';
-    ctx.lineWidth = 7;
+    ctx.lineWidth = 4;
     ctx.beginPath();
-    ctx.arc(128,157,42,.12*Math.PI,.88*Math.PI);
+    ctx.arc(128,151,25,.12*Math.PI,.88*Math.PI);
     ctx.stroke();
   }
 
-  // tiny nose cue
-  ctx.strokeStyle = shade(skin,-28);
-  ctx.lineWidth = 5;
-  ctx.beginPath();
-  ctx.moveTo(128,112);
-  ctx.lineTo(120,142);
-  ctx.lineTo(132,146);
-  ctx.stroke();
+  // nose and brows
+  ctx.strokeStyle = shade(skin,-32);
+  ctx.lineWidth = 3;
+  ctx.beginPath();ctx.moveTo(128,126);ctx.lineTo(124,145);ctx.lineTo(132,147);ctx.stroke();
+  ctx.strokeStyle = '#5b4438';
+  ctx.lineWidth = 3;
+  ctx.beginPath();ctx.moveTo(98,108);ctx.lineTo(117,106);ctx.stroke();
+  ctx.beginPath();ctx.moveTo(139,106);ctx.lineTo(158,108);ctx.stroke();
+
+  // neck transition along lower front
+  ctx.fillStyle = shade(skin,-8);
+  ctx.fillRect(115,174,26,10);
 
   return c;
+}
+
+function headGeometry(width,height,depth){
+  const hx=width/2, hy=height/2, hz=depth/2;
+  const faces=[
+    {name:'right', normal:[1,0,0], p:[[hx,-hy,hz],[hx,-hy,-hz],[hx,hy,-hz],[hx,hy,hz]]},
+    {name:'left', normal:[-1,0,0], p:[[-hx,-hy,-hz],[-hx,-hy,hz],[-hx,hy,hz],[-hx,hy,-hz]]},
+    {name:'top', normal:[0,1,0], p:[[-hx,hy,hz],[hx,hy,hz],[hx,hy,-hz],[-hx,hy,-hz]]},
+    {name:'bottom', normal:[0,-1,0], p:[[-hx,-hy,-hz],[hx,-hy,-hz],[hx,-hy,hz],[-hx,-hy,hz]]},
+    {name:'front', normal:[0,0,1], p:[[-hx,-hy,hz],[hx,-hy,hz],[hx,hy,hz],[-hx,hy,hz]]},
+    {name:'back', normal:[0,0,-1], p:[[hx,-hy,-hz],[-hx,-hy,-hz],[-hx,hy,-hz],[hx,hy,-hz]]}
+  ];
+  const pos=[],norm=[],uv=[],idx=[];
+  faces.forEach((face,fi)=>{
+    const base=fi*4;
+    face.p.forEach(p=>pos.push(...p));
+    for(let i=0;i<4;i++)norm.push(...face.normal);
+    const [x,y,w,h]=HEAD_UV[face.name];
+    const u0=x/256, u1=(x+w)/256;
+    const v0=1-(y+h)/256, v1=1-y/256;
+    uv.push(u0,v0, u1,v0, u1,v1, u0,v1);
+    idx.push(base,base+1,base+2, base,base+2,base+3);
+  });
+  const g=new THREE.BufferGeometry();
+  g.setAttribute('position',new THREE.Float32BufferAttribute(pos,3));
+  g.setAttribute('normal',new THREE.Float32BufferAttribute(norm,3));
+  g.setAttribute('uv',new THREE.Float32BufferAttribute(uv,2));
+  g.setIndex(idx);
+  g.computeBoundingSphere();
+  return g;
 }
 
 function canvasTexture(source){
@@ -296,19 +376,21 @@ function buildHead(faceCanvas){
   headGroup.name = 'HeadMesh';
   person.add(headGroup);
 
-  const skin = skins[state.skin];
-  const skinMat = new THREE.MeshStandardMaterial({color:skin,roughness:.95,metalness:0});
   const faceTex = canvasTexture(faceCanvas);
   currentTextures.push(faceTex);
-  const faceMat = new THREE.MeshStandardMaterial({map:faceTex,color:0xffffff,roughness:.95,metalness:0});
+  const headMat = new THREE.MeshStandardMaterial({
+    map:faceTex,
+    color:0xffffff,
+    roughness:.95,
+    metalness:0
+  });
 
   let scale = [.46,.50,.40];
   if(state.headMesh === 'narrow') scale = [.40,.52,.38];
   if(state.headMesh === 'round') scale = [.49,.49,.43];
 
-  const geom = new THREE.BoxGeometry(...scale);
-  const mats = [skinMat,skinMat,skinMat,skinMat,faceMat,skinMat];
-  const head = new THREE.Mesh(geom,mats);
+  const geom = headGeometry(...scale);
+  const head = new THREE.Mesh(geom,headMat);
   head.name = 'HeadMesh_' + state.headMesh;
   head.position.set(0,1.66,0);
   head.castShadow = true;
