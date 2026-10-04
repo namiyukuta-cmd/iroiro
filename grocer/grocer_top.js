@@ -1,26 +1,12 @@
 (() => {
   'use strict';
+  window.GrocerInventory.buildGrid(document.getElementById('inventoryGrid'));
 
-  const inventoryGrid = document.getElementById('inventoryGrid');
-  const stockButton = document.getElementById('stockButton');
-  const openShopButton = document.getElementById('openShopButton');
-
-  for (let i = 0; i < 24; i += 1) {
-    const slot = document.createElement('div');
-    slot.className = 'inventory-slot';
-    slot.dataset.slot = String(i);
-    inventoryGrid.appendChild(slot);
-  }
-
-  stockButton.addEventListener('click', () => {
-    window.dispatchEvent(new CustomEvent('grocer-top-action', {
-      detail: { action: 'stock' }
-    }));
+  document.getElementById('stockButton').addEventListener('click', () => {
+    location.href = './grocer_stock.html?_nc=' + Date.now();
   });
 
-  openShopButton.addEventListener('click', () => {
-    window.dispatchEvent(new CustomEvent('grocer-top-action', {
-      detail: { action: 'open' }
-    }));
+  document.getElementById('openShopButton').addEventListener('click', () => {
+    location.href = './grocer_shop.html?_nc=' + Date.now();
   });
 })();
