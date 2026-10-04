@@ -1,74 +1,10 @@
-:root{
-  --bg:#e7e2d8;
-  --panel:#f4f0e8;
-  --panel-strong:#eee7dc;
-  --ink:#221f1a;
-  --line:#2b2722;
-  --soft-line:#8e877c;
-  --pressed:#ded5c7;
-}
-*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-html,body{margin:0;width:100%;height:100%}
-body{
-  min-height:100dvh;
-  overflow:hidden;
-  background:var(--bg);
-  color:var(--ink);
-  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
-}
-button{font:inherit;color:inherit}
-.stock-screen{
-  width:min(100%,430px);
-  height:100dvh;
-  margin:0 auto;
-  padding:max(72px,env(safe-area-inset-top)) 16px max(40px,env(safe-area-inset-bottom));
-  display:grid;
-  grid-template-rows:minmax(0,1fr) minmax(0,1.06fr);
-  gap:7vh;
-  border-left:1px solid var(--line);
-  border-right:1px solid var(--line);
-  background:var(--bg);
-}
-.stock-upper{
-  min-height:0;
-  display:grid;
-  grid-template-columns:72px minmax(0,1fr) 70px;
-  gap:8px;
-}
-.reservation-panel,
-.stock-panel{
-  min-height:0;
-  border:1px solid var(--line);
-  background:var(--panel);
-  overflow:hidden;
-}
-.panel-title{
-  padding:6px;
-  border-bottom:1px solid var(--line);
-  text-align:center;
-  font-size:12px;
-  font-weight:800;
-}
 .stock-list{
-  height:calc(100% - 30px);
+  min-height:0;
+  flex:1 1 auto;
   overflow-y:auto;
   -webkit-overflow-scrolling:touch;
 }
-.stock-actions{
-  display:grid;
-  align-content:start;
-  gap:10px;
-  padding-top:10px;
-}
-.action-button{
-  min-height:66px;
-  border:1px solid var(--line);
-  background:var(--panel);
-  font-size:13px;
-  font-weight:800;
-}
-.action-button:active{background:var(--pressed);transform:scale(.97)}
-@media(max-height:720px){
-  .stock-screen{padding-top:max(48px,env(safe-area-inset-top));gap:5vh}
-  .action-button{min-height:56px;font-size:12px}
+
+#buyButton{
+  min-width:108px;
 }
