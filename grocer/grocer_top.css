@@ -59,7 +59,7 @@ button{font:inherit;color:inherit}
 .home-side-actions{
   position:absolute;
   right:16px;
-  bottom:calc(max(8px,env(safe-area-inset-bottom)) + 66px);
+  bottom:calc(max(8px,env(safe-area-inset-bottom)) + 60px);
   width:86px;
   display:flex;
   flex-direction:column;
@@ -68,12 +68,13 @@ button{font:inherit;color:inherit}
 
 .home-bottom-actions{
   position:absolute;
-  left:16px;
   right:16px;
+  left:auto;
   bottom:max(8px,env(safe-area-inset-bottom));
+  width:210px;
   display:grid;
-  grid-template-columns:minmax(0,1fr) 86px;
-  gap:10px;
+  grid-template-columns:116px 86px;
+  gap:8px;
 }
 
 .home-button{
@@ -86,7 +87,10 @@ button{font:inherit;color:inherit}
   line-height:1.15;
 }
 
-.home-button.wide{min-height:56px}
+.home-button.wide{
+  min-height:52px;
+  font-size:12px;
+}
 
 .home-button:active{
   transform:scale(.98);
