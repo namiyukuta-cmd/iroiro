@@ -21,12 +21,13 @@ button{font:inherit;color:inherit}
   width:min(100%,430px);
   height:100dvh;
   margin:0 auto;
-  padding:max(72px,env(safe-area-inset-top)) 12px max(36px,env(safe-area-inset-bottom));
+  padding:max(72px,env(safe-area-inset-top)) 16px max(40px,env(safe-area-inset-bottom));
   display:grid;
-  grid-template-rows:minmax(0,1fr) minmax(0,1.05fr);
-  gap:6vh;
+  grid-template-rows:minmax(0,1fr) minmax(0,1.06fr);
+  gap:7vh;
   border-left:1px solid var(--line);
   border-right:1px solid var(--line);
+  background:var(--bg);
 }
 .stock-upper{
   min-height:0;
@@ -57,12 +58,17 @@ button{font:inherit;color:inherit}
   display:grid;
   align-content:start;
   gap:10px;
+  padding-top:10px;
 }
 .action-button{
-  min-height:58px;
+  min-height:66px;
   border:1px solid var(--line);
   background:var(--panel);
   font-size:13px;
   font-weight:800;
 }
 .action-button:active{background:var(--pressed);transform:scale(.97)}
+@media(max-height:720px){
+  .stock-screen{padding-top:max(48px,env(safe-area-inset-top));gap:5vh}
+  .action-button{min-height:56px;font-size:12px}
+}
