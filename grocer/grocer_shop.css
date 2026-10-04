@@ -21,18 +21,19 @@ button{font:inherit;color:inherit}
   width:min(100%,430px);
   height:100dvh;
   margin:0 auto;
-  padding:max(72px,env(safe-area-inset-top)) 12px max(36px,env(safe-area-inset-bottom));
+  padding:max(72px,env(safe-area-inset-top)) 16px max(40px,env(safe-area-inset-bottom));
   display:grid;
-  grid-template-rows:minmax(0,1fr) minmax(0,1.05fr);
-  gap:6vh;
+  grid-template-rows:minmax(0,1fr) minmax(0,1.06fr);
+  gap:7vh;
   border-left:1px solid var(--line);
   border-right:1px solid var(--line);
+  background:var(--bg);
 }
 .shop-upper{
   min-height:0;
   display:grid;
-  grid-template-columns:minmax(0,1fr) 78px;
-  gap:8px;
+  grid-template-columns:minmax(0,1fr) 76px;
+  gap:10px;
 }
 .customer-panel{
   border:1px solid var(--line);
@@ -82,4 +83,7 @@ button{font:inherit;color:inherit}
   grid-template-columns:1fr 1fr;
   gap:8px;
   margin-top:8px;
+}
+@media(max-height:720px){
+  .shop-screen{padding-top:max(48px,env(safe-area-inset-top));gap:5vh}
 }
