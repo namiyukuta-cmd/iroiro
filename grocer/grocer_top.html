@@ -7,14 +7,24 @@
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
   <title>Grocer</title>
-  <link rel="stylesheet" href="./grocer_top.css?v=20261002-1">
+  <link rel="stylesheet" href="./grocer_top.css?v=20261004-2">
 </head>
 <body>
   <main class="grocer-top">
-    <button type="button" class="grocer-top-button" id="stockButton">仕入れ</button>
-    <button type="button" class="grocer-top-button" id="openShopButton">店を開く</button>
+    <section class="upper-layout" aria-label="店">
+      <div class="scene-window" id="sceneWindow"></div>
+
+      <aside class="side-actions" aria-label="店の操作">
+        <button type="button" class="side-button" id="stockButton">仕入れ</button>
+        <button type="button" class="side-button" id="openShopButton">店を開く</button>
+      </aside>
+    </section>
+
+    <section class="inventory-panel" aria-label="売り物インベントリ">
+      <div class="inventory-grid" id="inventoryGrid"></div>
+    </section>
   </main>
 
-  <script src="./grocer_top.js?v=20261002-1"></script>
+  <script src="./grocer_top.js?v=20261004-2"></script>
 </body>
 </html>
