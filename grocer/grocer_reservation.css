@@ -1,0 +1,16 @@
+.reservation-panel{
+  min-width:0;
+  min-height:0;
+  border:1px solid var(--line);
+  background:var(--panel);
+  overflow:hidden;
+  display:flex;
+  flex-direction:column;
+}
+
+.reservation-content{
+  min-height:0;
+  flex:1 1 auto;
+  overflow-y:auto;
+  -webkit-overflow-scrolling:touch;
+}
