@@ -10,6 +10,15 @@
   <link rel="stylesheet" href="./grocer_top.css?v=20261004-2">
 </head>
 <body>
+<script>
+(() => {
+  const u = new URL(location.href);
+  if (!u.searchParams.has('_nc')) {
+    u.searchParams.set('_nc', Date.now().toString());
+    location.replace(u.toString());
+  }
+})();
+</script>
   <main class="grocer-top">
     <section class="upper-layout" aria-label="店">
       <div class="scene-window" id="sceneWindow"></div>
