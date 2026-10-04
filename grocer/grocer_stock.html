@@ -7,9 +7,9 @@
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
   <title>Grocer - 仕入れ</title>
-  <link rel="stylesheet" href="./grocer_trade.css?v=20261004-2">
+  <link rel="stylesheet" href="./grocer_trade.css?v=20261004-3">
   <link rel="stylesheet" href="./grocer_reservation.css?v=20261004-2">
-  <link rel="stylesheet" href="./grocer_inventory.css?v=20261004-1">
+  <link rel="stylesheet" href="./grocer_inventory.css?v=20261004-2">
   <link rel="stylesheet" href="./grocer_stock.css?v=20261004-3">
 </head>
 <body>
@@ -25,11 +25,6 @@
           <div class="panel-title">予約</div>
           <div class="reservation-content" id="reservationList"></div>
         </section>
-
-        <div class="trade-actions">
-          <button type="button" class="trade-button" id="buyButton">買うOK</button>
-          <button type="button" class="trade-button" id="backButton">戻る</button>
-        </div>
       </aside>
     </section>
 
@@ -46,12 +41,20 @@
       </div>
     </section>
 
-    <section class="inventory-panel" aria-label="売り物インベントリ">
-      <div class="inventory-grid" id="inventoryGrid"></div>
+    <section class="trade-lower">
+      <section class="inventory-panel" aria-label="売り物インベントリ">
+        <div class="inventory-grid" id="inventoryGrid"></div>
+      </section>
+
+      <aside class="lower-actions" aria-label="仕入れの操作">
+        <button type="button" class="trade-button" id="buyButton">買うOK</button>
+        <button type="button" class="trade-button" id="backButton">戻る</button>
+      </aside>
     </section>
   </main>
 
-  <script src="./grocer_inventory.js?v=20261004-1"></script>
-  <script src="./grocer_stock.js?v=20261004-1"></script>
+  <script src="./grocer_state.js?v=20261004-1"></script>
+  <script src="./grocer_inventory.js?v=20261004-2"></script>
+  <script src="./grocer_stock.js?v=20261004-2"></script>
 </body>
 </html>
