@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
+  <title>Grocer - 仕入れ</title>
+  <link rel="stylesheet" href="./grocer_stock.css?v=20261004-1">
+  <link rel="stylesheet" href="./grocer_inventory.css?v=20261004-1">
+</head>
+<body>
+  <main class="stock-screen">
+    <section class="stock-upper">
+      <aside class="reservation-panel" aria-label="予約商品">
+        <div class="panel-title">予約</div>
+        <div id="reservationList"></div>
+      </aside>
+
+      <section class="stock-panel" aria-label="仕入れ可能商品">
+        <div class="panel-title">仕入れ</div>
+        <div class="stock-list" id="stockList"></div>
+      </section>
+
+      <aside class="stock-actions">
+        <button type="button" class="action-button" id="buyButton">購入</button>
+        <button type="button" class="action-button" id="backButton">戻る</button>
+      </aside>
+    </section>
+
+    <section class="inventory-panel" aria-label="売り物インベントリ">
+      <div class="inventory-grid" id="inventoryGrid"></div>
+    </section>
+  </main>
+
+  <script src="./grocer_inventory.js?v=20261004-1"></script>
+  <script src="./grocer_stock.js?v=20261004-1"></script>
+</body>
+</html>
