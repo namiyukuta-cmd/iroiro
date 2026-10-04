@@ -8,9 +8,8 @@
   --pressed:#ded5c7;
 }
 .inventory-panel{
-  width:82%;
+  width:100%;
   min-height:0;
-  justify-self:center;
   align-self:start;
   aspect-ratio:1.25/1;
   border:1px solid var(--line);
@@ -26,8 +25,33 @@
 .inventory-slot{
   min-width:0;
   min-height:0;
+  padding:4px 2px;
+  border:0;
   border-right:1px solid var(--soft-line);
   border-bottom:1px solid var(--soft-line);
+  background:transparent;
+  color:var(--ink);
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  gap:2px;
+  font:inherit;
 }
 .inventory-slot:nth-child(6n){border-right:0}
 .inventory-slot:nth-last-child(-n+6){border-bottom:0}
+.inventory-slot:disabled{opacity:1}
+.inventory-slot:not(:disabled):active{background:var(--pressed)}
+.inventory-name{
+  max-width:100%;
+  font-size:10px;
+  font-weight:800;
+  line-height:1.1;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
+.inventory-count{
+  font-size:10px;
+  font-weight:900;
+}
