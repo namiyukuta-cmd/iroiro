@@ -1,25 +1,12 @@
 :root{
   --bg:#e7e2d8;
   --panel:#f4f0e8;
-  --panel-strong:#eee7dc;
   --ink:#221f1a;
   --line:#2b2722;
-  --soft-line:#8e877c;
   --pressed:#ded5c7;
 }
-
-*{
-  box-sizing:border-box;
-  -webkit-tap-highlight-color:transparent;
-}
-
-html,
-body{
-  margin:0;
-  width:100%;
-  height:100%;
-}
-
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;width:100%;height:100%}
 body{
   min-height:100dvh;
   overflow:hidden;
@@ -27,20 +14,12 @@ body{
   color:var(--ink);
   font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
 }
-
-button{
-  font:inherit;
-  color:inherit;
-}
-
+button{font:inherit;color:inherit}
 .grocer-top{
   width:min(100%,430px);
   height:100dvh;
   margin:0 auto;
-  padding:
-    max(72px,env(safe-area-inset-top))
-    16px
-    max(40px,env(safe-area-inset-bottom));
+  padding:max(72px,env(safe-area-inset-top)) 16px max(40px,env(safe-area-inset-bottom));
   display:grid;
   grid-template-rows:minmax(0,1fr) minmax(0,1.06fr);
   gap:7vh;
@@ -48,7 +27,6 @@ button{
   border-right:1px solid var(--line);
   background:var(--bg);
 }
-
 .upper-layout{
   min-height:0;
   display:grid;
@@ -56,7 +34,6 @@ button{
   gap:10px;
   align-items:start;
 }
-
 .scene-window{
   width:100%;
   aspect-ratio:1/1;
@@ -64,14 +41,12 @@ button{
   border:1px solid var(--line);
   background:var(--panel);
 }
-
 .side-actions{
   display:grid;
   gap:12px;
   align-content:start;
   padding-top:10px;
 }
-
 .side-button{
   width:100%;
   min-height:66px;
@@ -83,87 +58,11 @@ button{
   line-height:1.15;
   cursor:pointer;
 }
-
 .side-button:active{
   transform:scale(.97);
   background:var(--pressed);
 }
-
-.inventory-panel{
-  width:82%;
-  min-height:0;
-  justify-self:center;
-  align-self:start;
-  aspect-ratio:1.25/1;
-  border:1px solid var(--line);
-  background:var(--panel);
-}
-
-.inventory-grid{
-  width:100%;
-  height:100%;
-  display:grid;
-  grid-template-columns:repeat(6,1fr);
-  grid-template-rows:repeat(4,1fr);
-}
-
-.inventory-slot{
-  min-width:0;
-  min-height:0;
-  border-right:1px solid var(--soft-line);
-  border-bottom:1px solid var(--soft-line);
-}
-
-.inventory-slot:nth-child(6n){
-  border-right:0;
-}
-
-.inventory-slot:nth-last-child(-n+6){
-  border-bottom:0;
-}
-
-/* 仕入れ画面でも使う共通色 */
-.stock-panel,
-.reservation-panel,
-.conversation-panel{
-  background:var(--panel);
-  color:var(--ink);
-  border:1px solid var(--line);
-}
-
-.stock-item,
-.reservation-item{
-  background:var(--panel-strong);
-  border-bottom:1px solid var(--soft-line);
-}
-
-.stock-item:last-child,
-.reservation-item:last-child{
-  border-bottom:0;
-}
-
-.confirm-button,
-.buy-button,
-.reply-button{
-  border:1px solid var(--line);
-  background:var(--panel);
-  color:var(--ink);
-}
-
-.confirm-button:active,
-.buy-button:active,
-.reply-button:active{
-  background:var(--pressed);
-}
-
 @media(max-height:720px){
-  .grocer-top{
-    padding-top:max(48px,env(safe-area-inset-top));
-    gap:5vh;
-  }
-
-  .side-button{
-    min-height:56px;
-    font-size:12px;
-  }
+  .grocer-top{padding-top:max(48px,env(safe-area-inset-top));gap:5vh}
+  .side-button{min-height:56px;font-size:12px}
 }
