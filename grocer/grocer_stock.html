@@ -7,8 +7,8 @@
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
   <title>Grocer - 仕入れ</title>
-  <link rel="stylesheet" href="./grocer_trade.css?v=20261004-1">
-  <link rel="stylesheet" href="./grocer_reservation.css?v=20261004-1">
+  <link rel="stylesheet" href="./grocer_trade.css?v=20261004-2">
+  <link rel="stylesheet" href="./grocer_reservation.css?v=20261004-2">
   <link rel="stylesheet" href="./grocer_inventory.css?v=20261004-1">
   <link rel="stylesheet" href="./grocer_stock.css?v=20261004-3">
 </head>
@@ -20,9 +20,16 @@
         <div class="stock-list" id="stockList"></div>
       </section>
 
-      <aside class="reservation-panel" aria-label="予約商品">
-        <div class="panel-title">予約</div>
-        <div class="reservation-content" id="reservationList"></div>
+      <aside class="trade-side">
+        <section class="reservation-panel" aria-label="予約商品">
+          <div class="panel-title">予約</div>
+          <div class="reservation-content" id="reservationList"></div>
+        </section>
+
+        <div class="trade-actions">
+          <button type="button" class="trade-button" id="buyButton">買うOK</button>
+          <button type="button" class="trade-button" id="backButton">戻る</button>
+        </div>
       </aside>
     </section>
 
@@ -36,11 +43,6 @@
           <span class="money-label">所持金</span>
           <strong class="money-value" id="stockMoney">0G</strong>
         </div>
-      </div>
-
-      <div class="action-row">
-        <button type="button" class="trade-button" id="buyButton">買うOK</button>
-        <button type="button" class="trade-button" id="backButton">戻る</button>
       </div>
     </section>
 
