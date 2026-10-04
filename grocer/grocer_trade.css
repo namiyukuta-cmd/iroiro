@@ -22,10 +22,11 @@ button{font:inherit;color:inherit}
   width:min(100%,430px);
   height:100dvh;
   margin:0 auto;
-  padding:max(56px,env(safe-area-inset-top)) 16px max(24px,env(safe-area-inset-bottom));
+  padding:max(72px,env(safe-area-inset-top)) 16px max(40px,env(safe-area-inset-bottom));
   display:grid;
-  grid-template-rows:minmax(0,1fr) auto auto;
-  gap:12px;
+  grid-template-rows:auto auto auto;
+  gap:8px;
+  align-content:start;
   border-left:1px solid var(--line);
   border-right:1px solid var(--line);
   background:var(--bg);
@@ -36,16 +37,26 @@ button{font:inherit;color:inherit}
   display:grid;
   grid-template-columns:minmax(0,1fr) 86px;
   gap:10px;
+  align-items:stretch;
 }
 
 .trade-main{
   min-width:0;
   min-height:0;
+  aspect-ratio:1/1;
   border:1px solid var(--line);
   background:var(--panel);
   overflow:hidden;
   display:flex;
   flex-direction:column;
+}
+
+.trade-side{
+  min-width:0;
+  min-height:0;
+  display:flex;
+  flex-direction:column;
+  gap:8px;
 }
 
 .panel-title{
@@ -58,8 +69,7 @@ button{font:inherit;color:inherit}
 }
 
 .trade-middle{
-  display:grid;
-  gap:8px;
+  min-height:0;
 }
 
 .money-bar{
@@ -70,8 +80,8 @@ button{font:inherit;color:inherit}
 
 .money-cell{
   min-width:0;
-  min-height:46px;
-  padding:6px 8px;
+  min-height:40px;
+  padding:5px 8px;
   border:1px solid var(--line);
   background:var(--panel);
   display:flex;
@@ -92,18 +102,16 @@ button{font:inherit;color:inherit}
   white-space:nowrap;
 }
 
-.action-row{
-  min-height:44px;
-  display:flex;
-  justify-content:flex-end;
-  align-items:stretch;
+.trade-actions{
+  margin-top:auto;
+  display:grid;
   gap:8px;
 }
 
 .trade-button{
-  min-width:86px;
+  width:100%;
   min-height:44px;
-  padding:6px 10px;
+  padding:6px 4px;
   border:1px solid var(--line);
   background:var(--panel);
   font-size:13px;
@@ -117,11 +125,9 @@ button{font:inherit;color:inherit}
 
 @media(max-height:720px){
   .trade-screen{
-    padding-top:max(40px,env(safe-area-inset-top));
-    padding-bottom:max(16px,env(safe-area-inset-bottom));
-    gap:8px;
+    padding-top:max(48px,env(safe-area-inset-top));
+    gap:6px;
   }
-  .money-cell{min-height:40px}
-  .action-row{min-height:40px}
+  .money-cell{min-height:36px}
   .trade-button{min-height:40px}
 }
