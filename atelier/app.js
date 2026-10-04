@@ -2,6 +2,7 @@
 const $=id=>document.getElementById(id), C=AtelierCore, assets=new Map();
 let serial=0, doc={sheets:[newSheet()],page:0}, tool='move', selected=null, snap=true, guide=true, ink='#384b43', brush=12, busy=false;
 let undo=[],redo=[],crop=null,gesture=null,layerPage=0,downloadURL=null,toastTimer;
+let batchCardSettings={threshold:28,size:92},batchSourceCanvas=null,batchSourceName='',batchFrameCanvas=null,batchFrameName='';
 const pointers=new Map(), canvas=$('canvas'), overlay=$('overlay'), ctx=canvas.getContext('2d'), ui=overlay.getContext('2d');
 function uid(){return ++serial}
 function newSheet(w=595,h=842){return{w,h,bg:null,grid:1,layers:[]}}
@@ -56,7 +57,7 @@ function layout(){
 function render(){const p=sheet();if(canvas.width!==p.w||canvas.height!==p.h){canvas.width=overlay.width=p.w;canvas.height=overlay.height=p.h}C.render(ctx,p,assets);$('dimensions').textContent=`${p.w} × ${p.h} px${p.bg?'':' · 透過'}`;$('page').textContent=`${doc.page+1} / ${doc.sheets.length}`;$('prev').disabled=doc.page===0;$('next').disabled=doc.page===doc.sheets.length-1;$('undo').disabled=!undo.length;$('redo').disabled=!redo.length;$('empty').hidden=p.layers.length>0||tool==='pen';document.querySelectorAll('[data-tool]').forEach(b=>b.classList.toggle('active',b.dataset.tool===tool));options();layout();drawOverlay();hint()}
 function hint(){const l=layer();$('hint').textContent=tool==='crop'?'指で四角く囲む →「切り抜く」で確定':tool==='pen'?'選択中のレイヤーに描画 · 空のときは描画レイヤーを追加':tool==='eraser'?'選択したレイヤーだけを消します':l?`${l.name} · 1本指で移動／2本指で拡大・回転`:'画像をタップして選択 · 追加でまとめて読み込み'}
 function drawOverlay(){ui.clearRect(0,0,overlay.width,overlay.height);const scale=overlay.width/Math.max(1,overlay.clientWidth),p=sheet();ui.lineWidth=scale;ui.strokeStyle='#418b80';if(guide&&p.grid>1){ui.save();ui.setLineDash([5*scale,4*scale]);for(const r of C.cells(p.w,p.h,p.grid))ui.strokeRect(r.x,r.y,r.w,r.h);ui.restore()}if(guide&&p.imageLayout){ui.save();ui.setLineDash([5*scale,4*scale]);for(const box of imageSlots(p,p.imageLayout))ui.strokeRect(box.x,box.y,box.w,box.h);ui.restore()}const l=layer();if(l&&tool==='move'){ui.save();if(l.frame){ui.strokeStyle='#d09b58';ui.strokeRect(l.frame.x,l.frame.y,l.frame.w,l.frame.h)}ui.translate(l.x,l.y);ui.rotate(l.rotation*Math.PI/180);ui.strokeStyle='#388a77';ui.strokeRect(-l.w*l.scale/2,-l.h*l.scale/2,l.w*l.scale,l.h*l.scale);for(const [x,y] of (l.shape==='rectangle'?[[-1,-1],[0,-1],[1,-1],[1,0],[1,1],[0,1],[-1,1],[-1,0]]:[[-1,-1],[1,-1],[1,1],[-1,1]])){ui.fillStyle='white';ui.fillRect(x*l.w*l.scale/2-4*scale,y*l.h*l.scale/2-4*scale,8*scale,8*scale);ui.strokeRect(x*l.w*l.scale/2-4*scale,y*l.h*l.scale/2-4*scale,8*scale,8*scale)}ui.restore()}if(crop){const r=cropRect();ui.fillStyle='#398a7433';ui.fillRect(r.x,r.y,r.w,r.h);ui.strokeStyle='#327d68';ui.strokeRect(r.x,r.y,r.w,r.h)}}
-function options(){const current=layer();if(tool==='move'&&current?.shape==='rectangle'){$('options').innerHTML='<button id="formatShape">図形の書式</button><button id="duplicateShape">複製</button><button id="smaller" aria-label="縮小">−</button><button id="larger" aria-label="拡大">＋</button><button id="rotate">回転 15°</button><button id="resetAngle">角度 0°</button>';$('formatShape').onclick=shapeFormatPanel;$('duplicateShape').onclick=()=>{const l=layer();if(!l||l.shape!=='rectangle')return;if(doc.sheets.flatMap(p=>p.layers).length>=60){toast('60レイヤーまでです');return}checkpoint();const copy={...l,id:uid(),name:l.name+' 複製',x:l.x+18,y:l.y+18,frame:l.frame?{...l.frame}:null,shapeStyle:l.shapeStyle?{...l.shapeStyle}:null};sheet().layers.push(copy);selected=copy.id;changed();toast('図形を複製しました')};$('smaller').onclick=()=>transform(.9,0);$('larger').onclick=()=>transform(1.1,0);$('rotate').onclick=()=>transform(1,15);$('resetAngle').onclick=()=>{const l=layer();if(!l)return;checkpoint();l.rotation=0;changed()};return}if(tool==='pen'||tool==='eraser'){$('options').innerHTML=`<input type="color" id="ink" aria-label="ペンの色" value="${ink}" ${tool==='eraser'?'disabled':''}><label>太さ <input id="brush" type="range" min="1" max="100" value="${brush}" aria-label="ペンの太さ"><span id="brushValue">${brush}</span></label><button id="newPaint">新レイヤー</button>`;$('ink').oninput=e=>ink=e.target.value;$('brush').oninput=e=>{brush=+e.target.value;$('brushValue').textContent=brush};$('newPaint').onclick=()=>{checkpoint();addPaint();changed()};return}if(tool==='crop'){$('options').innerHTML='<button id="confirmCrop">切り抜く</button><button id="cancelCrop">取消</button><small>選択レイヤーを四角く切抜</small>';$('confirmCrop').onclick=applyCrop;$('cancelCrop').onclick=()=>{crop=null;drawOverlay()};return}$('options').innerHTML=`<button id="snapping" class="${snap?'on':''}">吸着 ${snap?'入':'切'}</button><button id="smaller" aria-label="縮小">−</button><button id="larger" aria-label="拡大">＋</button><button id="rotate">回転 15°</button><button id="resetAngle">角度 0°</button>`;$('snapping').onclick=()=>{snap=!snap;options()};$('smaller').onclick=()=>transform(.9,0);$('larger').onclick=()=>transform(1.1,0);$('rotate').onclick=()=>transform(1,15);$('resetAngle').onclick=()=>{const l=layer();if(!l)return;checkpoint();l.rotation=0;changed()}}
+function options(){const current=layer();if(tool==='move'&&current?.batchCardSubject){$('options').innerHTML='<button id="batchAdjust">微調整</button><button id="smaller" aria-label="縮小">−</button><button id="larger" aria-label="拡大">＋</button><button id="centerBatch">中央</button>';$('batchAdjust').onclick=batchAdjustPanel;$('smaller').onclick=()=>transform(.96,0);$('larger').onclick=()=>transform(1.04,0);$('centerBatch').onclick=()=>{const l=layer();if(!l)return;checkpoint();const b=l.frame||{x:0,y:0,w:sheet().w,h:sheet().h};l.x=b.x+b.w/2;l.y=b.y+b.h/2;changed()};return}if(tool==='move'&&current?.shape==='rectangle'){$('options').innerHTML='<button id="formatShape">図形の書式</button><button id="duplicateShape">複製</button><button id="smaller" aria-label="縮小">−</button><button id="larger" aria-label="拡大">＋</button><button id="rotate">回転 15°</button><button id="resetAngle">角度 0°</button>';$('formatShape').onclick=shapeFormatPanel;$('duplicateShape').onclick=()=>{const l=layer();if(!l||l.shape!=='rectangle')return;if(doc.sheets.flatMap(p=>p.layers).length>=60){toast('60レイヤーまでです');return}checkpoint();const copy={...l,id:uid(),name:l.name+' 複製',x:l.x+18,y:l.y+18,frame:l.frame?{...l.frame}:null,shapeStyle:l.shapeStyle?{...l.shapeStyle}:null};sheet().layers.push(copy);selected=copy.id;changed();toast('図形を複製しました')};$('smaller').onclick=()=>transform(.9,0);$('larger').onclick=()=>transform(1.1,0);$('rotate').onclick=()=>transform(1,15);$('resetAngle').onclick=()=>{const l=layer();if(!l)return;checkpoint();l.rotation=0;changed()};return}if(tool==='pen'||tool==='eraser'){$('options').innerHTML=`<input type="color" id="ink" aria-label="ペンの色" value="${ink}" ${tool==='eraser'?'disabled':''}><label>太さ <input id="brush" type="range" min="1" max="100" value="${brush}" aria-label="ペンの太さ"><span id="brushValue">${brush}</span></label><button id="newPaint">新レイヤー</button>`;$('ink').oninput=e=>ink=e.target.value;$('brush').oninput=e=>{brush=+e.target.value;$('brushValue').textContent=brush};$('newPaint').onclick=()=>{checkpoint();addPaint();changed()};return}if(tool==='crop'){$('options').innerHTML='<button id="confirmCrop">切り抜く</button><button id="cancelCrop">取消</button><small>選択レイヤーを四角く切抜</small>';$('confirmCrop').onclick=applyCrop;$('cancelCrop').onclick=()=>{crop=null;drawOverlay()};return}$('options').innerHTML=`<button id="snapping" class="${snap?'on':''}">吸着 ${snap?'入':'切'}</button><button id="smaller" aria-label="縮小">−</button><button id="larger" aria-label="拡大">＋</button><button id="rotate">回転 15°</button><button id="resetAngle">角度 0°</button>`;$('snapping').onclick=()=>{snap=!snap;options()};$('smaller').onclick=()=>transform(.9,0);$('larger').onclick=()=>transform(1.1,0);$('rotate').onclick=()=>transform(1,15);$('resetAngle').onclick=()=>{const l=layer();if(!l)return;checkpoint();l.rotation=0;changed()}}
 function transform(f,a){const l=layer();if(!l){toast('画像を選んでください');return}checkpoint();l.scale=Math.max(.01,Math.min(30,l.scale*f));l.rotation=(l.rotation+a)%360;changed()}
 function setTool(t){if(busy)return;if(t==='add'){panel('追加','<div class="grid"><button id="addImages" class="option">画像を追加</button><button id="addShape" class="option">図形挿入</button><button id="addCardLayout" class="option">カードレイアウト</button><button id="addImageLayout" class="option">画像の配置</button></div>');$('addImages').onclick=()=>{$('files').click()};$('addShape').onclick=shapePanel;$('addCardLayout').onclick=cardLayoutPanel;$('addImageLayout').onclick=imageLayoutPanel;return}if(t==='align'){alignPanel();return}if(t==='shape'){shapeFormatPanel();return}if(t==='split'){splitPanel();return}if(t==='save'){savePanel();return}tool=t;crop=null;render()}
 function point(e){const r=overlay.getBoundingClientRect();return{x:(e.clientX-r.left)*sheet().w/r.width,y:(e.clientY-r.top)*sheet().h/r.height}}
@@ -94,6 +95,90 @@ function imageLayoutPanel(){
  $('applyImageLayout').onclick=()=>apply(false);$('layoutAddImages').onclick=()=>apply(true);preview();fitPanelViewport();
 }
 $('imageLayout').onclick=imageLayoutPanel;
+function batchSource(){
+ if(batchSourceCanvas)return{canvas:batchSourceCanvas,name:batchSourceName||'読み込み画像'};
+ const l=layer();
+ if(l&&!l.cardDecoration&&!l.cardBackground&&assets.get(l.asset))return{canvas:assets.get(l.asset),name:l.name||'選択中の画像'};
+ return null;
+}
+function batchCardPanel(){
+ const source=batchSource(),sourceLabel=source?source.name:'まだ選ばれていません',frameLabel=batchFrameCanvas?(batchFrameName||'選択した枠画像'):'標準の黒×金枠';
+ panel('6枚をカード化',
+  '<p>2列×3段の画像を自動で6分割し、周囲の余白を見つけて595×842のカードへ入れます。作成後は1枚ずつ移動・拡大できます。</p>'+
+  '<div class="batch-card-source"><strong>元画像</strong>'+escapeHTML(sourceLabel)+'</div>'+
+  '<div class="batch-card-source"><strong>カード枠</strong>'+escapeHTML(frameLabel)+'</div>'+
+  '<div class="batch-card-controls">'+
+   '<label>余白判定<input id="batchThreshold" type="range" min="8" max="55" value="'+batchCardSettings.threshold+'"><span id="batchThresholdValue">'+batchCardSettings.threshold+'</span></label>'+
+   '<label>素材サイズ<input id="batchSize" type="range" min="65" max="100" value="'+batchCardSettings.size+'"><span id="batchSizeValue">'+batchCardSettings.size+'%</span></label>'+
+  '</div>'+
+  '<div class="batch-card-actions"><button id="chooseBatchSource" class="option">6個入り画像を選ぶ</button><button id="chooseBatchFrame" class="option">枠画像を選ぶ</button></div>'+
+  '<button id="resetBatchFrame" class="option full">標準の黒×金枠を使う</button>'+
+  '<button id="runBatchCard" class="primary full" '+(source?'':'disabled')+'>6枚のカードを作る</button>'+
+  '<p class="quiet">現在の作品は6枚のカードに置き換わります。直後なら「↶」で元に戻せます。背景の薄い色は外周から自動判定します。</p>'
+ );
+ $('batchThreshold').oninput=e=>{batchCardSettings.threshold=+e.target.value;$('batchThresholdValue').textContent=e.target.value};
+ $('batchSize').oninput=e=>{batchCardSettings.size=+e.target.value;$('batchSizeValue').textContent=e.target.value+'%'};
+ $('chooseBatchSource').onclick=()=>{$('batchCardFile').click()};
+ $('chooseBatchFrame').onclick=()=>{$('batchFrameFile').click()};
+ $('resetBatchFrame').onclick=()=>{batchFrameCanvas=null;batchFrameName='';batchCardPanel()};
+ $('runBatchCard').onclick=()=>runBatchCards();
+ fitPanelViewport();
+}
+async function loadBatchImage(file,kind){
+ if(!file)return;
+ closePanel();setBusy(true,kind==='frame'?'カード枠を読み込み中…':'6個入り画像を読み込み中…');
+ try{
+  if(file.size>32*1024*1024)throw Error('32MBを超えています');
+  const c=await readImage(file);
+  if(kind==='frame'){batchFrameCanvas=c;batchFrameName=file.name}else{batchSourceCanvas=c;batchSourceName=file.name}
+ }catch(err){toast('画像を読み込めませんでした：'+err.message)}
+ finally{setBusy(false);render()}
+ batchCardPanel();
+}
+function runBatchCards(){
+ const source=batchSource();
+ if(!source){toast('6個入り画像を選んでください');return}
+ closePanel();setBusy(true,'6枚のカードを作成中…');
+ try{
+  const crops=BatchCard.extractSix(source.canvas,{threshold:batchCardSettings.threshold,paddingRatio:.055});
+  checkpoint();
+  const frameCanvas=batchFrameCanvas?BatchCard.fitFrame(batchFrameCanvas,595,842):BatchCard.drawBlackGoldFrame(595,842);
+  const frameAsset=register(frameCanvas),pages=[];
+  function makeFor(p,asset,name){
+   const c=assets.get(asset);
+   return{id:uid(),asset,name,w:c.width,h:c.height,x:p.w/2,y:p.h/2,scale:1,rotation:0,visible:true,opacity:1,frame:null};
+  }
+  for(let i=0;i<6;i++){
+   const p=newSheet(595,842);p.bg='#ffffff';p.batchCard=true;
+   const frame=makeFor(p,frameAsset,'黒金カード枠');frame.cardDecoration=true;frame.batchCardFrame=true;
+   const subjectAsset=register(crops[i]),subject=makeFor(p,subjectAsset,'カード素材 '+(i+1));subject.batchCardSubject=true;
+   const box=BatchCard.innerBox(p.w,p.h,batchCardSettings.size);
+   Object.assign(subject,C.placement({width:subject.w,height:subject.h},box,'contain'));
+   p.layers.push(frame,subject);pages.push(p);
+  }
+  doc={sheets:pages,page:0};selected=pages[0].layers.find(l=>l.batchCardSubject)?.id??null;tool='move';
+  batchSourceCanvas=null;batchSourceName='';
+  changed();toast('6枚のカードを作成しました。各カードは「微調整」で整えられます');
+ }catch(err){toast('カード化できませんでした：'+err.message)}
+ finally{setBusy(false);render()}
+}
+function batchAdjustPanel(){
+ const l=layer();if(!l||!l.batchCardSubject){toast('カード素材を選んでください');return}
+ panel('カード画像の微調整',
+  '<p>タップで少しずつ動かします。大きな移動はカード上を直接ドラッグできます。</p>'+
+  '<div class="nudge-grid"><span class="blank"></span><button id="nudgeUp">↑</button><span class="blank"></span><button id="nudgeLeft">←</button><button id="nudgeCenter">◎</button><button id="nudgeRight">→</button><span class="blank"></span><button id="nudgeDown">↓</button><span class="blank"></span></div>'+
+  '<div class="batch-scale-row"><button id="batchShrink">− 小さく</button><button id="batchResetCenter">中央</button><button id="batchGrow">＋ 大きく</button></div>'
+ );
+ const step=Math.max(2,Math.round(sheet().w*.012));
+ function move(dx,dy){checkpoint();l.x+=dx;l.y+=dy;changed()}
+ function center(){checkpoint();const b=l.frame||{x:0,y:0,w:sheet().w,h:sheet().h};l.x=b.x+b.w/2;l.y=b.y+b.h/2;changed()}
+ $('nudgeUp').onclick=()=>move(0,-step);$('nudgeDown').onclick=()=>move(0,step);$('nudgeLeft').onclick=()=>move(-step,0);$('nudgeRight').onclick=()=>move(step,0);$('nudgeCenter').onclick=center;$('batchResetCenter').onclick=center;
+ $('batchShrink').onclick=()=>{checkpoint();l.scale=Math.max(.01,l.scale*.97);changed()};
+ $('batchGrow').onclick=()=>{checkpoint();l.scale=Math.min(30,l.scale*1.03);changed()};
+}
+$('batchCard').onclick=batchCardPanel;
+$('batchCardFile').onchange=async e=>{const file=e.target.files[0];e.target.value='';await loadBatchImage(file,'source')};
+$('batchFrameFile').onchange=async e=>{const file=e.target.files[0];e.target.value='';await loadBatchImage(file,'frame')};
 function cardLayoutPanel(){
  const current=sheet(),editing=!!current.card;
  const oldBackground=current.layers.find(l=>l.cardBackground);let backgroundCanvas=oldBackground?assets.get(oldBackground.asset):null;
