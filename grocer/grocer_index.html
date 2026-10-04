@@ -49,8 +49,23 @@
 <body>
   <main>
     <h1>Grocer</h1>
-    <a class="menu" href="./grocer_top.html?new=1">はじめから</a>
-    <a class="menu" href="./grocer_top.html?continue=1">続きから</a>
+    <a class="menu" id="newGameLink" href="./grocer_top.html?new=1">はじめから</a>
+    <a class="menu" id="continueGameLink" href="./grocer_top.html?continue=1">続きから</a>
   </main>
+<script>
+(() => {
+  const go = (mode) => {
+    location.href = './grocer_top.html?' + mode + '=1&_nc=' + Date.now();
+  };
+  document.getElementById('newGameLink').addEventListener('click', (e) => {
+    e.preventDefault();
+    go('new');
+  });
+  document.getElementById('continueGameLink').addEventListener('click', (e) => {
+    e.preventDefault();
+    go('continue');
+  });
+})();
+</script>
 </body>
 </html>
