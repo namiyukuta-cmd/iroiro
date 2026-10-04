@@ -57,10 +57,12 @@ button{font:inherit;color:inherit}
 .home-status strong{font-size:14px}
 
 .home-side-actions{
-  align-self:stretch;
+  position:absolute;
+  right:16px;
+  bottom:calc(max(8px,env(safe-area-inset-bottom)) + 66px);
+  width:86px;
   display:flex;
   flex-direction:column;
-  justify-content:flex-end;
   gap:8px;
 }
 
@@ -97,5 +99,8 @@ button{font:inherit;color:inherit}
     padding-bottom:max(4px,env(safe-area-inset-bottom));
   }
   .home-bottom-actions{bottom:max(4px,env(safe-area-inset-bottom))}
+  .home-side-actions{
+    bottom:calc(max(4px,env(safe-area-inset-bottom)) + 58px);
+  }
   .home-button{min-height:46px;font-size:12px}
 }
