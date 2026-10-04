@@ -15,54 +15,88 @@ body{
   font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
 }
 button{font:inherit;color:inherit}
+
 .grocer-top{
+  position:relative;
   width:min(100%,430px);
   height:100dvh;
   margin:0 auto;
-  padding:max(72px,env(safe-area-inset-top)) 16px max(40px,env(safe-area-inset-bottom));
-  display:grid;
-  grid-template-rows:minmax(0,1fr) minmax(0,1.06fr);
-  gap:7vh;
+  padding:max(24px,env(safe-area-inset-top)) 16px max(20px,env(safe-area-inset-bottom));
   border-left:1px solid var(--line);
   border-right:1px solid var(--line);
   background:var(--bg);
 }
-.upper-layout{
-  min-height:0;
+
+.home-upper{
   display:grid;
-  grid-template-columns:minmax(0,1fr) 76px;
+  grid-template-columns:minmax(0,1fr) 86px;
   gap:10px;
-  align-items:start;
+  align-items:stretch;
 }
+
 .scene-window{
   width:100%;
   aspect-ratio:1/1;
-  align-self:start;
   border:1px solid var(--line);
   background:var(--panel);
+  position:relative;
 }
-.side-actions{
+
+.home-status{
+  position:absolute;
+  left:8px;
+  right:8px;
+  top:8px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:8px;
+  font-size:12px;
+}
+
+.home-status strong{font-size:14px}
+
+.home-side-actions{
+  display:flex;
+  flex-direction:column;
+  justify-content:flex-end;
+  gap:8px;
+}
+
+.home-bottom-actions{
+  position:absolute;
+  left:16px;
+  right:16px;
+  bottom:max(20px,env(safe-area-inset-bottom));
   display:grid;
-  gap:12px;
-  align-content:start;
-  padding-top:10px;
+  grid-template-columns:minmax(0,1fr) 86px;
+  gap:10px;
 }
-.side-button{
-  width:100%;
-  min-height:66px;
-  padding:5px 4px;
+
+.home-button{
+  min-height:52px;
+  padding:6px 5px;
   border:1px solid var(--line);
   background:var(--panel);
   font-size:13px;
   font-weight:800;
   line-height:1.15;
-  cursor:pointer;
 }
-.side-button:active{
-  transform:scale(.97);
+
+.home-button.wide{
+  min-height:56px;
+}
+
+.home-button:active{
+  transform:scale(.98);
   background:var(--pressed);
 }
+
 @media(max-height:720px){
-  .grocer-top{padding-top:max(48px,env(safe-area-inset-top));gap:5vh}
-  .side-button{min-height:56px;font-size:12px}
+  .grocer-top{
+    padding-top:max(16px,env(safe-area-inset-top));
+    padding-bottom:max(12px,env(safe-area-inset-bottom));
+  }
+  .home-bottom-actions{bottom:max(12px,env(safe-area-inset-bottom))}
+  .home-button{min-height:46px;font-size:12px}
 }
