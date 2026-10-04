@@ -1,3 +1,13 @@
+:root{
+  --bg:#e7e2d8;
+  --panel:#f4f0e8;
+  --panel-strong:#eee7dc;
+  --ink:#221f1a;
+  --line:#2b2722;
+  --soft-line:#8e877c;
+  --pressed:#ded5c7;
+}
+
 *{
   box-sizing:border-box;
   -webkit-tap-highlight-color:transparent;
@@ -13,8 +23,8 @@ body{
 body{
   min-height:100dvh;
   overflow:hidden;
-  background:#ffffff;
-  color:#201d19;
+  background:var(--bg);
+  color:var(--ink);
   font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
 }
 
@@ -34,9 +44,9 @@ button{
   display:grid;
   grid-template-rows:minmax(0,1fr) minmax(0,1.06fr);
   gap:7vh;
-  border-left:1px solid #2b2926;
-  border-right:1px solid #2b2926;
-  background:#fff;
+  border-left:1px solid var(--line);
+  border-right:1px solid var(--line);
+  background:var(--bg);
 }
 
 .upper-layout{
@@ -51,8 +61,8 @@ button{
   width:100%;
   aspect-ratio:1/1;
   align-self:start;
-  border:1px solid #8f8ce8;
-  background:#fff;
+  border:1px solid var(--line);
+  background:var(--panel);
 }
 
 .side-actions{
@@ -66,8 +76,8 @@ button{
   width:100%;
   min-height:66px;
   padding:5px 4px;
-  border:1px solid #c85e24;
-  background:#fff;
+  border:1px solid var(--line);
+  background:var(--panel);
   font-size:13px;
   font-weight:800;
   line-height:1.15;
@@ -76,7 +86,7 @@ button{
 
 .side-button:active{
   transform:scale(.97);
-  background:#fff3ea;
+  background:var(--pressed);
 }
 
 .inventory-panel{
@@ -85,8 +95,8 @@ button{
   justify-self:center;
   align-self:start;
   aspect-ratio:1.25/1;
-  border:1px solid #90e690;
-  background:#fff;
+  border:1px solid var(--line);
+  background:var(--panel);
 }
 
 .inventory-grid{
@@ -100,8 +110,8 @@ button{
 .inventory-slot{
   min-width:0;
   min-height:0;
-  border-right:1px solid #90e690;
-  border-bottom:1px solid #90e690;
+  border-right:1px solid var(--soft-line);
+  border-bottom:1px solid var(--soft-line);
 }
 
 .inventory-slot:nth-child(6n){
@@ -112,11 +122,46 @@ button{
   border-bottom:0;
 }
 
+/* 仕入れ画面でも使う共通色 */
+.stock-panel,
+.reservation-panel,
+.conversation-panel{
+  background:var(--panel);
+  color:var(--ink);
+  border:1px solid var(--line);
+}
+
+.stock-item,
+.reservation-item{
+  background:var(--panel-strong);
+  border-bottom:1px solid var(--soft-line);
+}
+
+.stock-item:last-child,
+.reservation-item:last-child{
+  border-bottom:0;
+}
+
+.confirm-button,
+.buy-button,
+.reply-button{
+  border:1px solid var(--line);
+  background:var(--panel);
+  color:var(--ink);
+}
+
+.confirm-button:active,
+.buy-button:active,
+.reply-button:active{
+  background:var(--pressed);
+}
+
 @media(max-height:720px){
   .grocer-top{
     padding-top:max(48px,env(safe-area-inset-top));
     gap:5vh;
   }
+
   .side-button{
     min-height:56px;
     font-size:12px;
