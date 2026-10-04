@@ -7,21 +7,40 @@
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
   <title>Grocer - 店</title>
-  <link rel="stylesheet" href="./grocer_shop.css?v=20261004-2">
+  <link rel="stylesheet" href="./grocer_trade.css?v=20261004-1">
+  <link rel="stylesheet" href="./grocer_reservation.css?v=20261004-1">
   <link rel="stylesheet" href="./grocer_inventory.css?v=20261004-1">
+  <link rel="stylesheet" href="./grocer_shop.css?v=20261004-3">
 </head>
 <body>
-  <main class="shop-screen">
-    <section class="shop-upper">
-      <div class="customer-panel" id="customerPanel"></div>
+  <main class="trade-screen shop-screen">
+    <section class="trade-upper">
+      <section class="trade-main" aria-label="店">
+        <div class="panel-title">店</div>
+        <div class="customer-content" id="customerPanel"></div>
+      </section>
 
-      <aside class="shop-side">
-        <section class="reservation-box" aria-label="予約">
-          <div class="panel-title">予約</div>
-          <div id="reservationBox"></div>
-        </section>
-        <button type="button" class="side-button" id="backButton">戻る</button>
+      <aside class="reservation-panel" aria-label="予約">
+        <div class="panel-title">予約</div>
+        <div class="reservation-content" id="reservationBox"></div>
       </aside>
+    </section>
+
+    <section class="trade-middle" aria-label="売上と所持金">
+      <div class="money-bar">
+        <div class="money-cell">
+          <span class="money-label">本日売上</span>
+          <strong class="money-value" id="daySales">0G</strong>
+        </div>
+        <div class="money-cell">
+          <span class="money-label">所持金</span>
+          <strong class="money-value" id="shopMoney">0G</strong>
+        </div>
+      </div>
+
+      <div class="action-row">
+        <button type="button" class="trade-button" id="backButton">戻る</button>
+      </div>
     </section>
 
     <section class="inventory-panel" aria-label="売り物インベントリ">
