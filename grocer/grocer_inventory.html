@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
+  <title>Grocer - インベントリ</title>
+  <link rel="stylesheet" href="./grocer_inventory.css?v=20261004-2">
+  <link rel="stylesheet" href="./grocer_inventory_page.css?v=20261004-1">
+</head>
+<body>
+  <main class="inventory-screen">
+    <section class="inventory-main">
+      <div class="inventory-title">インベントリ</div>
+      <section class="inventory-panel" aria-label="売り物インベントリ">
+        <div class="inventory-grid" id="inventoryGrid"></div>
+      </section>
+    </section>
+
+    <aside class="inventory-actions">
+      <button type="button" class="inventory-page-button" id="backButton">戻る</button>
+    </aside>
+  </main>
+
+  <script src="./grocer_state.js?v=20261004-1"></script>
+  <script src="./grocer_inventory.js?v=20261004-2"></script>
+  <script src="./grocer_inventory_page.js?v=20261004-1"></script>
+</body>
+</html>
