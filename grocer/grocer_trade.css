@@ -22,7 +22,7 @@ button{font:inherit;color:inherit}
   width:min(100%,430px);
   height:100dvh;
   margin:0 auto;
-  padding:max(24px,env(safe-area-inset-top)) 16px max(20px,env(safe-area-inset-bottom));
+  padding:max(8px,env(safe-area-inset-top)) 16px max(8px,env(safe-area-inset-bottom));
   display:grid;
   grid-template-rows:auto auto auto;
   gap:8px;
@@ -53,14 +53,10 @@ button{font:inherit;color:inherit}
   flex-direction:column;
 }
 
-.trade-side,
-.lower-actions{
+.trade-side{
   width:100%;
   min-width:0;
   min-height:0;
-  display:flex;
-  flex-direction:column;
-  gap:8px;
 }
 
 .panel-title{
@@ -72,9 +68,7 @@ button{font:inherit;color:inherit}
   font-weight:800;
 }
 
-.trade-middle{
-  min-height:0;
-}
+.trade-middle{min-height:0}
 
 .money-bar{
   display:grid;
@@ -106,14 +100,25 @@ button{font:inherit;color:inherit}
   white-space:nowrap;
 }
 
+.trade-lower .inventory-panel{
+  width:100%;
+  justify-self:stretch;
+  align-self:start;
+}
+
 .lower-actions{
-  align-self:stretch;
-  justify-content:flex-end;
+  position:absolute;
+  right:16px;
+  bottom:max(8px,env(safe-area-inset-bottom));
+  width:86px;
+  display:flex;
+  flex-direction:column;
+  gap:8px;
 }
 
 .trade-button{
   width:100%;
-  min-height:48px;
+  min-height:52px;
   padding:6px 4px;
   border:1px solid var(--line);
   background:var(--panel);
@@ -126,17 +131,15 @@ button{font:inherit;color:inherit}
   transform:scale(.98);
 }
 
-.trade-lower .inventory-panel{
-  width:100%;
-  justify-self:stretch;
-}
-
 @media(max-height:720px){
   .trade-screen{
-    padding-top:max(16px,env(safe-area-inset-top));
-    padding-bottom:max(12px,env(safe-area-inset-bottom));
+    padding-top:max(4px,env(safe-area-inset-top));
+    padding-bottom:max(4px,env(safe-area-inset-bottom));
     gap:6px;
   }
   .money-cell{min-height:34px}
-  .trade-button{min-height:42px}
+  .lower-actions{
+    bottom:max(4px,env(safe-area-inset-bottom));
+  }
+  .trade-button{min-height:46px}
 }
