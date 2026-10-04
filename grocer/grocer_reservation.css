@@ -1,7 +1,9 @@
 .reservation-panel{
+  width:100%;
   min-width:0;
-  min-height:0;
-  flex:1 1 auto;
+  min-height:96px;
+  max-height:150px;
+  flex:0 0 auto;
   border:1px solid var(--line);
   background:var(--panel);
   overflow:hidden;
@@ -14,4 +16,5 @@
   flex:1 1 auto;
   overflow-y:auto;
   -webkit-overflow-scrolling:touch;
+  padding:4px;
 }
