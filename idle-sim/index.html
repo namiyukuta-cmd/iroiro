@@ -8,7 +8,7 @@
   <meta http-equiv="Expires" content="0">
   <meta name="theme-color" content="#ebe8df">
   <title>放置生活</title>
-  <link rel="stylesheet" href="css/style.css?v=20261003-1">
+  <link rel="stylesheet" href="css/style.css?v=20261004-3dtest-1">
 </head>
 <body>
   <main class="game" id="game">
@@ -34,7 +34,10 @@
       <div class="zone" data-zone="desk"><span class="icon">▤</span><small>仕事</small></div>
       <div class="zone" data-zone="sofa"><span class="icon">▱</span><small>くつろぐ</small></div>
       <div class="zone" data-zone="door"><span class="icon">□</span><small>外出</small></div>
-      <div class="resident" id="resident" aria-label="住人">●</div>
+      <div class="resident resident-3d" id="resident" aria-label="住人">
+        <canvas id="resident3dCanvas" aria-hidden="true"></canvas>
+        <span class="resident-fallback" aria-hidden="true">●</span>
+      </div>
     </section>
 
     <section class="current">
@@ -58,6 +61,15 @@
     </footer>
   </main>
 
+  <script type="importmap">
+  {
+    "imports": {
+      "three": "https://cdn.jsdelivr.net/npm/three@0.169.0/build/three.module.js",
+      "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.169.0/examples/jsm/"
+    }
+  }
+  </script>
+  <script type="module" src="js/resident3d.js?v=20261004-3dtest-1"></script>
   <script src="js/main.js?v=20261003-1"></script>
 </body>
 </html>
