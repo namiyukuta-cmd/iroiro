@@ -21,7 +21,7 @@ button{font:inherit;color:inherit}
   width:min(100%,430px);
   height:100dvh;
   margin:0 auto;
-  padding:max(24px,env(safe-area-inset-top)) 16px max(20px,env(safe-area-inset-bottom));
+  padding:max(8px,env(safe-area-inset-top)) 16px max(8px,env(safe-area-inset-bottom));
   border-left:1px solid var(--line);
   border-right:1px solid var(--line);
   background:var(--bg);
@@ -31,7 +31,7 @@ button{font:inherit;color:inherit}
   display:grid;
   grid-template-columns:minmax(0,1fr) 86px;
   gap:10px;
-  align-items:stretch;
+  align-items:start;
 }
 
 .scene-window{
@@ -57,6 +57,7 @@ button{font:inherit;color:inherit}
 .home-status strong{font-size:14px}
 
 .home-side-actions{
+  align-self:stretch;
   display:flex;
   flex-direction:column;
   justify-content:flex-end;
@@ -67,7 +68,7 @@ button{font:inherit;color:inherit}
   position:absolute;
   left:16px;
   right:16px;
-  bottom:max(20px,env(safe-area-inset-bottom));
+  bottom:max(8px,env(safe-area-inset-bottom));
   display:grid;
   grid-template-columns:minmax(0,1fr) 86px;
   gap:10px;
@@ -83,9 +84,7 @@ button{font:inherit;color:inherit}
   line-height:1.15;
 }
 
-.home-button.wide{
-  min-height:56px;
-}
+.home-button.wide{min-height:56px}
 
 .home-button:active{
   transform:scale(.98);
@@ -94,9 +93,9 @@ button{font:inherit;color:inherit}
 
 @media(max-height:720px){
   .grocer-top{
-    padding-top:max(16px,env(safe-area-inset-top));
-    padding-bottom:max(12px,env(safe-area-inset-bottom));
+    padding-top:max(4px,env(safe-area-inset-top));
+    padding-bottom:max(4px,env(safe-area-inset-bottom));
   }
-  .home-bottom-actions{bottom:max(12px,env(safe-area-inset-bottom))}
+  .home-bottom-actions{bottom:max(4px,env(safe-area-inset-bottom))}
   .home-button{min-height:46px;font-size:12px}
 }
