@@ -7,26 +7,41 @@
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
   <title>Grocer - 仕入れ</title>
-  <link rel="stylesheet" href="./grocer_stock.css?v=20261004-2">
+  <link rel="stylesheet" href="./grocer_trade.css?v=20261004-1">
+  <link rel="stylesheet" href="./grocer_reservation.css?v=20261004-1">
   <link rel="stylesheet" href="./grocer_inventory.css?v=20261004-1">
+  <link rel="stylesheet" href="./grocer_stock.css?v=20261004-3">
 </head>
 <body>
-  <main class="stock-screen">
-    <section class="stock-upper">
-      <aside class="reservation-panel" aria-label="予約商品">
-        <div class="panel-title">予約</div>
-        <div id="reservationList"></div>
-      </aside>
-
-      <section class="stock-panel" aria-label="仕入れ可能商品">
+  <main class="trade-screen stock-screen">
+    <section class="trade-upper">
+      <section class="trade-main" aria-label="仕入れ可能商品">
         <div class="panel-title">仕入れ</div>
         <div class="stock-list" id="stockList"></div>
       </section>
 
-      <aside class="stock-actions">
-        <button type="button" class="action-button" id="buyButton">購入</button>
-        <button type="button" class="action-button" id="backButton">戻る</button>
+      <aside class="reservation-panel" aria-label="予約商品">
+        <div class="panel-title">予約</div>
+        <div class="reservation-content" id="reservationList"></div>
       </aside>
+    </section>
+
+    <section class="trade-middle" aria-label="仕入れ合計と所持金">
+      <div class="money-bar">
+        <div class="money-cell">
+          <span class="money-label">仕入れ合計</span>
+          <strong class="money-value" id="stockTotal">0G</strong>
+        </div>
+        <div class="money-cell">
+          <span class="money-label">所持金</span>
+          <strong class="money-value" id="stockMoney">0G</strong>
+        </div>
+      </div>
+
+      <div class="action-row">
+        <button type="button" class="trade-button" id="buyButton">買うOK</button>
+        <button type="button" class="trade-button" id="backButton">戻る</button>
+      </div>
     </section>
 
     <section class="inventory-panel" aria-label="売り物インベントリ">
