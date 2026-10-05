@@ -1,0 +1,28 @@
+.card{background:var(--card);color:var(--card-ink);border:1px solid #b99b7c;border-radius:4px;box-shadow:0 2px 4px #0005;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:3px;min-height:0}
+.card svg{width:100%;height:calc(100% - 14px);min-height:0}
+.card span{font-size:10px;white-space:nowrap}
+.hand{display:grid;grid-template-columns:repeat(8,minmax(0,1fr));padding-right:12px;align-items:center;height:calc(var(--hand-height) + 5px)}
+.hand .card{width:calc(100% + 12px);height:var(--hand-height);position:relative;z-index:var(--order);transform:none}
+.hand .card.selected{z-index:12;outline:2px solid #dfad68;outline-offset:1px;transform:translateY(-4px)}
+.hand .card:disabled{opacity:1}
+.hand .card.unavailable{background:#b7aa98;color:#756757}
+.opponent-hand .card{background:#28211b;color:#b99776;border:1px solid #b99776;padding:4px}
+.card-back{display:block;width:100%;height:100%;border:1px solid #a5816066;border-radius:2px;position:relative;background:repeating-linear-gradient(45deg,transparent 0 7px,#a581600b 7px 8px)}
+.card-back:before,.card-back:after{content:"◇";position:absolute;font-size:11px}
+.card-back:before{top:0;left:2px}
+.card-back:after{bottom:0;right:2px}
+.pile{flex:1;width:100%;min-height:0;position:relative;display:flex;align-items:center;justify-content:center}
+.pile .card{position:absolute;height:min(var(--pile-height),calc(100% - 10px));aspect-ratio:595/842;width:auto;transform:translate(var(--x),var(--y));animation:deal .2s ease-out}
+.pile .card:disabled{opacity:1}
+.pile .card.npc{border-color:#b56d78}
+.pile .card.picked{outline:2px solid #e7b355;outline-offset:1px}
+.empty-pile{height:min(var(--pile-height),calc(100% - 10px));aspect-ratio:595/842;border:1px dashed #9c785855;border-radius:4px}
+.invite-card,.bet-card{height:min(var(--slot-height),100%);aspect-ratio:595/842;width:auto;min-height:0;max-height:70px;background:#292119;display:flex;flex-direction:column;align-items:center;justify-content:center;border:1px solid var(--line);padding:3px;gap:1px}
+.invite-card{color:#d9b3ab}
+.invite-card .invite-symbol{font-size:20px;line-height:1}
+.invite-card span:last-child{font-size:10px}
+.invite-card.placed{background:#dec9b4;color:#693f42;border-color:#c59591}
+.invite-empty{height:min(var(--slot-height),100%);aspect-ratio:595/842;border:1px dashed #9c785855;border-radius:4px}
+.bet-card{font-size:14px;font-variant-numeric:tabular-nums}
+.bet-card.has-bet{background:#dec3a0;color:#30251d}
+@keyframes deal{from{opacity:0;translate:0 10px}to{opacity:1;translate:0 0}}
