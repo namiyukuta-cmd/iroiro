@@ -19,182 +19,161 @@ window.GrayGame = window.GrayGame || {};
     { id:"sit_home", label:"床に座って過ごす" }
   ];
 
-  GrayGame.data = { PREP_ITEMS, HOME_ACTIONS };
+  const ACTIONS = {
+    sit: { label:"近くに座る" },
+    snack: { label:"おやつを置く" },
+    hand: { label:"手を出して待つ" },
+    walk: { label:"一緒に散歩する" },
+    staff: { label:"スタッフに聞く" }
+  };
 
-  const zoneMeters = [4, 3, 2, 1, 0.5];
+  GrayGame.data = { PREP_ITEMS, HOME_ACTIONS, ACTIONS };
 
-  const useTurn = (patch, journal) => {
+  function useFacilityAction(id, result, observation, first) {
     const s = GrayGame.getState();
-    const left = Math.max(0, s.momentsLeft - 1);
+    if (s.momentsLeft <= 0 || s.usedActions.includes(id)) return null;
+
+    const counts = { ...s.actionCounts, [id]:(s.actionCounts[id] || 0) + 1 };
+    const left = s.momentsLeft - 1;
+
     GrayGame.patch({
       momentsLeft:left,
       acted:left <= 0,
-      sessionTurn:s.sessionTurn + 1,
-      ...patch
+      usedActions:[...s.usedActions,id],
+      actionCounts:counts,
+      familiarity:s.familiarity + 1,
+      trust:s.trust + 1,
+      lastEvent:id,
+      lastOutcome:first ? "first" : "move",
+      lastResultText:result,
+      lastObservationText:observation
     });
-    if (journal) GrayGame.addJournal(journal);
+
+    GrayGame.addJournal(`${ACTIONS[id].label}：${result}`);
+    if (first) GrayGame.addFirst(first[0], first[1]);
+    return true;
+  }
+
+  GrayGame.availableFacilityActions = () => {
+    const s = GrayGame.getState();
+    const list = ["sit","staff"];
+
+    if (s.actionCounts.sit >= 1 || s.visit >= 2) list.push("snack");
+    if (s.actionCounts.snack >= 1 || s.familiarity >= 3) list.push("hand");
+    if (s.visit >= 3 && (s.actionCounts.sit >= 2 || s.actionCounts.hand >= 1)) list.push("walk");
+
+    return list.filter((id) => !s.usedActions.includes(id));
   };
 
-  const addDistanceFirsts = () => {
+  GrayGame.doFacilityAction = (id) => {
     const s = GrayGame.getState();
-    const gap = Math.max(0, s.grayZone - s.playerZone);
-    if (gap <= 2) GrayGame.addFirst("within2", "初めて、2mほどの距離に残った");
-    if (gap <= 1) GrayGame.addFirst("within1", "初めて、1mほどの距離に残った");
-  };
+    const n = (s.actionCounts[id] || 0) + 1;
 
-  GrayGame.zoneLabel = (zone) => zoneMeters[zone] ? `${zoneMeters[zone]}m` : "そば";
-
-  GrayGame.sitAt = (zone) => {
-    const s = GrayGame.getState();
-    if (s.momentsLeft <= 0 || zone < 0 || zone > 3) return null;
-
-    const gap = s.grayZone - zone;
-    let ease = s.sessionEase;
-    let observation = "";
-    if (gap >= 2) {
-      ease += 2;
-      observation = "グレイは伏せた姿勢のまま。耳だけがこちらへ向きます。";
-    } else {
-      ease += 1;
-      observation = "グレイは少し顔を上げます。位置は変えず、そのままこちらを見ています。";
+    if (id === "sit") {
+      if (n === 1) return useFacilityAction(
+        id,
+        "少し距離を残して座ります。",
+        "グレイはその場を離れません。耳だけがこちらへ向きました。",
+        ["sit_first","初めて、近くで一緒に過ごした"]
+      );
+      if (n === 2) return useFacilityAction(
+        id,
+        "前と同じように、何もせず座ります。",
+        "しばらくして、グレイがこちらを一度見てから伏せ直しました。",
+        ["look_back","初めて、こちらを見て伏せ直した"]
+      );
+      if (n === 3) return useFacilityAction(
+        id,
+        "今日も同じ場所に座ります。",
+        "グレイは前より近い位置で、そのまま横になりました。",
+        ["near_rest","初めて、少し近い場所で休んだ"]
+      );
+      return useFacilityAction(
+        id,
+        "座っていると、グレイも落ち着いたまま過ごします。",
+        "こちらがいることを気にしすぎず、伏せたまま目を閉じています。"
+      );
     }
 
-    const text = `${GrayGame.zoneLabel(zone)}ほど離れた位置に座ります。`;
-    useTurn({
-      playerZone:zone,
-      sessionEase:ease,
-      lastEvent:"sit",
-      lastOutcome:"move",
-      lastResultText:text,
-      lastObservationText:observation
-    }, `${text} ${observation}`);
-
-    addDistanceFirsts();
-    return true;
-  };
-
-  GrayGame.placeSnack = (zone) => {
-    const s = GrayGame.getState();
-    if (s.momentsLeft <= 0 || zone < 1 || zone > 3) return null;
-
-    let grayZone = s.grayZone;
-    let ease = s.sessionEase + 1;
-    let moved = false;
-
-    if (zone < grayZone && zone > s.playerZone) {
-      grayZone = Math.max(zone, grayZone - 1);
-      moved = grayZone !== s.grayZone;
-      ease += moved ? 1 : 0;
+    if (id === "snack") {
+      if (n === 1) return useFacilityAction(
+        id,
+        "手渡しせず、少し離れた場所におやつを置きます。",
+        "すぐには動きません。しばらくしてから自分で取りに来ました。",
+        ["snack_first","初めて、置いたおやつを食べた"]
+      );
+      if (n === 2) return useFacilityAction(
+        id,
+        "いつもの場所におやつを置きます。",
+        "今日は前より早く立ち上がり、こちらがいる間に食べました。",
+        ["snack_near","初めて、こちらがいる間におやつを食べた"]
+      );
+      return useFacilityAction(
+        id,
+        "おやつを置くと、グレイは少し待ってから近づきます。",
+        "食べ終えると、すぐ元の場所には戻らずこちらを見ています。"
+      );
     }
 
-    const text = `${GrayGame.zoneLabel(zone)}の位置におやつを置きます。`;
-    const observation = moved
-      ? "しばらく待つと、グレイが立ち上がって一歩だけ近づき、おやつを食べました。"
-      : "グレイは鼻先を少し上げます。すぐには動かず、置かれた場所を見ています。";
-
-    useTurn({
-      grayZone,
-      snackZone:zone,
-      sessionEase:ease,
-      lastEvent:"snack",
-      lastOutcome:moved ? "approach" : "move",
-      lastResultText:text,
-      lastObservationText:observation
-    }, `${text} ${observation}`);
-
-    if (moved) GrayGame.addFirst("snack_step", "初めて、おやつのために一歩近づいた");
-    addDistanceFirsts();
-    return true;
-  };
-
-  GrayGame.waitQuietly = () => {
-    const s = GrayGame.getState();
-    if (s.momentsLeft <= 0) return null;
-
-    let grayZone = s.grayZone;
-    let ease = s.sessionEase + 1;
-    let moved = false;
-    const gap = grayZone - s.playerZone;
-
-    if (ease >= 3 && gap >= 2) {
-      grayZone -= 1;
-      ease = Math.max(0, ease - 2);
-      moved = true;
+    if (id === "hand") {
+      if (n === 1) return useFacilityAction(
+        id,
+        "手を低い位置で止めて待ちます。",
+        "グレイが首を少し伸ばし、短く匂いを確かめました。",
+        ["scent","初めて、手の匂いを確かめた"]
+      );
+      if (n === 2) return useFacilityAction(
+        id,
+        "手を出して、そのまま待ちます。",
+        "今日は自分から鼻先を寄せ、前より長く匂いを確かめました。",
+        ["nose_touch","初めて、鼻先が手に触れた"]
+      );
+      return useFacilityAction(
+        id,
+        "手を出すと、グレイは少し迷ってから近づきます。",
+        "確認が終わっても、その場から離れません。"
+      );
     }
 
-    const text = "何もせず、そのまま待ちます。";
-    const observation = moved
-      ? "数分後、グレイが自分から立ち上がり、ひとつ近い場所で伏せ直しました。"
-      : "グレイは姿勢を変えずにいます。呼吸だけが少しゆっくりになりました。";
-
-    useTurn({
-      grayZone,
-      sessionEase:ease,
-      lastEvent:"wait",
-      lastOutcome:moved ? "approach" : "move",
-      lastResultText:text,
-      lastObservationText:observation
-    }, `${text} ${observation}`);
-
-    if (moved) GrayGame.addFirst("self_step", "初めて、自分から一歩近づいた");
-    addDistanceFirsts();
-    return true;
-  };
-
-  GrayGame.offerHand = () => {
-    const s = GrayGame.getState();
-    if (s.momentsLeft <= 0 || s.visit < 3) return null;
-
-    const gap = s.grayZone - s.playerZone;
-    const text = "手を低い位置で止めて待ちます。";
-    let observation = "まだ届く距離ではありません。グレイは手の方を見ただけでした。";
-    let outcome = "move";
-
-    if (gap <= 1) {
-      observation = "グレイが首を少し伸ばし、鼻先で短く匂いを確かめました。";
-      outcome = "approach";
-      GrayGame.addFirst("scent", "初めて、手の匂いを確かめた");
+    if (id === "walk") {
+      if (n === 1) return useFacilityAction(
+        id,
+        "スタッフと一緒に外へ出ます。",
+        "最初は半歩後ろでしたが、帰り道では少し近くを歩きました。",
+        ["walk_first","初めて、一緒に散歩した"]
+      );
+      if (n === 2) return useFacilityAction(
+        id,
+        "今日も短い散歩へ出ます。",
+        "帰り道で一度だけ横に並び、そのまま数歩歩きました。",
+        ["walk_side","初めて、横に並んで歩いた"]
+      );
+      return useFacilityAction(
+        id,
+        "静かな道を一緒に歩きます。",
+        "グレイは時々こちらを確認しながら、ほぼ同じ歩幅で歩いています。"
+      );
     }
 
-    useTurn({
-      sessionEase:s.sessionEase + 1,
-      lastEvent:"hand",
-      lastOutcome:outcome,
-      lastResultText:text,
-      lastObservationText:observation
-    }, `${text} ${observation}`);
+    if (id === "staff") {
+      if (n === 1) return useFacilityAction(
+        id,
+        "スタッフから、グレイは嫌なことも我慢してしまうと聞きます。",
+        "反応が薄い時ほど、無理に何かをさせない方がよさそうです。",
+        ["learn","グレイの「我慢する癖」を知った"]
+      );
+      return useFacilityAction(
+        id,
+        "最近のグレイの様子をスタッフに聞きます。",
+        "こちらが来る日は、入口の音に反応することが増えたそうです。"
+      );
+    }
 
-    return true;
-  };
-
-  GrayGame.takeWalk = () => {
-    const s = GrayGame.getState();
-    if (s.momentsLeft <= 0 || s.visit < 3) return null;
-
-    const nextGray = Math.max(s.playerZone + 1, s.grayZone - 1);
-    const text = "スタッフと一緒に、短く外を歩きます。";
-    const observation = nextGray < s.grayZone
-      ? "戻ってくると、グレイはさっきより一つ近い場所で伏せました。"
-      : "帰り道は半歩ほど後ろ。施設へ戻ると、いつもの場所で伏せました。";
-
-    useTurn({
-      grayZone:nextGray,
-      sessionEase:s.sessionEase + 2,
-      lastEvent:"walk",
-      lastOutcome:nextGray < s.grayZone ? "approach" : "move",
-      lastResultText:text,
-      lastObservationText:observation
-    }, `${text} ${observation}`);
-
-    GrayGame.addFirst("walk", "初めて、一緒に散歩した");
-    if (s.visit >= 4) GrayGame.addFirst("walk_side", "初めて、帰り道で横に並んだ");
-    addDistanceFirsts();
-    return true;
+    return null;
   };
 
   GrayGame.advanceFacility = () => {
     const s = GrayGame.getState();
-    const baseGray = Math.max(2, 4 - Math.floor((s.visit + 1) / 4));
     GrayGame.patch({
       visit:s.visit + 1,
       acted:false,
@@ -203,19 +182,13 @@ window.GrayGame = window.GrayGame || {};
       lastEvent:"return",
       lastOutcome:"",
       lastResultText:"",
-      lastObservationText:"",
-      playerZone:0,
-      grayZone:baseGray,
-      snackZone:null,
-      sessionEase:Math.min(2, Math.floor(s.familiarity / 6)),
-      sessionTurn:0,
-      familiarity:s.familiarity + 1
+      lastObservationText:""
     });
   };
 
   GrayGame.canTrial = () => {
     const s = GrayGame.getState();
-    return s.visit >= 6 && s.prep.length >= 4 && s.firsts.some(x => x.id === "scent");
+    return s.visit >= 6 && s.prep.length >= 4 && s.actionCounts.hand >= 1 && s.actionCounts.walk >= 1;
   };
 
   GrayGame.startTrial = () => {
@@ -243,7 +216,7 @@ window.GrayGame = window.GrayGame || {};
     if (!action) return null;
 
     const copy = {
-      quiet:["同じ部屋で、何も求めず過ごします。","グレイは少し離れた場所で横になりました。"],
+      quiet:["何も求めず、同じ部屋で静かに過ごします。","グレイは少し離れた場所で横になりました。"],
       meal:["決まった場所にごはんを置きます。","食べ終えたあとも、すぐには隅へ戻りませんでした。"],
       walk_home:["家の周りを短く歩きます。","帰ると、自分から玄関の中へ入りました。"],
       sit_home:["床に座って静かに過ごします。","少しして、グレイも前より近い場所で伏せました。"]
