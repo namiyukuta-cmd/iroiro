@@ -52,8 +52,9 @@ border-bottom:5px solid rgba(110,92,72,.42)}
 .shelf-slot.filled .product-art{opacity:1;transform:scale(1) translateY(0)}
 .shelf-slot.pop .product-art{animation:shelfPop .34s cubic-bezier(.18,.9,.32,1.3)}
 .shelf-slot:active.filled .product-art{transform:scale(.95)}
-.coin{position:absolute;z-index:42;width:16px;height:16px;border-radius:50%;background:#d2a449;border:1px solid #7d6128;box-shadow:inset 0 0 0 2px #efd177,0 1px 2px rgba(0,0,0,.18);display:grid;place-items:center;font-size:8px;font-weight:900;color:#6b4d15;pointer-events:none}
-.coin-speck{position:absolute;z-index:41;width:6px;height:6px;border-radius:50%;background:#d2a449;pointer-events:none}
+.coin{position:absolute;z-index:42;width:18px;height:18px;border-radius:50%;background:radial-gradient(circle at 35% 35%,#fff7b8 0 18%,#f1cf62 19% 48%,#c88f2c 49% 78%,#8b5d18 79% 100%);border:1px solid #7a5316;box-shadow:0 0 0 2px rgba(255,236,154,.35),0 2px 5px rgba(0,0,0,.22);display:grid;place-items:center;font-size:8px;font-weight:900;color:#6d4910;pointer-events:none;will-change:left,top,transform,opacity}
+.coin::after{content:"";position:absolute;left:3px;top:3px;width:4px;height:4px;border-radius:50%;background:rgba(255,255,255,.85)}
+.coin-speck{position:absolute;z-index:41;width:7px;height:7px;border-radius:50%;background:radial-gradient(circle,#fff8c8 0 35%,#f2cb5d 36% 100%);pointer-events:none}
 @keyframes shelfPop{0%{transform:scale(.25) translateY(-16px);opacity:.1}62%{transform:scale(1.15) translateY(2px);opacity:1}100%{transform:scale(1) translateY(0);opacity:1}}
 
 /* cutout-5: make the whole shop visibly alive */
@@ -99,8 +100,11 @@ border-bottom:5px solid rgba(110,92,72,.42)}
 @keyframes plantReadyAlive{0%,100%{transform:translate(-50%,-50%) scale(1) rotate(-2deg)}50%{transform:translate(-50%,-54%) scale(1.14) rotate(2deg)}}
 @keyframes gardenDrift{0%{transform:translate(0,0) rotate(0);opacity:0}15%{opacity:.65}50%{transform:translate(125px,-44px) rotate(170deg);opacity:.75}100%{transform:translate(260px,-18px) rotate(330deg);opacity:0}}
 @keyframes gardenDrift2{0%{transform:translate(0,0) rotate(0);opacity:0}15%{opacity:.5}55%{transform:translate(-95px,-55px) rotate(-170deg);opacity:.7}100%{transform:translate(-230px,-15px) rotate(-350deg);opacity:0}}
-@keyframes coinSpin{0%{rotate:0deg}100%{rotate:360deg}}
+@keyframes coinSpin{0%{rotate:0deg;scale:1}50%{rotate:180deg;scale:1.08}100%{rotate:360deg;scale:1}}
 @media(prefers-reduced-motion:reduce){
   .customer-hit.waiting .customer-art,.customer-hit.waiting .customer-request,.shelf-slot.filled .product-art,
   .station-hit .station-art,.station-hit::before,.station-hit::after,.plot-hit .plant-art,#gardenLayer::before,#gardenLayer::after,.coin{animation:none!important}
 }
+
+/* cutout-6: exact coin-count burst */
+.money-bump{transform-origin:center}
