@@ -44,7 +44,7 @@ h1 { margin: 0; font-size: 22px; letter-spacing: .02em; }
   border-radius: 24px;
   background: linear-gradient(180deg, rgba(255,255,255,.25) 0 58%, rgba(181,138,77,.13) 58% 100%), repeating-linear-gradient(90deg, transparent 0 31px, rgba(31,29,26,.035) 31px 32px);
 }
-.dog { position: absolute; width: 90%; max-height: 96%; left: 50%; bottom: 2%; transform: translateX(-50%); transition: transform .45s ease, filter .45s ease; }
+.dog { position: absolute; width: auto; height: 94%; max-width: 92%; left: 50%; bottom: 2%; object-fit: contain; border-radius: 16px; transform: translateX(-50%); transition: transform .45s ease, filter .45s ease; }
 .dog-stage[data-distance="far"] .dog { transform: translateX(-50%) scale(.78); filter: saturate(.75); }
 .dog-stage[data-distance="mid"] .dog { transform: translateX(-50%) scale(.9); }
 .dog-stage[data-distance="near"] .dog { transform: translateX(-50%) scale(1); }
