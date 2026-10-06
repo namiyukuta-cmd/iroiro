@@ -5,7 +5,7 @@ window.GrayGame = window.GrayGame || {};
   const els = {};
 
   function cache() {
-    ['chapterLabel','dayLabel','placeLabel','sceneText','dogStage','distanceLine','observationText','actionTitle','actionCount','actions','advanceButton','sheet','sheetTitle','sheetContent','closeSheet','menuButton'].forEach(id => els[id] = $(id));
+    ['chapterLabel','dayLabel','placeLabel','sceneText','feedbackBadge','dogStage','distanceLine','observationText','actionTitle','actionCount','actions','advanceButton','sheet','sheetTitle','sheetContent','closeSheet','menuButton'].forEach(id => els[id] = $(id));
   }
 
   function distanceForState(s) {
@@ -29,34 +29,41 @@ window.GrayGame = window.GrayGame || {};
 
   function renderFacility(s) {
     const intro = facilityIntro(s);
-    const lastAction = s.acted ? GrayGame.data.FACILITY_ACTIONS.find(a => a.id === s.lastEvent) : null;
+    const pattern = GrayGame.currentPattern();
     els.chapterLabel.textContent = '保護施設';
     els.dayLabel.textContent = `訪問 ${s.visit}回目`;
     els.placeLabel.textContent = '譲渡会の一角';
-    els.sceneText.textContent = lastAction ? lastAction.result : intro[0];
-    els.observationText.textContent = lastAction ? lastAction.observation : intro[1];
-    els.actionTitle.textContent = 'どうする？';
-    els.actionCount.textContent = s.acted ? '今日は行動済み' : '1回選べます';
+    els.sceneText.textContent = s.lastResultText || intro[0];
+    els.observationText.textContent = s.lastOutcome
+      ? s.lastObservationText
+      : `${pattern.title}｜${pattern.clue}`;
+    els.actionTitle.textContent = 'サインを見て、どうする？';
+    els.actionCount.textContent = `残り ${s.momentsLeft}回`;
+
+    els.feedbackBadge.classList.toggle('hidden', !s.lastOutcome);
+    els.feedbackBadge.textContent = s.lastOutcome === 'fit' ? '噛み合った' : 'まだ待つ';
+    els.feedbackBadge.dataset.outcome = s.lastOutcome || '';
+
     els.dogStage.dataset.distance = distanceForState(s);
+    els.dogStage.dataset.outcome = s.lastOutcome || '';
     els.distanceLine.firstElementChild.style.width = `${Math.min(18 + s.visit * 11, 86)}%`;
 
     els.actions.innerHTML = '';
     GrayGame.availableFacilityActions().forEach(action => {
+      const used = s.usedActions.includes(action.id);
       const b = document.createElement('button');
       b.className = 'action-button';
-      b.textContent = action.label;
-      b.disabled = s.acted;
+      b.innerHTML = `<strong>${used ? '✓ ' : ''}${action.label}</strong><small>${action.fit}</small>`;
+      b.disabled = s.momentsLeft <= 0 || used;
       b.addEventListener('click', () => {
         const result = GrayGame.doFacilityAction(action.id);
         if (!result) return;
-        els.sceneText.textContent = result.result;
-        els.observationText.textContent = result.observation;
         GrayGame.UI.render();
       });
       els.actions.appendChild(b);
     });
 
-    els.advanceButton.classList.toggle('hidden', !s.acted);
+    els.advanceButton.classList.toggle('hidden', s.momentsLeft > 0);
     els.advanceButton.textContent = GrayGame.canTrial() ? 'トライアルへ進む' : '今日は帰る';
     els.advanceButton.onclick = () => {
       if (GrayGame.canTrial()) GrayGame.startTrial();
@@ -66,36 +73,46 @@ window.GrayGame = window.GrayGame || {};
   }
 
   function renderHome(s) {
-    const lastAction = s.acted ? GrayGame.data.HOME_ACTIONS.find(a => a.id === s.lastEvent) : null;
+    const pattern = GrayGame.currentPattern();
     els.chapterLabel.textContent = 'トライアル';
     els.dayLabel.textContent = `一緒に暮らして ${s.homeDay + 1}日目`;
     els.placeLabel.textContent = 'みどりの家';
-    const defaultScene = s.homeDay === 0 ? 'グレイが家に来ました。玄関から室内を静かに見ています。' : '朝。グレイは昨日より少しだけ部屋の奥で過ごしています。';
-    const defaultObservation = s.homeDay === 0 ? '知らない場所です。今日は「何もしない時間」も大切そうです。' : '生活の音を覚えながら、自分で休める場所を探しています。';
-    els.sceneText.textContent = lastAction ? lastAction.text : defaultScene;
-    els.observationText.textContent = lastAction ? lastAction.obs : defaultObservation;
-    els.actionTitle.textContent = '今日はどう過ごす？';
-    els.actionCount.textContent = s.acted ? '今日は行動済み' : '1回選べます';
+
+    const defaultScene = s.homeDay === 0
+      ? 'グレイが家に来ました。玄関から室内を静かに見ています。'
+      : '朝。グレイは自分で選んだ場所から、こちらの生活を見ています。';
+
+    els.sceneText.textContent = s.lastResultText || defaultScene;
+    els.observationText.textContent = s.lastOutcome
+      ? s.lastObservationText
+      : `${pattern.title}｜${pattern.clue}`;
+    els.actionTitle.textContent = '今の様子に合わせる';
+    els.actionCount.textContent = `残り ${s.momentsLeft}回`;
+
+    els.feedbackBadge.classList.toggle('hidden', !s.lastOutcome);
+    els.feedbackBadge.textContent = s.lastOutcome === 'fit' ? '噛み合った' : 'まだ待つ';
+    els.feedbackBadge.dataset.outcome = s.lastOutcome || '';
+
     els.dogStage.dataset.distance = 'home';
+    els.dogStage.dataset.outcome = s.lastOutcome || '';
     els.distanceLine.firstElementChild.style.width = `${Math.min(78 + s.homeDay * 3, 98)}%`;
 
     els.actions.innerHTML = '';
     GrayGame.data.HOME_ACTIONS.forEach(action => {
+      const used = s.usedActions.includes(action.id);
       const b = document.createElement('button');
       b.className = 'action-button';
-      b.textContent = action.label;
-      b.disabled = s.acted;
+      b.innerHTML = `<strong>${used ? '✓ ' : ''}${action.label}</strong>`;
+      b.disabled = s.momentsLeft <= 0 || used;
       b.addEventListener('click', () => {
         const result = GrayGame.doHomeAction(action.id);
         if (!result) return;
-        els.sceneText.textContent = result.text;
-        els.observationText.textContent = result.obs;
         GrayGame.UI.render();
       });
       els.actions.appendChild(b);
     });
 
-    els.advanceButton.classList.toggle('hidden', !s.acted);
+    els.advanceButton.classList.toggle('hidden', s.momentsLeft > 0);
     els.advanceButton.textContent = '次の日へ';
     els.advanceButton.onclick = () => {
       GrayGame.advanceHome();
