@@ -45,7 +45,7 @@ const recipes=[
 ];
 
 let money=120,minutes=8*60,day=1,tickNo=0,activeTab='seeds';
-let customerSerial=0,currentCustomer=null,saleBusy=false,nextCustomerTick=1;
+let customerSerial=0,currentCustomer=null,saleBusy=false,nextCustomerTick=1,placingProduct=false;
 const shelf=[null,null,null,null,null];
 const finishedQueue=[];
 const rawQueue=[];
@@ -124,7 +124,7 @@ function makePlot(i){
   const cover=document.createElement('span');cover.className='plot-cover';b.appendChild(cover);
   const art=cropSpan(regions.herbs[i],'plant-art');b.appendChild(art);
   b.addEventListener('click',()=>tapHerb(i));
-  gardenLayer.appendChild(b);plotEls[i]={button:b,art:art};
+  b.style.setProperty('--delay',(-i*.17)+'s');gardenLayer.appendChild(b);plotEls[i]={button:b,art:art};
 }
 function renderGarden(){
   herbs.forEach((h,i)=>{
@@ -197,13 +197,14 @@ function finishJob(job){
   placeNextFinished();
 }
 function placeNextFinished(){
-  if(finishedQueue.length===0)return;
+  if(placingProduct||finishedQueue.length===0)return;
   const slot=firstEmptyShelf();if(slot<0){say('商品棚がいっぱいです');return}
+  placingProduct=true;
   const type=finishedQueue.shift();
   say('商品が1個できました');
-  flyRegion(regions.products[type],stationEls.cauldron,shelfEls[slot],30,560,()=>{
-    shelf[slot]=type;paintShelfSlot(slot,true);say('商品が棚にポコッと並びました');
-    setTimeout(tryServeCustomer,120);
+  flyRegion(regions.products[type],stationEls.cauldron,shelfEls[slot],32,620,()=>{
+    shelf[slot]=type;paintShelfSlot(slot,true);placingProduct=false;say('商品が棚にポコッと並びました');
+    setTimeout(()=>{tryServeCustomer();placeNextFinished()},180);
   });
 }
 function tapStation(key){
@@ -230,16 +231,16 @@ function enterCustomer(){
   el.addEventListener('click',()=>tryServeCustomer(true));
   customerLayer.appendChild(el);
   const want=chooseWant();applyCrop(req,regions.herbs[want]);
-  currentCustomer={el:el,want:want,artIndex:artIndex,arrived:false};
+  currentCustomer={el:el,want:want,artIndex:artIndex,arrived:false,waitTicks:0};
   say('お客さんが入ってきました');
   requestAnimationFrame(()=>requestAnimationFrame(()=>el.classList.remove('entering')));
   setTimeout(()=>{if(!currentCustomer||currentCustomer.el!==el)return;currentCustomer.arrived=true;el.classList.add('waiting');tryServeCustomer()},620);
 }
-function leaveCustomer(){
+function leaveCustomer(reason){
   if(!currentCustomer)return;
   const c=currentCustomer;currentCustomer=null;
   c.el.classList.remove('waiting');c.el.classList.add('leaving');
-  say('お客さんが帰りました');
+  say(reason||'お客さんが買い物を終えて帰りました');
   setTimeout(()=>{c.el.remove();nextCustomerTick=tickNo+2},560);
 }
 function findShelfSlotFor(type){return shelf.findIndex(v=>v===type)}
@@ -271,9 +272,9 @@ function sellShelfSlot(slot,manual){
   saleBusy=true;
   const type=shelf[slot],gain=priceFor(type),customerEl=currentCustomer.el;
   shelf[slot]=null;paintShelfSlot(slot,false);
-  say('商品がお客さんのところへ飛びます');
-  flyRegion(regions.products[type],shelfEls[slot],customerEl,31,560,()=>{
-    say('コインになりました');
+  say('商品がお客さんへヒュン');
+  flyRegion(regions.products[type],shelfEls[slot],customerEl,34,620,()=>{
+    say('コインが弾けました');
     makeCoinBurst(customerEl,gain,()=>{
       say('+'+gain+'G');
       saleBusy=false;
@@ -325,7 +326,13 @@ function autoTick(){
   startJob();if(jobs.length)advanceJob(jobs[0]);
   placeNextFinished();
   if(!currentCustomer&&!saleBusy&&tickNo>=nextCustomerTick)enterCustomer();
-  if(currentCustomer&&currentCustomer.arrived)tryServeCustomer();
+  if(currentCustomer&&currentCustomer.arrived){
+    const sold=tryServeCustomer();
+    if(currentCustomer&&!saleBusy&&!sold){
+      currentCustomer.waitTicks++;
+      if(currentCustomer.waitTicks>=5)leaveCustomer('商品が間に合わず、お客さんは帰りました');
+    }
+  }
   renderGarden();renderStatus();
 }
 
@@ -336,5 +343,5 @@ regions.products.forEach((_,i)=>makeShelfSlot(i));
 placeRegion(document.getElementById('bookButton'),regions.book);
 applyCrop(document.getElementById('bookArt'),regions.book);
 renderStations();renderGarden();renderShelf();renderStatus();
-setInterval(autoTick,1150);
+setInterval(autoTick,1050);
 })();
