@@ -15,14 +15,15 @@
 html, body { width: 100%; height: 100%; margin: 0; overscroll-behavior: none; background: #151412; color: var(--ink); font-family: -apple-system, BlinkMacSystemFont, "Hiragino Sans", "Yu Gothic", sans-serif; }
 button { font: inherit; }
 button, .nav-button { -webkit-tap-highlight-color: transparent; }
-body { display: flex; justify-content: center; overflow: hidden; }
+body { display: flex; justify-content: center; align-items: flex-start; overflow-x: hidden; overflow-y: auto; }
 
 .game-shell {
   width: min(100%, 480px);
-  height: 100dvh;
+  min-height: 100dvh;
+  height: auto;
   background: radial-gradient(circle at 50% 20%, rgba(255,255,255,.45), transparent 42%), var(--paper);
   display: grid;
-  grid-template-rows: auto minmax(0, 1fr) auto auto;
+  grid-template-rows: auto auto auto auto;
   border-inline: 1px solid rgba(255,255,255,.06);
 }
 
@@ -31,7 +32,7 @@ body { display: flex; justify-content: center; overflow: hidden; }
 h1 { margin: 0; font-size: 22px; letter-spacing: .02em; }
 .icon-button, .close-button { min-width: 52px; min-height: 40px; border: 1px solid var(--line); border-radius: 999px; background: transparent; color: var(--ink); font-weight: 800; }
 
-.scene { min-height: 0; padding: 14px 16px 10px; display: grid; grid-template-rows: auto minmax(150px, 1fr) auto; gap: 10px; }
+.scene { padding: 14px 16px 10px; display: grid; grid-template-rows: auto auto auto; gap: 10px; }
 .scene-copy { min-height: 62px; }
 .scene-meta { display:flex; align-items:center; justify-content:space-between; gap:8px; margin-bottom:5px; }
 .scene-place { margin: 0; color: var(--ochre); font-size: 12px; font-weight: 900; letter-spacing: .08em; }
@@ -42,7 +43,8 @@ h1 { margin: 0; font-size: 22px; letter-spacing: .02em; }
 
 .dog-stage {
   position: relative;
-  min-height: 0;
+  min-height: 250px;
+  height: clamp(250px, 36dvh, 390px);
   overflow: hidden;
   border: 1.5px solid var(--line);
   border-radius: 24px;
@@ -75,9 +77,9 @@ h1 { margin: 0; font-size: 22px; letter-spacing: .02em; }
 .distance-line { position: absolute; right: 13px; bottom: 12px; width: 72px; height: 7px; border: 1px solid var(--line); border-radius: 999px; background: rgba(255,255,255,.35); overflow: hidden; }
 .distance-line span { display:block; width: 18%; height:100%; background: var(--ochre); transition: width .35s ease; }
 
-.observation { min-height: 60px; padding: 10px 12px; border-left: 4px solid var(--ochre); background: rgba(255,255,255,.38); }
+.observation { min-height: 60px; height: auto; padding: 12px 14px; border-left: 4px solid var(--ochre); background: rgba(255,255,255,.38); overflow: visible; }
 .observation-label { display: block; margin-bottom: 3px; color: var(--muted); font-size: 10px; font-weight: 900; letter-spacing: .1em; }
-.observation strong { font-size: 14px; line-height: 1.6; overflow-wrap: anywhere; }
+.observation strong { display:block; font-size: 14px; line-height: 1.65; overflow-wrap: anywhere; word-break: normal; }
 
 .action-panel { padding: 8px 16px 12px; border-top: 1px solid rgba(31,29,26,.14); background: rgba(243,239,230,.94); }
 .action-heading { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; font-size: 12px; font-weight: 900; }
@@ -90,7 +92,7 @@ h1 { margin: 0; font-size: 22px; letter-spacing: .02em; }
 .action-button[disabled] { opacity: 1; background: #e1dbcf; color: #514b43; border-color: #8b8277; }
 .primary-button { width: 100%; margin-top: 8px; background: var(--ink); color: var(--paper); }
 
-.bottom-nav { min-height: 63px; padding: 8px 10px max(8px, env(safe-area-inset-bottom)); display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; background: var(--ink); }
+.bottom-nav { position: sticky; bottom: 0; z-index: 12; min-height: 63px; padding: 8px 10px max(8px, env(safe-area-inset-bottom)); display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; background: var(--ink); box-shadow: 0 -1px 0 rgba(255,255,255,.05); }
 .nav-button { min-height: 44px; border: 0; border-radius: 12px; background: transparent; color: #c8c0b5; font-size: 12px; font-weight: 800; }
 .nav-button.active { background: #3a352f; color: #fff; }
 
@@ -114,10 +116,12 @@ h1 { margin: 0; font-size: 22px; letter-spacing: .02em; }
 
 @media (max-height: 700px) {
   .topbar { min-height: 62px; }
-  .scene { padding-top: 9px; gap: 7px; }
-  .scene-copy { min-height: 50px; }
-  .scene-text { font-size: 15px; line-height: 1.55; }
-  .observation { min-height: 52px; padding: 8px 10px; }
-  .action-button, .primary-button { min-height: 46px; }
+  .scene { padding-top: 9px; }
+  .dog-stage { height: 250px; }
   .bottom-nav { min-height: 55px; }
+}
+@media (max-width: 380px) {
+  .scene-text { font-size: 15px; }
+  .actions { grid-template-columns: 1fr; }
+  .action-button { min-height: 56px; }
 }
