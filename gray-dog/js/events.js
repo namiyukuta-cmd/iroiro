@@ -3,92 +3,6 @@ window.GrayGame = window.GrayGame || {};
 (() => {
   "use strict";
 
-  const FACILITY_PATTERNS = [
-    {
-      id:"guarded",
-      title:"距離を測っている",
-      clue:"耳だけがこちらへ向きます。目は合わせず、伏せた姿勢のままです。",
-      good:["observe","sit"],
-      first:["read_guarded","初めて、グレイが安心できる距離を読めた"]
-    },
-    {
-      id:"food",
-      title:"興味はある",
-      clue:"こちらが動くたび鼻先が少し上がります。足元と手元を交互に確認しています。",
-      good:["snack","observe"],
-      first:["read_food","初めて、興味を示すサインに気づいた"]
-    },
-    {
-      id:"scent",
-      title:"確認したい",
-      clue:"体は動かしませんが、鼻先だけがこちらへ向きます。逃げる準備はしていません。",
-      good:["hand","sit"],
-      first:["read_scent","初めて、グレイの方から確認したい瞬間を読めた"]
-    },
-    {
-      id:"movement",
-      title:"外へ意識が向いている",
-      clue:"入口の音に耳が立ち、リードを見ると一度だけ立ち上がりかけます。",
-      good:["walk","staff"],
-      first:["read_walk","初めて、グレイが歩きたいタイミングを読めた"]
-    },
-    {
-      id:"contact",
-      title:"近くても平気",
-      clue:"こちらが一歩近づいても体が固まりません。視線を外したまま、その場に残っています。",
-      good:["touch","sit"],
-      first:["read_contact","初めて、触れてもよいタイミングを読めた"]
-    },
-    {
-      id:"familiar",
-      title:"来たことを知っている",
-      clue:"入ってきた時点で耳がこちらを追います。伏せ直してから、近くの床へ視線を落とします。",
-      good:["sit","hand","walk"],
-      first:["read_familiar","初めて、グレイが来訪を待つような仕草を見せた"]
-    }
-  ];
-
-  const HOME_PATTERNS = [
-    {
-      id:"rest",
-      title:"休みたい",
-      clue:"あくびをして、部屋の端を何度も見ています。",
-      good:["quiet","sit_home"],
-      first:["home_rest","初めて、この家で深く休めた"]
-    },
-    {
-      id:"hungry",
-      title:"食事を待っている",
-      clue:"水入れのそばを通り、食器のある場所を一度確認します。",
-      good:["meal"],
-      first:["home_meal","初めて、ごはんの場所を自分から確認した"]
-    },
-    {
-      id:"outside",
-      title:"外へ出たい",
-      clue:"玄関の音に反応して立ち上がり、ドアの方を見ています。",
-      good:["walk_home"],
-      first:["home_walk","初めて、自分から散歩を待った"]
-    },
-    {
-      id:"company",
-      title:"同じ場所にいたい",
-      clue:"こちらが座ると、少し離れた場所へ移動して同じ向きに伏せます。",
-      good:["sit_home","quiet"],
-      first:["home_company","初めて、自分から同じ場所を選んだ"]
-    }
-  ];
-
-  const FACILITY_ACTIONS = [
-    { id:"observe", label:"少し離れて見る", minVisit:1, fit:"視線と耳の動きを読む" },
-    { id:"sit", label:"近くに座って待つ", minVisit:1, fit:"何も要求せず同じ空間にいる" },
-    { id:"staff", label:"スタッフに聞く", minVisit:1, fit:"今日の様子を確認する" },
-    { id:"snack", label:"おやつを離して置く", minVisit:2, fit:"手渡しせず興味を確かめる" },
-    { id:"hand", label:"手を低く出して待つ", minVisit:3, fit:"グレイから確認できるようにする" },
-    { id:"walk", label:"一緒に外へ出る", minVisit:4, fit:"歩く気配に合わせる" },
-    { id:"touch", label:"肩の後ろへ一度触れる", minVisit:5, fit:"触れてよい時だけ短く触れる" }
-  ];
-
   const PREP_ITEMS = [
     { id:"bed", label:"大きな寝床", text:"体を伸ばせる大きさのベッドを用意した。" },
     { id:"mat", label:"滑り止めマット", text:"滑りやすい床にマットを敷いた。" },
@@ -105,101 +19,203 @@ window.GrayGame = window.GrayGame || {};
     { id:"sit_home", label:"床に座って過ごす" }
   ];
 
-  const successFacility = {
-    observe:["急がず見ていると、グレイの耳がこちらへ向いたままになります。","こちらを意識しながらも、伏せた姿勢を崩しません。"],
-    sit:["距離を残して座ると、しばらくしてグレイが伏せ直しました。","同じ空間にいても、体の力が少し抜けています。"],
-    staff:["スタッフと話している間、グレイは入口を何度か確認します。","今日は外の音への反応が強いことが分かりました。"],
-    snack:["おやつを離して置くと、少し待ってから自分で取りに来ました。","食べ終えたあと、すぐ元の場所へ戻らずこちらを確認します。"],
-    hand:["手を止めて待つと、グレイから鼻先を寄せて短く匂いを確かめました。","確認が終わると、その場に残ったまま伏せ直します。"],
-    walk:["外へ出ると、最初は半歩後ろ。帰り道では同じくらいの位置を歩きます。","歩幅が少しずつこちらと揃っています。"],
-    touch:["一度だけ肩の後ろへ触れると、グレイは固まらずこちらを一度見ました。","手を離したあとも、その場から動きません。"]
-  };
+  GrayGame.data = { PREP_ITEMS, HOME_ACTIONS };
 
-  const neutralFacility = {
-    observe:["今日は見続けても大きな変化はありません。","ただ、こちらが静かにいることには慣れているようです。"],
-    sit:["座るとグレイは少しだけ位置を変えました。","嫌がってはいません。今日は別のことへ意識が向いています。"],
-    staff:["スタッフの話を聞いている間、グレイは静かにしています。","今日のサインは、会話だけではまだ読み切れません。"],
-    snack:["おやつにはすぐ反応せず、そのまま置いておきます。","今は食べ物より周囲の方が気になっているようです。"],
-    hand:["手はその位置で止めたまま。グレイは今日は嗅ぎに来ません。","近づけずに待ったので、距離はそのまま保てています。"],
-    walk:["リードを見せても今日は立ち上がりません。","無理に誘わず、その場で終えました。"],
-    touch:["触れずに手を引きました。","体が少し硬かったので、今日はまだ待つ方がよさそうです。"]
-  };
+  const zoneMeters = [4, 3, 2, 1, 0.5];
 
-  const successHome = {
-    quiet:["何も求めず過ごすと、グレイは横向きになって眠り始めました。","呼吸がゆっくりになっています。"],
-    meal:["食器を置くと迷わず近づき、食べ終えたあともその場に少し残ります。","ごはんの場所をもう覚えています。"],
-    walk_home:["玄関を開けると自分から立ち上がりました。帰宅時も自分から中へ入ります。","家と散歩道がつながり始めています。"],
-    sit_home:["床に座ると、少ししてグレイも同じ部屋へ移動して伏せました。","以前より近い場所を自分で選んでいます。"]
-  };
-
-  const neutralHome = {
-    quiet:["静かにしていると、グレイは部屋を一周してから伏せました。","まだ落ち着く場所を探しています。"],
-    meal:["ごはんを置きましたが、少し時間を置いてから食べ始めました。","今日は食事より別のことが気になっていたようです。"],
-    walk_home:["外へ誘うと玄関までは来ますが、今日はそこで止まりました。","無理に出ず、短く終えます。"],
-    sit_home:["床に座ると、グレイはこちらを確認して別の場所へ伏せます。","同じ部屋にはいます。距離はグレイに任せます。"]
-  };
-
-  GrayGame.data = { FACILITY_ACTIONS, PREP_ITEMS, HOME_ACTIONS, FACILITY_PATTERNS, HOME_PATTERNS };
-
-  GrayGame.currentPattern = () => {
+  const useTurn = (patch, journal) => {
     const s = GrayGame.getState();
-    const list = s.mode === "home" ? HOME_PATTERNS : FACILITY_PATTERNS;
-    const index = s.mode === "home" ? s.homeDay % list.length : (s.visit - 1) % list.length;
-    return list[index];
-  };
-
-  GrayGame.availableFacilityActions = () => {
-    const s = GrayGame.getState();
-    return FACILITY_ACTIONS.filter((a) => a.minVisit <= s.visit);
-  };
-
-  GrayGame.doFacilityAction = (id) => {
-    const s = GrayGame.getState();
-    if (s.momentsLeft <= 0 || s.usedActions.includes(id)) return null;
-    const action = FACILITY_ACTIONS.find((a) => a.id === id && a.minVisit <= s.visit);
-    if (!action) return null;
-
-    const pattern = GrayGame.currentPattern();
-    const matched = pattern.good.includes(id);
-    const [result, observation] = (matched ? successFacility : neutralFacility)[id];
-    const left = s.momentsLeft - 1;
-
+    const left = Math.max(0, s.momentsLeft - 1);
     GrayGame.patch({
       momentsLeft:left,
       acted:left <= 0,
-      todayWins:s.todayWins + (matched ? 1 : 0),
-      usedActions:[...s.usedActions, id],
-      trust:s.trust + (matched ? 2 : 0),
-      familiarity:s.familiarity + 1,
-      lastEvent:id,
-      lastOutcome:matched ? "fit" : "neutral",
-      lastResultText:result,
-      lastObservationText:observation
+      sessionTurn:s.sessionTurn + 1,
+      ...patch
     });
+    if (journal) GrayGame.addJournal(journal);
+  };
 
-    GrayGame.addJournal(`${action.label}：${result}`);
-    if (matched && pattern.first) GrayGame.addFirst(pattern.first[0], pattern.first[1]);
-    return { action, matched, result, observation, pattern };
+  const addDistanceFirsts = () => {
+    const s = GrayGame.getState();
+    const gap = Math.max(0, s.grayZone - s.playerZone);
+    if (gap <= 2) GrayGame.addFirst("within2", "初めて、2mほどの距離に残った");
+    if (gap <= 1) GrayGame.addFirst("within1", "初めて、1mほどの距離に残った");
+  };
+
+  GrayGame.zoneLabel = (zone) => zoneMeters[zone] ? `${zoneMeters[zone]}m` : "そば";
+
+  GrayGame.sitAt = (zone) => {
+    const s = GrayGame.getState();
+    if (s.momentsLeft <= 0 || zone < 0 || zone > 3) return null;
+
+    const gap = s.grayZone - zone;
+    let ease = s.sessionEase;
+    let observation = "";
+    if (gap >= 2) {
+      ease += 2;
+      observation = "グレイは伏せた姿勢のまま。耳だけがこちらへ向きます。";
+    } else {
+      ease += 1;
+      observation = "グレイは少し顔を上げます。位置は変えず、そのままこちらを見ています。";
+    }
+
+    const text = `${GrayGame.zoneLabel(zone)}ほど離れた位置に座ります。`;
+    useTurn({
+      playerZone:zone,
+      sessionEase:ease,
+      lastEvent:"sit",
+      lastOutcome:"move",
+      lastResultText:text,
+      lastObservationText:observation
+    }, `${text} ${observation}`);
+
+    addDistanceFirsts();
+    return true;
+  };
+
+  GrayGame.placeSnack = (zone) => {
+    const s = GrayGame.getState();
+    if (s.momentsLeft <= 0 || zone < 1 || zone > 3) return null;
+
+    let grayZone = s.grayZone;
+    let ease = s.sessionEase + 1;
+    let moved = false;
+
+    if (zone < grayZone && zone > s.playerZone) {
+      grayZone = Math.max(zone, grayZone - 1);
+      moved = grayZone !== s.grayZone;
+      ease += moved ? 1 : 0;
+    }
+
+    const text = `${GrayGame.zoneLabel(zone)}の位置におやつを置きます。`;
+    const observation = moved
+      ? "しばらく待つと、グレイが立ち上がって一歩だけ近づき、おやつを食べました。"
+      : "グレイは鼻先を少し上げます。すぐには動かず、置かれた場所を見ています。";
+
+    useTurn({
+      grayZone,
+      snackZone:zone,
+      sessionEase:ease,
+      lastEvent:"snack",
+      lastOutcome:moved ? "approach" : "move",
+      lastResultText:text,
+      lastObservationText:observation
+    }, `${text} ${observation}`);
+
+    if (moved) GrayGame.addFirst("snack_step", "初めて、おやつのために一歩近づいた");
+    addDistanceFirsts();
+    return true;
+  };
+
+  GrayGame.waitQuietly = () => {
+    const s = GrayGame.getState();
+    if (s.momentsLeft <= 0) return null;
+
+    let grayZone = s.grayZone;
+    let ease = s.sessionEase + 1;
+    let moved = false;
+    const gap = grayZone - s.playerZone;
+
+    if (ease >= 3 && gap >= 2) {
+      grayZone -= 1;
+      ease = Math.max(0, ease - 2);
+      moved = true;
+    }
+
+    const text = "何もせず、そのまま待ちます。";
+    const observation = moved
+      ? "数分後、グレイが自分から立ち上がり、ひとつ近い場所で伏せ直しました。"
+      : "グレイは姿勢を変えずにいます。呼吸だけが少しゆっくりになりました。";
+
+    useTurn({
+      grayZone,
+      sessionEase:ease,
+      lastEvent:"wait",
+      lastOutcome:moved ? "approach" : "move",
+      lastResultText:text,
+      lastObservationText:observation
+    }, `${text} ${observation}`);
+
+    if (moved) GrayGame.addFirst("self_step", "初めて、自分から一歩近づいた");
+    addDistanceFirsts();
+    return true;
+  };
+
+  GrayGame.offerHand = () => {
+    const s = GrayGame.getState();
+    if (s.momentsLeft <= 0 || s.visit < 3) return null;
+
+    const gap = s.grayZone - s.playerZone;
+    const text = "手を低い位置で止めて待ちます。";
+    let observation = "まだ届く距離ではありません。グレイは手の方を見ただけでした。";
+    let outcome = "move";
+
+    if (gap <= 1) {
+      observation = "グレイが首を少し伸ばし、鼻先で短く匂いを確かめました。";
+      outcome = "approach";
+      GrayGame.addFirst("scent", "初めて、手の匂いを確かめた");
+    }
+
+    useTurn({
+      sessionEase:s.sessionEase + 1,
+      lastEvent:"hand",
+      lastOutcome:outcome,
+      lastResultText:text,
+      lastObservationText:observation
+    }, `${text} ${observation}`);
+
+    return true;
+  };
+
+  GrayGame.takeWalk = () => {
+    const s = GrayGame.getState();
+    if (s.momentsLeft <= 0 || s.visit < 3) return null;
+
+    const nextGray = Math.max(s.playerZone + 1, s.grayZone - 1);
+    const text = "スタッフと一緒に、短く外を歩きます。";
+    const observation = nextGray < s.grayZone
+      ? "戻ってくると、グレイはさっきより一つ近い場所で伏せました。"
+      : "帰り道は半歩ほど後ろ。施設へ戻ると、いつもの場所で伏せました。";
+
+    useTurn({
+      grayZone:nextGray,
+      sessionEase:s.sessionEase + 2,
+      lastEvent:"walk",
+      lastOutcome:nextGray < s.grayZone ? "approach" : "move",
+      lastResultText:text,
+      lastObservationText:observation
+    }, `${text} ${observation}`);
+
+    GrayGame.addFirst("walk", "初めて、一緒に散歩した");
+    if (s.visit >= 4) GrayGame.addFirst("walk_side", "初めて、帰り道で横に並んだ");
+    addDistanceFirsts();
+    return true;
   };
 
   GrayGame.advanceFacility = () => {
     const s = GrayGame.getState();
+    const baseGray = Math.max(2, 4 - Math.floor((s.visit + 1) / 4));
     GrayGame.patch({
       visit:s.visit + 1,
       acted:false,
-      momentsLeft:2,
-      todayWins:0,
+      momentsLeft:4,
       usedActions:[],
       lastEvent:"return",
       lastOutcome:"",
       lastResultText:"",
-      lastObservationText:""
+      lastObservationText:"",
+      playerZone:0,
+      grayZone:baseGray,
+      snackZone:null,
+      sessionEase:Math.min(2, Math.floor(s.familiarity / 6)),
+      sessionTurn:0,
+      familiarity:s.familiarity + 1
     });
   };
 
   GrayGame.canTrial = () => {
     const s = GrayGame.getState();
-    return s.visit >= 6 && s.prep.length >= 4 && s.trust >= 8;
+    return s.visit >= 6 && s.prep.length >= 4 && s.firsts.some(x => x.id === "scent");
   };
 
   GrayGame.startTrial = () => {
@@ -209,7 +225,6 @@ window.GrayGame = window.GrayGame || {};
       homeDay:0,
       acted:false,
       momentsLeft:2,
-      todayWins:0,
       usedActions:[],
       lastEvent:"trial",
       lastOutcome:"",
@@ -224,30 +239,28 @@ window.GrayGame = window.GrayGame || {};
   GrayGame.doHomeAction = (id) => {
     const s = GrayGame.getState();
     if (s.momentsLeft <= 0 || s.usedActions.includes(id)) return null;
-    const action = HOME_ACTIONS.find((a) => a.id === id);
+    const action = HOME_ACTIONS.find(a => a.id === id);
     if (!action) return null;
 
-    const pattern = GrayGame.currentPattern();
-    const matched = pattern.good.includes(id);
-    const [result, observation] = (matched ? successHome : neutralHome)[id];
-    const left = s.momentsLeft - 1;
+    const copy = {
+      quiet:["同じ部屋で、何も求めず過ごします。","グレイは少し離れた場所で横になりました。"],
+      meal:["決まった場所にごはんを置きます。","食べ終えたあとも、すぐには隅へ戻りませんでした。"],
+      walk_home:["家の周りを短く歩きます。","帰ると、自分から玄関の中へ入りました。"],
+      sit_home:["床に座って静かに過ごします。","少しして、グレイも前より近い場所で伏せました。"]
+    }[id];
 
+    const left = s.momentsLeft - 1;
     GrayGame.patch({
       momentsLeft:left,
       acted:left <= 0,
-      todayWins:s.todayWins + (matched ? 1 : 0),
-      usedActions:[...s.usedActions, id],
-      trust:s.trust + (matched ? 1 : 0),
-      familiarity:s.familiarity + 1,
+      usedActions:[...s.usedActions,id],
       lastEvent:id,
-      lastOutcome:matched ? "fit" : "neutral",
-      lastResultText:result,
-      lastObservationText:observation
+      lastOutcome:"move",
+      lastResultText:copy[0],
+      lastObservationText:copy[1]
     });
-
-    GrayGame.addJournal(`${action.label}：${result}`);
-    if (matched && pattern.first) GrayGame.addFirst(pattern.first[0], pattern.first[1]);
-    return { action, matched, result, observation, pattern };
+    GrayGame.addJournal(`${copy[0]} ${copy[1]}`);
+    return true;
   };
 
   GrayGame.advanceHome = () => {
@@ -256,7 +269,6 @@ window.GrayGame = window.GrayGame || {};
       homeDay:s.homeDay + 1,
       acted:false,
       momentsLeft:2,
-      todayWins:0,
       usedActions:[],
       lastEvent:"new_day",
       lastOutcome:"",
