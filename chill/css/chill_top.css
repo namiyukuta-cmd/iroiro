@@ -32,3 +32,26 @@ button{font:inherit;color:inherit;touch-action:manipulation;-webkit-tap-highligh
 @keyframes moneyBump{0%,100%{transform:scale(1)}50%{transform:scale(1.18)}}
 @media(max-height:700px){.statusbar strong{font-size:15px}.auto-bar{font-size:9px}.plant-art{width:15px;height:15px}.book-panel{top:9%;bottom:7%}}
 @media(prefers-reduced-motion:reduce){.customer-hit.active .customer-art,.plot-hit.ready .plant-art{animation:none!important}.crop,.plant-art{transition:none!important}}
+
+/* cutout-4: visible shop flow */
+.customer-mask{position:absolute;left:12%;right:12%;top:11.2%;height:15.4%;z-index:6;pointer-events:none;background:
+linear-gradient(rgba(241,235,222,.94),rgba(241,235,222,.94)),
+repeating-linear-gradient(0deg,rgba(78,67,55,.035) 0 1px,transparent 1px 5px);
+border-bottom:1px solid rgba(112,99,84,.22)}
+.product-mask{position:absolute;left:7%;right:7%;top:28.4%;height:11.8%;z-index:6;pointer-events:none;background:
+linear-gradient(rgba(239,232,219,.97),rgba(239,232,219,.97)),
+repeating-linear-gradient(0deg,rgba(78,67,55,.035) 0 1px,transparent 1px 5px);
+border-bottom:5px solid rgba(110,92,72,.42)}
+.customer-hit{transition:transform .52s cubic-bezier(.2,.8,.2,1),opacity .38s ease}
+.customer-hit.entering{transform:translateX(260%);opacity:0}
+.customer-hit.leaving{transform:translateX(280%);opacity:0}
+.customer-hit.waiting .customer-art{animation:softPulse 1.55s ease-in-out infinite}
+.customer-request{position:absolute;right:-8px;top:-5px;width:22px;height:22px;z-index:14;pointer-events:none}
+.shelf-slot{position:absolute;z-index:9;pointer-events:auto;border:0;background:transparent;padding:0}
+.shelf-slot .product-art{position:absolute;inset:0;opacity:0;transform:scale(.45) translateY(-10px);transition:opacity .15s ease}
+.shelf-slot.filled .product-art{opacity:1;transform:scale(1) translateY(0)}
+.shelf-slot.pop .product-art{animation:shelfPop .34s cubic-bezier(.18,.9,.32,1.3)}
+.shelf-slot:active.filled .product-art{transform:scale(.95)}
+.coin{position:absolute;z-index:42;width:16px;height:16px;border-radius:50%;background:#d2a449;border:1px solid #7d6128;box-shadow:inset 0 0 0 2px #efd177,0 1px 2px rgba(0,0,0,.18);display:grid;place-items:center;font-size:8px;font-weight:900;color:#6b4d15;pointer-events:none}
+.coin-speck{position:absolute;z-index:41;width:6px;height:6px;border-radius:50%;background:#d2a449;pointer-events:none}
+@keyframes shelfPop{0%{transform:scale(.25) translateY(-16px);opacity:.1}62%{transform:scale(1.15) translateY(2px);opacity:1}100%{transform:scale(1) translateY(0);opacity:1}}
