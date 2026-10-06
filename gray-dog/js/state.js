@@ -13,6 +13,7 @@ window.GrayGame = window.GrayGame || {};
     acted: false,
     momentsLeft: 2,
     todayWins: 0,
+    usedActions: [],
     trust: 0,
     familiarity: 0,
     prep: [],
