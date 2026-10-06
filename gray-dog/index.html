@@ -6,7 +6,7 @@
   <meta name="theme-color" content="#1f1d1a">
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <title>グレイと暮らす</title>
-  <link rel="stylesheet" href="css/game.css?v=20261007-2">
+  <link rel="stylesheet" href="css/game.css?v=20261007-3">
 </head>
 <body>
   <main class="game-shell" aria-live="polite">
@@ -34,9 +34,11 @@
       </div>
 
       <div class="observation" id="observationBox">
-        <span class="observation-label">今日のサイン</span>
+        <span class="observation-label" id="observationLabel">今の様子</span>
         <strong id="observationText">こちらを見ません。耳だけが、ときどき周囲の音を追っています。</strong>
       </div>
+
+      <div class="care-status hidden" id="careStatus" aria-label="グレイの状態"></div>
     </section>
 
     <section class="action-panel">
@@ -50,7 +52,7 @@
 
     <nav class="bottom-nav" aria-label="ゲームメニュー">
       <button class="nav-button active" data-panel="main">グレイ</button>
-      <button class="nav-button" data-panel="home">準備</button>
+      <button class="nav-button" data-panel="home">用品</button>
       <button class="nav-button" data-panel="journal">記録</button>
       <button class="nav-button" data-panel="settings">保存</button>
     </nav>
@@ -66,10 +68,10 @@
     </div>
   </div>
 
-  <script src="js/state.js?v=20261006-4"></script>
+  <script src="js/state.js?v=20261007-1"></script>
   <script src="js/save.js?v=20261006-2"></script>
-  <script src="js/events.js?v=20261006-2"></script>
-  <script src="js/ui.js?v=20261006-4"></script>
+  <script src="js/events.js?v=20261007-1"></script>
+  <script src="js/ui.js?v=20261007-1"></script>
   <script src="js/gray-image.js?v=20261007-1"></script>
   <script src="js/main.js?v=20261006-2"></script>
 </body>
