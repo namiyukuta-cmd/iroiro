@@ -6,7 +6,7 @@
   <meta name="theme-color" content="#1f1d1a">
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <title>グレイと暮らす</title>
-  <link rel="stylesheet" href="css/game.css?v=20261006-1">
+  <link rel="stylesheet" href="css/game.css?v=20261006-2">
 </head>
 <body>
   <main class="game-shell" aria-live="polite">
@@ -25,21 +25,84 @@
       </div>
 
       <div class="dog-stage" id="dogStage" data-distance="far" aria-label="グレイの様子">
-        <svg class="dog" viewBox="0 0 320 230" role="img" aria-labelledby="dogTitle">
-          <title id="dogTitle">大型犬のグレイ</title>
-          <ellipse class="shadow" cx="165" cy="199" rx="105" ry="16"/>
-          <path class="tail" d="M238 134 C278 121 292 91 274 70 C264 58 249 64 255 76 C266 97 248 105 229 110"/>
-          <ellipse class="body" cx="165" cy="139" rx="88" ry="48"/>
-          <path class="leg" d="M108 164 L100 209 L124 209 L132 163 Z"/>
-          <path class="leg" d="M190 165 L187 209 L211 209 L216 159 Z"/>
-          <path class="neck" d="M102 118 C83 109 73 92 80 73 C88 49 120 43 142 62 C153 72 157 91 148 109 Z"/>
-          <ellipse class="head" cx="98" cy="78" rx="46" ry="41"/>
-          <path class="ear ear-left" d="M68 51 L74 18 L94 45 Z"/>
-          <path class="ear ear-right" d="M108 43 L131 18 L126 57 Z"/>
-          <ellipse class="muzzle" cx="70" cy="91" rx="25" ry="18"/>
-          <circle class="nose" cx="50" cy="91" r="8"/>
-          <circle class="eye" cx="91" cy="72" r="4.5"/>
-          <path class="collar" d="M110 112 C123 114 137 112 148 105"/>
+        <svg class="dog" viewBox="0 0 420 260" role="img" aria-labelledby="dogTitle">
+          <title id="dogTitle">伏せている大型犬のグレイ</title>
+          <ellipse class="shadow" cx="220" cy="224" rx="145" ry="18"/>
+
+          <path class="tail" d="M318 145 C354 137 381 116 385 91 C388 72 373 61 361 72 C352 80 357 93 369 94 C364 113 343 126 315 130"/>
+
+          <path class="body" d="M139 121
+            C166 99 218 92 267 102
+            C303 109 327 129 330 153
+            C333 177 317 194 291 200
+            C257 208 216 199 179 194
+            C151 190 126 177 119 156
+            C113 140 120 130 139 121 Z"/>
+
+          <path class="hind-leg rear" d="M275 174
+            C300 175 314 187 309 201
+            C304 214 286 219 260 218
+            L224 218
+            C218 218 215 212 220 208
+            C236 197 247 180 275 174 Z"/>
+          <path class="hind-leg front" d="M239 177
+            C255 183 263 196 257 207
+            C252 216 235 219 211 218
+            L183 218
+            C177 218 174 211 179 207
+            C194 196 211 178 239 177 Z"/>
+
+          <path class="chest" d="M146 126
+            C132 136 126 151 128 169
+            C130 183 138 195 150 202
+            L167 197
+            C162 181 162 159 171 141 Z"/>
+
+          <path class="front-leg rear" d="M157 184
+            C164 185 169 191 168 199
+            L166 219
+            L132 219
+            C125 219 123 211 129 208
+            L145 200
+            L146 187 Z"/>
+          <path class="front-leg front" d="M133 181
+            C141 183 146 190 145 199
+            L141 222
+            L102 222
+            C95 222 93 214 100 211
+            L119 202
+            L120 185 Z"/>
+
+          <path class="neck" d="M154 139
+            C138 130 123 118 113 101
+            C104 86 104 70 114 58
+            C126 44 150 44 168 56
+            C184 68 192 87 189 108
+            C187 122 178 135 167 145 Z"/>
+
+          <path class="head" d="M119 57
+            C108 47 94 42 80 46
+            C64 50 53 64 51 80
+            C49 96 57 109 71 116
+            C84 123 103 120 117 111
+            C129 103 136 91 135 76
+            C134 68 128 62 119 57 Z"/>
+
+          <path class="ear ear-left" d="M75 51 L68 20 L91 44 Z"/>
+          <path class="ear ear-right" d="M102 47 L116 18 L123 58 Z"/>
+
+          <path class="muzzle" d="M73 82
+            C59 79 42 84 34 95
+            C28 104 34 115 46 117
+            C61 119 75 113 84 104
+            C91 97 87 86 73 82 Z"/>
+          <ellipse class="nose" cx="34" cy="101" rx="8" ry="7"/>
+          <circle class="eye" cx="88" cy="72" r="4.5"/>
+          <path class="brow" d="M80 64 C87 60 94 60 100 64"/>
+          <path class="mouth" d="M45 110 C55 113 65 112 73 108"/>
+
+          <path class="collar" d="M113 111 C128 119 146 121 162 116"/>
+          <path class="chest-mark" d="M132 128 C144 133 153 143 157 157 C150 153 143 151 136 151 Z"/>
         </svg>
         <div class="distance-line" id="distanceLine"><span></span></div>
       </div>
