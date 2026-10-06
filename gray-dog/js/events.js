@@ -155,7 +155,7 @@ window.GrayGame = window.GrayGame || {};
 
   GrayGame.doFacilityAction = (id) => {
     const s = GrayGame.getState();
-    if (s.momentsLeft <= 0) return null;
+    if (s.momentsLeft <= 0 || s.usedActions.includes(id)) return null;
     const action = FACILITY_ACTIONS.find((a) => a.id === id && a.minVisit <= s.visit);
     if (!action) return null;
 
@@ -168,6 +168,7 @@ window.GrayGame = window.GrayGame || {};
       momentsLeft:left,
       acted:left <= 0,
       todayWins:s.todayWins + (matched ? 1 : 0),
+      usedActions:[...s.usedActions, id],
       trust:s.trust + (matched ? 2 : 0),
       familiarity:s.familiarity + 1,
       lastEvent:id,
@@ -188,6 +189,7 @@ window.GrayGame = window.GrayGame || {};
       acted:false,
       momentsLeft:2,
       todayWins:0,
+      usedActions:[],
       lastEvent:"return",
       lastOutcome:"",
       lastResultText:"",
@@ -208,6 +210,7 @@ window.GrayGame = window.GrayGame || {};
       acted:false,
       momentsLeft:2,
       todayWins:0,
+      usedActions:[],
       lastEvent:"trial",
       lastOutcome:"",
       lastResultText:"",
@@ -220,7 +223,7 @@ window.GrayGame = window.GrayGame || {};
 
   GrayGame.doHomeAction = (id) => {
     const s = GrayGame.getState();
-    if (s.momentsLeft <= 0) return null;
+    if (s.momentsLeft <= 0 || s.usedActions.includes(id)) return null;
     const action = HOME_ACTIONS.find((a) => a.id === id);
     if (!action) return null;
 
@@ -233,6 +236,7 @@ window.GrayGame = window.GrayGame || {};
       momentsLeft:left,
       acted:left <= 0,
       todayWins:s.todayWins + (matched ? 1 : 0),
+      usedActions:[...s.usedActions, id],
       trust:s.trust + (matched ? 1 : 0),
       familiarity:s.familiarity + 1,
       lastEvent:id,
@@ -253,6 +257,7 @@ window.GrayGame = window.GrayGame || {};
       acted:false,
       momentsLeft:2,
       todayWins:0,
+      usedActions:[],
       lastEvent:"new_day",
       lastOutcome:"",
       lastResultText:"",
