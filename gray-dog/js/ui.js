@@ -154,12 +154,13 @@ window.GrayGame = window.GrayGame || {};
     openSheet('保存', `<div class="card-list">
       <div class="info-card done"><small>専用セーブ</small><strong>private-game-data / gray-dog / saves / slot1.json</strong></div>
       <div class="info-card"><small>現在</small><strong>${s.mode === 'facility' ? `訪問 ${s.visit}回目` : `一緒に暮らして ${s.homeDay + 1}日目`}</strong></div>
-      <div class="info-card" id="saveStatus"><small>端末</small><strong>操作のたびに予備保存しています。</strong></div>
+      <div class="info-card" id="saveStatus"><small>保存方式</small><strong>自動保存しません。「保存」を押した時だけ保存します。</strong></div>
     </div>
     <div class="sheet-actions">
       <button class="sheet-action primary" data-private-save="1">private-game-dataへセーブ</button>
       <button class="sheet-action" data-private-load="1">private-game-dataからロード</button>
-      <button class="sheet-action danger" data-reset="1">端末データを最初からに戻す</button>
+      <button class="sheet-action" data-local-load="1">端末の保存からロード</button>
+      <button class="sheet-action danger" data-reset="1">保存せず最初から</button>
     </div>`);
 
     const status = () => els.sheetContent.querySelector('#saveStatus');
@@ -175,11 +176,16 @@ window.GrayGame = window.GrayGame || {};
       showStatus('セーブ中', 'private-game-dataへ書き込んでいます。');
       try {
         const result = await GrayGame.savePrivate();
-        if (result.skipped) showStatus('未保存', 'GitHubトークンが端末に登録されていません。');
-        else showStatus('保存済み', 'グレイ専用セーブへ保存しました。', true);
+        if (result.skipped) {
+          const localOk = GrayGame.saveLocalManual();
+          showStatus(localOk ? '端末へ保存済み' : '未保存', localOk ? 'GitHubトークンがないため端末だけに保存しました。' : '保存できませんでした。', localOk);
+        } else {
+          showStatus('保存済み', 'グレイ専用セーブと端末へ保存しました。', true);
+        }
       } catch (error) {
         console.error(error);
-        showStatus('保存失敗', 'private-game-dataへの保存に失敗しました。端末の予備保存は残っています。');
+        const localOk = GrayGame.saveLocalManual();
+        showStatus('GitHub保存失敗', localOk ? 'private-game-dataへの保存は失敗しましたが、端末には保存しました。' : 'private-game-dataにも端末にも保存できませんでした。', localOk);
       } finally {
         event.currentTarget.disabled = false;
       }
@@ -204,6 +210,16 @@ window.GrayGame = window.GrayGame || {};
       } finally {
         event.currentTarget.disabled = false;
       }
+    });
+
+    els.sheetContent.querySelector('[data-local-load]')?.addEventListener('click', () => {
+      const loaded = GrayGame.loadLocalManual();
+      if (!loaded) {
+        showStatus('端末セーブなし', '端末に明示保存したデータはありません。');
+        return;
+      }
+      closeSheet();
+      render();
     });
 
     els.sheetContent.querySelector('[data-reset]')?.addEventListener('click', () => {
