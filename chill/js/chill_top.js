@@ -246,76 +246,121 @@ function leaveCustomer(reason){
 function findShelfSlotFor(type){return shelf.findIndex(v=>v===type)}
 function priceFor(type){return 14+type*3+recipes.filter(r=>r.unlocked).reduce((s,r)=>s+r.bonus,0)}
 function makeCoinBurst(customerEl,amount,done){
-  const start=point(customerEl);
+  const origin=point(customerEl);
   const target=point(moneyEl);
   const total=Math.max(1,Math.floor(amount));
   let landed=0;
 
-  const sparkCount=Math.max(12,Math.min(24,total));
+  // 最初に白金の火花を大きく弾けさせる
+  const sparkCount=Math.max(18,Math.min(34,total));
   for(let i=0;i<sparkCount;i++){
     const s=document.createElement('span');
     s.className='coin-speck';
-    s.style.left=start.x+'px';
-    s.style.top=start.y+'px';
+    s.style.left=origin.x+'px';
+    s.style.top=origin.y+'px';
     travelLayer.appendChild(s);
 
-    const angle=(Math.PI*2*i/sparkCount)+((i%2)*.11);
-    const dist=24+(i%5)*9;
-    const dx=Math.cos(angle)*dist;
-    const dy=Math.sin(angle)*dist;
+    const angle=Math.PI*2*i/sparkCount+(i%3)*.08;
+    const dist=28+(i%7)*8;
+    const x=origin.x+Math.cos(angle)*dist;
+    const y=origin.y+Math.sin(angle)*dist;
 
     const a=s.animate([
-      {left:start.x+'px',top:start.y+'px',transform:'translate(-50%,-50%) scale(.15)',opacity:0},
-      {left:(start.x+dx*.65)+'px',top:(start.y+dy*.65)+'px',transform:'translate(-50%,-50%) scale(1.3)',opacity:1,offset:.38},
-      {left:(start.x+dx)+'px',top:(start.y+dy)+'px',transform:'translate(-50%,-50%) scale(.1)',opacity:0}
-    ],{duration:520,easing:'cubic-bezier(.18,.9,.32,1)'});
+      {left:origin.x+'px',top:origin.y+'px',transform:'translate(-50%,-50%) scale(.15)',opacity:0},
+      {left:x+'px',top:y+'px',transform:'translate(-50%,-50%) scale(1.45)',opacity:1,offset:.42},
+      {left:(origin.x+(x-origin.x)*1.35)+'px',top:(origin.y+(y-origin.y)*1.35)+'px',transform:'translate(-50%,-50%) scale(.05)',opacity:0}
+    ],{duration:560,easing:'cubic-bezier(.15,.9,.25,1)'});
     a.onfinish=()=>s.remove();
   }
+
+  const rr=room.getBoundingClientRect();
+  const leftPad=22,rightPad=22,topPad=74,bottomPad=78;
 
   for(let i=0;i<total;i++){
     const coin=document.createElement('span');
     coin.className='coin';
     coin.textContent='G';
-    coin.style.left=start.x+'px';
-    coin.style.top=start.y+'px';
-    coin.style.animation='coinSpin .42s linear infinite';
+    coin.style.left=origin.x+'px';
+    coin.style.top=origin.y+'px';
+    coin.style.animation='coinSpin .36s linear infinite';
     travelLayer.appendChild(coin);
 
-    const spread=((i/Math.max(1,total-1))-.5)*Math.PI*1.15;
-    const burstDist=30+(i%7)*5;
-    const burstX=start.x+Math.sin(spread)*burstDist;
-    const burstY=start.y-Math.cos(spread)*burstDist-(i%4)*3;
-    const curveX=target.x+((i%9)-4)*5;
-    const curveY=target.y-30-(i%5)*5;
-    const delay=i*16;
+    // いったん画面いっぱいに散らす。
+    // 36Gなら36枚がそれぞれ別の位置まで飛ぶ。
+    const band=i%4;
+    const rx=((i*73)%101)/100;
+    const ry=((i*47+band*19)%97)/100;
+    const scatterX=leftPad+rx*(rr.width-leftPad-rightPad);
+    const minY=band===0?rr.height*.34:band===1?rr.height*.45:band===2?rr.height*.56:rr.height*.66;
+    const maxY=Math.min(rr.height-bottomPad,minY+rr.height*.22);
+    const scatterY=minY+ry*(maxY-minY);
 
+    const burstDelay=i*13;
+    const burstMidX=origin.x+(scatterX-origin.x)*.48+(((i%5)-2)*9);
+    const burstMidY=Math.min(origin.y,scatterY)-35-(i%6)*5;
+
+    // 1段目：お客さんの所から勢いよくばら撒く
     const burst=coin.animate([
-      {left:start.x+'px',top:start.y+'px',transform:'translate(-50%,-50%) scale(.2)',opacity:0},
-      {left:burstX+'px',top:burstY+'px',transform:'translate(-50%,-50%) scale(1.18)',opacity:1}
+      {left:origin.x+'px',top:origin.y+'px',transform:'translate(-50%,-50%) scale(.18)',opacity:0},
+      {left:burstMidX+'px',top:burstMidY+'px',transform:'translate(-50%,-50%) scale(1.22)',opacity:1,offset:.42},
+      {left:scatterX+'px',top:scatterY+'px',transform:'translate(-50%,-50%) scale(.96)',opacity:1}
     ],{
-      delay:delay,
-      duration:210,
-      easing:'cubic-bezier(.18,.9,.32,1.28)',
+      delay:burstDelay,
+      duration:520+(i%7)*24,
+      easing:'cubic-bezier(.17,.84,.28,1.08)',
       fill:'forwards'
     });
 
     burst.onfinish=()=>{
-      const fly=coin.animate([
-        {left:burstX+'px',top:burstY+'px',transform:'translate(-50%,-50%) scale(1.08)',opacity:1},
-        {left:curveX+'px',top:curveY+'px',transform:'translate(-50%,-50%) scale(.95)',opacity:1,offset:.56},
-        {left:target.x+'px',top:target.y+'px',transform:'translate(-50%,-50%) scale(.62)',opacity:.9}
+      // 散った場所で一瞬キラッとする
+      const trail=document.createElement('span');
+      trail.className='coin-trail';
+      trail.style.left=scatterX+'px';
+      trail.style.top=scatterY+'px';
+      travelLayer.appendChild(trail);
+      const ta=trail.animate([
+        {transform:'translate(-50%,-50%) scale(.2)',opacity:0},
+        {transform:'translate(-50%,-50%) scale(1.5)',opacity:1,offset:.35},
+        {transform:'translate(-50%,-50%) scale(.1)',opacity:0}
+      ],{duration:330,easing:'ease-out'});
+      ta.onfinish=()=>trail.remove();
+
+      // 2段目：少しばらけたまま、所持金へ吸い込まれる
+      const homeDelay=90+(i%8)*18;
+      const curveX=(scatterX+target.x)/2+(((i%9)-4)*11);
+      const curveY=Math.min(scatterY,target.y)-42-(i%5)*9;
+
+      const home=coin.animate([
+        {left:scatterX+'px',top:scatterY+'px',transform:'translate(-50%,-50%) scale(.96)',opacity:1},
+        {left:curveX+'px',top:curveY+'px',transform:'translate(-50%,-50%) scale(.88)',opacity:1,offset:.55},
+        {left:target.x+'px',top:target.y+'px',transform:'translate(-50%,-50%) scale(.45)',opacity:.95}
       ],{
-        duration:610+(i%6)*22,
-        easing:'cubic-bezier(.22,.72,.24,1)',
+        delay:homeDelay,
+        duration:690+(i%6)*34,
+        easing:'cubic-bezier(.22,.68,.2,1)',
         fill:'forwards'
       });
 
-      fly.onfinish=()=>{
+      home.onfinish=()=>{
         coin.remove();
+
+        const hit=document.createElement('span');
+        hit.className='money-arrival-spark';
+        hit.style.left=target.x+'px';
+        hit.style.top=target.y+'px';
+        travelLayer.appendChild(hit);
+        const ha=hit.animate([
+          {transform:'translate(-50%,-50%) scale(.1)',opacity:0},
+          {transform:'translate(-50%,-50%) scale(1.4)',opacity:1,offset:.35},
+          {transform:'translate(-50%,-50%) scale(.15)',opacity:0}
+        ],{duration:260,easing:'ease-out'});
+        ha.onfinish=()=>hit.remove();
+
         money+=1;
         landed++;
         renderStatus();
         bumpMoney();
+
         if(landed===total&&done)done();
       };
     };
