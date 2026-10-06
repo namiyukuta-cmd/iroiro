@@ -29,11 +29,12 @@ window.GrayGame = window.GrayGame || {};
 
   function renderFacility(s) {
     const intro = facilityIntro(s);
+    const lastAction = s.acted ? GrayGame.data.FACILITY_ACTIONS.find(a => a.id === s.lastEvent) : null;
     els.chapterLabel.textContent = '保護施設';
     els.dayLabel.textContent = `訪問 ${s.visit}回目`;
     els.placeLabel.textContent = '譲渡会の一角';
-    els.sceneText.textContent = intro[0];
-    els.observationText.textContent = intro[1];
+    els.sceneText.textContent = lastAction ? lastAction.result : intro[0];
+    els.observationText.textContent = lastAction ? lastAction.observation : intro[1];
     els.actionTitle.textContent = 'どうする？';
     els.actionCount.textContent = s.acted ? '今日は行動済み' : '1回選べます';
     els.dogStage.dataset.distance = distanceForState(s);
@@ -65,11 +66,14 @@ window.GrayGame = window.GrayGame || {};
   }
 
   function renderHome(s) {
+    const lastAction = s.acted ? GrayGame.data.HOME_ACTIONS.find(a => a.id === s.lastEvent) : null;
     els.chapterLabel.textContent = 'トライアル';
     els.dayLabel.textContent = `一緒に暮らして ${s.homeDay + 1}日目`;
     els.placeLabel.textContent = 'みどりの家';
-    els.sceneText.textContent = s.homeDay === 0 ? 'グレイが家に来ました。玄関から室内を静かに見ています。' : '朝。グレイは昨日より少しだけ部屋の奥で過ごしています。';
-    els.observationText.textContent = s.homeDay === 0 ? '知らない場所です。今日は「何もしない時間」も大切そうです。' : '生活の音を覚えながら、自分で休める場所を探しています。';
+    const defaultScene = s.homeDay === 0 ? 'グレイが家に来ました。玄関から室内を静かに見ています。' : '朝。グレイは昨日より少しだけ部屋の奥で過ごしています。';
+    const defaultObservation = s.homeDay === 0 ? '知らない場所です。今日は「何もしない時間」も大切そうです。' : '生活の音を覚えながら、自分で休める場所を探しています。';
+    els.sceneText.textContent = lastAction ? lastAction.text : defaultScene;
+    els.observationText.textContent = lastAction ? lastAction.obs : defaultObservation;
     els.actionTitle.textContent = '今日はどう過ごす？';
     els.actionCount.textContent = s.acted ? '今日は行動済み' : '1回選べます';
     els.dogStage.dataset.distance = 'home';
