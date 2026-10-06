@@ -251,8 +251,8 @@ function makeCoinBurst(customerEl,amount,done){
   const total=Math.max(1,Math.floor(amount));
   let landed=0;
 
-  // 最初に白金の火花を大きく弾けさせる
-  const sparkCount=Math.max(18,Math.min(34,total));
+  // 売れた瞬間だけ、客の周囲で短く弾ける。画面全体には散らさない。
+  const sparkCount=Math.max(10,Math.min(18,total));
   for(let i=0;i<sparkCount;i++){
     const s=document.createElement('span');
     s.className='coin-speck';
@@ -260,107 +260,65 @@ function makeCoinBurst(customerEl,amount,done){
     s.style.top=origin.y+'px';
     travelLayer.appendChild(s);
 
-    const angle=Math.PI*2*i/sparkCount+(i%3)*.08;
-    const dist=28+(i%7)*8;
+    const angle=Math.PI*2*i/sparkCount;
+    const dist=18+(i%4)*6;
     const x=origin.x+Math.cos(angle)*dist;
     const y=origin.y+Math.sin(angle)*dist;
 
     const a=s.animate([
-      {left:origin.x+'px',top:origin.y+'px',transform:'translate(-50%,-50%) scale(.15)',opacity:0},
-      {left:x+'px',top:y+'px',transform:'translate(-50%,-50%) scale(1.45)',opacity:1,offset:.42},
-      {left:(origin.x+(x-origin.x)*1.35)+'px',top:(origin.y+(y-origin.y)*1.35)+'px',transform:'translate(-50%,-50%) scale(.05)',opacity:0}
-    ],{duration:560,easing:'cubic-bezier(.15,.9,.25,1)'});
+      {left:origin.x+'px',top:origin.y+'px',transform:'translate(-50%,-50%) scale(.2)',opacity:0},
+      {left:x+'px',top:y+'px',transform:'translate(-50%,-50%) scale(1.2)',opacity:.95,offset:.45},
+      {left:(origin.x+(x-origin.x)*1.18)+'px',top:(origin.y+(y-origin.y)*1.18)+'px',transform:'translate(-50%,-50%) scale(.1)',opacity:0}
+    ],{duration:360,easing:'ease-out'});
     a.onfinish=()=>s.remove();
   }
 
-  const rr=room.getBoundingClientRect();
-  const leftPad=22,rightPad=22,topPad=74,bottomPad=78;
-
+  // 金額ぶんのコインは全部飛ばす。ただし1本の流れにまとめて視線を固定する。
   for(let i=0;i<total;i++){
     const coin=document.createElement('span');
     coin.className='coin';
     coin.textContent='G';
     coin.style.left=origin.x+'px';
     coin.style.top=origin.y+'px';
-    coin.style.animation='coinSpin .36s linear infinite';
+    coin.style.animation='coinSpin .44s linear infinite';
     travelLayer.appendChild(coin);
 
-    // いったん画面いっぱいに散らす。
-    // 36Gなら36枚がそれぞれ別の位置まで飛ぶ。
-    const band=i%4;
-    const rx=((i*73)%101)/100;
-    const ry=((i*47+band*19)%97)/100;
-    const scatterX=leftPad+rx*(rr.width-leftPad-rightPad);
-    const minY=band===0?rr.height*.34:band===1?rr.height*.45:band===2?rr.height*.56:rr.height*.66;
-    const maxY=Math.min(rr.height-bottomPad,minY+rr.height*.22);
-    const scatterY=minY+ry*(maxY-minY);
+    const lane=((i%7)-3)*3.2;
+    const burstAngle=(-110+(i%7)*36)*Math.PI/180;
+    const burstDist=18+(i%5)*3;
+    const burstX=origin.x+Math.cos(burstAngle)*burstDist;
+    const burstY=origin.y+Math.sin(burstAngle)*burstDist;
+    const curveX=(origin.x+target.x)/2+lane;
+    const curveY=Math.min(origin.y,target.y)-24-Math.abs(lane)*.4;
+    const delay=i*18;
 
-    const burstDelay=i*13;
-    const burstMidX=origin.x+(scatterX-origin.x)*.48+(((i%5)-2)*9);
-    const burstMidY=Math.min(origin.y,scatterY)-35-(i%6)*5;
-
-    // 1段目：お客さんの所から勢いよくばら撒く
     const burst=coin.animate([
-      {left:origin.x+'px',top:origin.y+'px',transform:'translate(-50%,-50%) scale(.18)',opacity:0},
-      {left:burstMidX+'px',top:burstMidY+'px',transform:'translate(-50%,-50%) scale(1.22)',opacity:1,offset:.42},
-      {left:scatterX+'px',top:scatterY+'px',transform:'translate(-50%,-50%) scale(.96)',opacity:1}
+      {left:origin.x+'px',top:origin.y+'px',transform:'translate(-50%,-50%) scale(.3)',opacity:0},
+      {left:burstX+'px',top:burstY+'px',transform:'translate(-50%,-50%) scale(1)',opacity:1}
     ],{
-      delay:burstDelay,
-      duration:520+(i%7)*24,
-      easing:'cubic-bezier(.17,.84,.28,1.08)',
+      delay,
+      duration:170,
+      easing:'cubic-bezier(.2,.85,.3,1.12)',
       fill:'forwards'
     });
 
     burst.onfinish=()=>{
-      // 散った場所で一瞬キラッとする
-      const trail=document.createElement('span');
-      trail.className='coin-trail';
-      trail.style.left=scatterX+'px';
-      trail.style.top=scatterY+'px';
-      travelLayer.appendChild(trail);
-      const ta=trail.animate([
-        {transform:'translate(-50%,-50%) scale(.2)',opacity:0},
-        {transform:'translate(-50%,-50%) scale(1.5)',opacity:1,offset:.35},
-        {transform:'translate(-50%,-50%) scale(.1)',opacity:0}
-      ],{duration:330,easing:'ease-out'});
-      ta.onfinish=()=>trail.remove();
-
-      // 2段目：少しばらけたまま、所持金へ吸い込まれる
-      const homeDelay=90+(i%8)*18;
-      const curveX=(scatterX+target.x)/2+(((i%9)-4)*11);
-      const curveY=Math.min(scatterY,target.y)-42-(i%5)*9;
-
       const home=coin.animate([
-        {left:scatterX+'px',top:scatterY+'px',transform:'translate(-50%,-50%) scale(.96)',opacity:1},
+        {left:burstX+'px',top:burstY+'px',transform:'translate(-50%,-50%) scale(1)',opacity:1},
         {left:curveX+'px',top:curveY+'px',transform:'translate(-50%,-50%) scale(.88)',opacity:1,offset:.55},
-        {left:target.x+'px',top:target.y+'px',transform:'translate(-50%,-50%) scale(.45)',opacity:.95}
+        {left:target.x+'px',top:target.y+'px',transform:'translate(-50%,-50%) scale(.5)',opacity:.9}
       ],{
-        delay:homeDelay,
-        duration:690+(i%6)*34,
-        easing:'cubic-bezier(.22,.68,.2,1)',
+        duration:520+(i%5)*18,
+        easing:'cubic-bezier(.25,.7,.25,1)',
         fill:'forwards'
       });
 
       home.onfinish=()=>{
         coin.remove();
-
-        const hit=document.createElement('span');
-        hit.className='money-arrival-spark';
-        hit.style.left=target.x+'px';
-        hit.style.top=target.y+'px';
-        travelLayer.appendChild(hit);
-        const ha=hit.animate([
-          {transform:'translate(-50%,-50%) scale(.1)',opacity:0},
-          {transform:'translate(-50%,-50%) scale(1.4)',opacity:1,offset:.35},
-          {transform:'translate(-50%,-50%) scale(.15)',opacity:0}
-        ],{duration:260,easing:'ease-out'});
-        ha.onfinish=()=>hit.remove();
-
         money+=1;
         landed++;
         renderStatus();
         bumpMoney();
-
         if(landed===total&&done)done();
       };
     };
