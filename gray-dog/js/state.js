@@ -3,8 +3,6 @@ window.GrayGame = window.GrayGame || {};
 (() => {
   "use strict";
 
-  // 明示的に「保存」を押した時だけ使うキー。
-  // 旧 grayDogGame_v1 は自動保存だったため、今後は読み込まない。
   const MANUAL_STORAGE_KEY = "grayDogGame_manual_v1";
 
   const freshState = () => ({
@@ -13,27 +11,29 @@ window.GrayGame = window.GrayGame || {};
     visit: 1,
     homeDay: 0,
     acted: false,
+    momentsLeft: 2,
+    todayWins: 0,
     trust: 0,
     familiarity: 0,
     prep: [],
     firsts: [],
     journal: [{ day: "訪問 1回目", text: "保護施設でグレイと初めて会った。" }],
-    lastEvent: "intro"
+    lastEvent: "intro",
+    lastOutcome: "",
+    lastResultText: "",
+    lastObservationText: ""
   });
 
   const clone = (value) => JSON.parse(JSON.stringify(value));
-
-  // 起動時は勝手にロードしない。新規状態から開始する。
   let state = freshState();
 
   GrayGame.getState = () => state;
   GrayGame.exportState = () => clone(state);
 
   GrayGame.replaceState = (next) => {
-    if (!next || typeof next !== "object" || next.version !== 1) {
-      throw new Error("invalid save");
-    }
+    if (!next || typeof next !== "object" || next.version !== 1) throw new Error("invalid save");
     state = { ...freshState(), ...clone(next) };
+    if (typeof state.momentsLeft !== "number") state.momentsLeft = state.acted ? 0 : 2;
     return state;
   };
 
@@ -42,7 +42,6 @@ window.GrayGame = window.GrayGame || {};
     return state;
   };
 
-  // ゲーム進行はメモリ上だけ変更。ここでは保存しない。
   GrayGame.patch = (patch) => {
     state = { ...state, ...patch };
     return state;
@@ -75,8 +74,7 @@ window.GrayGame = window.GrayGame || {};
     try {
       const raw = localStorage.getItem(MANUAL_STORAGE_KEY);
       if (!raw) return false;
-      const parsed = JSON.parse(raw);
-      GrayGame.replaceState(parsed);
+      GrayGame.replaceState(JSON.parse(raw));
       return true;
     } catch (_) {
       return false;
@@ -84,11 +82,8 @@ window.GrayGame = window.GrayGame || {};
   };
 
   GrayGame.hasLocalManualSave = () => {
-    try {
-      return !!localStorage.getItem(MANUAL_STORAGE_KEY);
-    } catch (_) {
-      return false;
-    }
+    try { return !!localStorage.getItem(MANUAL_STORAGE_KEY); }
+    catch (_) { return false; }
   };
 
   GrayGame.dayLabel = () => state.mode === "facility"
