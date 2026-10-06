@@ -29,7 +29,16 @@ window.GrayGame = window.GrayGame || {};
   let state = load();
 
   GrayGame.getState = () => state;
+  GrayGame.exportState = () => JSON.parse(JSON.stringify(state));
   GrayGame.save = () => localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  GrayGame.replaceState = (next) => {
+    if (!next || typeof next !== 'object' || next.version !== 1) {
+      throw new Error('invalid save');
+    }
+    state = { ...freshState(), ...next };
+    GrayGame.save();
+    return state;
+  };
   GrayGame.reset = () => {
     state = freshState();
     GrayGame.save();
