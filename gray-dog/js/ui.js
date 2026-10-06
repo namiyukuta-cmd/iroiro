@@ -59,8 +59,8 @@ window.GrayGame = window.GrayGame || {};
 
       b.innerHTML = `<span class="zone-label">${label}</span><span class="zone-markers">${markers.join("")}</span>`;
 
-      const validSit = placementMode === "sit" && zone <= 3;
-      const validSnack = placementMode === "snack" && zone >= 1 && zone <= 3 && zone !== s.playerZone;
+      const validSit = placementMode === "sit" && zone <= 3 && zone < s.grayZone;
+      const validSnack = placementMode === "snack" && zone >= 1 && zone <= 3 && zone > s.playerZone && zone < s.grayZone;
       const selectable = validSit || validSnack;
       b.classList.toggle("selectable", selectable);
       b.disabled = !!placementMode && !selectable;
@@ -140,6 +140,7 @@ window.GrayGame = window.GrayGame || {};
         { selected: placementMode === "sit", note:"4m〜1mから選ぶ" }
       ));
 
+      const gap = Math.max(0, s.grayZone - s.playerZone);
       els.actions.appendChild(actionButton(
         "おやつを置く",
         "snack",
@@ -147,7 +148,7 @@ window.GrayGame = window.GrayGame || {};
           placementMode = placementMode === "snack" ? "" : "snack";
           render();
         },
-        { selected: placementMode === "snack", note:"場所を選んで置く" }
+        { selected: placementMode === "snack", disabled:gap <= 1, note:gap <= 1 ? "もう間に置く場所がない" : "間の地点を選んで置く" }
       ));
 
       els.actions.appendChild(actionButton(
