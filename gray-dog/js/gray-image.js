@@ -1,0 +1,1 @@
+window.GRAY_DOG_IMAGE = "data:image/webp;base64," + (window.GRAY_DOG_IMAGE_PARTS || []).join("");
