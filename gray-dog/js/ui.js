@@ -5,7 +5,7 @@ window.GrayGame = window.GrayGame || {};
   const els = {};
 
   function cache() {
-    ['chapterLabel','dayLabel','placeLabel','sceneText','feedbackBadge','dogStage','distanceLine','observationText','actionTitle','actionCount','actions','advanceButton','sheet','sheetTitle','sheetContent','closeSheet','menuButton'].forEach(id => els[id] = $(id));
+    ['chapterLabel','dayLabel','placeLabel','sceneText','feedbackBadge','dogStage','distanceLine','observationLabel','observationText','careStatus','actionTitle','actionCount','actions','advanceButton','sheet','sheetTitle','sheetContent','closeSheet','menuButton'].forEach(id => els[id] = $(id));
   }
 
   function distanceForState(s) {
@@ -28,95 +28,133 @@ window.GrayGame = window.GrayGame || {};
   }
 
   function renderFacility(s) {
-    const intro = facilityIntro(s);
-    const pattern = GrayGame.currentPattern();
+    const intros = [
+      ['初めて会うグレイは、少し離れた場所で伏せています。','こちらを見ません。耳だけが、ときどき周囲の音を追っています。'],
+      ['二度目。グレイは前と同じ場所にいます。','入ってきたことには気づいています。前回より確認が少し早いようです。'],
+      ['三度目。今日はスタッフが散歩用のリードを用意しています。','グレイはこちらを一度見て、そのまま伏せ直しました。']
+    ];
+    const intro = intros[Math.min(Math.max(s.visit - 1, 0), intros.length - 1)];
+
     els.chapterLabel.textContent = '保護施設';
     els.dayLabel.textContent = `訪問 ${s.visit}回目`;
     els.placeLabel.textContent = '譲渡会の一角';
     els.sceneText.textContent = s.lastResultText || intro[0];
-    els.observationText.textContent = s.lastOutcome
-      ? s.lastObservationText
-      : `${pattern.title}｜${pattern.clue}`;
-    els.actionTitle.textContent = 'サインを見て、どうする？';
-    els.actionCount.textContent = `残り ${s.momentsLeft}回`;
+    els.observationLabel.textContent = '今日の様子';
+    els.observationText.textContent = s.lastObservationText || intro[1];
+    els.careStatus.classList.add('hidden');
+    els.feedbackBadge.classList.add('hidden');
+    els.distanceLine.classList.remove('hidden');
 
-    els.feedbackBadge.classList.toggle('hidden', !s.lastOutcome);
-    els.feedbackBadge.textContent = s.lastOutcome === 'fit' ? '噛み合った' : 'まだ待つ';
-    els.feedbackBadge.dataset.outcome = s.lastOutcome || '';
-
+    els.actionTitle.textContent = '今日はどう過ごす？';
+    els.actionCount.textContent = s.momentsLeft > 0 ? '1回だけ' : '今日はここまで';
     els.dogStage.dataset.distance = distanceForState(s);
-    els.dogStage.dataset.outcome = s.lastOutcome || '';
-    els.distanceLine.firstElementChild.style.width = `${Math.min(18 + s.visit * 11, 86)}%`;
+    els.dogStage.dataset.outcome = '';
+    els.distanceLine.firstElementChild.style.width = `${Math.min(18 + s.visit * 18, 72)}%`;
 
     els.actions.innerHTML = '';
     GrayGame.availableFacilityActions().forEach(action => {
-      const used = s.usedActions.includes(action.id);
       const b = document.createElement('button');
       b.className = 'action-button';
-      b.innerHTML = `<strong>${used ? '✓ ' : ''}${action.label}</strong><small>${action.fit}</small>`;
-      b.disabled = s.momentsLeft <= 0 || used;
+      b.innerHTML = `<strong>${action.label}</strong>`;
+      b.disabled = s.momentsLeft <= 0;
       b.addEventListener('click', () => {
-        const result = GrayGame.doFacilityAction(action.id);
-        if (!result) return;
-        GrayGame.UI.render();
+        if (!GrayGame.doFacilityAction(action.id)) return;
+        render();
       });
       els.actions.appendChild(b);
     });
 
-    els.advanceButton.classList.toggle('hidden', s.momentsLeft > 0);
-    els.advanceButton.textContent = GrayGame.canTrial() ? 'トライアルへ進む' : '今日は帰る';
+    const canGoHome = GrayGame.canTrial();
+    els.advanceButton.classList.toggle('hidden', !canGoHome && s.momentsLeft > 0);
+    els.advanceButton.textContent = canGoHome ? 'グレイを迎える' : '今日は帰る';
     els.advanceButton.onclick = () => {
-      if (GrayGame.canTrial()) GrayGame.startTrial();
+      if (canGoHome) GrayGame.startTrial();
       else GrayGame.advanceFacility();
-      GrayGame.UI.render();
+      render();
     };
   }
 
+  function careLabel(value) {
+    if (value >= 80) return '十分';
+    if (value >= 55) return '安定';
+    if (value >= 35) return '少し気になる';
+    return '要注意';
+  }
+
+  function renderCareStatus(s) {
+    const items = [
+      ['satiety','ごはん'],
+      ['water','水'],
+      ['energy','元気'],
+      ['hygiene','清潔'],
+      ['health','体調'],
+      ['calm','安心']
+    ];
+    els.careStatus.innerHTML = items.map(([key,label]) => {
+      const value = s.care[key];
+      return `<div class="care-stat">
+        <div class="care-stat-head"><span>${label}</span><small>${careLabel(value)}</small></div>
+        <div class="care-meter"><span style="width:${value}%"></span></div>
+      </div>`;
+    }).join('');
+  }
+
   function renderHome(s) {
-    const pattern = GrayGame.currentPattern();
-    els.chapterLabel.textContent = 'トライアル';
-    els.dayLabel.textContent = `一緒に暮らして ${s.homeDay + 1}日目`;
+    const need = GrayGame.lowestCareNeed();
+    const time = GrayGame.homeTimeLabel();
+
+    els.chapterLabel.textContent = 'グレイとの暮らし';
+    els.dayLabel.textContent = `${s.homeDay + 1}日目・${time}`;
     els.placeLabel.textContent = 'みどりの家';
 
-    const defaultScene = s.homeDay === 0
-      ? 'グレイが家に来ました。玄関から室内を静かに見ています。'
-      : '朝。グレイは自分で選んだ場所から、こちらの生活を見ています。';
+    const firstScene = 'グレイが家に来ました。まずは、この家で食べて、眠って、散歩して暮らしていきます。';
+    const normalScene = s.daySummary || 'グレイは自分の寝床と水入れの場所を覚えながら過ごしています。';
 
-    els.sceneText.textContent = s.lastResultText || defaultScene;
-    els.observationText.textContent = s.lastOutcome
-      ? s.lastObservationText
-      : `${pattern.title}｜${pattern.clue}`;
-    els.actionTitle.textContent = '今の様子に合わせる';
-    els.actionCount.textContent = `残り ${s.momentsLeft}回`;
+    els.sceneText.textContent = s.lastResultText || (s.homeDay === 0 ? firstScene : normalScene);
+    els.observationLabel.textContent = '今の様子';
+    els.observationText.textContent = s.lastObservationText || (
+      need.value < 35
+        ? `${need.label}がかなり気になります。先に整えた方がよさそうです。`
+        : need.value < 55
+          ? `${need.label}が少し下がっています。`
+          : '今のところ大きく崩れているところはありません。'
+    );
 
-    els.feedbackBadge.classList.toggle('hidden', !s.lastOutcome);
-    els.feedbackBadge.textContent = s.lastOutcome === 'fit' ? '噛み合った' : 'まだ待つ';
-    els.feedbackBadge.dataset.outcome = s.lastOutcome || '';
-
+    els.careStatus.classList.remove('hidden');
+    renderCareStatus(s);
+    els.distanceLine.classList.add('hidden');
     els.dogStage.dataset.distance = 'home';
     els.dogStage.dataset.outcome = s.lastOutcome || '';
-    els.distanceLine.firstElementChild.style.width = `${Math.min(78 + s.homeDay * 3, 98)}%`;
+
+    const isFirst = s.lastOutcome === 'first';
+    els.feedbackBadge.classList.toggle('hidden', !isFirst);
+    els.feedbackBadge.textContent = isFirst ? 'はじめて' : '';
+    els.feedbackBadge.dataset.outcome = isFirst ? 'fit' : '';
+
+    els.actionTitle.textContent = `${time}の世話`;
+    els.actionCount.textContent = s.momentsLeft > 0 ? `あと ${s.momentsLeft}回` : '今日は終了';
 
     els.actions.innerHTML = '';
-    GrayGame.data.HOME_ACTIONS.forEach(action => {
+    GrayGame.availableHomeActions().forEach(action => {
       const used = s.usedActions.includes(action.id);
       const b = document.createElement('button');
-      b.className = 'action-button';
-      b.innerHTML = `<strong>${used ? '✓ ' : ''}${action.label}</strong>`;
+      b.className = 'action-button care-action';
+      b.innerHTML = `<strong>${used ? '✓ ' : ''}${action.label}</strong><small>${action.hint}</small>`;
       b.disabled = s.momentsLeft <= 0 || used;
       b.addEventListener('click', () => {
         const result = GrayGame.doHomeAction(action.id);
         if (!result) return;
-        GrayGame.UI.render();
+        render();
       });
       els.actions.appendChild(b);
     });
 
     els.advanceButton.classList.toggle('hidden', s.momentsLeft > 0);
-    els.advanceButton.textContent = '次の日へ';
+    els.advanceButton.textContent = '眠る・次の日へ';
     els.advanceButton.onclick = () => {
       GrayGame.advanceHome();
-      GrayGame.UI.render();
+      render();
+      window.scrollTo({ top:0, behavior:'smooth' });
     };
   }
 
@@ -132,11 +170,11 @@ window.GrayGame = window.GrayGame || {};
       const done = s.prep.includes(item.id);
       return `<button class="sheet-action ${done ? 'primary' : ''}" data-prep="${item.id}" ${done ? 'disabled' : ''}>${done ? '✓ ' : ''}${item.label}</button>`;
     }).join('');
-    const trial = GrayGame.canTrial()
-      ? '<button class="sheet-action primary" data-trial="1">準備できた。トライアルを始める</button>'
-      : `<div class="info-card"><small>トライアルまで</small><strong>訪問を重ね、家の準備を4つ以上整えると進めます。現在 ${s.prep.length}/4。</strong></div>`;
+    const trial = s.mode === 'facility' && GrayGame.canTrial()
+      ? '<button class="sheet-action primary" data-trial="1">グレイを迎える</button>'
+      : '';
 
-    openSheet('迎える準備', `<div class="card-list">${GrayGame.data.PREP_ITEMS.map(item => {
+    openSheet('生活用品', `<div class="card-list">${GrayGame.data.PREP_ITEMS.map(item => {
       const done = s.prep.includes(item.id);
       return `<div class="info-card ${done ? 'done' : ''}"><small>${done ? '準備済み' : 'まだ'}</small><strong>${item.label}</strong></div>`;
     }).join('')}</div><div class="sheet-actions">${items}${trial}</div>`);
