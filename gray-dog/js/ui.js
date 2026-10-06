@@ -5,189 +5,88 @@ window.GrayGame = window.GrayGame || {};
 
   const $ = (id) => document.getElementById(id);
   const els = {};
-  let placementMode = "";
 
   function cache() {
     [
       "chapterLabel","dayLabel","placeLabel","sceneText","feedbackBadge","dogStage",
-      "interactionBoard","boardPrompt","zoneTrack","observationText",
-      "actionTitle","actionCount","actions","advanceButton","sheet","sheetTitle",
-      "sheetContent","closeSheet","menuButton"
+      "observationText","actionTitle","actionCount","actions","advanceButton","sheet",
+      "sheetTitle","sheetContent","closeSheet","menuButton"
     ].forEach((id) => els[id] = $(id));
   }
 
-  function dogDistanceForGap(s) {
-    const gap = Math.max(0, s.grayZone - s.playerZone);
-    if (gap >= 3) return "far";
-    if (gap >= 2) return "mid";
-    return "near";
+  function relationStage(s) {
+    const total = Object.values(s.actionCounts || {}).reduce((a,b) => a + b, 0);
+    if (total >= 12) return "near";
+    if (total >= 5) return "mid";
+    return "far";
   }
 
   function facilityIntro(s) {
     if (s.visit === 1) return [
-      "大きな黒灰色の犬が、部屋の奥で伏せています。",
-      "まだこちらから距離を取っています。今日は4回だけ、同じ場所で過ごせます。"
+      "大きな黒灰色の犬が、少し離れた場所で伏せています。",
+      "こちらを見ません。耳だけが、ときどき周囲の音を追っています。"
     ];
     if (s.visit <= 3) return [
-      "前と同じ部屋にグレイがいます。入ってきたことには気づいています。",
-      "前回より、こちらの動きを確認する時間が短くなっています。"
+      "前と同じ場所にグレイがいます。こちらが入ってきても、立ち上がりません。",
+      "一度だけこちらを確認して、また前を向きました。"
     ];
     if (s.visit <= 6) return [
-      "グレイはこちらを一度見てから、伏せ直しました。",
-      "最初の頃より、近い位置でもその場に残るようになっています。"
+      "こちらが来ると、グレイの耳が先に動きました。",
+      "近くにいても休める時間が少し長くなっています。"
     ];
     return [
-      "部屋へ入ると、グレイの耳が先にこちらへ向きました。",
+      "部屋へ入ると、グレイはこちらを一度見て伏せ直しました。",
       "来訪そのものには、もうかなり慣れています。"
     ];
   }
 
-  function renderBoard(s) {
-    const labels = ["4m","3m","2m","1m","寝床"];
-    els.zoneTrack.innerHTML = "";
-
-    labels.forEach((label, zone) => {
-      const b = document.createElement("button");
-      b.type = "button";
-      b.className = "zone-button";
-      b.dataset.zone = String(zone);
-
-      const markers = [];
-      if (s.playerZone === zone) markers.push('<span class="zone-marker you">●</span>');
-      if (s.grayZone === zone) markers.push('<span class="zone-marker gray">G</span>');
-      if (s.snackZone === zone) markers.push('<span class="zone-marker snack">◆</span>');
-
-      b.innerHTML = `<span class="zone-label">${label}</span><span class="zone-markers">${markers.join("")}</span>`;
-
-      const validSit = placementMode === "sit" && zone <= 3 && zone < s.grayZone;
-      const validSnack = placementMode === "snack" && zone >= 1 && zone <= 3 && zone > s.playerZone && zone < s.grayZone;
-      const selectable = validSit || validSnack;
-      b.classList.toggle("selectable", selectable);
-      b.disabled = !!placementMode && !selectable;
-
-      if (selectable) {
-        b.addEventListener("click", () => {
-          const done = placementMode === "sit"
-            ? GrayGame.sitAt(zone)
-            : GrayGame.placeSnack(zone);
-          if (!done) return;
-          placementMode = "";
-          render();
-        });
-      }
-
-      els.zoneTrack.appendChild(b);
-    });
-
-    if (placementMode === "sit") {
-      els.boardPrompt.textContent = "座る位置をタップ";
-    } else if (placementMode === "snack") {
-      els.boardPrompt.textContent = "おやつを置く位置をタップ";
-    } else {
-      const gap = Math.max(0, s.grayZone - s.playerZone);
-      els.boardPrompt.textContent = gap <= 1
-        ? "グレイはすぐ近くにいます。"
-        : `今は ${gap}区画ぶん離れています。`;
-    }
-  }
-
-  function actionButton(label, id, onClick, options = {}) {
+  function addActionButton(id, label, note="") {
     const b = document.createElement("button");
-    b.type = "button";
     b.className = "action-button";
-    if (options.selected) b.classList.add("selected");
-    b.innerHTML = options.note
-      ? `<strong>${label}</strong><small>${options.note}</small>`
-      : `<strong>${label}</strong>`;
-    b.disabled = !!options.disabled;
-    b.dataset.action = id;
-    b.addEventListener("click", onClick);
-    return b;
+    b.innerHTML = note ? `<strong>${label}</strong><small>${note}</small>` : `<strong>${label}</strong>`;
+    b.addEventListener("click", () => {
+      if (!GrayGame.doFacilityAction(id)) return;
+      render();
+    });
+    els.actions.appendChild(b);
   }
 
   function renderFacility(s) {
     const intro = facilityIntro(s);
-
     els.chapterLabel.textContent = "保護施設";
     els.dayLabel.textContent = `訪問 ${s.visit}回目`;
     els.placeLabel.textContent = "譲渡会の一角";
     els.sceneText.textContent = s.lastResultText || intro[0];
     els.observationText.textContent = s.lastObservationText || intro[1];
-    els.actionTitle.textContent = placementMode ? "位置を選ぶ" : "どう過ごす？";
+    els.actionTitle.textContent = "どう過ごす？";
     els.actionCount.textContent = `あと ${s.momentsLeft}回`;
 
-    els.interactionBoard.classList.remove("hidden");
-    renderBoard(s);
+    const first = s.lastOutcome === "first";
+    els.feedbackBadge.classList.toggle("hidden", !first);
+    els.feedbackBadge.textContent = first ? "はじめて" : "";
+    els.feedbackBadge.dataset.outcome = first ? "fit" : "";
 
-    const approached = s.lastOutcome === "approach";
-    els.feedbackBadge.classList.toggle("hidden", !approached);
-    els.feedbackBadge.textContent = approached ? "グレイが動いた" : "";
-    els.feedbackBadge.dataset.outcome = approached ? "fit" : "";
-
-    els.dogStage.dataset.distance = dogDistanceForGap(s);
-    els.dogStage.dataset.outcome = approached ? "fit" : "";
+    els.dogStage.dataset.distance = relationStage(s);
+    els.dogStage.dataset.outcome = first ? "fit" : "";
 
     els.actions.innerHTML = "";
-
     if (s.momentsLeft > 0) {
-      els.actions.appendChild(actionButton(
-        "座る位置を決める",
-        "sit",
-        () => {
-          placementMode = placementMode === "sit" ? "" : "sit";
-          render();
-        },
-        { selected: placementMode === "sit", note:"4m〜1mから選ぶ" }
-      ));
-
-      const gap = Math.max(0, s.grayZone - s.playerZone);
-      els.actions.appendChild(actionButton(
-        "おやつを置く",
-        "snack",
-        () => {
-          placementMode = placementMode === "snack" ? "" : "snack";
-          render();
-        },
-        { selected: placementMode === "snack", disabled:gap <= 1, note:gap <= 1 ? "もう間に置く場所がない" : "間の地点を選んで置く" }
-      ));
-
-      els.actions.appendChild(actionButton(
-        "そのまま待つ",
-        "wait",
-        () => {
-          placementMode = "";
-          if (GrayGame.waitQuietly()) render();
-        },
-        { note:"グレイから動ける時間を作る" }
-      ));
-
-      if (s.visit >= 3) {
-        els.actions.appendChild(actionButton(
-          "手を低く出して待つ",
-          "hand",
-          () => {
-            placementMode = "";
-            if (GrayGame.offerHand()) render();
-          },
-          { note:"届く距離なら匂いを確認できる" }
-        ));
-
-        els.actions.appendChild(actionButton(
-          "一緒に散歩する",
-          "walk",
-          () => {
-            placementMode = "";
-            if (GrayGame.takeWalk()) render();
-          },
-          { note:"戻った後の位置が変わることがある" }
-        ));
-      }
+      GrayGame.availableFacilityActions().forEach((id) => {
+        const meta = GrayGame.data.ACTIONS[id];
+        const notes = {
+          sit:"何も求めず同じ場所で過ごす",
+          snack:"手渡しせず置いて待つ",
+          hand:"グレイから確認できるようにする",
+          walk:"短く外を歩く",
+          staff:"最近の様子を聞く"
+        };
+        addActionButton(id, meta.label, notes[id]);
+      });
     }
 
     els.advanceButton.classList.toggle("hidden", s.momentsLeft > 0);
     els.advanceButton.textContent = GrayGame.canTrial() ? "トライアルへ進む" : "今日は帰る";
     els.advanceButton.onclick = () => {
-      placementMode = "";
       if (GrayGame.canTrial()) GrayGame.startTrial();
       else GrayGame.advanceFacility();
       render();
@@ -196,9 +95,6 @@ window.GrayGame = window.GrayGame || {};
   }
 
   function renderHome(s) {
-    placementMode = "";
-    els.interactionBoard.classList.add("hidden");
-
     els.chapterLabel.textContent = "トライアル";
     els.dayLabel.textContent = `一緒に暮らして ${s.homeDay + 1}日目`;
     els.placeLabel.textContent = "みどりの家";
@@ -222,14 +118,14 @@ window.GrayGame = window.GrayGame || {};
     els.actions.innerHTML = "";
     GrayGame.data.HOME_ACTIONS.forEach((action) => {
       const used = s.usedActions.includes(action.id);
-      els.actions.appendChild(actionButton(
-        used ? `✓ ${action.label}` : action.label,
-        action.id,
-        () => {
-          if (GrayGame.doHomeAction(action.id)) render();
-        },
-        { disabled:s.momentsLeft <= 0 || used }
-      ));
+      const b = document.createElement("button");
+      b.className = "action-button";
+      b.innerHTML = `<strong>${used ? "✓ " : ""}${action.label}</strong>`;
+      b.disabled = s.momentsLeft <= 0 || used;
+      b.addEventListener("click", () => {
+        if (GrayGame.doHomeAction(action.id)) render();
+      });
+      els.actions.appendChild(b);
     });
 
     els.advanceButton.classList.toggle("hidden", s.momentsLeft > 0);
@@ -255,7 +151,7 @@ window.GrayGame = window.GrayGame || {};
 
     const trial = GrayGame.canTrial()
       ? '<button class="sheet-action primary" data-trial="1">準備できた。トライアルを始める</button>'
-      : `<div class="info-card"><small>トライアルまで</small><strong>訪問6回以上・家の準備4つ以上・手の匂いを確認できるところまで進むと開始できます。現在 準備 ${s.prep.length}/4。</strong></div>`;
+      : `<div class="info-card"><small>トライアルまで</small><strong>訪問6回以上・家の準備4つ以上・手の匂い確認・散歩まで進むと開始できます。現在 準備 ${s.prep.length}/4。</strong></div>`;
 
     openSheet("迎える準備", `<div class="card-list">${GrayGame.data.PREP_ITEMS.map((item) => {
       const done = s.prep.includes(item.id);
@@ -335,11 +231,9 @@ window.GrayGame = window.GrayGame || {};
       showStatus("ロード中", "グレイ専用セーブを読み込んでいます。");
       try {
         const result = await GrayGame.loadPrivate();
-        if (result.skipped) {
-          showStatus("未ロード", "GitHubトークンが端末に登録されていません。");
-        } else if (result.missing) {
-          showStatus("セーブなし", "グレイ専用セーブがまだありません。");
-        } else {
+        if (result.skipped) showStatus("未ロード", "GitHubトークンが端末に登録されていません。");
+        else if (result.missing) showStatus("セーブなし", "グレイ専用セーブがまだありません。");
+        else {
           closeSheet();
           render();
         }
@@ -363,15 +257,12 @@ window.GrayGame = window.GrayGame || {};
 
     els.sheetContent.querySelector("[data-reset]")?.addEventListener("click", () => {
       GrayGame.reset();
-      placementMode = "";
       closeSheet();
       render();
     });
   }
 
-  function closeSheet() {
-    els.sheet.classList.add("hidden");
-  }
+  function closeSheet() { els.sheet.classList.add("hidden"); }
 
   function render() {
     const s = GrayGame.getState();
@@ -385,7 +276,6 @@ window.GrayGame = window.GrayGame || {};
       els.closeSheet.addEventListener("click", closeSheet);
       els.sheet.addEventListener("click", (e) => { if (e.target === els.sheet) closeSheet(); });
       els.menuButton.addEventListener("click", journalSheet);
-
       document.querySelectorAll(".nav-button").forEach((btn) => {
         btn.addEventListener("click", () => {
           document.querySelectorAll(".nav-button").forEach((x) => x.classList.remove("active"));
@@ -397,7 +287,6 @@ window.GrayGame = window.GrayGame || {};
           if (panel === "settings") return saveSheet();
         });
       });
-
       render();
     },
     render,
