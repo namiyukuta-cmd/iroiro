@@ -33,7 +33,11 @@ h1 { margin: 0; font-size: 22px; letter-spacing: .02em; }
 
 .scene { min-height: 0; padding: 14px 16px 10px; display: grid; grid-template-rows: auto minmax(150px, 1fr) auto; gap: 10px; }
 .scene-copy { min-height: 62px; }
-.scene-place { margin: 0 0 5px; color: var(--ochre); font-size: 12px; font-weight: 900; letter-spacing: .08em; }
+.scene-meta { display:flex; align-items:center; justify-content:space-between; gap:8px; margin-bottom:5px; }
+.scene-place { margin: 0; color: var(--ochre); font-size: 12px; font-weight: 900; letter-spacing: .08em; }
+.feedback-badge { flex:0 0 auto; padding:4px 8px; border:1px solid var(--line); border-radius:999px; font-size:11px; font-weight:900; background:var(--paper-2); }
+.feedback-badge[data-outcome="fit"] { background:#d7d2b7; }
+.feedback-badge[data-outcome="neutral"] { background:#e8e0d5; color:var(--muted); }
 .scene-text { margin: 0; max-width: 36em; font-size: 16px; line-height: 1.65; font-weight: 600; overflow-wrap: anywhere; }
 
 .dog-stage {
@@ -49,6 +53,7 @@ h1 { margin: 0; font-size: 22px; letter-spacing: .02em; }
 .dog-stage[data-distance="mid"] .dog { transform: translateX(-50%) scale(.9); }
 .dog-stage[data-distance="near"] .dog { transform: translateX(-50%) scale(1); }
 .dog-stage[data-distance="home"] .dog { transform: translateX(-50%) scale(1.06); }
+.dog-stage[data-outcome="fit"] { box-shadow: inset 0 0 0 2px rgba(181,138,77,.28); }
 .shadow { fill: rgba(31,29,26,.14); }
 .body, .neck, .head, .chest, .front-leg, .hind-leg, .ear, .muzzle {
   fill: var(--dog);
@@ -78,6 +83,8 @@ h1 { margin: 0; font-size: 22px; letter-spacing: .02em; }
 .action-heading { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; font-size: 12px; font-weight: 900; }
 .action-count { color: var(--muted); font-size: 11px; }
 .actions { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+.action-button strong { display:block; font-size:14px; }
+.action-button small { display:block; margin-top:3px; color:var(--muted); font-size:10px; line-height:1.3; font-weight:700; }
 .action-button, .primary-button, .sheet-action { min-height: 50px; padding: 10px 12px; border: 1.5px solid var(--line); border-radius: 14px; background: var(--white); color: var(--ink); font-size: 14px; line-height: 1.35; font-weight: 800; white-space: normal; overflow-wrap: anywhere; }
 .action-button:active, .sheet-action:active { transform: scale(.985); background: var(--paper-2); }
 .action-button[disabled] { opacity: 1; background: #e1dbcf; color: #514b43; border-color: #8b8277; }
