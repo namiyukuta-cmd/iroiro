@@ -108,3 +108,8 @@ border-bottom:5px solid rgba(110,92,72,.42)}
 
 /* cutout-6: exact coin-count burst */
 .money-bump{transform-origin:center}
+
+/* cutout-7: Cat-Soup-like wide coin scatter -> home */
+.coin{width:17px;height:17px;box-shadow:0 0 0 2px rgba(255,239,159,.34),0 2px 5px rgba(0,0,0,.22),0 0 8px rgba(244,195,69,.26)}
+.coin-trail{position:absolute;z-index:40;width:4px;height:4px;border-radius:50%;background:#ffe78b;box-shadow:0 0 5px #ffd35e;pointer-events:none}
+.money-arrival-spark{position:absolute;z-index:44;width:8px;height:8px;border-radius:50%;background:#fff3ae;box-shadow:0 0 8px #ffd35e;pointer-events:none}
