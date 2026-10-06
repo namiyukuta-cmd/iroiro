@@ -3,80 +3,54 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
-<meta name="theme-color" content="#f4efe4">
+<meta name="theme-color" content="#efe8da">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
 <title>Chill Herb Shop</title>
-<link rel="stylesheet" href="css/chill_top.css?v=20261006-herb-1">
+<link rel="stylesheet" href="css/chill_top.css?v=20261006-cutout-2">
 </head>
 <body>
-<main id="app" aria-label="薬草店">
-  <header class="statusbar">
-    <div><span class="mini">所持金</span><strong id="money">120</strong>G</div>
-    <div><span class="mini">時刻</span><strong id="time">08:00</strong></div>
-    <div><span class="mini">日付</span><strong id="date">1日目</strong></div>
-  </header>
+<main id="game" aria-label="薬草店">
+  <section id="room" aria-label="自動で動く薬草店">
+    <div class="room-base" aria-hidden="true"></div>
 
-  <section class="band customers" aria-label="お客さん">
-    <div class="band-label">客</div>
-    <div id="customerRow" class="customer-row"></div>
+    <header class="statusbar">
+      <div><span>所持金</span><strong id="money">120</strong><b>G</b></div>
+      <div><span>時刻</span><strong id="time">08:00</strong></div>
+      <div><span>日付</span><strong id="date">1日目</strong></div>
+    </header>
+
+    <div id="customerLayer" class="layer"></div>
+    <div id="productLayer" class="layer"></div>
+    <div id="stationLayer" class="layer"></div>
+    <div id="gardenLayer" class="layer"></div>
+    <div id="travelLayer" class="layer travel-layer" aria-hidden="true"></div>
+
+    <button id="bookButton" class="book-hit" type="button" aria-label="本を開く">
+      <span id="bookArt" class="crop book-art"></span>
+    </button>
+
+    <footer class="auto-bar">
+      <strong>AUTO ●</strong>
+      <span id="message" aria-live="polite">ラベンダーが育っています</span>
+    </footer>
   </section>
-
-  <section class="band products" aria-label="商品">
-    <div class="band-label">商品</div>
-    <div id="productRow" class="product-row"></div>
-  </section>
-
-  <section class="band workshop" aria-label="調合部屋">
-    <div class="band-label">調合</div>
-    <div class="workshop-grid">
-      <button class="station" data-station="drying" type="button" aria-label="乾燥">
-        <span class="equip eq-drying" aria-hidden="true"></span><small>乾燥</small><i></i>
-      </button>
-      <button class="station" data-station="cauldron" type="button" aria-label="かまど">
-        <span class="equip eq-cauldron" aria-hidden="true"></span><small>かまど</small><i></i>
-      </button>
-      <button class="station locked" data-station="chop" type="button" aria-label="刻む">
-        <span class="equip eq-chop" aria-hidden="true"></span><small>刻む</small><i></i>
-      </button>
-      <button class="station locked" data-station="mortar" type="button" aria-label="粉にする">
-        <span class="equip eq-mortar" aria-hidden="true"></span><small>粉</small><i></i>
-      </button>
-      <button class="station" data-station="basket" type="button" aria-label="収穫したハーブ置き場">
-        <span class="equip eq-basket" aria-hidden="true"></span><small id="basketCount">0</small>
-      </button>
-    </div>
-  </section>
-
-  <section class="band garden" aria-label="ガーデン">
-    <div class="band-label">庭</div>
-    <div id="gardenGrid" class="garden-grid"></div>
-  </section>
-
-  <footer class="footerbar">
-    <span id="autoState">AUTO ●</span>
-    <span id="message" aria-live="polite">ラベンダーが育っています</span>
-  </footer>
-
-  <button id="bookButton" class="book-button" type="button" aria-label="本を開く">
-    <span class="equip eq-book" aria-hidden="true"></span>
-  </button>
 
   <div id="bookShade" class="book-shade" hidden></div>
-  <aside id="bookPanel" class="book-panel" aria-label="本" hidden>
+  <aside id="bookPanel" class="book-panel" hidden aria-label="本">
     <div class="book-head">
       <strong>本</strong>
       <button id="bookClose" type="button" aria-label="閉じる">×</button>
     </div>
-    <div class="tabs" role="tablist">
-      <button class="tab active" data-tab="seeds" type="button">種</button>
-      <button class="tab" data-tab="tools" type="button">道具</button>
-      <button class="tab" data-tab="recipes" type="button">レシピ</button>
-    </div>
+    <nav class="book-tabs" aria-label="本の内容">
+      <button class="book-tab active" data-tab="seeds" type="button">種</button>
+      <button class="book-tab" data-tab="tools" type="button">道具</button>
+      <button class="book-tab" data-tab="recipes" type="button">レシピ</button>
+    </nav>
     <div id="bookContent" class="book-content"></div>
   </aside>
 </main>
-<script src="js/chill_top.js?v=20261006-herb-1"></script>
+<script src="js/chill_top.js?v=20261006-cutout-2"></script>
 </body>
 </html>
