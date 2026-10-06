@@ -151,7 +151,61 @@ window.GrayGame = window.GrayGame || {};
 
   function saveSheet() {
     const s = GrayGame.getState();
-    openSheet('保存', `<div class="card-list"><div class="info-card done"><small>自動保存</small><strong>この端末に自動で保存されています。</strong></div><div class="info-card"><small>現在</small><strong>${s.mode === 'facility' ? `訪問 ${s.visit}回目` : `一緒に暮らして ${s.homeDay + 1}日目`}</strong></div></div><div class="sheet-actions"><button class="sheet-action danger" data-reset="1">最初からやり直す</button></div>`);
+    openSheet('保存', `<div class="card-list">
+      <div class="info-card done"><small>専用セーブ</small><strong>private-game-data / gray-dog / saves / slot1.json</strong></div>
+      <div class="info-card"><small>現在</small><strong>${s.mode === 'facility' ? `訪問 ${s.visit}回目` : `一緒に暮らして ${s.homeDay + 1}日目`}</strong></div>
+      <div class="info-card" id="saveStatus"><small>端末</small><strong>操作のたびに予備保存しています。</strong></div>
+    </div>
+    <div class="sheet-actions">
+      <button class="sheet-action primary" data-private-save="1">private-game-dataへセーブ</button>
+      <button class="sheet-action" data-private-load="1">private-game-dataからロード</button>
+      <button class="sheet-action danger" data-reset="1">端末データを最初からに戻す</button>
+    </div>`);
+
+    const status = () => els.sheetContent.querySelector('#saveStatus');
+    const showStatus = (title, message, done = false) => {
+      const box = status();
+      if (!box) return;
+      box.classList.toggle('done', done);
+      box.innerHTML = `<small>${title}</small><strong>${message}</strong>`;
+    };
+
+    els.sheetContent.querySelector('[data-private-save]')?.addEventListener('click', async (event) => {
+      event.currentTarget.disabled = true;
+      showStatus('セーブ中', 'private-game-dataへ書き込んでいます。');
+      try {
+        const result = await GrayGame.savePrivate();
+        if (result.skipped) showStatus('未保存', 'GitHubトークンが端末に登録されていません。');
+        else showStatus('保存済み', 'グレイ専用セーブへ保存しました。', true);
+      } catch (error) {
+        console.error(error);
+        showStatus('保存失敗', 'private-game-dataへの保存に失敗しました。端末の予備保存は残っています。');
+      } finally {
+        event.currentTarget.disabled = false;
+      }
+    });
+
+    els.sheetContent.querySelector('[data-private-load]')?.addEventListener('click', async (event) => {
+      event.currentTarget.disabled = true;
+      showStatus('ロード中', 'グレイ専用セーブを読み込んでいます。');
+      try {
+        const result = await GrayGame.loadPrivate();
+        if (result.skipped) {
+          showStatus('未ロード', 'GitHubトークンが端末に登録されていません。');
+        } else if (result.missing) {
+          showStatus('セーブなし', 'グレイ専用セーブがまだありません。');
+        } else {
+          closeSheet();
+          render();
+        }
+      } catch (error) {
+        console.error(error);
+        showStatus('ロード失敗', 'private-game-dataから読み込めませんでした。');
+      } finally {
+        event.currentTarget.disabled = false;
+      }
+    });
+
     els.sheetContent.querySelector('[data-reset]')?.addEventListener('click', () => {
       GrayGame.reset();
       closeSheet();
