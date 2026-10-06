@@ -34,7 +34,7 @@ regions.herbs=plantCenters.map(([x,y])=>centerBox(x,y,58,70));
 
 const herbNames=['ラベンダー','カモミール','ミント','セージ','ローズマリー','セントジョーンズワート','エキナセア','レモンバーム','カレンデュラ','エルダー','ローズヒップ','リンデン','クローバー','ネトル','スミレ'];
 const seedCosts=[35,40,35,55,60,70,75,55,60,80,85,90,50,65,70];
-const herbs=herbNames.map((name,i)=>({name,cost:seedCosts[i],unlocked:i<3,grow:i<3?25+i*18:0}));
+const herbs=herbNames.map((name,i)=>({name:name,cost:seedCosts[i],unlocked:i<3,grow:i<3?22+i*21:0}));
 const tools={drying:true,cauldron:true,basket:true,chop:false,mortar:false};
 const toolCosts={chop:240,mortar:320};
 const recipes=[
@@ -45,11 +45,12 @@ const recipes=[
 ];
 
 let money=120,minutes=8*60,day=1,tickNo=0,activeTab='seeds';
-const stocks=[0,0,0,0,0];
+let customerSerial=0,currentCustomer=null,saleBusy=false,nextCustomerTick=1;
+const shelf=[null,null,null,null,null];
+const finishedQueue=[];
 const rawQueue=[];
 const jobs=[];
-const customerWants=[0,1];
-const productEls=[],customerEls=[],stationEls={},plotEls=[],requestEls=[];
+const shelfEls=[],stationEls={},plotEls=[];
 
 function applyCrop(el,r){
   el.style.backgroundSize=(10000/r.w)+'% '+(10000/r.h)+'%';
@@ -60,9 +61,9 @@ function applyCrop(el,r){
 function placeRegion(el,r){
   el.style.left=r.x+'%';el.style.top=r.y+'%';el.style.width=r.w+'%';el.style.height=r.h+'%';
 }
-function cropSpan(r,cls=''){
+function cropSpan(r,cls){
   const el=document.createElement('span');
-  el.className='crop '+cls;
+  el.className='crop '+(cls||'');
   applyCrop(el,r);
   return el;
 }
@@ -79,75 +80,51 @@ function point(el){
   const rr=room.getBoundingClientRect(),r=el.getBoundingClientRect();
   return {x:r.left-rr.left+r.width/2,y:r.top-rr.top+r.height/2};
 }
-function flyRegion(region,fromEl,toEl,size=20,duration=700){
-  if(!fromEl||!toEl)return;
-  const s=point(fromEl),e=point(toEl),m={x:(s.x+e.x)/2,y:Math.min(s.y,e.y)-18};
+function flyRegion(region,fromEl,toEl,size,duration,done){
+  if(!fromEl||!toEl){if(done)done();return}
+  const s=point(fromEl),e=point(toEl),m={x:(s.x+e.x)/2,y:Math.min(s.y,e.y)-22};
   const f=cropSpan(region,'traveler');
-  f.style.width=size+'px';f.style.height=size+'px';
+  f.style.width=(size||22)+'px';f.style.height=(size||22)+'px';
   f.style.left=s.x+'px';f.style.top=s.y+'px';
   travelLayer.appendChild(f);
   const a=f.animate([
-    {left:s.x+'px',top:s.y+'px',transform:'translate(-50%,-50%) scale(.72)',opacity:.2},
-    {left:m.x+'px',top:m.y+'px',transform:'translate(-50%,-50%) scale(1.08)',opacity:1,offset:.5},
-    {left:e.x+'px',top:e.y+'px',transform:'translate(-50%,-50%) scale(.75)',opacity:.15}
-  ],{duration,easing:'ease-in-out'});
-  a.onfinish=()=>f.remove();
+    {left:s.x+'px',top:s.y+'px',transform:'translate(-50%,-50%) scale(.72)',opacity:.35},
+    {left:m.x+'px',top:m.y+'px',transform:'translate(-50%,-50%) scale(1.06)',opacity:1,offset:.48},
+    {left:e.x+'px',top:e.y+'px',transform:'translate(-50%,-50%) scale(.82)',opacity:.25}
+  ],{duration:duration||650,easing:'cubic-bezier(.2,.72,.24,1)'});
+  a.onfinish=()=>{f.remove();if(done)done()};
 }
 function pulseStation(key){
   const el=stationEls[key];if(!el)return;
   el.classList.remove('working');void el.offsetWidth;el.classList.add('working');
   setTimeout(()=>el.classList.remove('working'),650);
 }
-function coinPop(target,amount){
-  const p=point(target),el=document.createElement('span');
-  el.className='coin-pop';el.textContent='+'+amount+'G';el.style.left=p.x+'px';el.style.top=p.y+'px';
-  travelLayer.appendChild(el);
-  const a=el.animate([{transform:'translate(-50%,0)',opacity:0},{transform:'translate(-50%,-16px)',opacity:1,offset:.35},{transform:'translate(-50%,-34px)',opacity:0}],{duration:900,easing:'ease-out'});
-  a.onfinish=()=>el.remove();
-}
 
-function makeCustomer(i){
-  const r=regions.customers[i];
-  const b=document.createElement('button');b.type='button';b.className='hit customer-hit active';placeRegion(b,r);
-  const art=cropSpan(r,'customer-art');b.appendChild(art);
-  b.addEventListener('click',()=>sellToCustomer(i,true));
-  customerLayer.appendChild(b);customerEls[i]=b;
-  const req=document.createElement('span');req.className='crop request-icon';
-  req.style.left=(i===0?'40.5':'80')+'%';req.style.top=(i===0?'15.3':'15.7')+'%';
-  req.style.transform='translate(-50%,-50%)';
-  customerLayer.appendChild(req);requestEls[i]=req;
-}
-function renderCustomers(){
-  customerWants.forEach((w,i)=>applyCrop(requestEls[i],regions.herbs[w]));
-}
-function makeProduct(i){
-  const r=regions.products[i];
-  const b=document.createElement('button');b.type='button';b.className='hit product-hit';placeRegion(b,r);
-  const art=cropSpan(r,'product-art');b.appendChild(art);
-  const stock=document.createElement('span');stock.className='stock-badge';b.appendChild(stock);
-  b.addEventListener('click',()=>sellProduct(i,true));
-  productLayer.appendChild(b);productEls[i]=b;
-}
-function renderProducts(){
-  stocks.forEach((n,i)=>{productEls[i].classList.toggle('stocked',n>0);productEls[i].querySelector('.stock-badge').textContent=n});
+function installMasks(){
+  const cm=document.createElement('div');cm.className='customer-mask';customerLayer.appendChild(cm);
+  const pm=document.createElement('div');pm.className='product-mask';productLayer.appendChild(pm);
 }
 function makeStation(key){
   const r=regions.stations[key];
   const b=document.createElement('button');b.type='button';b.className='hit station-hit';placeRegion(b,r);b.dataset.station=key;
-  const art=cropSpan(r,'station-art');b.appendChild(art);
+  b.appendChild(cropSpan(r,'station-art'));
   b.addEventListener('click',()=>tapStation(key));
   stationLayer.appendChild(b);stationEls[key]=b;
 }
 function renderStations(){
-  Object.keys(stationEls).forEach(k=>{stationEls[k].classList.toggle('locked',!tools[k]);stationEls[k].classList.toggle('unlocked',!!tools[k])});
+  Object.keys(stationEls).forEach(k=>{
+    stationEls[k].classList.toggle('locked',!tools[k]);
+    stationEls[k].classList.toggle('unlocked',!!tools[k]);
+  });
 }
 function makePlot(i){
   const [cx,cy]=plantCenters[i];
-  const b=document.createElement('button');b.type='button';b.className='hit plot-hit';b.style.left=(cx/SRC_W*100)+'%';b.style.top=(cy/SRC_H*100)+'%';
+  const b=document.createElement('button');b.type='button';b.className='hit plot-hit';
+  b.style.left=(cx/SRC_W*100)+'%';b.style.top=(cy/SRC_H*100)+'%';
   const cover=document.createElement('span');cover.className='plot-cover';b.appendChild(cover);
   const art=cropSpan(regions.herbs[i],'plant-art');b.appendChild(art);
   b.addEventListener('click',()=>tapHerb(i));
-  gardenLayer.appendChild(b);plotEls[i]={button:b,art};
+  gardenLayer.appendChild(b);plotEls[i]={button:b,art:art};
 }
 function renderGarden(){
   herbs.forEach((h,i)=>{
@@ -158,10 +135,29 @@ function renderGarden(){
   });
 }
 
-function harvest(i,manual=false){
+function makeShelfSlot(i){
+  const r=regions.products[i];
+  const b=document.createElement('button');b.type='button';b.className='shelf-slot';placeRegion(b,r);b.dataset.slot=i;
+  b.addEventListener('click',()=>{if(shelf[i]!=null)sellShelfSlot(i,true)});
+  productLayer.appendChild(b);shelfEls[i]=b;
+}
+function paintShelfSlot(i,pop){
+  const el=shelfEls[i];el.replaceChildren();
+  const type=shelf[i];
+  el.classList.toggle('filled',type!=null);
+  el.classList.remove('pop');
+  if(type==null)return;
+  el.appendChild(cropSpan(regions.products[type],'product-art'));
+  if(pop){void el.offsetWidth;el.classList.add('pop');setTimeout(()=>el.classList.remove('pop'),360)}
+}
+function renderShelf(){shelf.forEach((_,i)=>paintShelfSlot(i,false))}
+function firstEmptyShelf(){return shelf.findIndex(v=>v==null)}
+function shelfTypes(){return shelf.filter(v=>v!=null)}
+
+function harvest(i,manual){
   const h=herbs[i];if(!h.unlocked||h.grow<100)return false;
   h.grow=0;rawQueue.push(i);
-  flyRegion(regions.herbs[i],plotEls[i].button,stationEls.basket,18,620);
+  flyRegion(regions.herbs[i],plotEls[i].button,stationEls.basket,18,520);
   pulseStation('basket');
   say((manual?'収穫：':'自動収穫：')+h.name);
   renderGarden();return true;
@@ -180,64 +176,131 @@ function routeNow(){
   r.push('cauldron');return r;
 }
 function startJob(){
-  if(rawQueue.length===0||jobs.length>=2)return;
-  jobs.push({herb:rawQueue.shift(),route:routeNow(),step:0});
+  if(rawQueue.length===0||jobs.length>=1)return;
+  jobs.push({herb:rawQueue.shift(),route:routeNow(),step:0,finishing:false});
 }
 function advanceJob(job){
-  if(!job)return;
-  if(job.step>=job.route.length)return finishJob(job);
-  const toKey=job.route[job.step],fromEl=job.step===0?stationEls.basket:stationEls[job.route[job.step-1]],toEl=stationEls[toKey];
-  flyRegion(regions.herbs[job.herb],fromEl,toEl,18,640);pulseStation(toKey);job.step++;
+  if(!job||job.finishing)return;
+  if(job.step>=job.route.length){finishJob(job);return}
+  const toKey=job.route[job.step];
+  const fromEl=job.step===0?stationEls.basket:stationEls[job.route[job.step-1]];
+  const toEl=stationEls[toKey];
+  flyRegion(regions.herbs[job.herb],fromEl,toEl,18,470);
+  pulseStation(toKey);job.step++;
   say(herbs[job.herb].name+'を自動加工中');
-  if(job.step>=job.route.length)setTimeout(()=>finishJob(job),690);
+  if(job.step>=job.route.length){job.finishing=true;setTimeout(()=>finishJob(job),520)}
 }
 function finishJob(job){
   const idx=jobs.indexOf(job);if(idx<0)return;
   jobs.splice(idx,1);
-  const p=job.herb%5;stocks[p]++;
-  flyRegion(regions.products[p],stationEls.cauldron,productEls[p],27,720);
-  setTimeout(()=>{renderProducts();say('商品が棚に並びました')},500);
+  finishedQueue.push(job.herb%5);
+  placeNextFinished();
+}
+function placeNextFinished(){
+  if(finishedQueue.length===0)return;
+  const slot=firstEmptyShelf();if(slot<0){say('商品棚がいっぱいです');return}
+  const type=finishedQueue.shift();
+  say('商品が1個できました');
+  flyRegion(regions.products[type],stationEls.cauldron,shelfEls[slot],30,560,()=>{
+    shelf[slot]=type;paintShelfSlot(slot,true);say('商品が棚にポコッと並びました');
+    setTimeout(tryServeCustomer,120);
+  });
 }
 function tapStation(key){
   if(!tools[key]){say('本からこの道具を買えます');return}
   pulseStation(key);
-  const j=jobs.find(x=>x.route[x.step]===key);
-  if(j){advanceJob(j);say('作業を手伝いました')}else say(key==='basket'?'収穫したハーブ '+rawQueue.length+'束':'今は自動作業待ちです');
+  const j=jobs[0];
+  if(j&&j.route[j.step]===key){advanceJob(j);say('作業を手伝いました')}
+  else say(key==='basket'?'収穫したハーブ '+rawQueue.length+'束':'今は自動作業待ちです');
 }
-function priceFor(i){return 14+i*3+recipes.filter(r=>r.unlocked).reduce((s,r)=>s+r.bonus,0)}
-function newWant(i){
+
+function chooseWant(){
+  const stocked=shelfTypes();
+  if(stocked.length)return stocked[Math.floor(Math.random()*stocked.length)];
   const available=Math.max(1,Math.min(5,herbs.filter(h=>h.unlocked).length));
-  customerWants[i]=Math.floor(Math.random()*available);renderCustomers();
+  return Math.floor(Math.random()*available);
 }
-function sellToCustomer(ci,manual=false){
-  const p=customerWants[ci];
-  if(stocks[p]<=0){say('このお客さんの商品はまだ出来ていません');return false}
-  stocks[p]--;const gain=priceFor(p);money+=gain;
-  flyRegion(regions.products[p],productEls[p],customerEls[ci],28,650);coinPop(customerEls[ci],gain);
-  customerEls[ci].classList.remove('active');void customerEls[ci].offsetWidth;customerEls[ci].classList.add('active');
-  renderProducts();renderStatus();bumpMoney();say(manual?'商品を手渡しました':'商品が自動で売れました');
-  setTimeout(()=>newWant(ci),700);return true;
+function enterCustomer(){
+  if(currentCustomer||saleBusy)return;
+  const artIndex=customerSerial++%2;
+  const r=regions.customers[artIndex];
+  const el=document.createElement('button');el.type='button';el.className='hit customer-hit entering';placeRegion(el,r);
+  el.appendChild(cropSpan(r,'customer-art'));
+  const req=cropSpan(regions.herbs[0],'customer-request');el.appendChild(req);
+  el.addEventListener('click',()=>tryServeCustomer(true));
+  customerLayer.appendChild(el);
+  const want=chooseWant();applyCrop(req,regions.herbs[want]);
+  currentCustomer={el:el,want:want,artIndex:artIndex,arrived:false};
+  say('お客さんが入ってきました');
+  requestAnimationFrame(()=>requestAnimationFrame(()=>el.classList.remove('entering')));
+  setTimeout(()=>{if(!currentCustomer||currentCustomer.el!==el)return;currentCustomer.arrived=true;el.classList.add('waiting');tryServeCustomer()},620);
 }
-function sellProduct(p,manual=false){
-  if(stocks[p]<=0){say('この商品はまだありません');return}
-  const ci=customerWants.findIndex(w=>w===p);
-  if(ci>=0){sellToCustomer(ci,manual);return}
-  const fallback=0;stocks[p]--;const gain=Math.max(8,priceFor(p)-3);money+=gain;
-  flyRegion(regions.products[p],productEls[p],customerEls[fallback],28,650);coinPop(customerEls[fallback],gain);
-  renderProducts();renderStatus();bumpMoney();say('商品を販売しました');
+function leaveCustomer(){
+  if(!currentCustomer)return;
+  const c=currentCustomer;currentCustomer=null;
+  c.el.classList.remove('waiting');c.el.classList.add('leaving');
+  say('お客さんが帰りました');
+  setTimeout(()=>{c.el.remove();nextCustomerTick=tickNo+2},560);
+}
+function findShelfSlotFor(type){return shelf.findIndex(v=>v===type)}
+function priceFor(type){return 14+type*3+recipes.filter(r=>r.unlocked).reduce((s,r)=>s+r.bonus,0)}
+function makeCoinBurst(customerEl,amount,done){
+  const p=point(customerEl),target=point(moneyEl);
+  for(let i=0;i<7;i++){
+    const s=document.createElement('span');s.className='coin-speck';s.style.left=p.x+'px';s.style.top=p.y+'px';travelLayer.appendChild(s);
+    const a=Math.PI*2*i/7,dist=18+(i%3)*5,dx=Math.cos(a)*dist,dy=Math.sin(a)*dist;
+    const an=s.animate([{transform:'translate(-50%,-50%) scale(.4)',opacity:.2},{transform:'translate(calc(-50% + '+dx+'px),calc(-50% + '+dy+'px)) scale(1)',opacity:1},{transform:'translate(calc(-50% + '+(dx*1.2)+'px),calc(-50% + '+(dy*1.2)+'px)) scale(.2)',opacity:0}],{duration:420,easing:'ease-out'});
+    an.onfinish=()=>s.remove();
+  }
+  const coin=document.createElement('span');coin.className='coin';coin.textContent='G';coin.style.left=p.x+'px';coin.style.top=p.y+'px';travelLayer.appendChild(coin);
+  setTimeout(()=>{
+    const a=coin.animate([
+      {left:p.x+'px',top:p.y+'px',transform:'translate(-50%,-50%) scale(.8)',opacity:0},
+      {left:p.x+'px',top:(p.y-20)+'px',transform:'translate(-50%,-50%) scale(1.08)',opacity:1,offset:.22},
+      {left:target.x+'px',top:target.y+'px',transform:'translate(-50%,-50%) scale(.7)',opacity:.95}
+    ],{duration:720,easing:'cubic-bezier(.25,.72,.25,1)'});
+    a.onfinish=()=>{coin.remove();money+=amount;renderStatus();bumpMoney();if(done)done()};
+  },260);
+}
+function sellShelfSlot(slot,manual){
+  if(saleBusy||!currentCustomer||!currentCustomer.arrived||shelf[slot]==null)return false;
+  if(shelf[slot]!==currentCustomer.want){
+    if(manual)say('このお客さんが欲しい商品ではありません');
+    return false;
+  }
+  saleBusy=true;
+  const type=shelf[slot],gain=priceFor(type),customerEl=currentCustomer.el;
+  shelf[slot]=null;paintShelfSlot(slot,false);
+  say('商品がお客さんのところへ飛びます');
+  flyRegion(regions.products[type],shelfEls[slot],customerEl,31,560,()=>{
+    say('コインになりました');
+    makeCoinBurst(customerEl,gain,()=>{
+      say('+'+gain+'G');
+      saleBusy=false;
+      leaveCustomer();
+      setTimeout(placeNextFinished,180);
+    });
+  });
+  return true;
+}
+function tryServeCustomer(manual){
+  if(!currentCustomer||!currentCustomer.arrived||saleBusy)return false;
+  const slot=findShelfSlotFor(currentCustomer.want);
+  if(slot<0){if(manual)say('欲しい商品がまだありません');return false}
+  return sellShelfSlot(slot,!!manual);
 }
 
 function renderBook(){
   document.querySelectorAll('.book-tab').forEach(b=>b.classList.toggle('active',b.dataset.tab===activeTab));
   const c=document.getElementById('bookContent');
   if(activeTab==='seeds'){
-    c.innerHTML=herbs.map((h,i)=>`<div class="book-item"><span class="book-mini crop" data-mini-herb="${i}"></span><div><div class="book-name">${h.name}</div><div class="book-desc">${h.unlocked?'庭で育成中':'庭に追加する種'}</div></div><button class="buy" data-buy-seed="${i}" ${h.unlocked||money<h.cost?'disabled':''}>${h.unlocked?'所持':h.cost+'G'}</button></div>`).join('');
+    c.innerHTML=herbs.map((h,i)=>'<div class="book-item"><span class="book-mini crop" data-mini-herb="'+i+'"></span><div><div class="book-name">'+h.name+'</div><div class="book-desc">'+(h.unlocked?'庭で育成中':'庭に追加する種')+'</div></div><button class="buy" data-buy-seed="'+i+'" '+(h.unlocked||money<h.cost?'disabled':'')+'>'+(h.unlocked?'所持':h.cost+'G')+'</button></div>').join('');
     c.querySelectorAll('[data-mini-herb]').forEach(e=>applyCrop(e,regions.herbs[+e.dataset.miniHerb]));
   }else if(activeTab==='tools'){
-    c.innerHTML=['chop','mortar'].map(k=>`<div class="book-item"><span class="book-mini crop" data-mini-tool="${k}"></span><div><div class="book-name">${k==='chop'?'刻み台':'乳鉢'}</div><div class="book-desc">${tools[k]?'設置済み':'調合部屋に追加'}</div></div><button class="buy" data-buy-tool="${k}" ${tools[k]||money<toolCosts[k]?'disabled':''}>${tools[k]?'設置済':toolCosts[k]+'G'}</button></div>`).join('');
+    c.innerHTML=['chop','mortar'].map(k=>'<div class="book-item"><span class="book-mini crop" data-mini-tool="'+k+'"></span><div><div class="book-name">'+(k==='chop'?'刻み台':'乳鉢')+'</div><div class="book-desc">'+(tools[k]?'設置済み':'調合部屋に追加')+'</div></div><button class="buy" data-buy-tool="'+k+'" '+(tools[k]||money<toolCosts[k]?'disabled':'')+'>'+(tools[k]?'設置済':toolCosts[k]+'G')+'</button></div>').join('');
     c.querySelectorAll('[data-mini-tool]').forEach(e=>applyCrop(e,regions.stations[e.dataset.miniTool]));
   }else{
-    c.innerHTML=recipes.map((r,i)=>`<div class="book-item"><span class="book-mini crop" data-mini-product="${Math.min(i,4)}"></span><div><div class="book-name">${r.name}</div><div class="book-desc">${r.unlocked?'覚えています':'商品の価値が上がります'}</div></div><button class="buy" data-buy-recipe="${i}" ${r.unlocked||money<r.cost?'disabled':''}>${r.unlocked?'読了':r.cost+'G'}</button></div>`).join('');
+    c.innerHTML=recipes.map((r,i)=>'<div class="book-item"><span class="book-mini crop" data-mini-product="'+Math.min(i,4)+'"></span><div><div class="book-name">'+r.name+'</div><div class="book-desc">'+(r.unlocked?'覚えています':'商品の価値が上がります')+'</div></div><button class="buy" data-buy-recipe="'+i+'" '+(r.unlocked||money<r.cost?'disabled':'')+'>'+(r.unlocked?'読了':r.cost+'G')+'</button></div>').join('');
     c.querySelectorAll('[data-mini-product]').forEach(e=>applyCrop(e,regions.products[+e.dataset.miniProduct]));
   }
 }
@@ -258,18 +321,20 @@ document.getElementById('bookContent').addEventListener('click',e=>{
 
 function autoTick(){
   tickNo++;minutes+=10;if(minutes>=1440){minutes-=1440;day++}
-  herbs.forEach((h,i)=>{if(!h.unlocked)return;h.grow=Math.min(100,h.grow+16+(i%3)*2);if(h.grow>=100)harvest(i,false)});
+  herbs.forEach((h,i)=>{if(!h.unlocked)return;h.grow=Math.min(100,h.grow+12+(i%3)*2);if(h.grow>=100)harvest(i,false)});
   startJob();if(jobs.length)advanceJob(jobs[0]);
-  if(tickNo%4===0){for(let i=0;i<customerWants.length;i++){if(sellToCustomer(i,false))break}}
+  placeNextFinished();
+  if(!currentCustomer&&!saleBusy&&tickNo>=nextCustomerTick)enterCustomer();
+  if(currentCustomer&&currentCustomer.arrived)tryServeCustomer();
   renderGarden();renderStatus();
 }
 
-regions.customers.forEach((_,i)=>makeCustomer(i));
-regions.products.forEach((_,i)=>makeProduct(i));
+installMasks();
 Object.keys(regions.stations).forEach(makeStation);
 plantCenters.forEach((_,i)=>makePlot(i));
+regions.products.forEach((_,i)=>makeShelfSlot(i));
 placeRegion(document.getElementById('bookButton'),regions.book);
 applyCrop(document.getElementById('bookArt'),regions.book);
-renderCustomers();renderProducts();renderStations();renderGarden();renderStatus();
-setInterval(autoTick,1300);
+renderStations();renderGarden();renderShelf();renderStatus();
+setInterval(autoTick,1150);
 })();
