@@ -246,22 +246,80 @@ function leaveCustomer(reason){
 function findShelfSlotFor(type){return shelf.findIndex(v=>v===type)}
 function priceFor(type){return 14+type*3+recipes.filter(r=>r.unlocked).reduce((s,r)=>s+r.bonus,0)}
 function makeCoinBurst(customerEl,amount,done){
-  const p=point(customerEl),target=point(moneyEl);
-  for(let i=0;i<7;i++){
-    const s=document.createElement('span');s.className='coin-speck';s.style.left=p.x+'px';s.style.top=p.y+'px';travelLayer.appendChild(s);
-    const a=Math.PI*2*i/7,dist=18+(i%3)*5,dx=Math.cos(a)*dist,dy=Math.sin(a)*dist;
-    const an=s.animate([{transform:'translate(-50%,-50%) scale(.4)',opacity:.2},{transform:'translate(calc(-50% + '+dx+'px),calc(-50% + '+dy+'px)) scale(1)',opacity:1},{transform:'translate(calc(-50% + '+(dx*1.2)+'px),calc(-50% + '+(dy*1.2)+'px)) scale(.2)',opacity:0}],{duration:420,easing:'ease-out'});
-    an.onfinish=()=>s.remove();
+  const start=point(customerEl);
+  const target=point(moneyEl);
+  const total=Math.max(1,Math.floor(amount));
+  let landed=0;
+
+  const sparkCount=Math.max(12,Math.min(24,total));
+  for(let i=0;i<sparkCount;i++){
+    const s=document.createElement('span');
+    s.className='coin-speck';
+    s.style.left=start.x+'px';
+    s.style.top=start.y+'px';
+    travelLayer.appendChild(s);
+
+    const angle=(Math.PI*2*i/sparkCount)+((i%2)*.11);
+    const dist=24+(i%5)*9;
+    const dx=Math.cos(angle)*dist;
+    const dy=Math.sin(angle)*dist;
+
+    const a=s.animate([
+      {left:start.x+'px',top:start.y+'px',transform:'translate(-50%,-50%) scale(.15)',opacity:0},
+      {left:(start.x+dx*.65)+'px',top:(start.y+dy*.65)+'px',transform:'translate(-50%,-50%) scale(1.3)',opacity:1,offset:.38},
+      {left:(start.x+dx)+'px',top:(start.y+dy)+'px',transform:'translate(-50%,-50%) scale(.1)',opacity:0}
+    ],{duration:520,easing:'cubic-bezier(.18,.9,.32,1)'});
+    a.onfinish=()=>s.remove();
   }
-  const coin=document.createElement('span');coin.className='coin';coin.textContent='G';coin.style.left=p.x+'px';coin.style.top=p.y+'px';travelLayer.appendChild(coin);
-  setTimeout(()=>{
-    const a=coin.animate([
-      {left:p.x+'px',top:p.y+'px',transform:'translate(-50%,-50%) scale(.8)',opacity:0},
-      {left:p.x+'px',top:(p.y-20)+'px',transform:'translate(-50%,-50%) scale(1.08)',opacity:1,offset:.22},
-      {left:target.x+'px',top:target.y+'px',transform:'translate(-50%,-50%) scale(.7)',opacity:.95}
-    ],{duration:720,easing:'cubic-bezier(.25,.72,.25,1)'});
-    a.onfinish=()=>{coin.remove();money+=amount;renderStatus();bumpMoney();if(done)done()};
-  },260);
+
+  for(let i=0;i<total;i++){
+    const coin=document.createElement('span');
+    coin.className='coin';
+    coin.textContent='G';
+    coin.style.left=start.x+'px';
+    coin.style.top=start.y+'px';
+    coin.style.animation='coinSpin .42s linear infinite';
+    travelLayer.appendChild(coin);
+
+    const spread=((i/Math.max(1,total-1))-.5)*Math.PI*1.15;
+    const burstDist=30+(i%7)*5;
+    const burstX=start.x+Math.sin(spread)*burstDist;
+    const burstY=start.y-Math.cos(spread)*burstDist-(i%4)*3;
+    const curveX=target.x+((i%9)-4)*5;
+    const curveY=target.y-30-(i%5)*5;
+    const delay=i*16;
+
+    const burst=coin.animate([
+      {left:start.x+'px',top:start.y+'px',transform:'translate(-50%,-50%) scale(.2)',opacity:0},
+      {left:burstX+'px',top:burstY+'px',transform:'translate(-50%,-50%) scale(1.18)',opacity:1}
+    ],{
+      delay:delay,
+      duration:210,
+      easing:'cubic-bezier(.18,.9,.32,1.28)',
+      fill:'forwards'
+    });
+
+    burst.onfinish=()=>{
+      const fly=coin.animate([
+        {left:burstX+'px',top:burstY+'px',transform:'translate(-50%,-50%) scale(1.08)',opacity:1},
+        {left:curveX+'px',top:curveY+'px',transform:'translate(-50%,-50%) scale(.95)',opacity:1,offset:.56},
+        {left:target.x+'px',top:target.y+'px',transform:'translate(-50%,-50%) scale(.62)',opacity:.9}
+      ],{
+        duration:610+(i%6)*22,
+        easing:'cubic-bezier(.22,.72,.24,1)',
+        fill:'forwards'
+      });
+
+      fly.onfinish=()=>{
+        coin.remove();
+        money+=1;
+        landed++;
+        renderStatus();
+        bumpMoney();
+        if(landed===total&&done)done();
+      };
+    };
+  }
 }
 function sellShelfSlot(slot,manual){
   if(saleBusy||!currentCustomer||!currentCustomer.arrived||shelf[slot]==null)return false;
