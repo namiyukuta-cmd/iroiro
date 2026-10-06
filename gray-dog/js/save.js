@@ -69,6 +69,8 @@ window.GrayGame = window.GrayGame || {};
     }
 
     const current = GrayGame.exportState();
+    // 「保存」を押した時だけ端末にも明示保存する。
+    GrayGame.saveLocalManual();
     const body = {
       message: `Save Gray dog game ${GrayGame.dayLabel()}`,
       content: utf8ToBase64(JSON.stringify(current, null, 2)),
@@ -87,6 +89,7 @@ window.GrayGame = window.GrayGame || {};
       const data = await githubRequest("GET", url);
       const parsed = JSON.parse(base64ToUtf8(data.content));
       GrayGame.replaceState(parsed);
+      GrayGame.saveLocalManual();
       return { ok:true, path:SAVE_PATH };
     } catch (error) {
       if (error.status === 404) return { ok:false, missing:true };
