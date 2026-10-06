@@ -13,6 +13,7 @@ window.GrayGame = window.GrayGame || {};
     acted: false,
     momentsLeft: 4,
     usedActions: [],
+    actionCounts: { sit:0, snack:0, hand:0, walk:0, staff:0 },
     trust: 0,
     familiarity: 0,
     prep: [],
@@ -21,12 +22,7 @@ window.GrayGame = window.GrayGame || {};
     lastEvent: "intro",
     lastOutcome: "",
     lastResultText: "",
-    lastObservationText: "",
-    playerZone: 0,
-    grayZone: 4,
-    snackZone: null,
-    sessionEase: 0,
-    sessionTurn: 0
+    lastObservationText: ""
   });
 
   const clone = (value) => JSON.parse(JSON.stringify(value));
@@ -38,11 +34,9 @@ window.GrayGame = window.GrayGame || {};
   GrayGame.replaceState = (next) => {
     if (!next || typeof next !== "object" || next.version !== 1) throw new Error("invalid save");
     state = { ...freshState(), ...clone(next) };
+    state.actionCounts = { ...freshState().actionCounts, ...(next.actionCounts || {}) };
+    state.usedActions = Array.isArray(state.usedActions) ? state.usedActions : [];
     if (!Number.isFinite(state.momentsLeft)) state.momentsLeft = state.acted ? 0 : 4;
-    if (!Number.isFinite(state.playerZone)) state.playerZone = 0;
-    if (!Number.isFinite(state.grayZone)) state.grayZone = 4;
-    if (!Number.isFinite(state.sessionEase)) state.sessionEase = 0;
-    if (!Number.isFinite(state.sessionTurn)) state.sessionTurn = 0;
     return state;
   };
 
