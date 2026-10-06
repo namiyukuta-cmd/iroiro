@@ -113,3 +113,21 @@ border-bottom:5px solid rgba(110,92,72,.42)}
 .coin{width:17px;height:17px;box-shadow:0 0 0 2px rgba(255,239,159,.34),0 2px 5px rgba(0,0,0,.22),0 0 8px rgba(244,195,69,.26)}
 .coin-trail{position:absolute;z-index:40;width:4px;height:4px;border-radius:50%;background:#ffe78b;box-shadow:0 0 5px #ffd35e;pointer-events:none}
 .money-arrival-spark{position:absolute;z-index:44;width:8px;height:8px;border-radius:50%;background:#fff3ae;box-shadow:0 0 8px #ffd35e;pointer-events:none}
+
+/* cutout-8: calm visual hierarchy */
+.customer-hit.waiting .customer-art{animation:none!important}
+.customer-hit.waiting .customer-request{animation:requestFloat 1.8s ease-in-out infinite}
+.shelf-slot.filled:not(.pop) .product-art{animation:none!important}
+.station-hit:not(.locked) .station-art{animation:none!important}
+.station-hit.working .station-art{animation:workJolt .42s ease-in-out 2!important}
+.station-hit[data-station="cauldron"]::before{animation:steamRise 2.4s ease-out infinite}
+.station-hit[data-station="cauldron"]::after{animation:steamRise 2.4s 1.2s ease-out infinite}
+.station-hit[data-station="drying"]::after,
+.station-hit[data-station="chop"]::after,
+.station-hit[data-station="mortar"]::after{display:none!important}
+.plot-hit:not(.locked):not(.ready) .plant-art{animation:none!important}
+.plot-hit.ready .plant-art{animation:plantReadySoft 1.8s ease-in-out infinite!important}
+#gardenLayer::before,#gardenLayer::after{display:none!important}
+.coin{width:15px;height:15px;box-shadow:0 1px 3px rgba(0,0,0,.18),0 0 5px rgba(244,195,69,.18)}
+.coin-speck{width:5px;height:5px}
+@keyframes plantReadySoft{0%,100%{transform:translate(-50%,-50%) scale(1)}50%{transform:translate(-50%,-53%) scale(1.06)}}
