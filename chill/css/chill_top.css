@@ -55,3 +55,52 @@ border-bottom:5px solid rgba(110,92,72,.42)}
 .coin{position:absolute;z-index:42;width:16px;height:16px;border-radius:50%;background:#d2a449;border:1px solid #7d6128;box-shadow:inset 0 0 0 2px #efd177,0 1px 2px rgba(0,0,0,.18);display:grid;place-items:center;font-size:8px;font-weight:900;color:#6b4d15;pointer-events:none}
 .coin-speck{position:absolute;z-index:41;width:6px;height:6px;border-radius:50%;background:#d2a449;pointer-events:none}
 @keyframes shelfPop{0%{transform:scale(.25) translateY(-16px);opacity:.1}62%{transform:scale(1.15) translateY(2px);opacity:1}100%{transform:scale(1) translateY(0);opacity:1}}
+
+/* cutout-5: make the whole shop visibly alive */
+.customer-hit.waiting .customer-art{animation:customerBreathe 1.45s ease-in-out infinite}
+.customer-hit.waiting .customer-request{animation:requestFloat 1.15s ease-in-out infinite}
+.shelf-slot.filled:not(.pop) .product-art{animation:shelfIdle 2.3s ease-in-out infinite}
+.shelf-slot:nth-child(2n).filled:not(.pop) .product-art{animation-delay:-.8s}
+.station-hit:not(.locked)[data-station="drying"] .station-art{animation:dryingSway 2.1s ease-in-out infinite;transform-origin:50% 18%}
+.station-hit:not(.locked)[data-station="cauldron"] .station-art{animation:cauldronIdle 1.15s ease-in-out infinite;transform-origin:50% 80%}
+.station-hit:not(.locked)[data-station="chop"] .station-art{animation:chopIdle 1.05s ease-in-out infinite;transform-origin:55% 72%}
+.station-hit:not(.locked)[data-station="mortar"] .station-art{animation:mortarIdle 1.35s ease-in-out infinite;transform-origin:52% 75%}
+.station-hit:not(.locked)[data-station="basket"] .station-art{animation:basketIdle 2.2s ease-in-out infinite;transform-origin:50% 85%}
+.station-hit.working .station-art{animation:workJolt .36s ease-in-out 2!important}
+.station-hit[data-station="cauldron"]::before,
+.station-hit[data-station="cauldron"]::after{content:"";position:absolute;z-index:14;left:48%;top:20%;width:8px;height:13px;border:2px solid rgba(116,106,92,.45);border-left:0;border-bottom:0;border-radius:55%;opacity:.0;pointer-events:none}
+.station-hit[data-station="cauldron"]::before{animation:steamRise 1.7s ease-out infinite}
+.station-hit[data-station="cauldron"]::after{left:58%;top:24%;width:6px;height:10px;animation:steamRise 1.7s .72s ease-out infinite}
+.station-hit[data-station="cauldron"].locked::before,
+.station-hit[data-station="cauldron"].locked::after{display:none}
+.station-hit[data-station="drying"]::after{content:"";position:absolute;left:25%;right:25%;bottom:14%;height:4px;border-radius:50%;background:rgba(99,116,73,.14);filter:blur(1px);animation:dryingShadow 2.1s ease-in-out infinite;pointer-events:none}
+.station-hit[data-station="chop"]::after{content:"";position:absolute;z-index:15;left:59%;top:45%;width:5px;height:3px;border-radius:80% 10% 80% 10%;background:#71825f;border:1px solid rgba(55,63,46,.35);animation:leafHop 1.05s ease-in-out infinite;pointer-events:none}
+.station-hit[data-station="mortar"]::after{content:"";position:absolute;z-index:15;left:44%;top:48%;width:5px;height:5px;border-radius:50%;background:rgba(96,125,72,.75);animation:mortarSpeck 1.35s ease-in-out infinite;pointer-events:none}
+.plot-hit:not(.locked):not(.ready) .plant-art{animation:plantSway 2.4s ease-in-out infinite;animation-delay:var(--delay,0s)}
+.plot-hit.ready .plant-art{animation:plantReadyAlive .9s ease-in-out infinite}
+#gardenLayer::before,#gardenLayer::after{content:"";position:absolute;z-index:12;width:8px;height:5px;border:1px solid rgba(78,91,61,.45);border-radius:80% 10% 80% 10%;background:rgba(119,139,91,.42);pointer-events:none}
+#gardenLayer::before{left:16%;top:69%;animation:gardenDrift 7s linear infinite}
+#gardenLayer::after{left:78%;top:76%;animation:gardenDrift2 8.5s linear infinite}
+.coin{animation:coinSpin .48s linear infinite}
+@keyframes customerBreathe{0%,100%{transform:translateY(0) rotate(0)}50%{transform:translateY(-2px) rotate(.4deg)}}
+@keyframes requestFloat{0%,100%{transform:translateY(0) scale(1)}50%{transform:translateY(-4px) scale(1.06)}}
+@keyframes shelfIdle{0%,100%{transform:translateY(0) rotate(0)}50%{transform:translateY(-1.5px) rotate(.7deg)}}
+@keyframes dryingSway{0%,100%{transform:rotate(-.6deg)}50%{transform:rotate(.8deg)}}
+@keyframes cauldronIdle{0%,100%{transform:translateY(0) scale(1)}50%{transform:translateY(-1.5px) scale(1.008)}}
+@keyframes chopIdle{0%,100%{transform:rotate(-.4deg) translateY(0)}50%{transform:rotate(1.2deg) translateY(-1px)}}
+@keyframes mortarIdle{0%,100%{transform:rotate(-.5deg)}50%{transform:rotate(.9deg)}}
+@keyframes basketIdle{0%,100%{transform:translateY(0) rotate(0)}50%{transform:translateY(-1px) rotate(-.5deg)}}
+@keyframes workJolt{0%,100%{transform:translateY(0) scale(1)}50%{transform:translateY(-4px) scale(1.045)}}
+@keyframes steamRise{0%{transform:translate(0,7px) scale(.75);opacity:0}24%{opacity:.55}100%{transform:translate(6px,-20px) scale(1.25);opacity:0}}
+@keyframes dryingShadow{0%,100%{transform:scaleX(.85);opacity:.25}50%{transform:scaleX(1);opacity:.4}}
+@keyframes leafHop{0%,100%{transform:translate(0,0) rotate(-20deg);opacity:.3}45%{transform:translate(7px,-8px) rotate(32deg);opacity:.85}100%{opacity:.2}}
+@keyframes mortarSpeck{0%,100%{transform:translate(0,0) scale(.7);opacity:.15}50%{transform:translate(10px,-7px) scale(1);opacity:.8}}
+@keyframes plantSway{0%,100%{transform:translate(-50%,-50%) scale(var(--grow,.45)) rotate(-2deg)}50%{transform:translate(-50%,-50%) scale(var(--grow,.45)) rotate(2deg)}}
+@keyframes plantReadyAlive{0%,100%{transform:translate(-50%,-50%) scale(1) rotate(-2deg)}50%{transform:translate(-50%,-54%) scale(1.14) rotate(2deg)}}
+@keyframes gardenDrift{0%{transform:translate(0,0) rotate(0);opacity:0}15%{opacity:.65}50%{transform:translate(125px,-44px) rotate(170deg);opacity:.75}100%{transform:translate(260px,-18px) rotate(330deg);opacity:0}}
+@keyframes gardenDrift2{0%{transform:translate(0,0) rotate(0);opacity:0}15%{opacity:.5}55%{transform:translate(-95px,-55px) rotate(-170deg);opacity:.7}100%{transform:translate(-230px,-15px) rotate(-350deg);opacity:0}}
+@keyframes coinSpin{0%{rotate:0deg}100%{rotate:360deg}}
+@media(prefers-reduced-motion:reduce){
+  .customer-hit.waiting .customer-art,.customer-hit.waiting .customer-request,.shelf-slot.filled .product-art,
+  .station-hit .station-art,.station-hit::before,.station-hit::after,.plot-hit .plant-art,#gardenLayer::before,#gardenLayer::after,.coin{animation:none!important}
+}
