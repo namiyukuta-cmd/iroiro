@@ -1,35 +1,20 @@
-window.HOUSE_DATA = {
-  cols: 10,
-  rows: 12,
-  startMoney: 5000,
-  base: {
-    floor:  { label: "床", price: 50 },
-    wall:   { label: "壁", price: 80 },
-    door:   { label: "扉", price: 120, requires: "wall" },
-    window: { label: "窓", price: 100, requires: "wall" }
+window.ROOM_DATA={
+  cols:10,rows:12,startMoney:70000,
+  furniture:{
+    bed:{name:"ベッド",short:"寝",price:12000,w:2,h:3},
+    desk:{name:"机",short:"机",price:5000,w:2,h:1},
+    table:{name:"ローテーブル",short:"卓",price:4000,w:2,h:2},
+    sofa:{name:"ソファ",short:"ソ",price:9000,w:3,h:1},
+    shelf:{name:"収納棚",short:"棚",price:6000,w:1,h:2},
+    fridge:{name:"冷蔵庫",short:"冷",price:10000,w:1,h:1},
+    washer:{name:"洗濯機",short:"洗",price:8000,w:1,h:1},
+    tv:{name:"テレビ",short:"TV",price:7000,w:2,h:1},
+    rug:{name:"ラグ",short:"ラ",price:3000,w:3,h:2},
+    plant:{name:"観葉植物",short:"植",price:1500,w:1,h:1}
   },
-  furniture: {
-    bed:    { label: "寝", name: "ベッド", price: 300 },
-    table:  { label: "卓", name: "机", price: 180 },
-    sofa:   { label: "ソ", name: "ソファ", price: 350 },
-    stove:  { label: "台", name: "台所", price: 280 },
-    toilet: { label: "厠", name: "トイレ", price: 240 }
-  },
-  goals: [
-    {
-      title: "小さな一軒家",
-      reward: 1200,
-      requirements: { floor: 18, wall: 10, door: 1, window: 2, bed: 1, table: 1 }
-    },
-    {
-      title: "暮らせる家",
-      reward: 1800,
-      requirements: { floor: 28, wall: 14, door: 1, window: 3, bed: 1, table: 1, stove: 1, toilet: 1 }
-    },
-    {
-      title: "くつろげる家",
-      reward: 2500,
-      requirements: { floor: 36, wall: 18, door: 2, window: 4, bed: 1, table: 1, sofa: 1, stove: 1, toilet: 1 }
-    }
+  goals:[
+    {title:"引っ越し初日",reward:8000,requirements:{bed:1,table:1,shelf:1}},
+    {title:"生活できる部屋",reward:12000,requirements:{bed:1,table:1,shelf:1,fridge:1,washer:1}},
+    {title:"ちゃんと自分の部屋",reward:18000,requirements:{bed:1,table:1,shelf:1,fridge:1,washer:1,sofa:1,tv:1,plant:1}}
   ]
 };
