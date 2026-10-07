@@ -3,23 +3,17 @@ import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 
 const resident=document.getElementById('resident');
 const canvas=document.getElementById('resident3dCanvas');
-const skinBtn=document.getElementById('skinBtn');
 const outfitBtn=document.getElementById('outfitBtn');
-const hairBtn=document.getElementById('hairBtn');
 
-const APPEARANCE_KEY='idle-sim-appearance-v1';
-
-const SKINS=[0xd6a77a,0xf0c7a3,0xa56f4f,0x704735];
-const HAIRS=[0x553421,0x211c19,0xb58a4c,0x7c3427];
-const OUTFITS=[
-  {top:0x4f7658,bottom:0x687482,shoes:0x302c28},
-  {top:0x39556f,bottom:0x34383d,shoes:0x211f1d},
-  {top:0x7b454c,bottom:0xb3a285,shoes:0x46382f},
-  {top:0xa2763d,bottom:0x4b514b,shoes:0x2b2926}
+const APPEARANCE_KEY='idle-sim-body-texture-v1';
+const BODY_TEXTURES=[
+  '../textures/female_v1/body_green.png',
+  '../textures/female_v1/body_blue.png'
 ];
 
-let appearance=loadAppearance();
-let materials=null;
+let outfitIndex=Number(localStorage.getItem(APPEARANCE_KEY)||0);
+if(!Number.isInteger(outfitIndex) || outfitIndex<0)outfitIndex=0;
+outfitIndex%=BODY_TEXTURES.length;
 
 if(resident && canvas){
   boot().catch(err=>{
@@ -27,116 +21,136 @@ if(resident && canvas){
   });
 }
 
-function loadAppearance(){
-  try{
-    const saved=JSON.parse(localStorage.getItem(APPEARANCE_KEY)||'{}');
-    return {
-      skin:Number.isInteger(saved.skin)?saved.skin%SKINS.length:0,
-      outfit:Number.isInteger(saved.outfit)?saved.outfit%OUTFITS.length:0,
-      hair:Number.isInteger(saved.hair)?saved.hair%HAIRS.length:0
-    };
-  }catch(_){
-    return {skin:0,outfit:0,hair:0};
-  }
+function clamp01(v){return Math.max(0,Math.min(1,v))}
+
+function classifyPanel(nx,ny,nz){
+  const ax=Math.abs(nx),ay=Math.abs(ny),az=Math.abs(nz);
+  if(az>=ax && az>=ay)return nz>=0?0:1; // FRONT / BACK
+  if(ax>=ay)return nx>=0?3:2;            // RIGHT / LEFT
+  return ny>=0?4:5;                      // TOP / BOTTOM
 }
 
-function saveAppearance(){
-  localStorage.setItem(APPEARANCE_KEY,JSON.stringify(appearance));
-}
+function projectUV(x,y,z,panel,min,max){
+  const dx=max.x-min.x||1;
+  const dy=max.y-min.y||1;
+  const dz=max.z-min.z||1;
+  let a=0.5,b=0.5;
 
-function applyAppearance(){
-  if(!materials)return;
-  const outfit=OUTFITS[appearance.outfit];
-  materials.skin.color.setHex(SKINS[appearance.skin]);
-  materials.top.color.setHex(outfit.top);
-  materials.bottom.color.setHex(outfit.bottom);
-  materials.shoes.color.setHex(outfit.shoes);
-  materials.hair.color.setHex(HAIRS[appearance.hair]);
-}
-
-function bindAppearanceButtons(){
-  skinBtn?.addEventListener('click',()=>{
-    appearance.skin=(appearance.skin+1)%SKINS.length;
-    applyAppearance();saveAppearance();
-  });
-  outfitBtn?.addEventListener('click',()=>{
-    appearance.outfit=(appearance.outfit+1)%OUTFITS.length;
-    applyAppearance();saveAppearance();
-  });
-  hairBtn?.addEventListener('click',()=>{
-    appearance.hair=(appearance.hair+1)%HAIRS.length;
-    applyAppearance();saveAppearance();
-  });
-}
-
-function regionFor(x,y,z){
-  // 0 skin / 1 top / 2 bottom / 3 shoes / 4 hair
-  if(y < -0.82)return 3;
-  if(y < 0.08 && Math.abs(x)<0.23)return 2;
-  if(y>=0.08 && y<0.59 && Math.abs(x)<0.22)return 1;
-  if(y>=0.43 && y<0.60 && Math.abs(x)>=0.22 && Math.abs(x)<0.38)return 1;
-  if(y>0.62 && (z < -0.025 || y>0.86 || (y>0.80 && Math.abs(x)>0.07)))return 4;
-  return 0;
-}
-
-function splitIntoSimMaterials(mesh){
-  const geometry=mesh.geometry;
-  const position=geometry.getAttribute('position');
-  const index=geometry.index;
-  if(!position || !index)return;
-
-  const buckets=[[],[],[],[],[]];
-  for(let i=0;i<index.count;i+=3){
-    const a=index.getX(i),b=index.getX(i+1),c=index.getX(i+2);
-    const x=(position.getX(a)+position.getX(b)+position.getX(c))/3;
-    const y=(position.getY(a)+position.getY(b)+position.getY(c))/3;
-    const z=(position.getZ(a)+position.getZ(b)+position.getZ(c))/3;
-    buckets[regionFor(x,y,z)].push(a,b,c);
+  if(panel===0){
+    a=(x-min.x)/dx;b=(y-min.y)/dy;
+  }else if(panel===1){
+    a=1-(x-min.x)/dx;b=(y-min.y)/dy;
+  }else if(panel===2){
+    a=(z-min.z)/dz;b=(y-min.y)/dy;
+  }else if(panel===3){
+    a=1-(z-min.z)/dz;b=(y-min.y)/dy;
+  }else if(panel===4){
+    a=(x-min.x)/dx;b=(z-min.z)/dz;
+  }else{
+    a=(x-min.x)/dx;b=1-(z-min.z)/dz;
   }
 
-  const IndexArray=position.count>65535?Uint32Array:Uint16Array;
-  const ordered=new IndexArray(index.count);
-  geometry.clearGroups();
+  a=clamp01(a);b=clamp01(b);
 
-  let offset=0;
-  for(let materialIndex=0;materialIndex<buckets.length;materialIndex++){
-    const bucket=buckets[materialIndex];
-    ordered.set(bucket,offset);
-    geometry.addGroup(offset,bucket.length,materialIndex);
-    offset+=bucket.length;
-  }
-  geometry.setIndex(new THREE.BufferAttribute(ordered,1));
-  geometry.computeVertexNormals();
+  const cells=[[0,0],[1,0],[2,0],[0,1],[1,1],[2,1]];
+  const [col,row]=cells[panel];
 
-  materials={
-    skin:new THREE.MeshStandardMaterial({name:'MAT_Skin',roughness:.94,metalness:0,flatShading:true}),
-    top:new THREE.MeshStandardMaterial({name:'MAT_Top',roughness:.9,metalness:0,flatShading:true}),
-    bottom:new THREE.MeshStandardMaterial({name:'MAT_Bottom',roughness:.92,metalness:0,flatShading:true}),
-    shoes:new THREE.MeshStandardMaterial({name:'MAT_Shoes',roughness:.86,metalness:0,flatShading:true}),
-    hair:new THREE.MeshStandardMaterial({name:'MAT_Hair',roughness:.96,metalness:0,flatShading:true})
-  };
+  // Matches female_base_uv_template_v1.png:
+  // 768x512, 3x2 cells, each 256x256 with 10px padding.
+  const px=col*256+10+a*236;
+  const py=row*256+10+(1-b)*236;
 
-  mesh.material=[materials.skin,materials.top,materials.bottom,materials.shoes,materials.hair];
-  mesh.frustumCulled=false;
-  applyAppearance();
+  return [px/768,1-py/512];
 }
 
-function addSimpleFace(model){
-  const head=model.getObjectByName('mixamorig:Head');
-  if(!head)return;
+function unwrapForTexture(mesh){
+  const source=mesh.geometry;
+  const pos=source.getAttribute('position');
+  const idx=source.index;
+  if(!pos || !idx)return;
 
-  const ink=new THREE.MeshBasicMaterial({color:0x2a211d,side:THREE.DoubleSide});
-  const eyeGeo=new THREE.CircleGeometry(0.011,7);
+  const skinIndex=source.getAttribute('skinIndex');
+  const skinWeight=source.getAttribute('skinWeight');
 
-  for(const x of [-0.030,0.030]){
-    const eye=new THREE.Mesh(eyeGeo,ink);
-    eye.position.set(x,0.092,0.108);
-    head.add(eye);
+  const min=new THREE.Vector3(Infinity,Infinity,Infinity);
+  const max=new THREE.Vector3(-Infinity,-Infinity,-Infinity);
+  const p=new THREE.Vector3();
+  for(let i=0;i<pos.count;i++){
+    p.fromBufferAttribute(pos,i);
+    min.min(p);max.max(p);
   }
 
-  const mouth=new THREE.Mesh(new THREE.PlaneGeometry(0.040,0.006),ink);
-  mouth.position.set(0,0.025,0.108);
-  head.add(mouth);
+  const positions=[];
+  const uvs=[];
+  const joints=[];
+  const weights=[];
+  const indices=[];
+  const vertexMap=new Map();
+
+  const a=new THREE.Vector3();
+  const b=new THREE.Vector3();
+  const c=new THREE.Vector3();
+  const ab=new THREE.Vector3();
+  const ac=new THREE.Vector3();
+  const normal=new THREE.Vector3();
+
+  function addVertex(original,panel){
+    const key=original+'|'+panel;
+    const found=vertexMap.get(key);
+    if(found!==undefined)return found;
+
+    p.fromBufferAttribute(pos,original);
+    const next=positions.length/3;
+    positions.push(p.x,p.y,p.z);
+    const uv=projectUV(p.x,p.y,p.z,panel,min,max);
+    uvs.push(uv[0],uv[1]);
+
+    if(skinIndex){
+      joints.push(
+        skinIndex.getX(original),skinIndex.getY(original),
+        skinIndex.getZ(original),skinIndex.getW(original)
+      );
+    }
+    if(skinWeight){
+      weights.push(
+        skinWeight.getX(original),skinWeight.getY(original),
+        skinWeight.getZ(original),skinWeight.getW(original)
+      );
+    }
+
+    vertexMap.set(key,next);
+    return next;
+  }
+
+  for(let i=0;i<idx.count;i+=3){
+    const ia=idx.getX(i),ib=idx.getX(i+1),ic=idx.getX(i+2);
+    a.fromBufferAttribute(pos,ia);
+    b.fromBufferAttribute(pos,ib);
+    c.fromBufferAttribute(pos,ic);
+    ab.subVectors(b,a);
+    ac.subVectors(c,a);
+    normal.crossVectors(ab,ac);
+    const panel=classifyPanel(normal.x,normal.y,normal.z);
+
+    indices.push(
+      addVertex(ia,panel),
+      addVertex(ib,panel),
+      addVertex(ic,panel)
+    );
+  }
+
+  const g=new THREE.BufferGeometry();
+  g.setAttribute('position',new THREE.Float32BufferAttribute(positions,3));
+  g.setAttribute('uv',new THREE.Float32BufferAttribute(uvs,2));
+  if(joints.length)g.setAttribute('skinIndex',new THREE.Uint16BufferAttribute(joints,4));
+  if(weights.length)g.setAttribute('skinWeight',new THREE.Float32BufferAttribute(weights,4));
+  g.setIndex(indices);
+  g.computeVertexNormals();
+  g.computeBoundingBox();
+  g.computeBoundingSphere();
+
+  mesh.geometry=g;
+  source.dispose();
 }
 
 async function boot(){
@@ -177,11 +191,43 @@ async function boot(){
   key.position.set(2.5,4,3);
   scene.add(key);
 
+  const textureLoader=new THREE.TextureLoader();
+  const textures=await Promise.all(BODY_TEXTURES.map(async rel=>{
+    const texture=await textureLoader.loadAsync(new URL(rel,import.meta.url).href);
+    texture.colorSpace=THREE.SRGBColorSpace;
+    texture.minFilter=THREE.LinearFilter;
+    texture.magFilter=THREE.LinearFilter;
+    texture.generateMipmaps=false;
+    return texture;
+  }));
+
   const model=gltf.scene;
+  const meshes=[];
   model.traverse(obj=>{
-    if(obj.isSkinnedMesh || obj.isMesh)splitIntoSimMaterials(obj);
+    if(!(obj.isSkinnedMesh||obj.isMesh))return;
+    unwrapForTexture(obj);
+    obj.frustumCulled=false;
+    obj.material=new THREE.MeshStandardMaterial({
+      map:textures[outfitIndex],
+      roughness:.92,
+      metalness:0
+    });
+    meshes.push(obj);
   });
-  addSimpleFace(model);
+
+  function applyOutfit(){
+    const texture=textures[outfitIndex];
+    for(const mesh of meshes){
+      mesh.material.map=texture;
+      mesh.material.needsUpdate=true;
+    }
+    localStorage.setItem(APPEARANCE_KEY,String(outfitIndex));
+  }
+
+  outfitBtn?.addEventListener('click',()=>{
+    outfitIndex=(outfitIndex+1)%textures.length;
+    applyOutfit();
+  });
 
   const box=new THREE.Box3().setFromObject(model);
   const size=box.getSize(new THREE.Vector3());
@@ -232,18 +278,16 @@ async function boot(){
   const resizeObserver=new ResizeObserver(resize);
   resizeObserver.observe(canvas);
 
-  bindAppearanceButtons();
   resident.classList.add('model-ready');
 
   window.IdleSimResident={
-    setAppearance(next={}){
-      if(Number.isInteger(next.skin))appearance.skin=((next.skin%SKINS.length)+SKINS.length)%SKINS.length;
-      if(Number.isInteger(next.outfit))appearance.outfit=((next.outfit%OUTFITS.length)+OUTFITS.length)%OUTFITS.length;
-      if(Number.isInteger(next.hair))appearance.hair=((next.hair%HAIRS.length)+HAIRS.length)%HAIRS.length;
-      applyAppearance();saveAppearance();
+    getOutfit(){return outfitIndex},
+    setOutfit(index){
+      outfitIndex=((Number(index)||0)%textures.length+textures.length)%textures.length;
+      applyOutfit();
     },
-    getAppearance(){return {...appearance}},
-    materialNames:['MAT_Skin','MAT_Top','MAT_Bottom','MAT_Shoes','MAT_Hair'],
+    textureFiles:[...BODY_TEXTURES],
+    uvTemplate:'../textures/female_v1/uv_template.png',
     animationNames:Object.keys(actions)
   };
 
@@ -261,6 +305,8 @@ async function boot(){
     clearTimeout(walkTimer);
     observer.disconnect();
     resizeObserver.disconnect();
+    for(const t of textures)t.dispose();
+    for(const m of meshes)m.material.dispose();
     renderer.dispose();
   },{once:true});
 }
