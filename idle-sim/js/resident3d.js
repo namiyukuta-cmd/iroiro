@@ -7,8 +7,8 @@ const outfitBtn=document.getElementById('outfitBtn');
 
 const APPEARANCE_KEY='idle-sim-body-texture-v1';
 const BODY_TEXTURES=[
-  '../textures/female_v1/body_green.png',
-  '../textures/female_v1/body_blue.png'
+  '../textures/female_v1/body_green.svg',
+  '../textures/female_v1/body_blue.svg'
 ];
 
 let outfitIndex=Number(localStorage.getItem(APPEARANCE_KEY)||0);
@@ -287,7 +287,7 @@ async function boot(){
       applyOutfit();
     },
     textureFiles:[...BODY_TEXTURES],
-    uvTemplate:'../textures/female_v1/uv_template.png',
+    uvTemplate:'../textures/female_v1/uv_template.svg',
     animationNames:Object.keys(actions)
   };
 

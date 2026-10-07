@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="768" height="512" viewBox="0 0 768 512">
+<rect width="768" height="512" fill="#f5f3ee"/>
+<g fill="none" stroke="#7d786f" stroke-width="2">
+<rect x="1" y="1" width="254" height="254"/><rect x="257" y="1" width="254" height="254"/><rect x="513" y="1" width="254" height="254"/>
+<rect x="1" y="257" width="254" height="254"/><rect x="257" y="257" width="254" height="254"/><rect x="513" y="257" width="254" height="254"/>
+</g>
+<g font-family="Arial,sans-serif" font-size="16" fill="#333">
+<text x="10" y="22">FRONT</text><text x="266" y="22">BACK</text><text x="522" y="22">LEFT</text>
+<text x="10" y="278">RIGHT</text><text x="266" y="278">TOP</text><text x="522" y="278">BOTTOM</text>
+</g>
+<g fill="none" stroke="#aaa49a" stroke-width="1" stroke-dasharray="4 4">
+<rect x="91" y="54" width="75" height="62"/><rect x="86" y="113" width="85" height="117"/><rect x="107" y="10" width="43" height="42"/>
+<rect x="347" y="54" width="75" height="62"/><rect x="342" y="113" width="85" height="117"/><rect x="363" y="10" width="43" height="42"/>
+</g>
+</svg>
