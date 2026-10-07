@@ -3,75 +3,74 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <meta name="theme-color" content="#d6b36a">
+  <meta name="theme-color" content="#c9a65f">
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-  <title>家づくり</title>
-  <link rel="stylesheet" href="style.css?_nc=20261007-1">
+  <title>一人暮らしの部屋</title>
+  <link rel="stylesheet" href="style.css?_nc=20261007-2">
 </head>
 <body>
-  <main class="app">
-    <header class="hud">
-      <div>
-        <p class="eyebrow">HOUSE BUILDER</p>
-        <h1>家づくり</h1>
+<main class="app">
+  <header class="hud">
+    <div>
+      <p class="eyebrow">MY FIRST ROOM</p>
+      <h1>一人暮らしの部屋</h1>
+    </div>
+    <div class="money"><span>残金</span><strong id="money">0</strong><small>円</small></div>
+  </header>
+
+  <section class="goal-card">
+    <div class="goal-head">
+      <div><span class="goal-label">目標</span><strong id="goalTitle">引っ越し初日</strong></div>
+      <button id="completeBtn" type="button">達成</button>
+    </div>
+    <div id="goalProgress" class="goal-progress"></div>
+  </section>
+
+  <section class="room-panel">
+    <div class="room-head">
+      <span>1K / 8畳くらい</span>
+      <span id="statusText">家具を選んで置きます</span>
+    </div>
+    <div id="grid" class="grid" role="grid" aria-label="一人暮らしの部屋"></div>
+  </section>
+
+  <section class="controls">
+    <div class="control-top">
+      <div class="tabs" role="tablist">
+        <button class="tab active" data-tab="furniture" type="button">家具</button>
+        <button class="tab" data-tab="appliance" type="button">家電・雑貨</button>
+        <button class="tab" data-tab="manage" type="button">管理</button>
       </div>
-      <div class="money" aria-label="所持金"><span>所持金</span><strong id="money">0</strong><small>円</small></div>
-    </header>
+      <button id="rotateBtn" class="rotate-btn" type="button">↻ 回転</button>
+    </div>
 
-    <section class="goal-card" aria-labelledby="goalTitle">
-      <div class="goal-head">
-        <div>
-          <span class="goal-label">依頼</span>
-          <strong id="goalTitle">小さな一軒家</strong>
-        </div>
-        <button id="completeBtn" class="complete-btn" type="button">完成判定</button>
-      </div>
-      <div id="goalProgress" class="goal-progress" aria-live="polite"></div>
-    </section>
+    <div id="furnitureTools" class="tool-grid panel">
+      <button class="tool active" data-tool="bed" type="button"><b>ベッド</b><small>2×3 / 12,000円</small></button>
+      <button class="tool" data-tool="desk" type="button"><b>机</b><small>2×1 / 5,000円</small></button>
+      <button class="tool" data-tool="table" type="button"><b>ローテーブル</b><small>2×2 / 4,000円</small></button>
+      <button class="tool" data-tool="sofa" type="button"><b>ソファ</b><small>3×1 / 9,000円</small></button>
+      <button class="tool" data-tool="shelf" type="button"><b>収納棚</b><small>1×2 / 6,000円</small></button>
+    </div>
 
-    <section class="site-panel">
-      <div class="site-head">
-        <span>敷地 10 × 12</span>
-        <span id="statusText">床を置いて家を作ります</span>
-      </div>
-      <div id="grid" class="grid" role="grid" aria-label="建築敷地"></div>
-    </section>
+    <div id="applianceTools" class="tool-grid panel hidden">
+      <button class="tool" data-tool="fridge" type="button"><b>冷蔵庫</b><small>1×1 / 10,000円</small></button>
+      <button class="tool" data-tool="washer" type="button"><b>洗濯機</b><small>1×1 / 8,000円</small></button>
+      <button class="tool" data-tool="tv" type="button"><b>テレビ</b><small>2×1 / 7,000円</small></button>
+      <button class="tool" data-tool="rug" type="button"><b>ラグ</b><small>3×2 / 3,000円</small></button>
+      <button class="tool" data-tool="plant" type="button"><b>観葉植物</b><small>1×1 / 1,500円</small></button>
+    </div>
 
-    <section class="builder">
-      <div class="tool-tabs" role="tablist" aria-label="建築カテゴリ">
-        <button class="tab active" type="button" data-tab="structure">建築</button>
-        <button class="tab" type="button" data-tab="furniture">家具</button>
-        <button class="tab" type="button" data-tab="manage">管理</button>
-      </div>
-
-      <div id="structureTools" class="tool-row tab-panel">
-        <button class="tool active" type="button" data-tool="floor"><b>床</b><small>50円</small></button>
-        <button class="tool" type="button" data-tool="wall"><b>壁</b><small>80円</small></button>
-        <button class="tool" type="button" data-tool="door"><b>扉</b><small>120円</small></button>
-        <button class="tool" type="button" data-tool="window"><b>窓</b><small>100円</small></button>
-        <button class="tool danger" type="button" data-tool="remove"><b>撤去</b><small>半額返金</small></button>
-      </div>
-
-      <div id="furnitureTools" class="tool-row tab-panel hidden">
-        <button class="tool" type="button" data-tool="bed"><b>ベッド</b><small>300円</small></button>
-        <button class="tool" type="button" data-tool="table"><b>机</b><small>180円</small></button>
-        <button class="tool" type="button" data-tool="sofa"><b>ソファ</b><small>350円</small></button>
-        <button class="tool" type="button" data-tool="stove"><b>台所</b><small>280円</small></button>
-        <button class="tool" type="button" data-tool="toilet"><b>トイレ</b><small>240円</small></button>
-      </div>
-
-      <div id="manageTools" class="manage-row tab-panel hidden">
-        <button id="saveBtn" type="button">保存</button>
-        <button id="loadBtn" type="button">読込</button>
-        <button id="resetBtn" type="button" class="danger-btn">更地に戻す</button>
-        <a href="../index.html?_nc=20261007-1">ゲーム一覧</a>
-      </div>
-    </section>
-  </main>
-
-  <div id="toast" class="toast" role="status" aria-live="polite"></div>
-
-  <script src="data.js?_nc=20261007-1"></script>
-  <script src="game.js?_nc=20261007-1"></script>
+    <div id="manageTools" class="manage panel hidden">
+      <button id="removeBtn" type="button">家具を撤去</button>
+      <button id="saveBtn" type="button">保存</button>
+      <button id="loadBtn" type="button">読込</button>
+      <button id="resetBtn" class="danger" type="button">引っ越し直す</button>
+      <a href="../index.html?_nc=20261007-2">一覧へ</a>
+    </div>
+  </section>
+</main>
+<div id="toast" class="toast" role="status" aria-live="polite"></div>
+<script src="data.js?_nc=20261007-2"></script>
+<script src="game.js?_nc=20261007-2"></script>
 </body>
 </html>
