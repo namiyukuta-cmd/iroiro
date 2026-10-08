@@ -58,9 +58,9 @@ window.RoomInventory = (() => {
       if (!drag || drag.pid !== e.pointerId) return;
       if (!drag.moved && Math.hypot(e.clientX - drag.x, e.clientY - drag.y) > 7) {
         drag.moved = true; drag.source.classList.add('drag-source');
-        const r = drag.source.getBoundingClientRect();
+        const cell=api.cellSize(),dim=drag.tool?api.toolDimensions(drag.tool):api.dimensions(api.getItem(drag.id));
         drag.ghost = drag.source.cloneNode(true); drag.ghost.removeAttribute('id');
-        drag.ghost.classList.add('inventory-ghost'); drag.ghost.style.width=r.width+'px';drag.ghost.style.height=r.height+'px';
+        drag.ghost.classList.add('inventory-ghost'); drag.ghost.style.width=dim.w*cell.w+'px';drag.ghost.style.height=dim.h*cell.h+'px';
         document.body.appendChild(drag.ghost);
       }
       if (!drag.moved) return;

@@ -180,3 +180,11 @@ h1{margin:0;font:800 22px/1 Georgia,"Times New Roman",serif}
 .drag-source{opacity:.25}.inventory-ghost{position:fixed!important;z-index:1000!important;pointer-events:none!important;transform:translate(-50%,-50%);margin:0!important;opacity:.9;font-size:32px}
 .drop-over{outline:3px solid #69844c}.drop-invalid{outline:3px solid #b75b47}
 .toast{z-index:1100}
+
+/* Every piece uses the room's actual cell size, including the drag preview. */
+.storage-grid{box-sizing:content-box}
+.inventory-item,.inventory-ghost{box-sizing:border-box}
+.history-btn{flex:0 0 auto;min-height:32px;padding:4px;border:1px solid var(--line);border-radius:6px;background:#fffaf0;color:var(--ink);font-size:10px;font-weight:800}
+.history-btn:disabled{opacity:.35}
+.room-head{gap:4px}
+#statusText{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}

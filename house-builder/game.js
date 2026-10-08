@@ -4,6 +4,17 @@ const D=window.ROOM_DATA,SAVE_KEY="iroiroSoloRoomV1";
 const grid=document.getElementById("grid"),sceneTitle=document.getElementById("sceneTitle"),sceneNav=document.getElementById("sceneNav"),gridToggle=document.getElementById("gridToggle"),moneyEl=document.getElementById("money"),statusEl=document.getElementById("statusText"),progressEl=document.getElementById("goalProgress"),goalTitleEl=document.getElementById("goalTitle"),toast=document.getElementById("toast"),completeBtn=document.getElementById("completeBtn"),rotateBtn=document.getElementById("rotateBtn");
 let money=D.startMoney,selected="bed",rotated=false,goalIndex=0,nextId=1,items={},scene="myroom";let toastTimer=0,selectedId=null,openId=null;
 const inventoryPanel=document.getElementById("inventoryPanel"),storageGrid=document.getElementById("storageGrid"),looseList=document.getElementById("looseList");
+const undoBtn=document.getElementById("undoBtn"),redoBtn=document.getElementById("redoBtn"),undoStack=[],redoStack=[];
+function snapshot(){return JSON.stringify({money,goalIndex,nextId,items,scene})}
+function remember(){undoStack.push(snapshot());if(undoStack.length>100)undoStack.shift();redoStack.length=0}
+function renderHistory(){undoBtn.disabled=!undoStack.length;redoBtn.disabled=!redoStack.length}
+function restoreHistory(from,to,message){
+  if(!from.length)return;
+  interaction.cancel();to.push(snapshot());
+  const state=JSON.parse(from.pop());({money,goalIndex,nextId,items}=state);
+  selectedId=null;openId=null;showScene(state.scene);show(message);
+}
+function cellSize(){return{w:grid.clientWidth/D.cols,h:grid.clientHeight/D.rows}}
 function isPlaced(it){return !it.parent||it.parent==="room"}
 const GRID_PREF_KEY="iroiroSoloRoomGridVisibleV1";
 let gridVisible=false;
@@ -111,7 +122,7 @@ function render(){
     }
     grid.appendChild(piece);
   });
-  renderGoal();renderInventory();
+  renderGoal();renderInventory();renderHistory();
 }
 function canPlace(type,anchor,rot,ignoreId=null,targetScene=scene){
   const fp=footprint(type,anchor,rot);
@@ -122,11 +133,11 @@ function place(anchor){
   const f=D.furniture[selected];if(!f)return;
   if(!canPlace(selected,anchor,rotated)){show("そこには置けません");return}
   if(money<f.price){show("お金が足りません");return}
-  money-=f.price;items[nextId++]={type:selected,anchor,rotated,scene,parent:"room"};statusEl.textContent=f.name+"を置きました";render();
+  remember();money-=f.price;items[nextId++]={type:selected,anchor,rotated,scene,parent:"room"};statusEl.textContent=f.name+"を置きました";render();
 }
 function removeAt(i){
   const occ=occupiedMap(),id=occ[i];if(!id){show("家具がありません");return}
-  const it=items[id],f=D.furniture[it.type];money+=Math.floor(f.price/2);for(const child of Object.values(items))if(child.parent==="container:"+id)child.parent="loose";
+  remember();const it=items[id],f=D.furniture[it.type];money+=Math.floor(f.price/2);for(const child of Object.values(items))if(child.parent==="container:"+id)child.parent="loose";
   if(openId===id)openId=null;if(selectedId===id)selectedId=null;delete items[id];statusEl.textContent=f.name+"を撤去しました";render();
 }
 function selectTool(type){
@@ -144,12 +155,12 @@ function switchTab(tab){
 function completeGoal(){
   if(goalIndex>=D.goals.length)return;const g=D.goals[goalIndex],c=counts();
   if(!Object.entries(g.requirements).every(([k,n])=>(c[k]||0)>=n)){show("まだ必要な家具が足りません");return}
-  money+=g.reward;goalIndex++;show("達成！ +"+yen(g.reward)+"円");render();
+  remember();money+=g.reward;goalIndex++;show("達成！ +"+yen(g.reward)+"円");render();
 }
 function save(){localStorage.setItem(SAVE_KEY,JSON.stringify({version:3,money,goalIndex,nextId,items,scene}));show("保存しました")}
 function load(){
   const raw=localStorage.getItem(SAVE_KEY);if(!raw){show("保存データがありません");return}
-  try{const d=JSON.parse(raw);money=Number.isFinite(d.money)?d.money:D.startMoney;goalIndex=Number.isInteger(d.goalIndex)?Math.max(0,Math.min(d.goalIndex,D.goals.length)):0;nextId=Number.isInteger(d.nextId)?d.nextId:1;items={};
+  try{const d=JSON.parse(raw);remember();money=Number.isFinite(d.money)?d.money:D.startMoney;goalIndex=Number.isInteger(d.goalIndex)?Math.max(0,Math.min(d.goalIndex,D.goals.length)):0;nextId=Number.isInteger(d.nextId)?d.nextId:1;items={};
     Object.entries(d.items||{}).forEach(([id,it])=>{
       const targetScene=D.scenes[it.scene]?it.scene:"myroom";
       if(!D.furniture[it.type]||!Number.isInteger(it.anchor))return;
@@ -168,7 +179,7 @@ function load(){
     showScene(D.scenes[d.scene]?d.scene:"myroom");show("読み込みました");
   }catch{show("保存データを読み込めません")}
 }
-function reset(){if(!confirm("部屋を空の状態に戻しますか？"))return;money=D.startMoney;goalIndex=0;nextId=1;items={};selectedId=null;openId=null;inventoryPanel.hidden=true;showScene("myroom");show("空の部屋に戻しました")}
+function reset(){if(!confirm("部屋を空の状態に戻しますか？"))return;remember();money=D.startMoney;goalIndex=0;nextId=1;items={};selectedId=null;openId=null;inventoryPanel.hidden=true;showScene("myroom");show("空の部屋に戻しました")}
 
 sceneNav.addEventListener("click",e=>{
   const button=e.target.closest(".scene-step");
@@ -181,9 +192,9 @@ document.querySelectorAll(".tab").forEach(b=>b.addEventListener("click",()=>swit
 rotateBtn.addEventListener("click",()=>{
   if(selectedId&&items[selectedId]){
     const it=items[selectedId],fp=footprint(it.type,it.anchor,it.rotated),target=isPlaced(it)?"room":it.parent.startsWith("container:")?it.parent.slice(10):"loose";
-    const old=it.rotated;it.rotated=!old;
+    const before=snapshot(),old=it.rotated;it.rotated=!old;
     if(target!=="loose"&&!fits(selectedId,target,fp.x,fp.y)){it.rotated=old;show("回転する場所が足りません");return}
-    render();show("家具を回転しました");return;
+    undoStack.push(before);redoStack.length=0;render();show("家具を回転しました");return;
   }
   rotated=!rotated;rotateBtn.textContent=rotated?"↻ 回転：横":"↻ 回転：縦";show("向きを変えました")});
 document.getElementById("removeBtn").addEventListener("click",()=>{selected="remove";statusEl.textContent="撤去する家具をタップ";show("撤去モード")});
@@ -203,6 +214,9 @@ function fits(id,target,x,y){
 function moveItem(id,target,x,y){
   const it=items[id];if(!it)return false;
   if(target!=="loose"&&!fits(id,target,x,y)){show("そこには入りません");return false}
+  const parent=target==="room"?"room":target==="loose"?"loose":"container:"+target;
+  if(it.parent===parent&&(target==="loose"||(it.anchor===idx(x,y)&&(target!=="room"||it.scene===scene))))return true;
+  remember();
   it.parent=target==="room"?"room":target==="loose"?"loose":"container:"+target;
   if(target==="room")it.scene=scene;
   if(target!=="loose")it.anchor=idx(x,y);
@@ -218,8 +232,8 @@ function selectItem(id){
 function inventoryCard(id,it,inside){
   const card=document.createElement("div"),f=D.furniture[it.type],dim=dimensions(it);
   card.className="inventory-item "+it.type+(selectedId===id?" selected":"");card.dataset.item=id;card.tabIndex=0;card.setAttribute("role","button");card.setAttribute("aria-label",f.name);
-  const title=document.createElement("span");title.textContent=f.name;card.appendChild(title);card.style.width=dim.w+"em";card.style.height=dim.h+"em";
-  if(inside){const p=xy(it.anchor);card.style.position="absolute";card.style.left=p.x+"em";card.style.top=p.y+"em"}
+  const title=document.createElement("span");title.textContent=f.name;card.appendChild(title);const cell=cellSize();card.style.width=dim.w*cell.w+"px";card.style.height=dim.h*cell.h+"px";
+  if(inside){const p=xy(it.anchor);card.style.position="absolute";card.style.left=p.x*cell.w+"px";card.style.top=p.y*cell.h+"px"}
   return card;
 }
 function renderInventory(){
@@ -234,12 +248,12 @@ function renderInventory(){
   for(const [id,it] of Object.entries(items))if(it.parent==="loose")looseList.appendChild(inventoryCard(id,it,false));
   if(!looseList.childElementCount){const empty=document.createElement("span");empty.className="inventory-empty";empty.textContent="未配置の家具はありません。ここに戻すと保管できます。";looseList.appendChild(empty)}
   storageGrid.hidden=!size;storageGrid.replaceChildren();storageGrid.dataset.target=openId||"";
-  if(size){storageGrid.style.width=size.cols+"em";storageGrid.style.height=size.rows+"em";
+  if(size){const cell=cellSize();storageGrid.style.width=size.cols*cell.w+"px";storageGrid.style.height=size.rows*cell.h+"px";storageGrid.style.backgroundSize=cell.w+"px "+cell.h+"px";
     for(const [id,it] of Object.entries(items))if(it.parent==="container:"+openId)storageGrid.appendChild(inventoryCard(id,it,true));}
 }
 const interaction=window.RoomInventory.attach({
   root:document,room:grid,storage:storageGrid,loose:document.getElementById("loose"),
-  getItem:id=>items[id],toolDimensions:type=>dimensions({type,rotated}),dimensions,spec,fits,move:moveItem,tap:selectItem,
+  cellSize,getItem:id=>items[id],toolDimensions:type=>dimensions({type,rotated}),dimensions,spec,fits,move:moveItem,tap:selectItem,
   currentTarget:()=>openId,notify:show,
   toolDrop:(type,x,y)=>{selectTool(type);place(idx(x,y))}
 });
@@ -247,8 +261,11 @@ document.getElementById("inventoryBtn").addEventListener("click",()=>{inventoryP
 document.getElementById("inventoryClose").addEventListener("click",()=>{interaction.cancel();inventoryPanel.hidden=true;openId=null});
 document.getElementById("inventoryBack").addEventListener("click",()=>{openId=null;renderInventory()});
 document.getElementById("toLooseBtn").addEventListener("click",()=>moveItem(selectedId,"loose"));
-document.getElementById("buyLooseBtn").addEventListener("click",()=>{const f=D.furniture[selected];if(!f)return;if(money<f.price){show("お金が足りません");return}money-=f.price;const id=String(nextId++);items[id]={type:selected,anchor:0,rotated,scene,parent:"loose"};selectedId=id;show(f.name+"を購入しました");render()});
+document.getElementById("buyLooseBtn").addEventListener("click",()=>{const f=D.furniture[selected];if(!f)return;if(money<f.price){show("お金が足りません");return}remember();money-=f.price;const id=String(nextId++);items[id]={type:selected,anchor:0,rotated,scene,parent:"loose"};selectedId=id;show(f.name+"を購入しました");render()});
 
+undoBtn.addEventListener("click",()=>restoreHistory(undoStack,redoStack,"元に戻しました"));
+redoBtn.addEventListener("click",()=>restoreHistory(redoStack,undoStack,"やり直しました"));
+new ResizeObserver(()=>renderInventory()).observe(grid);
 setGridVisible(gridVisible);
 showScene("myroom");
 })();
