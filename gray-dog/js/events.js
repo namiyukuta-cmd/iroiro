@@ -206,7 +206,7 @@ window.GrayGame = window.GrayGame || {};
 
   GrayGame.canTrial = () => {
     const s = GrayGame.getState();
-    return s.visit >= 6 && s.prep.length >= 4 && s.actionCounts.hand >= 1 && s.actionCounts.walk >= 1;
+    return s.visit >= 6 && s.prep.length >= 4;
   };
 
   GrayGame.startTrial = () => {
