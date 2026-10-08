@@ -119,3 +119,40 @@ h1{margin:0;font:800 22px/1 Georgia,"Times New Roman",serif}
 .room-piece.rug{background:#d4b6a7;}
 .room-piece.plant{background:#b5c6a5;}
 .room-piece img{display:block;width:100%;height:100%;object-fit:contain;}
+
+/* ひと画面＝横から見た1区画。マス目は編集用の透明レイヤー。 */
+.room-panel{justify-content:center;}
+.room-head{font-size:11px;}
+.room-type{font-size:12px;font-weight:900;color:var(--ink);}
+.scene-nav{width:min(100%,350px);display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:4px;margin-top:8px;}
+.scene-step{min-width:0;min-height:44px;padding:5px 2px;border:1px solid var(--line);background:#fffaf0;font-weight:800;font-size:11px;line-height:1.2;white-space:normal;}
+.scene-step[hidden]{display:none;}
+.scene-backdrop{position:absolute;inset:0;z-index:0;pointer-events:none;overflow:hidden;
+  background:linear-gradient(to bottom,#f8f2e4 0%,#fdf9ee 79%,#b58a63 79%,#b58a63 100%);}
+.scene-backdrop:after{content:"";position:absolute;top:78%;left:0;right:0;border-top:3px solid #716054;}
+.grid .cell,.grid .cell.wall,.grid .cell.door,.grid .cell.window,.grid .cell.occupied{
+  position:relative;z-index:1;background:transparent;box-shadow:none;}
+.grid.show-grid .cell{border-right:1px solid rgba(52,42,29,.18);border-bottom:1px solid rgba(52,42,29,.18);}
+.grid .room-piece{z-index:3;}
+.scene-window{position:absolute;top:14%;left:23%;width:54%;height:36%;border:9px solid #8a7a67;background:#b2d1d3;box-shadow:inset 0 0 0 3px #e9e7db;}
+.scene-window:before{content:"";position:absolute;top:0;bottom:0;left:50%;width:5px;background:#e9e7db;}
+.scene-window-inner{position:absolute;inset:5%;background:linear-gradient(#d2e8e7,#dae6d4);}
+.scene-window-inner:after{content:"";position:absolute;top:0;bottom:0;left:50%;width:5px;background:#e8e5dd;}
+.scene-backdrop--opposite{background:linear-gradient(to bottom,#efeadf 0%,#f5ede0 79%,#ae8463 79%,#ae8463 100%);}
+.scene-wallpanel{position:absolute;inset:6% 5% 24%;border:2px solid #e0d4bc;}
+.scene-backdrop--balcony{background:linear-gradient(#bdd8db 0%,#ebebde 60%,#c5ac91 61%,#c5ac91 100%);}
+.balcony-sky{position:absolute;inset:0 0 35%;background:linear-gradient(#bdd8db,#edf1e8);}
+.balcony-rail{position:absolute;inset:48% 6% 19%;border:5px solid #726d65;
+ background:repeating-linear-gradient(to right,transparent 0%,transparent 18%,#726d65 18%,#726d65 20%);}
+.kitchen-wall{position:absolute;top:12%;left:8%;right:8%;height:18%;border:3px solid #77716a;background:#ddd6c8;}
+.kitchen-counter{position:absolute;top:54%;left:9%;width:82%;height:24%;border:4px solid #777067;background:#c6b8a1;display:flex;justify-content:space-around;align-items:center;}
+.kitchen-sink{width:42%;height:70%;border:5px solid #a7a8a4;border-radius:8px;background:#f0efea;}
+.kitchen-burners{width:35%;height:75%;border:4px solid #777a78;background:#515151;display:flex;align-items:center;justify-content:space-evenly;}
+.kitchen-burners i{width:32%;aspect-ratio:1;border-radius:100%;border:3px solid #abb0b1;}
+.scene-backdrop--bathroom{background:linear-gradient(#f2f5f3 0%,#d6e3e0 79%,#bcccca 79%);}
+.bath-tile{position:absolute;inset:0;background:repeating-linear-gradient(0deg,transparent 0px,transparent 29px,#c3d6d0 30px),repeating-linear-gradient(90deg,transparent 0px,transparent 29px,#c3d6d0 30px);opacity:.38;}
+.bath-tub{position:absolute;bottom:18%;left:7%;width:55%;height:35%;border:8px solid #f7f7f5;border-radius:12px;background:#d9eced;box-shadow:inset 0 0 0 3px #aac0c0;}
+.bath-toilet{position:absolute;bottom:18%;right:9%;width:23%;height:24%;border:5px solid #aaaead;border-radius:30% 30% 44% 44%;background:#fff;}
+.entry-door{position:absolute;left:25%;top:11%;width:50%;height:68%;border:8px solid #7b6350;background:linear-gradient(90deg,#9f866e,#a78f78);box-shadow:inset 0 0 0 5px #876e59;}
+.entry-knob{position:absolute;right:7%;top:53%;width:12px;height:12px;border-radius:50%;background:#e0c99d;}
+@media(max-height:740px){.scene-step{min-height:36px}.scene-nav{margin-top:5px}}
