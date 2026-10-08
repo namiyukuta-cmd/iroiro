@@ -85,8 +85,14 @@ window.GrayGame = window.GrayGame || {};
       if (n === 3) return useFacilityAction(
         id,
         "今日も同じ場所に座ります。",
-        "グレイは前より近い位置で、そのまま横になりました。",
-        ["near_rest","初めて、少し近い場所で休んだ"]
+        "グレイは前より近い位置へ自分から移動し、そのまま横になりました。",
+        ["near_rest","初めて、自分から近くへ来て休んだ"]
+      );
+      if (n === 4) return useFacilityAction(
+        id,
+        "いつものように座ります。",
+        "少しして、グレイが自分からこちらのそばまで来て伏せました。離れようとはしません。",
+        ["beside_rest","初めて、自分からそばまで来て伏せた"]
       );
       return useFacilityAction(
         id,
@@ -128,6 +134,12 @@ window.GrayGame = window.GrayGame || {};
         "今日は自分から鼻先を寄せ、前より長く匂いを確かめました。",
         ["nose_touch","初めて、鼻先が手に触れた"]
       );
+      if (n === 3) return useFacilityAction(
+        id,
+        "手を低く出して待ちます。",
+        "グレイは迷わず近づき、鼻先を触れたあと、そのまま手のそばに残りました。",
+        ["hand_stay","初めて、手に触れたあともそばに残った"]
+      );
       return useFacilityAction(
         id,
         "手を出すと、グレイは少し迷ってから近づきます。",
@@ -145,8 +157,14 @@ window.GrayGame = window.GrayGame || {};
       if (n === 2) return useFacilityAction(
         id,
         "今日も短い散歩へ出ます。",
-        "帰り道で一度だけ横に並び、そのまま数歩歩きました。",
-        ["walk_side","初めて、横に並んで歩いた"]
+        "帰り道で自分から横に並び、その位置のまま施設まで歩きました。",
+        ["walk_side","初めて、自分から横に並んで歩いた"]
+      );
+      if (n === 3) return useFacilityAction(
+        id,
+        "リードを手に取ります。",
+        "グレイは呼ばれる前に立ち上がり、こちらのそばまで来て散歩を待ちました。",
+        ["walk_wait","初めて、自分からそばへ来て散歩を待った"]
       );
       return useFacilityAction(
         id,
