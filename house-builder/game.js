@@ -14,7 +14,26 @@ function restoreHistory(from,to,message){
   const state=JSON.parse(from.pop());({money,goalIndex,nextId,items}=state);
   selectedId=null;openId=null;showScene(state.scene);show(message);
 }
-function cellSize(){return{w:grid.clientWidth/D.cols,h:grid.clientHeight/D.rows}}
+function cellSize(){const r=grid.getBoundingClientRect();return{w:(r.width-grid.clientLeft*2)/D.cols,h:(r.height-grid.clientTop*2)/D.rows}}
+function renderTools(){
+ const cell=cellSize();
+ document.querySelectorAll('.tool[data-tool]').forEach(button=>{
+  const type=button.dataset.tool,f=D.furniture[type],dim=dimensions({type,rotated});
+  const shape=document.createElement('span');shape.className='tool-piece '+type;shape.textContent=f.short;
+  shape.style.width=dim.w*cell.w+'px';shape.style.height=dim.h*cell.h+'px';
+  const stage=document.createElement('span');stage.className='tool-stage';stage.style.height=3*Math.max(cell.w,cell.h)+'px';stage.appendChild(shape);
+  const name=document.createElement('b');name.textContent=f.name;
+  const info=document.createElement('small');info.textContent=dim.w+'×'+dim.h+' / '+yen(f.price)+'円';
+  button.replaceChildren(stage,name,info);button.setAttribute('aria-label',f.name+' '+dim.w+'×'+dim.h+'マス '+yen(f.price)+'円');
+ });
+}
+function markBlocked(ignoreId=null){
+ grid.querySelectorAll('.cell').forEach(cell=>{
+  const blocked=cell.classList.contains('fixed')||!!(cell.dataset.itemId&&cell.dataset.itemId!==ignoreId);
+  cell.classList.toggle('blocked-cell',blocked);
+  cell.setAttribute('aria-label',blocked?'配置できないマス':'配置できるマス');
+ });
+}
 function isPlaced(it){return !it.parent||it.parent==="room"}
 const GRID_PREF_KEY="iroiroSoloRoomGridVisibleV1";
 let gridVisible=false;
@@ -122,7 +141,7 @@ function render(){
     }
     grid.appendChild(piece);
   });
-  renderGoal();renderInventory();renderHistory();
+  renderGoal();renderInventory();renderHistory();renderTools();markBlocked();
 }
 function canPlace(type,anchor,rot,ignoreId=null,targetScene=scene){
   const fp=footprint(type,anchor,rot);
@@ -196,7 +215,7 @@ rotateBtn.addEventListener("click",()=>{
     if(target!=="loose"&&!fits(selectedId,target,fp.x,fp.y)){it.rotated=old;show("回転する場所が足りません");return}
     undoStack.push(before);redoStack.length=0;render();show("家具を回転しました");return;
   }
-  rotated=!rotated;rotateBtn.textContent=rotated?"↻ 回転：横":"↻ 回転：縦";show("向きを変えました")});
+  rotated=!rotated;rotateBtn.textContent=rotated?"↻ 回転：横":"↻ 回転：縦";renderTools();show("向きを変えました")});
 document.getElementById("removeBtn").addEventListener("click",()=>{selected="remove";statusEl.textContent="撤去する家具をタップ";show("撤去モード")});
 document.getElementById("saveBtn").addEventListener("click",save);document.getElementById("loadBtn").addEventListener("click",load);document.getElementById("resetBtn").addEventListener("click",reset);completeBtn.addEventListener("click",completeGoal);
 
@@ -253,7 +272,7 @@ function renderInventory(){
 }
 const interaction=window.RoomInventory.attach({
   root:document,room:grid,storage:storageGrid,loose:document.getElementById("loose"),
-  cellSize,getItem:id=>items[id],toolDimensions:type=>dimensions({type,rotated}),dimensions,spec,fits,move:moveItem,tap:selectItem,
+  markBlocked,cellSize,toolFits:(type,target,x,y)=>target==="room"&&canPlace(type,idx(x,y),rotated),getItem:id=>items[id],toolDimensions:type=>dimensions({type,rotated}),dimensions,spec,fits,move:moveItem,tap:selectItem,
   currentTarget:()=>openId,notify:show,
   toolDrop:(type,x,y)=>{selectTool(type);place(idx(x,y))}
 });
@@ -265,7 +284,7 @@ document.getElementById("buyLooseBtn").addEventListener("click",()=>{const f=D.f
 
 undoBtn.addEventListener("click",()=>restoreHistory(undoStack,redoStack,"元に戻しました"));
 redoBtn.addEventListener("click",()=>restoreHistory(redoStack,undoStack,"やり直しました"));
-new ResizeObserver(()=>renderInventory()).observe(grid);
+new ResizeObserver(()=>{renderInventory();renderTools()}).observe(grid);
 setGridVisible(gridVisible);
 showScene("myroom");
 })();

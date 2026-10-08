@@ -90,7 +90,7 @@ h1{margin:0;font:800 22px/1 Georgia,"Times New Roman",serif}
 }
 .cell.anchor::after{content:none;}
 /* 家具は複数の色付きマスではなく、画用紙上の1枚のピースとして描画 */
-.room-piece{
+.room-piece,.tool-piece{
   position:absolute;
   z-index:2;
   display:flex;
@@ -108,16 +108,16 @@ h1{margin:0;font:800 22px/1 Georgia,"Times New Roman",serif}
   text-align:center;
   white-space:nowrap;
 }
-.room-piece.bed{background:#d9e1dd;}
-.room-piece.desk{background:#d8b99a;}
-.room-piece.table{background:#e4c59e;}
-.room-piece.sofa{background:#abc1b0;}
-.room-piece.shelf{background:#cab197;}
-.room-piece.fridge{background:#e0e3e1;}
-.room-piece.washer{background:#d7dde3;}
-.room-piece.tv{background:#55565b;color:#fff;}
-.room-piece.rug{background:#d4b6a7;}
-.room-piece.plant{background:#b5c6a5;}
+.room-piece.bed,.tool-piece.bed{background:#d9e1dd;}
+.room-piece.desk,.tool-piece.desk{background:#d8b99a;}
+.room-piece.table,.tool-piece.table{background:#e4c59e;}
+.room-piece.sofa,.tool-piece.sofa{background:#abc1b0;}
+.room-piece.shelf,.tool-piece.shelf{background:#cab197;}
+.room-piece.fridge,.tool-piece.fridge{background:#e0e3e1;}
+.room-piece.washer,.tool-piece.washer{background:#d7dde3;}
+.room-piece.tv,.tool-piece.tv{background:#55565b;color:#fff;}
+.room-piece.rug,.tool-piece.rug{background:#d4b6a7;}
+.room-piece.plant,.tool-piece.plant{background:#b5c6a5;}
 .room-piece img{display:block;width:100%;height:100%;object-fit:contain;}
 
 /* ひと画面＝横から見た1区画。マス目は編集用の透明レイヤー。 */
@@ -188,3 +188,20 @@ h1{margin:0;font:800 22px/1 Georgia,"Times New Roman",serif}
 .history-btn:disabled{opacity:.35}
 .room-head{gap:4px}
 #statusText{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+
+/* The catalogue silhouette, carried piece and placed furniture share one scale. */
+.grid{width:min(100%,350px,calc((100dvh - 335px)*.666667));max-height:none}
+.tool-grid{display:flex;gap:8px;overflow-x:auto;align-items:flex-end;padding:4px 3px 6px;scrollbar-width:thin}
+.tool{flex:0 0 auto;min-width:60px;min-height:0;padding:0 3px;border:0;background:transparent;box-shadow:none}
+.tool.active{background:transparent;box-shadow:none}
+.tool-stage{display:flex;align-items:flex-end;justify-content:center;margin-bottom:6px}
+.tool-piece{position:relative;flex:0 0 auto;box-sizing:border-box;pointer-events:none}
+.tool.active .tool-piece{outline:3px solid #b88539;outline-offset:1px}
+.tool b{font-size:10px}.tool small{font-size:8px;white-space:nowrap}
+.grid .cell.blocked-cell{background:rgba(190,43,43,.12);border:1px solid rgba(186,39,39,.5)}
+.grid .cell.fixed{background:repeating-linear-gradient(135deg,rgba(190,43,43,.13) 0px,rgba(190,43,43,.13) 4px,transparent 4px,transparent 8px);border:1px solid rgba(186,39,39,.55)}
+.placement-preview{position:absolute;z-index:5;pointer-events:none;border:2px solid #338447;background:rgba(64,168,81,.2);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;color:#245b30}
+.placement-preview.invalid{border-color:#b62b2b;background:rgba(190,43,43,.25);color:#902222}
+.inventory-ghost.tool-piece{position:fixed;display:flex}
+
+.controls{min-width:0}

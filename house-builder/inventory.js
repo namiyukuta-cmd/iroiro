@@ -8,9 +8,9 @@ window.RoomInventory = (() => {
       const r = el.getBoundingClientRect(), border = el.clientLeft;
       const target = el === api.room ? 'room' : api.currentTarget();
       const size = api.spec(target);
-      return { target, size, left: r.left + border, top: r.top + border, cw: el.clientWidth / size.cols, ch: el.clientHeight / size.rows };
+      return { target, size, left: r.left + border, top: r.top + border, cw: (r.width-border*2) / size.cols, ch: (r.height-border*2) / size.rows };
     }
-    // Original bestDrop: snap at the pointer's center, then try adjacent free cells.
+    // Snap at the pointer center; the shown footprint is the exact drop position.
     function bestDrop(el, x, y) {
       const m = metrics(el), item = drag.tool ? null : api.getItem(drag.id);
       const dim = item ? api.dimensions(item) : (() => { return api.toolDimensions(drag.tool); })();
@@ -18,15 +18,9 @@ window.RoomInventory = (() => {
       if (maxX < 0 || maxY < 0) return null;
       const xx = Math.max(0, Math.min(maxX, Math.round((x - m.left) / m.cw - dim.w / 2)));
       const yy = Math.max(0, Math.min(maxY, Math.round((y - m.top) / m.ch - dim.h / 2)));
-      const fits = (a, b) => drag.tool ? m.target === 'room' : api.fits(drag.id, m.target, a, b);
+      const fits = (a, b) => drag.tool ? api.toolFits(drag.tool,m.target,a,b) : api.fits(drag.id, m.target, a, b);
       if (fits(xx, yy)) return { target: m.target, x: xx, y: yy };
-      const candidates = [];
-      for (let b = Math.max(0, yy - 1); b <= Math.min(maxY, yy + 1); b++) {
-        for (let a = Math.max(0, xx - 1); a <= Math.min(maxX, xx + 1); a++) {
-          if (fits(a, b)) candidates.push({ target: m.target, x: a, y: b, d: (m.left + (a + dim.w / 2) * m.cw - x) ** 2 + (m.top + (b + dim.h / 2) * m.ch - y) ** 2 });
-        }
-      }
-      return candidates.sort((a, b) => a.d - b.d)[0] || null;
+      return null;
     }
     function targetAt(x, y) {
       const el = document.elementFromPoint(x, y);
@@ -39,12 +33,21 @@ window.RoomInventory = (() => {
       });
     }
     function clearMarks() { document.querySelectorAll('.drop-over,.drop-invalid').forEach(e => e.classList.remove('drop-over','drop-invalid')); }
+    function preview(target,x,y) {
+      document.querySelector('.placement-preview')?.remove();
+      if(!target||target===api.loose)return;
+      const m=metrics(target),dim=drag.tool?api.toolDimensions(drag.tool):api.dimensions(api.getItem(drag.id));
+      const pos=bestDrop(target,x,y),a=pos?.x??Math.max(0,Math.round((x-m.left)/m.cw-dim.w/2)),b=pos?.y??Math.max(0,Math.round((y-m.top)/m.ch-dim.h/2));
+      const box=document.createElement('div');box.className='placement-preview '+(pos?'valid':'invalid');
+      box.style.left=a*m.cw+'px';box.style.top=b*m.ch+'px';box.style.width=dim.w*m.cw+'px';box.style.height=dim.h*m.ch+'px';
+      box.textContent=pos?'配置可':'配置不可';target.appendChild(box);
+    }
     function cancel() {
       if (!drag) return;
       drag.source.classList.remove('drag-source'); drag.ghost?.remove(); drag = null;
       window.removeEventListener('pointermove', move);
       window.removeEventListener('pointerup', up);
-      window.removeEventListener('pointercancel', aborted); clearMarks();
+      window.removeEventListener('pointercancel', aborted); clearMarks();document.querySelector('.placement-preview')?.remove();api.markBlocked();
     }
     function down(e) {
       const source = e.target.closest('[data-item],.tool[data-tool]');
@@ -59,13 +62,13 @@ window.RoomInventory = (() => {
       if (!drag.moved && Math.hypot(e.clientX - drag.x, e.clientY - drag.y) > 7) {
         drag.moved = true; drag.source.classList.add('drag-source');
         const cell=api.cellSize(),dim=drag.tool?api.toolDimensions(drag.tool):api.dimensions(api.getItem(drag.id));
-        drag.ghost = drag.source.cloneNode(true); drag.ghost.removeAttribute('id');
+        api.markBlocked(drag.id||null);drag.ghost = (drag.source.querySelector('.tool-piece')||drag.source).cloneNode(true); drag.ghost.removeAttribute('id');
         drag.ghost.classList.add('inventory-ghost'); drag.ghost.style.width=dim.w*cell.w+'px';drag.ghost.style.height=dim.h*cell.h+'px';
         document.body.appendChild(drag.ghost);
       }
       if (!drag.moved) return;
       e.preventDefault();drag.ghost.style.left=e.clientX+'px';drag.ghost.style.top=e.clientY+'px';
-      clearMarks(); const target = targetAt(e.clientX,e.clientY);
+      clearMarks(); const target = targetAt(e.clientX,e.clientY);preview(target,e.clientX,e.clientY);
       if (target) target.classList.add(target === api.loose || bestDrop(target,e.clientX,e.clientY) ? 'drop-over' : 'drop-invalid');
     }
     function up(e) {
