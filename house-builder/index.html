@@ -6,7 +6,7 @@
   <meta name="theme-color" content="#c9a65f">
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <title>一人暮らしの部屋</title>
-  <link rel="stylesheet" href="style.css?_nc=20261008-paper-1">
+  <link rel="stylesheet" href="style.css?_nc=20261008-scenes-1">
 </head>
 <body>
 <main class="app">
@@ -28,11 +28,17 @@
 
   <section class="room-panel">
     <div class="room-head">
-      <span class="room-type">1K / 8畳くらい</span>
+      <span id="sceneTitle" class="room-type">マイルーム</span>
       <span id="statusText">家具を選んで置きます</span>
       <button id="gridToggle" class="grid-toggle" type="button" aria-pressed="false">マス目：OFF</button>
     </div>
-    <div id="grid" class="grid" role="grid" aria-label="一人暮らしの部屋"></div>
+    <div id="grid" class="grid" role="grid" aria-label="マイルーム"></div>
+    <nav id="sceneNav" class="scene-nav" aria-label="部屋の移動">
+      <button type="button" data-direction="left" class="scene-step" hidden></button>
+      <button type="button" data-direction="up" class="scene-step" hidden></button>
+      <button type="button" data-direction="down" class="scene-step" hidden></button>
+      <button type="button" data-direction="right" class="scene-step" hidden></button>
+    </nav>
   </section>
 
   <section class="controls">
@@ -66,12 +72,12 @@
       <button id="saveBtn" type="button">保存</button>
       <button id="loadBtn" type="button">読込</button>
       <button id="resetBtn" class="danger" type="button">引っ越し直す</button>
-      <a href="../index.html?_nc=20261008-paper-1">一覧へ</a>
+      <a href="../index.html?_nc=20261008-scenes-1">一覧へ</a>
     </div>
   </section>
 </main>
 <div id="toast" class="toast" role="status" aria-live="polite"></div>
-<script src="data.js?_nc=20261008-paper-1"></script>
-<script src="game.js?_nc=20261008-paper-1"></script>
+<script src="data.js?_nc=20261008-scenes-1"></script>
+<script src="game.js?_nc=20261008-scenes-1"></script>
 </body>
 </html>
