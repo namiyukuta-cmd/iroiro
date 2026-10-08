@@ -156,3 +156,27 @@ h1{margin:0;font:800 22px/1 Georgia,"Times New Roman",serif}
 .entry-door{position:absolute;left:25%;top:11%;width:50%;height:68%;border:8px solid #7b6350;background:linear-gradient(90deg,#9f866e,#a78f78);box-shadow:inset 0 0 0 5px #876e59;}
 .entry-knob{position:absolute;right:7%;top:53%;width:12px;height:12px;border-radius:50%;background:#e0c99d;}
 @media(max-height:740px){.scene-step{min-height:36px}.scene-nav{margin-top:5px}}
+
+
+/* Drifter-style movable pieces and a drawer that leaves the room reachable. */
+[hidden]{display:none!important}
+.control-top{grid-template-columns:minmax(0,1fr) auto auto}
+.grid{touch-action:none;max-height:100%;width:min(100%,350px,calc((100dvh - 330px)*.833333));max-width:100%;height:auto;flex:0 0 auto}
+.room-panel{justify-content:flex-start}.room-head,.scene-nav{flex:0 0 auto}
+.room-piece{pointer-events:auto;touch-action:none;user-select:none;-webkit-user-select:none;cursor:grab}
+.room-piece.selected,.inventory-item.selected{outline:3px solid #b88539;outline-offset:-3px}
+.tool{touch-action:none}
+.inventory-panel{position:fixed;z-index:40;left:50%;bottom:max(8px,env(safe-area-inset-bottom));transform:translateX(-50%);width:min(458px,calc(100% - 16px));max-height:39dvh;overflow:auto;border:2px solid #5c4939;border-radius:12px;background:#fff9ef;box-shadow:0 8px 35px #0005;padding:9px}
+.inventory-head{display:flex;align-items:center;gap:6px;font-size:13px}.inventory-head strong{flex:1}
+.inventory-head button,.inventory-actions button{min-height:34px;border:1px solid #8c7863;border-radius:7px;background:#f1e4ce;color:var(--ink);font-size:11px;font-weight:800;padding:5px 8px}
+.inventory-hint{font-size:10px;line-height:1.4;margin:5px 0;color:#756958}
+.loose{padding:6px;border:2px dashed #b7a188;border-radius:8px;background:#f0e8db;min-height:80px}
+.loose-list{display:flex;flex-wrap:wrap;gap:5px;align-items:flex-start;font-size:clamp(24px,7vw,32px)}
+.inventory-item{position:relative;flex:0 0 auto;display:flex;align-items:center;justify-content:center;text-align:center;border:1px solid #665241;border-radius:5px;background:#d9c5a8;touch-action:none;user-select:none;-webkit-user-select:none;cursor:grab;overflow:hidden}
+.inventory-item span{font-size:11px;font-weight:800;line-height:1.15;padding:2px;pointer-events:none}
+.inventory-empty{font-size:11px;line-height:1.5;color:#786a59}
+.storage-grid{position:relative;font-size:clamp(24px,7vw,32px);border:2px solid #776554;border-radius:5px;background-color:#f0e8db;background-image:linear-gradient(to right,#c8b7a4 1px,transparent 1px),linear-gradient(to bottom,#c8b7a4 1px,transparent 1px);background-size:1em 1em;touch-action:none;margin:7px 0}
+.inventory-actions{display:flex;gap:5px;margin-top:6px}.inventory-actions button{flex:1}.inventory-actions button:disabled{opacity:.45}
+.drag-source{opacity:.25}.inventory-ghost{position:fixed!important;z-index:1000!important;pointer-events:none!important;transform:translate(-50%,-50%);margin:0!important;opacity:.9;font-size:32px}
+.drop-over{outline:3px solid #69844c}.drop-invalid{outline:3px solid #b75b47}
+.toast{z-index:1100}

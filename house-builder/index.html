@@ -6,7 +6,7 @@
   <meta name="theme-color" content="#c9a65f">
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <title>一人暮らしの部屋</title>
-  <link rel="stylesheet" href="style.css?_nc=20261008-scenes-1">
+  <link rel="stylesheet" href="style.css?_nc=20261008-inventory-1">
 </head>
 <body>
 <main class="app">
@@ -48,6 +48,7 @@
         <button class="tab" data-tab="appliance" type="button">家電・雑貨</button>
         <button class="tab" data-tab="manage" type="button">管理</button>
       </div>
+      <button id="inventoryBtn" class="rotate-btn" type="button">手元・収納</button>
       <button id="rotateBtn" class="rotate-btn" type="button">↻ 回転</button>
     </div>
 
@@ -72,12 +73,20 @@
       <button id="saveBtn" type="button">保存</button>
       <button id="loadBtn" type="button">読込</button>
       <button id="resetBtn" class="danger" type="button">引っ越し直す</button>
-      <a href="../index.html?_nc=20261008-scenes-1">一覧へ</a>
+      <a href="../index.html?_nc=20261008-inventory-1">一覧へ</a>
     </div>
   </section>
 </main>
+<aside id="inventoryPanel" class="inventory-panel" hidden aria-label="手元と収納">
+  <div class="inventory-head"><strong id="inventoryTitle">手元・未配置</strong><button id="inventoryBack" type="button" hidden>手元へ</button><button id="inventoryClose" type="button" aria-label="収納を閉じる">閉じる</button></div>
+  <p id="inventoryHint" class="inventory-hint">家具をドラッグして部屋へ。部屋の家具もここへ戻せます。</p>
+  <div id="loose" class="loose"><div id="looseList" class="loose-list"></div></div>
+  <div id="storageGrid" class="storage-grid" hidden></div>
+  <div class="inventory-actions"><button id="buyLooseBtn" type="button">選択中の家具を購入</button><button id="toLooseBtn" type="button" disabled>選択した家具を手元へ</button></div>
+</aside>
 <div id="toast" class="toast" role="status" aria-live="polite"></div>
-<script src="data.js?_nc=20261008-scenes-1"></script>
-<script src="game.js?_nc=20261008-scenes-1"></script>
+<script src="data.js?_nc=20261008-inventory-1"></script>
+<script src="inventory.js?_nc=20261008-inventory-1"></script>
+<script src="game.js?_nc=20261008-inventory-1"></script>
 </body>
 </html>

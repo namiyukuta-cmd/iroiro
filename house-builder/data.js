@@ -13,7 +13,7 @@ window.ROOM_DATA={
     desk:{name:"机",short:"机",price:5000,w:2,h:1},
     table:{name:"ローテーブル",short:"卓",price:4000,w:2,h:2},
     sofa:{name:"ソファ",short:"ソ",price:9000,w:3,h:1},
-    shelf:{name:"収納棚",short:"棚",price:6000,w:1,h:2},
+    shelf:{name:"収納棚",short:"棚",price:6000,w:1,h:2,inner:{cols:4,rows:3}},
     fridge:{name:"冷蔵庫",short:"冷",price:10000,w:1,h:1},
     washer:{name:"洗濯機",short:"洗",price:8000,w:1,h:1},
     tv:{name:"テレビ",short:"TV",price:7000,w:2,h:1},
