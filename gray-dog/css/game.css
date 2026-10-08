@@ -125,3 +125,51 @@ h1 { margin: 0; font-size: 22px; letter-spacing: .02em; }
   .actions { grid-template-columns: 1fr; }
   .action-button { min-height: 56px; }
 }
+
+/* グレイが自分の意思で近づく変化を、静止画像の位置と大きさでも見せる */
+.dog-stage .dog {
+  transition: left .85s ease-in-out, transform .85s ease-in-out, filter .85s ease-in-out;
+}
+.dog-stage[data-bond="0"] .dog {
+  left: 58%;
+  transform: translateX(-50%) scale(.69);
+  filter: saturate(.78);
+}
+.dog-stage[data-bond="1"] .dog {
+  left: 56%;
+  transform: translateX(-50%) scale(.8);
+  filter: saturate(.86);
+}
+.dog-stage[data-bond="2"] .dog {
+  left: 54%;
+  transform: translateX(-50%) scale(.91);
+  filter: saturate(.96);
+}
+.dog-stage[data-bond="3"] .dog {
+  left: 51%;
+  transform: translateX(-50%) scale(1.03);
+  filter: none;
+}
+.dog-stage[data-bond="4"] .dog {
+  left: 50%;
+  transform: translateX(-50%) scale(1.13);
+  filter: none;
+}
+.dog-behavior {
+  position: absolute;
+  z-index: 2;
+  left: 10px;
+  bottom: 10px;
+  max-width: calc(100% - 20px);
+  padding: 8px 11px;
+  border-radius: 10px;
+  background: rgba(31, 29, 26, .91);
+  color: #fffdf8;
+  font-size: 12px;
+  line-height: 1.4;
+  font-weight: 800;
+  overflow-wrap: anywhere;
+}
+@media (prefers-reduced-motion: reduce) {
+  .dog-stage .dog { transition: none; }
+}
