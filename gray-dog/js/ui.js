@@ -14,52 +14,30 @@ window.GrayGame = window.GrayGame || {};
     ].forEach((id) => els[id] = $(id));
   }
 
-  function relationshipLevel(s) {
-    if (s.mode === "home") return 4;
-    const ids = new Set((s.firsts || []).map(x => x.id));
-    if (s.visit >= 6 || ids.has("beside_rest") || ids.has("walk_wait") || ids.has("hand_stay")) return 4;
-    if (s.visit >= 4 || ids.has("near_rest") || ids.has("walk_side")) return 3;
-    if (s.visit >= 3 || ids.has("nose_touch") || ids.has("look_back")) return 2;
-    if (s.visit >= 2 || ids.has("sit_first") || ids.has("snack_first")) return 1;
-    return 0;
-  }
-
   function facilityIntro(s) {
-    const level = relationshipLevel(s);
-    if (level === 4) return [
-      "部屋へ入ると、グレイがすぐに顔を上げます。自分から近づき、すぐそばに伏せました。",
-      "グレイは主人公のそばを自分で選んでいます。もう遠くから見ているだけではありません。"
+    const stage = GrayGame.grayStage(s);
+    const intro = [
+      "初めてグレイと会います。静かな部屋で、グレイはこちらに気づきました。",
+      "次の訪問。グレイは人の足音を聞き分けているようです。",
+      "グレイが前より近い場所を選びました。こちらから誘ったわけではありません。",
+      "グレイはこちらのそばへ来て、静かに伏せます。",
+      "部屋へ入るとグレイがこちらに気づき、自分から隣へ来て休み始めました。"
     ];
-    if (level === 3) return [
-      "グレイはこちらに気づくと、立ち上がって少し近くへ来ました。",
-      "声を掛けなくても、グレイの方から距離を縮めました。"
-    ];
-    if (level === 2) return [
-      "グレイが顔を上げ、こちらを見ます。前より長く目を向けています。",
-      "来訪を覚えていて、自分から反応するようになりました。"
-    ];
-    if (level === 1) return [
-      "グレイは伏せたまま、入口の方へ耳を向けました。",
-      "前に会ったときの音を覚えているようです。"
-    ];
-    return [
-      "大きな黒灰色の犬が、少し離れた場所で伏せています。",
-      "初めての訪問。グレイの耳がこちらへ一度だけ向きました。"
-    ];
+    return [intro[stage], GrayGame.grayMoment(s).text];
   }
 
   function renderGrayBehavior(s) {
-    const level = relationshipLevel(s);
+    const level = GrayGame.grayStage(s);
     els.dogStage.dataset.bond = String(level);
     els.dogStage.dataset.outcome = s.lastOutcome === "first" ? "fit" : "";
-    const lines = [
-      "少し離れて伏せている",
-      "こちらの足音に耳を向ける",
-      "自分から顔を上げる",
-      "自分から近づいてくる",
-      "自分からそばを選ぶ"
+    const descriptions = [
+      "グレイがこちらに気づいた",
+      "グレイから目を向けた",
+      "グレイから近づいてきた",
+      "グレイからそばに来た",
+      "グレイが自分で隣を選んだ"
     ];
-    els.dogBehavior.textContent = s.mode === "home" ? "グレイは自分から同じ部屋で休んでいる" : lines[level];
+    els.dogBehavior.textContent = descriptions[level];
   }
 
   function addActionButton(id, label, note="") {
@@ -81,7 +59,7 @@ window.GrayGame = window.GrayGame || {};
     els.sceneText.textContent = s.lastResultText || intro[0];
     els.observationText.textContent = s.lastObservationText || intro[1];
     els.actionTitle.textContent = "どう過ごす？";
-    els.actionCount.textContent = `あと ${s.momentsLeft}回`;
+    els.actionCount.textContent = "この訪問であと " + s.momentsLeft + "回";
 
     const first = s.lastOutcome === "first";
     els.feedbackBadge.classList.toggle("hidden", !first);
@@ -105,8 +83,8 @@ window.GrayGame = window.GrayGame || {};
       });
     }
 
-    els.advanceButton.classList.toggle("hidden", s.momentsLeft > 0);
-    els.advanceButton.textContent = GrayGame.canTrial() ? "トライアルへ進む" : "今日は帰る";
+    els.advanceButton.classList.remove("hidden");
+    els.advanceButton.textContent = GrayGame.canTrial() ? "グレイと家へ帰る" : "次の訪問へ";
     els.advanceButton.onclick = () => {
       if (GrayGame.canTrial()) GrayGame.startTrial();
       else GrayGame.advanceFacility();
@@ -171,7 +149,7 @@ window.GrayGame = window.GrayGame || {};
 
     const trial = GrayGame.canTrial()
       ? '<button class="sheet-action primary" data-trial="1">準備できた。トライアルを始める</button>'
-      : `<div class="info-card"><small>トライアルまで</small><strong>訪問6回以上・家の準備4つ以上で開始できます。現在 準備 ${s.prep.length}/4。</strong></div>`;
+      : `<div class="info-card"><small>トライアルまで</small><strong>訪問4回以上・家の準備4つ以上で開始できます。現在 準備 ${s.prep.length}/4。</strong></div>`;
 
     openSheet("迎える準備", `<div class="card-list">${GrayGame.data.PREP_ITEMS.map((item) => {
       const done = s.prep.includes(item.id);
