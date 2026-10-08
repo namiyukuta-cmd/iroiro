@@ -16,8 +16,9 @@ window.GrayGame = window.GrayGame || {};
 
   function relationStage(s) {
     const total = Object.values(s.actionCounts || {}).reduce((a,b) => a + b, 0);
-    if (total >= 12) return "near";
-    if (total >= 5) return "mid";
+    const progress = Math.max(total, Math.floor((s.visit || 1) / 2), Math.floor((s.familiarity || 0) / 2));
+    if (progress >= 8) return "near";
+    if (progress >= 3) return "mid";
     return "far";
   }
 
@@ -44,9 +45,19 @@ window.GrayGame = window.GrayGame || {};
       "こちらを見ません。耳だけが、ときどき周囲の音を追っています。"
     ];
 
+    if (s.visit >= 10) return [
+      "部屋へ入ると、グレイがすぐに顔を上げます。こちらを見たまま、少し近い場所へ移って伏せました。",
+      "何度も会ってきた相手として、こちらをはっきり覚えています。"
+    ];
+
+    if (s.visit >= 6) return [
+      "こちらが入ると、グレイは顔を上げてしばらくこちらを見ます。",
+      "もう毎回『知らない人』として見ているわけではありません。"
+    ];
+
     return [
       "グレイはこちらの来訪には気づいています。",
-      "大きな反応はまだありませんが、前より落ち着いて同じ場所にいられます。"
+      "前より落ち着いて、同じ場所にいられます。"
     ];
   }
 
