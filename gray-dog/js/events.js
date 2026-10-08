@@ -44,6 +44,20 @@ window.GrayGame = window.GrayGame || {};
 
   GrayGame.grayMoment = (s = GrayGame.getState()) => grayMoments[GrayGame.grayStage(s)];
 
+  const homeMoments = [
+    ["自分から主人公と同じ部屋を選んで伏せた。","初めて、自分から同じ部屋を選んだ"],
+    ["朝、主人公の足音に気づくと自分から迎えに来た。","初めて、朝に迎えに来た"],
+    ["散歩の時間になると、グレイから玄関へ来て待った。","初めて、自分から散歩を待った"],
+    ["主人公のそばへ来て、ゆっくりと横になった。","初めて、自分からそばで眠った"],
+    ["部屋を移動すると、グレイも自分の意思であとをついてきた。","初めて、自分からあとをついてきた"]
+  ];
+  GrayGame.homeMoment = (s = GrayGame.getState()) => homeMoments[Math.min(4, Math.max(0,s.homeDay))][0];
+
+  function recordHomeMoment(s = GrayGame.getState()) {
+    const idx = Math.min(4, Math.max(0,s.homeDay));
+    return GrayGame.addFirst("home_self_" + idx, homeMoments[idx][1]);
+  }
+
   function recordGrayMoment(s = GrayGame.getState()) {
     const stage = GrayGame.grayStage(s);
     return GrayGame.addFirst("gray_self_" + stage, grayMoments[stage].first);
@@ -279,9 +293,10 @@ window.GrayGame = window.GrayGame || {};
       lastEvent:id,
       lastOutcome:"move",
       lastResultText:copy[0],
-      lastObservationText:copy[1]
+      lastObservationText:GrayGame.homeMoment(s)
     });
-    GrayGame.addJournal(`${copy[0]} ${copy[1]}`);
+    recordHomeMoment();
+    GrayGame.addJournal(`${copy[0]} ${GrayGame.homeMoment()}`);
     return true;
   };
 
@@ -297,5 +312,6 @@ window.GrayGame = window.GrayGame || {};
       lastResultText:"",
       lastObservationText:""
     });
+    if (recordHomeMoment()) GrayGame.addJournal(GrayGame.homeMoment());
   };
 })();
