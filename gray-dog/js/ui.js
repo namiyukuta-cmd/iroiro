@@ -9,56 +9,57 @@ window.GrayGame = window.GrayGame || {};
   function cache() {
     [
       "chapterLabel","dayLabel","placeLabel","sceneText","feedbackBadge","dogStage",
-      "observationText","actionTitle","actionCount","actions","advanceButton","sheet",
+      "observationText","dogBehavior","actionTitle","actionCount","actions","advanceButton","sheet",
       "sheetTitle","sheetContent","closeSheet","menuButton"
     ].forEach((id) => els[id] = $(id));
   }
 
-  function relationStage(s) {
-    const total = Object.values(s.actionCounts || {}).reduce((a,b) => a + b, 0);
-    const progress = Math.max(total, Math.floor((s.visit || 1) / 2), Math.floor((s.familiarity || 0) / 2));
-    if (progress >= 8) return "near";
-    if (progress >= 3) return "mid";
-    return "far";
+  function relationshipLevel(s) {
+    if (s.mode === "home") return 4;
+    const ids = new Set((s.firsts || []).map(x => x.id));
+    if (s.visit >= 6 || ids.has("beside_rest") || ids.has("walk_wait") || ids.has("hand_stay")) return 4;
+    if (s.visit >= 4 || ids.has("near_rest") || ids.has("walk_side")) return 3;
+    if (s.visit >= 3 || ids.has("nose_touch") || ids.has("look_back")) return 2;
+    if (s.visit >= 2 || ids.has("sit_first") || ids.has("snack_first")) return 1;
+    return 0;
   }
 
   function facilityIntro(s) {
-    const ids = new Set((s.firsts || []).map(x => x.id));
-
-    if (ids.has("walk_wait") || ids.has("beside_rest") || ids.has("hand_stay")) return [
-      "部屋へ入ると、グレイが顔を上げます。少しして、自分からこちらの近くまで来ました。",
-      "もう「ただ耐えている」だけではありません。グレイの方から距離を縮めています。"
+    const level = relationshipLevel(s);
+    if (level === 4) return [
+      "部屋へ入ると、グレイがすぐに顔を上げます。自分から近づき、すぐそばに伏せました。",
+      "グレイは主人公のそばを自分で選んでいます。もう遠くから見ているだけではありません。"
     ];
-
-    if (ids.has("nose_touch") || ids.has("walk_side")) return [
-      "こちらが入ると、グレイはすぐに気づいて顔を上げました。",
-      "前より明らかにこちらを意識しています。離れるのではなく、その場に残っています。"
+    if (level === 3) return [
+      "グレイはこちらに気づくと、立ち上がって少し近くへ来ました。",
+      "声を掛けなくても、グレイの方から距離を縮めました。"
     ];
-
-    if (ids.has("snack_near") || ids.has("look_back")) return [
-      "前と同じ場所にグレイがいます。こちらが入ると、一度こちらを見ました。",
-      "以前より確認が早く、そのまま落ち着いて伏せています。"
+    if (level === 2) return [
+      "グレイが顔を上げ、こちらを見ます。前より長く目を向けています。",
+      "来訪を覚えていて、自分から反応するようになりました。"
     ];
-
-    if (s.visit === 1) return [
-      "大きな黒灰色の犬が、少し離れた場所で伏せています。",
-      "こちらを見ません。耳だけが、ときどき周囲の音を追っています。"
+    if (level === 1) return [
+      "グレイは伏せたまま、入口の方へ耳を向けました。",
+      "前に会ったときの音を覚えているようです。"
     ];
-
-    if (s.visit >= 10) return [
-      "部屋へ入ると、グレイがすぐに立ち上がります。迷わずこちらまで歩いてきて、そばで伏せました。",
-      "グレイの方から、主人公のそばを選んでいます。"
-    ];
-
-    if (s.visit >= 6) return [
-      "こちらが入ると、グレイが顔を上げます。少しして立ち上がり、自分からこちらへ近づいてきました。",
-      "グレイは主人公を覚え、避けるのではなく近づくようになっています。"
-    ];
-
     return [
-      "グレイはこちらの来訪には気づいています。",
-      "前より落ち着いて、同じ場所にいられます。"
+      "大きな黒灰色の犬が、少し離れた場所で伏せています。",
+      "初めての訪問。グレイの耳がこちらへ一度だけ向きました。"
     ];
+  }
+
+  function renderGrayBehavior(s) {
+    const level = relationshipLevel(s);
+    els.dogStage.dataset.bond = String(level);
+    els.dogStage.dataset.outcome = s.lastOutcome === "first" ? "fit" : "";
+    const lines = [
+      "少し離れて伏せている",
+      "こちらの足音に耳を向ける",
+      "自分から顔を上げる",
+      "自分から近づいてくる",
+      "自分からそばを選ぶ"
+    ];
+    els.dogBehavior.textContent = s.mode === "home" ? "グレイは自分から同じ部屋で休んでいる" : lines[level];
   }
 
   function addActionButton(id, label, note="") {
@@ -87,8 +88,7 @@ window.GrayGame = window.GrayGame || {};
     els.feedbackBadge.textContent = first ? "はじめて" : "";
     els.feedbackBadge.dataset.outcome = first ? "fit" : "";
 
-    els.dogStage.dataset.distance = relationStage(s);
-    els.dogStage.dataset.outcome = first ? "fit" : "";
+    renderGrayBehavior(s);
 
     els.actions.innerHTML = "";
     if (s.momentsLeft > 0) {
@@ -133,8 +133,7 @@ window.GrayGame = window.GrayGame || {};
     els.actionCount.textContent = `あと ${s.momentsLeft}回`;
 
     els.feedbackBadge.classList.add("hidden");
-    els.dogStage.dataset.distance = "home";
-    els.dogStage.dataset.outcome = "";
+    renderGrayBehavior(s);
 
     els.actions.innerHTML = "";
     GrayGame.data.HOME_ACTIONS.forEach((action) => {
