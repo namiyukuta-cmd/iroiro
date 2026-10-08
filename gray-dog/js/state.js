@@ -35,6 +35,19 @@ window.GrayGame = window.GrayGame || {};
     if (!next || typeof next !== "object" || next.version !== 1) throw new Error("invalid save");
     state = { ...freshState(), ...clone(next) };
     state.actionCounts = { ...freshState().actionCounts, ...(next.actionCounts || {}) };
+
+    // 旧セーブには actionCounts が無い。訪問回数や既存の関係値から進行を復元する。
+    if (!next.actionCounts) {
+      const v = Math.max(1, Number(state.visit) || 1);
+      const f = Math.max(0, Number(state.familiarity) || 0);
+      const t = Math.max(0, Number(state.trust) || 0);
+      state.actionCounts.sit = Math.min(4, Math.max(0, Math.floor((v - 1) / 2)));
+      state.actionCounts.snack = Math.min(3, Math.max(0, Math.floor((v - 2) / 3)));
+      state.actionCounts.hand = Math.min(3, Math.max(0, Math.floor((v - 3) / 4), f >= 8 ? 1 : 0));
+      state.actionCounts.walk = Math.min(3, Math.max(0, Math.floor((v - 4) / 4), t >= 8 ? 1 : 0));
+      state.actionCounts.staff = v >= 2 ? 1 : 0;
+    }
+
     state.usedActions = Array.isArray(state.usedActions) ? state.usedActions : [];
     if (!Number.isFinite(state.momentsLeft)) state.momentsLeft = state.acted ? 0 : 4;
     return state;
