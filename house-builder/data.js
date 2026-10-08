@@ -1,5 +1,13 @@
 window.ROOM_DATA={
   cols:10,rows:12,startMoney:70000,
+  scenes:{
+    myroom:{label:"マイルーム",exits:{left:"balcony",down:"opposite",right:"kitchen"}},
+    balcony:{label:"バルコニー",exits:{right:"myroom"}},
+    opposite:{label:"部屋の反対側",exits:{up:"myroom"}},
+    kitchen:{label:"キッチン",exits:{up:"bathroom",left:"myroom",right:"entrance"}},
+    bathroom:{label:"バスルーム",exits:{down:"kitchen"}},
+    entrance:{label:"玄関",exits:{left:"kitchen"}}
+  },
   furniture:{
     bed:{name:"ベッド",short:"寝",price:12000,w:2,h:3},
     desk:{name:"机",short:"机",price:5000,w:2,h:1},
