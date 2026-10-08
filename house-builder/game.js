@@ -1,5 +1,13 @@
 (()=>{
 "use strict";
+const viewToggle=document.getElementById("roomViewToggle"),artwork=document.getElementById("roomArtwork");
+viewToggle.addEventListener("click",()=>{
+ const showingArt=document.querySelector(".app").classList.toggle("artwork-mode");
+ artwork.hidden=!showingArt;
+ viewToggle.textContent=showingArt?"家具を配置":"部屋を見る";
+ viewToggle.setAttribute("aria-pressed",String(!showingArt));
+ window.dispatchEvent(new Event("resize"));
+});
 const D=window.ROOM_DATA,SAVE_KEY="iroiroSoloRoomV1";
 const grid=document.getElementById("grid"),sceneTitle=document.getElementById("sceneTitle"),sceneNav=document.getElementById("sceneNav"),gridToggle=document.getElementById("gridToggle"),moneyEl=document.getElementById("money"),statusEl=document.getElementById("statusText"),progressEl=document.getElementById("goalProgress"),goalTitleEl=document.getElementById("goalTitle"),toast=document.getElementById("toast"),completeBtn=document.getElementById("completeBtn"),rotateBtn=document.getElementById("rotateBtn");
 let money=D.startMoney,selected="bed",rotated=false,goalIndex=0,nextId=1,items={},scene="myroom";let toastTimer=0,selectedId=null,openId=null;

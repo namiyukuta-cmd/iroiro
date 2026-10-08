@@ -205,3 +205,12 @@ h1{margin:0;font:800 22px/1 Georgia,"Times New Roman",serif}
 .inventory-ghost.tool-piece{position:fixed;display:flex}
 
 .controls{min-width:0}
+
+/* Room illustration and existing furniture editor */
+.room-view-toggle{align-self:flex-end;flex:0 0 auto;padding:8px 12px;margin-bottom:6px}
+.room-artwork{min-height:0;flex:1;width:100%;display:flex;justify-content:center;overflow:auto}
+.room-artwork img{display:block;width:100%;height:auto;object-fit:contain;object-position:top;align-self:flex-start}
+.app.artwork-mode{height:auto;min-height:100dvh;grid-template-rows:auto auto auto}
+body:has(.artwork-mode){overflow:auto}
+.artwork-mode .room-head,.artwork-mode #grid,.artwork-mode .scene-nav,.artwork-mode .controls{display:none}
+.room-artwork[hidden]{display:none}
