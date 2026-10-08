@@ -1,8 +1,19 @@
 (()=>{
 "use strict";
 const D=window.ROOM_DATA,SAVE_KEY="iroiroSoloRoomV1";
-const grid=document.getElementById("grid"),moneyEl=document.getElementById("money"),statusEl=document.getElementById("statusText"),progressEl=document.getElementById("goalProgress"),goalTitleEl=document.getElementById("goalTitle"),toast=document.getElementById("toast"),completeBtn=document.getElementById("completeBtn"),rotateBtn=document.getElementById("rotateBtn");
+const grid=document.getElementById("grid"),gridToggle=document.getElementById("gridToggle"),moneyEl=document.getElementById("money"),statusEl=document.getElementById("statusText"),progressEl=document.getElementById("goalProgress"),goalTitleEl=document.getElementById("goalTitle"),toast=document.getElementById("toast"),completeBtn=document.getElementById("completeBtn"),rotateBtn=document.getElementById("rotateBtn");
 let money=D.startMoney,selected="bed",rotated=false,goalIndex=0,nextId=1,items={};let toastTimer=0;
+const GRID_PREF_KEY="iroiroSoloRoomGridVisibleV1";
+let gridVisible=false;
+try{gridVisible=localStorage.getItem(GRID_PREF_KEY)==="1"}catch{}
+function setGridVisible(on){
+  gridVisible=!!on;
+  grid.classList.toggle("show-grid",gridVisible);
+  gridToggle.setAttribute("aria-pressed",String(gridVisible));
+  gridToggle.textContent="マス目："+(gridVisible?"ON":"OFF");
+  try{localStorage.setItem(GRID_PREF_KEY,gridVisible?"1":"0")}catch{}
+}
+
 
 function xy(i){return{x:i%D.cols,y:Math.floor(i/D.cols)}}
 function idx(x,y){return y*D.cols+x}
@@ -41,6 +52,29 @@ function render(){
     if(id){const it=items[id];b.classList.add("occupied",it.type);if(i===it.anchor){b.classList.add("anchor");b.dataset.label=D.furniture[it.type].short}b.dataset.itemId=id}
     grid.appendChild(b);
   }
+  // 1つの家具を複数の色付きセルではなく、単一の絵の重ね合わせで表示。
+  // 当たり判定とタップ位置は下のセル側に残す。
+  Object.values(items).forEach(it=>{
+    const f=D.furniture[it.type];
+    if(!f)return;
+    const fp=footprint(it.type,it.anchor,it.rotated);
+    const piece=document.createElement("div");
+    piece.className="room-piece "+it.type;
+    piece.style.left=(fp.x/D.cols*100)+"%";
+    piece.style.top=(fp.y/D.rows*100)+"%";
+    piece.style.width=(fp.w/D.cols*100)+"%";
+    piece.style.height=(fp.h/D.rows*100)+"%";
+    if(f.image){
+      const picture=document.createElement("img");
+      picture.src=f.image;
+      picture.alt=f.name;
+      piece.appendChild(picture);
+    }else{
+      piece.textContent=f.short;
+      piece.setAttribute("aria-label",f.name);
+    }
+    grid.appendChild(piece);
+  });
   renderGoal();
 }
 function canPlace(type,anchor,rot,ignoreId=null){
@@ -85,11 +119,13 @@ function load(){
 }
 function reset(){if(!confirm("部屋を空の状態に戻しますか？"))return;money=D.startMoney;goalIndex=0;nextId=1;items={};render();show("空の部屋に戻しました")}
 
+gridToggle.addEventListener("click",()=>setGridVisible(!gridVisible));
 grid.addEventListener("click",e=>{const cell=e.target.closest(".cell");if(!cell||cell.classList.contains("fixed"))return;const i=Number(cell.dataset.index);if(selected==="remove")removeAt(i);else place(i)});
 document.querySelectorAll(".tool").forEach(b=>b.addEventListener("click",()=>selectTool(b.dataset.tool)));
 document.querySelectorAll(".tab").forEach(b=>b.addEventListener("click",()=>switchTab(b.dataset.tab)));
 rotateBtn.addEventListener("click",()=>{rotated=!rotated;rotateBtn.textContent=rotated?"↻ 回転：横":"↻ 回転：縦";show("向きを変えました")});
 document.getElementById("removeBtn").addEventListener("click",()=>{selected="remove";statusEl.textContent="撤去する家具をタップ";show("撤去モード")});
 document.getElementById("saveBtn").addEventListener("click",save);document.getElementById("loadBtn").addEventListener("click",load);document.getElementById("resetBtn").addEventListener("click",reset);completeBtn.addEventListener("click",completeGoal);
+setGridVisible(gridVisible);
 render();
 })();
