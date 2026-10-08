@@ -198,8 +198,8 @@ h1{margin:0;font:800 22px/1 Georgia,"Times New Roman",serif}
 .tool-piece{position:relative;flex:0 0 auto;box-sizing:border-box;pointer-events:none}
 .tool.active .tool-piece{outline:3px solid #b88539;outline-offset:1px}
 .tool b{font-size:10px}.tool small{font-size:8px;white-space:nowrap}
-.grid .cell.blocked-cell{background:rgba(190,43,43,.12);border:1px solid rgba(186,39,39,.5)}
-.grid .cell.fixed{background:repeating-linear-gradient(135deg,rgba(190,43,43,.13) 0px,rgba(190,43,43,.13) 4px,transparent 4px,transparent 8px);border:1px solid rgba(186,39,39,.55)}
+.grid.show-grid .cell.blocked-cell{background:rgba(190,43,43,.12);border:1px solid rgba(186,39,39,.5)}
+.grid.show-grid .cell.fixed{background:repeating-linear-gradient(135deg,rgba(190,43,43,.13) 0px,rgba(190,43,43,.13) 4px,transparent 4px,transparent 8px);border:1px solid rgba(186,39,39,.55)}
 .placement-preview{position:absolute;z-index:5;pointer-events:none;border:2px solid #338447;background:rgba(64,168,81,.2);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;color:#245b30}
 .placement-preview.invalid{border-color:#b62b2b;background:rgba(190,43,43,.25);color:#902222}
 .inventory-ghost.tool-piece{position:fixed;display:flex}
