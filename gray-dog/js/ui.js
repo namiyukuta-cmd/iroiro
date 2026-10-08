@@ -46,13 +46,13 @@ window.GrayGame = window.GrayGame || {};
     ];
 
     if (s.visit >= 10) return [
-      "部屋へ入ると、グレイがすぐに顔を上げます。こちらを見たまま、少し近い場所へ移って伏せました。",
-      "何度も会ってきた相手として、こちらをはっきり覚えています。"
+      "部屋へ入ると、グレイがすぐに立ち上がります。迷わずこちらまで歩いてきて、そばで伏せました。",
+      "グレイの方から、主人公のそばを選んでいます。"
     ];
 
     if (s.visit >= 6) return [
-      "こちらが入ると、グレイは顔を上げてしばらくこちらを見ます。",
-      "もう毎回『知らない人』として見ているわけではありません。"
+      "こちらが入ると、グレイが顔を上げます。少しして立ち上がり、自分からこちらへ近づいてきました。",
+      "グレイは主人公を覚え、避けるのではなく近づくようになっています。"
     ];
 
     return [
@@ -172,7 +172,7 @@ window.GrayGame = window.GrayGame || {};
 
     const trial = GrayGame.canTrial()
       ? '<button class="sheet-action primary" data-trial="1">準備できた。トライアルを始める</button>'
-      : `<div class="info-card"><small>トライアルまで</small><strong>訪問6回以上・家の準備4つ以上・手の匂い確認・散歩まで進むと開始できます。現在 準備 ${s.prep.length}/4。</strong></div>`;
+      : `<div class="info-card"><small>トライアルまで</small><strong>訪問6回以上・家の準備4つ以上で開始できます。現在 準備 ${s.prep.length}/4。</strong></div>`;
 
     openSheet("迎える準備", `<div class="card-list">${GrayGame.data.PREP_ITEMS.map((item) => {
       const done = s.prep.includes(item.id);
