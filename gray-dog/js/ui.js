@@ -99,11 +99,9 @@ window.GrayGame = window.GrayGame || {};
     els.placeLabel.textContent = "みどりの家";
 
     const defaultScene = s.homeDay === 0
-      ? "グレイが家に来ました。玄関から室内を静かに見ています。"
-      : "朝。グレイは昨日より少しだけ部屋の奥で過ごしています。";
-    const defaultObservation = s.homeDay === 0
-      ? "知らない場所です。今日は何もしない時間も大切そうです。"
-      : "生活の音を覚えながら、自分で休める場所を探しています。";
+      ? "グレイが家に来ました。部屋を見回したあと、自分から主人公と同じ部屋へ来て伏せました。"
+      : "朝。グレイは主人公に気づいて、自分から近くへ来ました。";
+    const defaultObservation = GrayGame.homeMoment(s);
 
     els.sceneText.textContent = s.lastResultText || defaultScene;
     els.observationText.textContent = s.lastObservationText || defaultObservation;
