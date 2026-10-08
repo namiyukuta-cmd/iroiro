@@ -1,8 +1,8 @@
 (()=>{
 "use strict";
 const D=window.ROOM_DATA,SAVE_KEY="iroiroSoloRoomV1";
-const grid=document.getElementById("grid"),gridToggle=document.getElementById("gridToggle"),moneyEl=document.getElementById("money"),statusEl=document.getElementById("statusText"),progressEl=document.getElementById("goalProgress"),goalTitleEl=document.getElementById("goalTitle"),toast=document.getElementById("toast"),completeBtn=document.getElementById("completeBtn"),rotateBtn=document.getElementById("rotateBtn");
-let money=D.startMoney,selected="bed",rotated=false,goalIndex=0,nextId=1,items={};let toastTimer=0;
+const grid=document.getElementById("grid"),sceneTitle=document.getElementById("sceneTitle"),sceneNav=document.getElementById("sceneNav"),gridToggle=document.getElementById("gridToggle"),moneyEl=document.getElementById("money"),statusEl=document.getElementById("statusText"),progressEl=document.getElementById("goalProgress"),goalTitleEl=document.getElementById("goalTitle"),toast=document.getElementById("toast"),completeBtn=document.getElementById("completeBtn"),rotateBtn=document.getElementById("rotateBtn");
+let money=D.startMoney,selected="bed",rotated=false,goalIndex=0,nextId=1,items={},scene="myroom";let toastTimer=0;
 const GRID_PREF_KEY="iroiroSoloRoomGridVisibleV1";
 let gridVisible=false;
 try{gridVisible=localStorage.getItem(GRID_PREF_KEY)==="1"}catch{}
@@ -18,19 +18,45 @@ function setGridVisible(on){
 function xy(i){return{x:i%D.cols,y:Math.floor(i/D.cols)}}
 function idx(x,y){return y*D.cols+x}
 function fixedType(x,y){
-  if(y===0&&(x===4||x===5))return"window";
-  if(y===D.rows-1&&x===8)return"door";
-  if(x===0||x===D.cols-1||y===0||y===D.rows-1)return"wall";
-  return"floor";
+  // 横から見た1区画の編集面。外周だけを固定し、背景の絵は別レイヤー。
+  return (x===0||x===D.cols-1||y===0||y===D.rows-1)?"wall":"floor";
 }
+const BACKDROPS={
+  myroom:'<div class="scene-window"><div class="scene-window-inner"></div></div>',
+  balcony:'<div class="balcony-sky"></div><div class="balcony-rail"></div>',
+  opposite:'<div class="scene-wallpanel"></div>',
+  kitchen:'<div class="kitchen-wall"></div><div class="kitchen-counter"><div class="kitchen-sink"></div><div class="kitchen-burners"><i></i><i></i></div></div>',
+  bathroom:'<div class="bath-tile"></div><div class="bath-tub"></div><div class="bath-toilet"></div>',
+  entrance:'<div class="entry-door"><div class="entry-knob"></div></div>'
+};
+const DIRECTION_LABELS={left:"←",up:"↑",down:"↓",right:"→"};
+function showScene(name){
+  if(!D.scenes[name])return;
+  scene=name;
+  sceneTitle.textContent=D.scenes[scene].label;
+  grid.setAttribute("aria-label",D.scenes[scene].label);
+  for(const button of sceneNav.querySelectorAll(".scene-step")){
+    const dest=D.scenes[scene].exits[button.dataset.direction];
+    button.hidden=!dest;
+    button.disabled=!dest;
+    button.dataset.target=dest||"";
+    if(dest)button.textContent=DIRECTION_LABELS[button.dataset.direction]+" "+(dest==="opposite"?"反対側":D.scenes[dest].label);
+  }
+  statusEl.textContent="表示："+D.scenes[scene].label;
+  render();
+}
+
 function footprint(type,anchor,rot){
   const f=D.furniture[type],p=xy(anchor),w=rot?f.h:f.w,h=rot?f.w:f.h,out=[];
   for(let dy=0;dy<h;dy++)for(let dx=0;dx<w;dx++)out.push(idx(p.x+dx,p.y+dy));
   return{cells:out,w,h,x:p.x,y:p.y};
 }
-function occupiedMap(){
+function occupiedMap(forScene=scene){
   const map={};
-  Object.entries(items).forEach(([id,it])=>footprint(it.type,it.anchor,it.rotated).cells.forEach(i=>map[i]=id));
+  Object.entries(items).forEach(([id,it])=>{
+    if((it.scene||"myroom")!==forScene)return;
+    footprint(it.type,it.anchor,it.rotated).cells.forEach(i=>map[i]=id);
+  });
   return map;
 }
 function counts(){const c={};Object.values(items).forEach(it=>c[it.type]=(c[it.type]||0)+1);return c}
@@ -45,7 +71,12 @@ function renderGoal(){
   completeBtn.disabled=false;completeBtn.textContent="達成";
 }
 function render(){
-  moneyEl.textContent=yen(money);grid.innerHTML="";const occ=occupiedMap();
+  moneyEl.textContent=yen(money);grid.innerHTML="";
+  const backdrop=document.createElement("div");
+  backdrop.className="scene-backdrop scene-backdrop--"+scene;
+  backdrop.innerHTML=BACKDROPS[scene]||"";
+  grid.appendChild(backdrop);
+  const occ=occupiedMap();
   for(let i=0;i<D.cols*D.rows;i++){
     const p=xy(i),base=fixedType(p.x,p.y),b=document.createElement("button");b.type="button";b.className="cell "+base+(base!=="floor"?" fixed":"");b.dataset.index=i;b.setAttribute("role","gridcell");
     const id=occ[i];
@@ -55,6 +86,7 @@ function render(){
   // 1つの家具を複数の色付きセルではなく、単一の絵の重ね合わせで表示。
   // 当たり判定とタップ位置は下のセル側に残す。
   Object.values(items).forEach(it=>{
+    if((it.scene||"myroom")!==scene)return;
     const f=D.furniture[it.type];
     if(!f)return;
     const fp=footprint(it.type,it.anchor,it.rotated);
@@ -77,16 +109,16 @@ function render(){
   });
   renderGoal();
 }
-function canPlace(type,anchor,rot,ignoreId=null){
+function canPlace(type,anchor,rot,ignoreId=null,targetScene=scene){
   const fp=footprint(type,anchor,rot);
   if(fp.x<1||fp.y<1||fp.x+fp.w>D.cols-1||fp.y+fp.h>D.rows-1)return false;
-  const occ=occupiedMap();return fp.cells.every(i=>!occ[i]||occ[i]===ignoreId);
+  const occ=occupiedMap(targetScene);return fp.cells.every(i=>!occ[i]||occ[i]===ignoreId);
 }
 function place(anchor){
   const f=D.furniture[selected];if(!f)return;
   if(!canPlace(selected,anchor,rotated)){show("そこには置けません");return}
   if(money<f.price){show("お金が足りません");return}
-  money-=f.price;items[nextId++]={type:selected,anchor,rotated};statusEl.textContent=f.name+"を置きました";render();
+  money-=f.price;items[nextId++]={type:selected,anchor,rotated,scene};statusEl.textContent=f.name+"を置きました";render();
 }
 function removeAt(i){
   const occ=occupiedMap(),id=occ[i];if(!id){show("家具がありません");return}
@@ -109,16 +141,25 @@ function completeGoal(){
   if(!Object.entries(g.requirements).every(([k,n])=>(c[k]||0)>=n)){show("まだ必要な家具が足りません");return}
   money+=g.reward;goalIndex++;show("達成！ +"+yen(g.reward)+"円");render();
 }
-function save(){localStorage.setItem(SAVE_KEY,JSON.stringify({version:1,money,goalIndex,nextId,items}));show("保存しました")}
+function save(){localStorage.setItem(SAVE_KEY,JSON.stringify({version:2,money,goalIndex,nextId,items,scene}));show("保存しました")}
 function load(){
   const raw=localStorage.getItem(SAVE_KEY);if(!raw){show("保存データがありません");return}
   try{const d=JSON.parse(raw);money=Number.isFinite(d.money)?d.money:D.startMoney;goalIndex=Number.isInteger(d.goalIndex)?Math.max(0,Math.min(d.goalIndex,D.goals.length)):0;nextId=Number.isInteger(d.nextId)?d.nextId:1;items={};
-    Object.entries(d.items||{}).forEach(([id,it])=>{if(D.furniture[it.type]&&Number.isInteger(it.anchor)&&canPlace(it.type,it.anchor,!!it.rotated,id))items[id]={type:it.type,anchor:it.anchor,rotated:!!it.rotated}});
-    render();show("読み込みました");
+    Object.entries(d.items||{}).forEach(([id,it])=>{
+      const targetScene=D.scenes[it.scene]?it.scene:"myroom";
+      if(!D.furniture[it.type]||!Number.isInteger(it.anchor))return;
+      // 旧セーブはマイルームへ移行。
+      if(canPlace(it.type,it.anchor,!!it.rotated,id,targetScene))items[id]={type:it.type,anchor:it.anchor,rotated:!!it.rotated,scene:targetScene};
+    });
+    showScene(D.scenes[d.scene]?d.scene:"myroom");show("読み込みました");
   }catch{show("保存データを読み込めません")}
 }
-function reset(){if(!confirm("部屋を空の状態に戻しますか？"))return;money=D.startMoney;goalIndex=0;nextId=1;items={};render();show("空の部屋に戻しました")}
+function reset(){if(!confirm("部屋を空の状態に戻しますか？"))return;money=D.startMoney;goalIndex=0;nextId=1;items={};showScene("myroom");show("空の部屋に戻しました")}
 
+sceneNav.addEventListener("click",e=>{
+  const button=e.target.closest(".scene-step");
+  if(button&&!button.disabled&&D.scenes[button.dataset.target])showScene(button.dataset.target);
+});
 gridToggle.addEventListener("click",()=>setGridVisible(!gridVisible));
 grid.addEventListener("click",e=>{const cell=e.target.closest(".cell");if(!cell||cell.classList.contains("fixed"))return;const i=Number(cell.dataset.index);if(selected==="remove")removeAt(i);else place(i)});
 document.querySelectorAll(".tool").forEach(b=>b.addEventListener("click",()=>selectTool(b.dataset.tool)));
@@ -127,5 +168,5 @@ rotateBtn.addEventListener("click",()=>{rotated=!rotated;rotateBtn.textContent=r
 document.getElementById("removeBtn").addEventListener("click",()=>{selected="remove";statusEl.textContent="撤去する家具をタップ";show("撤去モード")});
 document.getElementById("saveBtn").addEventListener("click",save);document.getElementById("loadBtn").addEventListener("click",load);document.getElementById("resetBtn").addEventListener("click",reset);completeBtn.addEventListener("click",completeGoal);
 setGridVisible(gridVisible);
-render();
+showScene("myroom");
 })();
