@@ -27,6 +27,28 @@ window.GrayGame = window.GrayGame || {};
     staff: { label:"スタッフに聞く" }
   };
 
+  GrayGame.grayStage = (s = GrayGame.getState()) => {
+    if (s.mode === "home") return 4;
+    const v = Math.max(1, Number(s.visit) || 1);
+    const acted = Array.isArray(s.usedActions) ? s.usedActions.length : 0;
+    return Math.min(4, Math.max(0, v - 1 + (acted >= 2 ? 1 : 0)));
+  };
+
+  const grayMoments = [
+    { text:"グレイが耳をこちらへ向けた。伏せたまま、そっと目を開けている。", first:"初めて、こちらの足音に気づいた" },
+    { text:"グレイが自分から顔を上げた。視線が合っても、すぐにはそらさない。", first:"初めて、自分から顔を上げた" },
+    { text:"グレイは自分から距離を縮め、前より近い場所で伏せ直した。", first:"初めて、自分から近くへ来た" },
+    { text:"グレイがこちらのそばまで来て、自分で場所を選んで伏せた。", first:"初めて、自分からそばを選んだ" },
+    { text:"グレイはこちらの姿を見つけると近くへ来て、隣でくつろぎ始めた。", first:"初めて、自分から隣でくつろいだ" }
+  ];
+
+  GrayGame.grayMoment = (s = GrayGame.getState()) => grayMoments[GrayGame.grayStage(s)];
+
+  function recordGrayMoment(s = GrayGame.getState()) {
+    const stage = GrayGame.grayStage(s);
+    return GrayGame.addFirst("gray_self_" + stage, grayMoments[stage].first);
+  }
+
   GrayGame.data = { PREP_ITEMS, HOME_ACTIONS, ACTIONS };
 
   function useFacilityAction(id, result, observation, first) {
@@ -44,12 +66,18 @@ window.GrayGame = window.GrayGame || {};
       familiarity:s.familiarity + 1,
       trust:s.trust + 1,
       lastEvent:id,
-      lastOutcome:first ? "first" : "move",
       lastResultText:result,
       lastObservationText:observation
     });
 
-    GrayGame.addJournal(`${ACTIONS[id].label}：${result}`);
+    const current = GrayGame.getState();
+    const newMoment = recordGrayMoment(current);
+    const voluntary = GrayGame.grayMoment(current).text;
+    GrayGame.patch({
+      lastOutcome:newMoment ? "first" : "move",
+      lastObservationText:voluntary
+    });
+    GrayGame.addJournal(`${ACTIONS[id].label}：${result} ${voluntary}`);
     if (first) GrayGame.addFirst(first[0], first[1]);
     return true;
   }
@@ -202,11 +230,14 @@ window.GrayGame = window.GrayGame || {};
       lastResultText:"",
       lastObservationText:""
     });
+    if (recordGrayMoment()) {
+      GrayGame.addJournal(GrayGame.grayMoment().text);
+    }
   };
 
   GrayGame.canTrial = () => {
     const s = GrayGame.getState();
-    return s.visit >= 6 && s.prep.length >= 4;
+    return s.visit >= 4 && s.prep.length >= 4;
   };
 
   GrayGame.startTrial = () => {
