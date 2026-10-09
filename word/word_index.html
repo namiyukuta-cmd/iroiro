@@ -4,10 +4,10 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <title>文章入力・交換小説ログ</title>
-  <link rel="stylesheet" href="word_index.css?v=20261010popup2">
+  <link rel="stylesheet" href="word_index.css?v=20261010popup1">
   <script src="word_index.js?v=20261010private2" defer></script>
   <script src="novel-logs.js?v=20261010novel1" defer></script>
-  <script src="word-popup.js?v=20261010popup2" defer></script>
+  <script src="word-popup.js?v=20261010popup1" defer></script>
 </head>
 <body>
   <main>
@@ -29,18 +29,6 @@
       <button type="button" id="openEditor" aria-haspopup="dialog">文章を入力する</button>
     </div>
 
-    <section class="novel-post" aria-label="交換小説へ投稿">
-      <div class="novel-row">
-        <label for="novelAuthor">書いた人</label>
-        <select id="novelAuthor">
-          <option value="user">自分</option>
-          <option value="chatgpt">ChatGPT</option>
-        </select>
-        <button type="button" id="appendNovelLog">交換小説ログに追加</button>
-      </div>
-      <p class="hint">ChatGPTの文章はコピーして入力欄に貼り付けます。投稿した文章は非公開GitHubに追加され、以前の投稿は上書きしません。</p>
-    </section>
-
     <section class="novel-entries-section" aria-labelledby="novelEntriesHeading">
       <div class="saved-title">
         <h2 id="novelEntriesHeading">投稿ログ</h2>
@@ -54,10 +42,6 @@
 
     <section class="standalone-save" aria-label="単独の文章を保存">
       <h2>文章ファイルの保存</h2>
-      <div class="save-controls">
-        <button type="button" id="saveText">GitHubに保存</button>
-        <button type="button" id="newText">新しい文章</button>
-      </div>
       <p id="saveStatus" role="status" aria-live="polite"></p>
       <section class="saved-section" aria-label="保存済みの文章">
         <div class="saved-title">
@@ -84,6 +68,22 @@
         <button type="button" id="closeEditor" aria-label="文章入力を閉じる">閉じる</button>
       </header>
       <textarea id="userText" placeholder="ここに文章を入力してください" rows="6" aria-label="文章入力"></textarea>
+      <section class="novel-post" aria-label="交換小説へ投稿">
+        <div class="novel-row">
+          <label for="novelAuthor">書いた人</label>
+          <select id="novelAuthor">
+            <option value="user">自分</option>
+            <option value="chatgpt">ChatGPT</option>
+          </select>
+          <button type="button" id="appendNovelLog">交換小説ログに追加</button>
+        </div>
+        <p class="hint">ChatGPTの文章はコピーして入力欄に貼り付けます。投稿した文章は非公開GitHubに追加され、以前の投稿は上書きしません。</p>
+      </section>
+      <div class="save-controls">
+        <button type="button" id="saveText">GitHubに保存</button>
+        <button type="button" id="newText">新しい文章</button>
+      </div>
+      <p id="editorStatus" role="status" aria-live="polite"></p>
     </div>
   </dialog>
 </body>
