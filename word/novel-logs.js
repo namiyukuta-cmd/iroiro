@@ -295,7 +295,7 @@
     if (!["user", "chatgpt"].includes(author)) { setStatus("投稿者を選択してください。"); return; }
     const previous = entries[entries.length - 1];
     if (previous && previous.text === text && previous.author === author) {
-      if (!(window.wordEditorConfirm ? window.wordEditorConfirm("直前と同じ文章です。もう一度投稿しますか？") : window.confirm("直前と同じ文章です。もう一度投稿しますか？"))) return;
+      if (!confirm("直前と同じ文章です。もう一度投稿しますか？")) return;
     }
     const id = sortableStamp() + "_" + uniqueId().slice(0, 12);
     const createdAt = new Date().toISOString();

@@ -4,10 +4,10 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <title>文章入力・交換小説ログ</title>
-  <link rel="stylesheet" href="word_index.css?v=20261010window1">
-  <script src="word_index.js?v=20261010window1" defer></script>
-  <script src="novel-logs.js?v=20261010window1" defer></script>
-  <script src="word-popup.js?v=20261010window1" defer></script>
+  <link rel="stylesheet" href="word_index.css?v=20261010popup1">
+  <script src="word_index.js?v=20261010private2" defer></script>
+  <script src="novel-logs.js?v=20261010novel1" defer></script>
+  <script src="word-popup.js?v=20261010popup1" defer></script>
 </head>
 <body>
   <main>
@@ -26,7 +26,7 @@
     </section>
 
     <div class="editor-launch">
-      <button type="button" id="openEditor">文章を入力する</button>
+      <button type="button" id="openEditor" aria-haspopup="dialog">文章を入力する</button>
     </div>
 
     <section class="novel-entries-section" aria-labelledby="novelEntriesHeading">
@@ -61,8 +61,12 @@
     </details>
   </main>
 
-  <section id="editorState" hidden aria-hidden="true">
-    <div>
+  <dialog id="editorDialog" aria-labelledby="editorDialogTitle">
+    <div class="editor-dialog-inner">
+      <header class="editor-dialog-header">
+        <h2 id="editorDialogTitle">文章入力</h2>
+        <button type="button" id="closeEditor" aria-label="文章入力を閉じる">閉じる</button>
+      </header>
       <textarea id="userText" placeholder="ここに文章を入力してください" rows="6" aria-label="文章入力"></textarea>
       <section class="novel-post" aria-label="交換小説へ投稿">
         <div class="novel-row">
@@ -81,6 +85,6 @@
       </div>
       <p id="editorStatus" role="status" aria-live="polite"></p>
     </div>
-  </section>
+  </dialog>
 </body>
 </html>

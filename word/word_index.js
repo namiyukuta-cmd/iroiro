@@ -24,9 +24,6 @@
   let busy = false;
 
   function setStatus(message) { status.textContent = message; }
-  function confirmEditor(message) {
-    return window.wordEditorConfirm ? window.wordEditorConfirm(message) : window.confirm(message);
-  }
   function getToken() {
     try {
       for (const key of TOKEN_KEYS) {
@@ -127,8 +124,7 @@
 
   async function loadSave(file) {
     if (busy) return;
-    if (hasUnsavedChanges() && !confirmEditor("未保存の文章があります。別の文章を読み込みますか？")) return;
-    if (window.wordEditorOpen) window.wordEditorOpen();
+    if (hasUnsavedChanges() && !confirm("未保存の文章があります。別の文章を読み込みますか？")) return;
     setBusy(true);
     setStatus("GitHubから読み込み中…");
     try {
@@ -182,7 +178,7 @@
 
   newButton.addEventListener("click", () => {
     if (busy) return;
-    if (hasUnsavedChanges() && !confirmEditor("未保存の文章があります。新しい文章を始めますか？")) return;
+    if (hasUnsavedChanges() && !confirm("未保存の文章があります。新しい文章を始めますか？")) return;
     editor.value = "";
     currentPath = null;
     currentSha = null;
