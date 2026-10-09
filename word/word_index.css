@@ -38,3 +38,45 @@ button:disabled { opacity: .55; cursor: wait; }
 .github-settings input { width: 100%; min-height: 44px; padding: 8px; font-size: 16px; }
 .github-settings button { margin-top: 8px; }
 .github-settings p { font-size: 12px; line-height: 1.6; }
+
+
+/* 交換小説ログ */
+.novel-section, .novel-post, .novel-entries-section {
+  padding-bottom: 14px;
+  margin-bottom: 14px;
+  border-bottom: 1px solid #ddd;
+}
+.novel-section h1 { font-size: 20px; margin: 0 0 14px; }
+.novel-section label, .editor-label { display: block; margin: 10px 0 8px; font-size: 15px; font-weight: 700; }
+.novel-row { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-bottom: 10px; }
+.novel-row input, .novel-row select {
+  min-width: 0;
+  flex: 1 1 150px;
+  min-height: 44px;
+  border: 1px solid #999;
+  border-radius: 8px;
+  padding: 8px;
+  font-family: inherit;
+  font-size: 16px;
+  background: #fff;
+  color: #222;
+}
+.novel-row label { margin: 0; font-size: 14px; }
+.novel-row button { flex: 0 0 auto; }
+#novelAuthor { flex: 0 1 140px; }
+#appendNovelLog { background: #242424; border-color: #242424; color: white; }
+#novelStatus { font-size: 14px; min-height: 1.5em; white-space: pre-wrap; color: #555; margin: 4px 0; }
+.hint { font-size: 12px; line-height: 1.6; color: #666; margin: 6px 0 0; }
+.novel-entries-section .saved-title { flex-wrap: wrap; }
+.novel-entries-section .saved-title h2 { font-size: 17px; }
+.novel-entries { display: flex; flex-direction: column; gap: 10px; max-height: 55vh; overflow-y: auto; padding: 10px 0; }
+.novel-entries > p { font-size: 14px; color: #777; margin: 0; }
+.novel-entry { border: 1px solid #ccc; border-radius: 8px; padding: 10px 12px; background: #fff; }
+.novel-entry[data-author="chatgpt"] { background: #f6f6f6; }
+.novel-entry-head { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px; font-size: 13px; }
+.novel-entry-head strong { font-size: 14px; }
+.novel-entry-head time { color: #666; font-variant-numeric: tabular-nums; }
+.novel-entry-text { white-space: pre-wrap; overflow-wrap: anywhere; margin: 10px 0; font-size: 15px; line-height: 1.7; }
+.novel-entry-copy { min-height: 36px; font-size: 12px; padding: 4px 12px; }
+.standalone-save { border-top: 1px solid #ddd; padding-top: 12px; }
+.standalone-save > h2 { font-size: 16px; margin: 0 0 10px; }
