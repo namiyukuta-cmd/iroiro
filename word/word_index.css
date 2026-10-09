@@ -80,3 +80,63 @@ button:disabled { opacity: .55; cursor: wait; }
 .novel-entry-copy { min-height: 36px; font-size: 12px; padding: 4px 12px; }
 .standalone-save { border-top: 1px solid #ddd; padding-top: 12px; }
 .standalone-save > h2 { font-size: 16px; margin: 0 0 10px; }
+
+
+/* 文章入力ポップアップ */
+.editor-launch { margin: 8px 0 18px; }
+#openEditor {
+  display: block;
+  width: 100%;
+  min-height: 54px;
+  color: #fff;
+  background: #242424;
+  border-color: #242424;
+  font-weight: 700;
+  font-size: 17px;
+}
+#editorDialog {
+  width: min(100% - 24px, 600px);
+  max-width: 600px;
+  max-height: calc(100dvh - 24px);
+  margin: auto;
+  border: 1px solid #bbb;
+  border-radius: 12px;
+  background: #fff;
+  color: #222;
+  padding: 0;
+  overflow: hidden;
+}
+#editorDialog::backdrop { background: rgba(0, 0, 0, .55); }
+#editorDialog[open] { display: block; }
+.editor-dialog-inner {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 14px;
+  max-height: calc(100dvh - 26px);
+  overflow: auto;
+  overscroll-behavior: contain;
+}
+.editor-dialog-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+.editor-dialog-header h2 { font-size: 17px; margin: 0; }
+#closeEditor { min-height: 40px; }
+#editorDialog #userText {
+  flex: 1 0 auto;
+  width: 100%;
+  min-height: min(43dvh, 430px);
+  max-height: 60dvh;
+  margin: 0;
+}
+#editorDialog .novel-post {
+  padding: 4px 0 8px;
+  margin: 0;
+}
+#editorDialog .save-controls { margin: 0; padding: 0 0 4px; }
+@media (max-height: 600px) {
+  #editorDialog #userText { min-height: 130px; }
+}
