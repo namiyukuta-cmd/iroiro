@@ -1,0 +1,11 @@
+#userText {
+  box-sizing: border-box;
+  width: 100%;
+  min-height: 120px;
+  padding: 12px;
+  font-size: 16px;
+  line-height: 1.6;
+  border: 1px solid #999;
+  border-radius: 8px;
+  resize: vertical;
+}
