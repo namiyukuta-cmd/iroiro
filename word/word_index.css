@@ -9,3 +9,25 @@
   border-radius: 8px;
   resize: vertical;
 }
+
+.save-controls {
+  margin-top: 12px;
+}
+
+#saveText {
+  min-height: 44px;
+  padding: 10px 20px;
+  border: 1px solid #777;
+  border-radius: 8px;
+  background: #f4f4f4;
+  color: #222;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+#saveStatus {
+  min-height: 1.6em;
+  margin: 8px 0 0;
+  font-size: 14px;
+  color: #555;
+}
