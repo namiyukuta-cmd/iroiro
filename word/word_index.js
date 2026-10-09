@@ -164,6 +164,7 @@
       currentPath = path;
       currentSha = result.content.sha;
       lastSavedText = snapshot;
+      try { localStorage.removeItem(LEGACY_LOCAL_KEY); } catch (_) {}
       setStatus(editor.value === snapshot
         ? "非公開リポジトリの " + path + " に保存しました。"
         : "GitHubに保存しましたが、その後の入力は未保存です。");
