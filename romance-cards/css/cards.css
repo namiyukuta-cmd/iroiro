@@ -73,3 +73,17 @@
 .opponent-hand .card.picked{outline:2px solid #e7b355;outline-offset:1px}
 .history-icons{overflow-x:auto;flex-wrap:nowrap}
 .history-icon{flex-shrink:0}
+
+.tease-status{position:absolute;top:3px;left:50%;translate:-50% 0;z-index:8;display:none;min-width:146px;padding:4px 10px;border:1px solid #d77799;border-radius:8px;background:#3b2032ed;color:#ffd3e3;pointer-events:none;text-align:center}
+.tease-status.active{display:grid;gap:2px;box-shadow:0 0 16px #ea56814d}
+.tease-status strong{font-size:15px;line-height:1.1}
+.tease-status>span{font-size:10px}
+.tease-meter{height:5px;background:#301b29;border-radius:9px;overflow:hidden}
+.tease-meter i{display:block;height:100%;background:#ed83a6;transition:width .35s}
+.teasing-invite .invite-card{border-color:#f094b3;background:var(--tease-color,#5a3047);color:#ffd3e3;box-shadow:0 0 var(--tease-glow,8px) #e55d9370}
+.teasing-invite .invite-symbol{animation:tease-heart var(--tease-speed,1s) ease-in-out infinite}
+.teasing-active{border-color:#d77799}
+.bet-pulse .invite-card{animation:tease-bet .7s ease-out}
+@keyframes tease-heart{0%,100%{transform:scale(1)}25%{transform:scale(1.35)}45%{transform:scale(1.05)}65%{transform:scale(1.22)}}
+@keyframes tease-bet{0%{transform:scale(1)}35%{transform:translateY(-7px) scale(1.14);box-shadow:0 0 26px #ff86b8}100%{transform:scale(1)}}
+@media(prefers-reduced-motion:reduce){.teasing-invite .invite-symbol,.bet-pulse .invite-card{animation:none}}

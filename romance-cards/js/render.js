@@ -35,6 +35,11 @@ function showWolfEffect(who){
  $('wolfEffect').innerHTML=`<div class="wolf-burst"><span aria-hidden="true">🐺</span><strong>${who==='npc'?'相手':'自分'}の狼効果</strong><span>焦らしで欲求が高まっています</span></div>`;
  wolfTimer=setTimeout(clearWolfEffect,2400);
 }
+function showTeaseBet(who){
+ const target=$(who==='npc'?'npcInvite':'pcInvite');
+ target.classList.remove('bet-pulse');void target.offsetWidth;target.classList.add('bet-pulse');
+ target.onanimationend=e=>{if(e.animationName==='tease-bet')target.classList.remove('bet-pulse')};
+}
 function render(){
  const inactive=s.paused||s.ended,pcTurn=s.turn==='pc'&&!inactive;
  const handCount=DECK.filter(c=>canCard(c[0])).length;
@@ -75,6 +80,20 @@ function render(){
  $('history').querySelectorAll('[data-history-seq]').forEach(e=>e.onclick=()=>selectPair(+e.dataset.historySeq));
  const inviting=pendingCard();
  const privateMode=s.mode==='private';
+ const teasing=!!(inviting&&s.teasing[inviting]);
+ const desire=inviting?(inviting==='npc'?s.npcDesire:s.pcDesire):0;
+ const intensity=Math.min(1,desire/20);
+ $('teaseStatus').innerHTML=teasing?`<strong>焦らし中♡</strong><span>${inviting==='npc'?'相手':'自分'}の欲求 ${desire}</span><div class="tease-meter" role="progressbar" aria-label="${inviting==='npc'?'相手':'自分'}の欲求" aria-valuenow="${desire}" aria-valuemin="0" aria-valuemax="100"><i style="width:${desire}%"></i></div>`:'';
+ $('teaseStatus').classList.toggle('active',teasing);
+ $('scene').classList.toggle('teasing-active',teasing);
+ for(const who of ['pc','npc']){
+  const slot=$(who==='npc'?'npcInvite':'pcInvite');
+  slot.classList.toggle('teasing-invite',teasing&&inviting===who);
+  slot.style.setProperty('--tease-speed',`${1.1-intensity*.65}s`);
+  slot.style.setProperty('--tease-glow',`${6+intensity*18}px`);
+  slot.style.setProperty('--tease-color',`hsl(${335+intensity*20} 45% ${28+intensity*8}%)`);
+ }
+
  $('npcInviteTitle').textContent=privateMode?'相手の確認カード':'相手の誘いカード';
  $('pcInviteTitle').textContent=privateMode?'自分の確認カード':'自分の誘いカード';
  $('npcBet').innerHTML=`<div class="bet-card" aria-label="相手のベット ＋${inviting?s.inviteBets.npc:0}">＋${inviting?s.inviteBets.npc:0}</div>`;

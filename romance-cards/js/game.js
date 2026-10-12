@@ -1,5 +1,5 @@
 'use strict';
-const fresh=()=>({pcMood:38,npcMood:40,pcFeeling:'calm',npcFeeling:'calm',mode:'public',turn:'pc',stack:[],discard:[],history:[],lastPlay:null,drawn:null,npcHand:[],wolf:{pc:false,npc:false},round:0,selected:null,pair:null,bet:0,paused:false,ended:false,invitation:null,confirmation:null,completed:false,inviteBets:{pc:0,npc:0},pcDesire:0,npcDesire:0,date:null,time:null});
+const fresh=()=>({pcMood:38,npcMood:40,pcFeeling:'calm',npcFeeling:'calm',mode:'public',turn:'pc',stack:[],discard:[],history:[],lastPlay:null,drawn:null,npcHand:[],wolf:{pc:false,npc:false},teasing:{pc:false,npc:false},round:0,selected:null,pair:null,bet:0,paused:false,ended:false,invitation:null,confirmation:null,completed:false,inviteBets:{pc:0,npc:0},pcDesire:0,npcDesire:0,date:null,time:null});
 let s=fresh(),timer=null,generation=0,sequence=0;
 const clamp=n=>Math.max(0,Math.min(100,n));
 function change(k,n){s[k]=clamp(s[k]+n)}
@@ -36,7 +36,7 @@ function selectPair(seq){
  s.pair=s.pair===seq?null:seq;render();
 }
 function enter(first,privateMode=false){
- generation++;clearTimeout(timer);clearPlayEffect();clearWolfEffect();s.lastPlay=null;s.drawn=null;s.mode=privateMode?'private':'public';s.round=0;s.selected=null;s.pair=null;s.bet=0;s.turn=first;s.paused=false;s.ended=false;s.invitation=null;s.confirmation=null;s.completed=false;s.inviteBets={pc:0,npc:0};dealNPC();render();if(first==='npc')scheduleNPC();
+ generation++;clearTimeout(timer);clearPlayEffect();clearWolfEffect();s.lastPlay=null;s.drawn=null;s.mode=privateMode?'private':'public';s.round=0;s.selected=null;s.pair=null;s.bet=0;s.turn=first;s.paused=false;s.ended=false;s.invitation=null;s.confirmation=null;s.completed=false;s.inviteBets={pc:0,npc:0};s.teasing={pc:false,npc:false};dealNPC();render();if(first==='npc')scheduleNPC();
 }
 function pendingCard(){return s.mode==='public'?s.invitation:s.confirmation}
 function readyForFinish(){return s.npcMood>=80&&s.pcMood>=80}
@@ -54,6 +54,8 @@ function scheduleNPC(){
 function pairBonus(id,other){const ids=[id,other];return ids.includes('neck')&&ids.includes('lips')?9:id===other?4:ids.includes('hand')?5:3}
 function play(id,who){
  if(s.paused||s.ended||!canCard(id)||s.turn!==who)return;
+ const waiting=pendingCard();
+ if(waiting&&waiting!==who)s.teasing[waiting]=true;
  const c=DECK.find(c=>c[0]===id),chosen=who==='pc'?s.stack.find(c=>c.seq===s.pair&&c.who==='npc'&&!c.pairedWith&&!c.usedForPair):null;
  const partner=who==='pc'?(s.drawn?{id:s.drawn.id,who:'npc',seq:++sequence,fromHand:true}:chosen?{id:chosen.id,who:chosen.who,seq:++sequence,sourceSeq:chosen.seq}:null):null;
  const risky=c[2]>s.npcMood||(partner&&DECK.find(c=>c[0]===partner.id)[2]>s.npcMood);
@@ -125,7 +127,7 @@ function menu(){
 $('send').onclick=()=>play(s.selected,'pc');
 $('bet').onclick=()=>{
  if(s.paused||s.ended||s.turn!=='pc')return;
- if(pendingCard()){if(pendingCard()!=='pc')return;s.inviteBets.pc++}
+ if(pendingCard()){if(pendingCard()!=='pc')return;s.inviteBets.pc++;change('pcDesire',1);if(!s.wolf.pc&&s.pcDesire>=20){s.wolf.pc=true;showWolfEffect('pc')}showTeaseBet('pc')}
  else s.bet=(s.bet+1)%3;
  render();
 };

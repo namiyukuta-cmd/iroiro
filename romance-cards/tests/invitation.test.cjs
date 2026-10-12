@@ -5,7 +5,7 @@ const path=require('node:path');
 const vm=require('node:vm');
 function game(){
  const nodes=new Map(),timers=new Map();let timerId=0,clock=0,choices;
- const node=id=>{if(!nodes.has(id))nodes.set(id,{innerHTML:'',textContent:'',style:{setProperty(){}},classList:{toggle(){}},querySelectorAll(){return []}});return nodes.get(id)};
+ const node=id=>{if(!nodes.has(id))nodes.set(id,{innerHTML:'',textContent:'',style:{setProperty(){}},classList:{toggle(){},add(){},remove(){}},querySelectorAll(){return []}});return nodes.get(id)};
  const ctx=vm.createContext({document:{getElementById:node},setTimeout(fn,delay=0){timers.set(++timerId,{fn,time:clock+delay});return timerId},clearTimeout(id){timers.delete(id)},Math:Object.assign(Object.create(Math),{random:()=>0})});
  for(const file of ['cards.js','render.js','game.js'])vm.runInContext(fs.readFileSync(path.join(__dirname,'../js',file),'utf8'),ctx);
  ctx.capture=items=>choices=items;
@@ -23,8 +23,8 @@ test('only one invitation: NPC invitation cannot be overwritten or duplicated',(
 test('invitation bet stacks without consuming a turn or disappearing after a hand',()=>{
  const g=game();g.run("invitePrivate();$('bet').onclick();$('bet').onclick();$('bet').onclick();invitePrivate()");
  assert.equal(g.run('s.inviteBets.pc'),3);assert.equal(g.run('s.turn'),'pc');assert.equal(g.run('s.round'),0);
- g.run("play('hand','pc')");assert.equal(g.run('s.pcDesire'),0);g.tick();
- assert.equal(g.run('s.pcDesire'),6);assert.equal(g.run('s.inviteBets.pc'),3);assert.equal(g.run('s.history.length'),2);
+ g.run("play('hand','pc')");assert.equal(g.run('s.pcDesire'),3);g.tick();
+ assert.equal(g.run('s.pcDesire'),9);assert.equal(g.run('s.inviteBets.pc'),3);assert.equal(g.run('s.history.length'),2);
  assert.equal(g.run('s.npcMood'),50);assert.equal(g.run('s.pcMood'),46);
 });
 test('NPC keeps playing normal cards and adds bets to an existing invitation',()=>{
@@ -55,7 +55,7 @@ test('private confirmation is single, stacks bets, and waits without ending the 
  const g=game();g.run("enter('pc',true);confirmFinish();$('bet').onclick();$('bet').onclick();confirmFinish()");
  assert.equal(g.run('s.confirmation'),'pc');assert.equal(g.run('s.inviteBets.pc'),2);assert.equal(g.run('s.round'),0);
  g.run("play('hand','pc')");g.tick();
- assert.equal(g.run('s.pcDesire'),5);assert.equal(g.run('s.ended'),false);assert.equal(g.run('s.confirmation'),'pc');
+ assert.equal(g.run('s.pcDesire'),7);assert.equal(g.run('s.ended'),false);assert.equal(g.run('s.confirmation'),'pc');
 });
 test('NPC confirmation keeps normal play available and can be accepted to finish',()=>{
  const g=game();g.run("enter('pc',true);s.npcMood=85;s.pcMood=85;play('hand','pc')");g.tick();
@@ -142,4 +142,16 @@ test('body cards persist after repeated actions and all action layers remain',()
  g.run("s.turn='pc';drawNPC(0);s.selected='hand';play('hand','pc')");
  assert.equal(g.run('JSON.stringify(s.npcHand)'),initial);
  assert.match(g.node('pile').innerHTML,/paired-action/);
+});
+
+test('teasing appears on the first declined invitation hand before wolf mode',()=>{
+ const g=game();g.run("s.invitation='npc';play('hand','pc')");
+ assert.equal(g.run('s.teasing.npc'),true);
+ assert.equal(g.run('s.wolf.npc'),false);
+ assert.match(g.node('teaseStatus').innerHTML,/焦らし中♡/);
+ g.run("enter('pc',true)");assert.equal(g.node('teaseStatus').innerHTML,'');
+});
+test('stacking an invitation bet raises visible desire immediately',()=>{
+ const g=game();g.run("s.invitation='pc';s.teasing.pc=true;$('bet').onclick()");
+ assert.equal(g.run('s.pcDesire'),1);assert.match(g.node('teaseStatus').innerHTML,/自分の欲求 1/);
 });
