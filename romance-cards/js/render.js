@@ -1,8 +1,8 @@
 'use strict';
 const $=id=>document.getElementById(id);
 function svg(path){return `<svg viewBox="0 0 100 100" aria-hidden="true"><path d="${path}" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>`}
-function cardArt(c){return CARD_ART[c[0]]?`<img class="card-art" src="${CARD_ART[c[0]]}" alt="" draggable="false">`:svg(c[3])}
-function cardHTML(id,cls='',extra=''){const c=DECK.find(c=>c[0]===id);return `<button class="card ${cls}" ${extra} aria-label="${c[1]}">${cardArt(c)}<span>${c[1]}</span></button>`}
+function cardArt(c,who='pc'){const variants=CARD_ART_BY_OWNER[who]||CARD_ART_BY_OWNER.pc;const src=Object.hasOwn(variants,c[0])?variants[c[0]]:CARD_ART[c[0]];return src?`<img class="card-art" src="${src}" alt="" draggable="false">`:svg(c[3])}
+function cardHTML(id,cls='',extra='',who='pc'){const c=DECK.find(c=>c[0]===id);return `<button class="card ${cls}" ${extra} aria-label="${c[1]}">${cardArt(c,who)}<span>${c[1]}</span></button>`}
 function feeling(npc){let f=npc?s.npcFeeling:s.pcFeeling,v=npc?s.npcMood:s.pcMood;if(f==='calm'&&v>=55)f='warm';return `${s.wolf[npc?'npc':'pc']?'🐺 ':''}${FEEL[f][0]} · ♡ ${v}${pendingCard()===(npc?'npc':'pc')?' · 欲求 '+(npc?s.npcDesire:s.pcDesire):''}`}
 function dialog(title,body,choices){
  $('modal').innerHTML=`<div class="overlay"><section class="dialog" role="dialog" aria-modal="true" aria-label="${title}"><h2>${title}</h2><p>${body}</p><div class="choices"></div></section></div>`;
@@ -13,14 +13,14 @@ function dialog(title,body,choices){
 function stackHTML(cards,interactive){
  if(!cards.length)return '<div class="empty-pile" aria-label="札なし"></div>';
  const visible=cards.slice(-5);
- return visible.map((c,i)=>cardHTML(c.id,`${c.who} ${c.pairedWith?'combined-top':cards.some(p=>p.pairedWith===c.seq)?'combined-base':''} ${c.seq===s.lastPlay?.seq?'latest-card':''} ${s.pair===c.seq?'picked':''}`,`style="--x:${(i-visible.length+1)*-2}px;--y:${(i-visible.length+1)*-2}px;z-index:${i}" data-seq="${c.seq}" ${!interactive||(c.who!=='npc'||c.pairedWith)||s.turn!=='pc'||s.paused||s.ended?'disabled':''}`)).join('');
+ return visible.map((c,i)=>cardHTML(c.id,`${c.who} ${c.pairedWith?'combined-top':cards.some(p=>p.pairedWith===c.seq)?'combined-base':''} ${c.seq===s.lastPlay?.seq?'latest-card':''} ${s.pair===c.seq?'picked':''}`,`style="--x:${(i-visible.length+1)*-2}px;--y:${(i-visible.length+1)*-2}px;z-index:${i}" data-seq="${c.seq}" ${!interactive||(c.who!=='npc'||c.pairedWith)||s.turn!=='pc'||s.paused||s.ended?'disabled':''}`,c.who)).join('');
 }
 let effectTimer=null;
 function clearPlayEffect(){clearTimeout(effectTimer);$('playEffect').innerHTML=''}
 function showPlayed(card,partner=null,labelOverride=null){
  clearPlayEffect();
  const label=labelOverride||(partner?'重ねた札':card.who==='npc'?'相手が出した札':'自分が出した札');
- $('playEffect').innerHTML=`<div class="played-preview ${card.who}"><span class="played-label">${label}</span><div class="played-cards">${cardHTML(card.id)}${partner?cardHTML(partner.id):''}</div></div>`;
+ $('playEffect').innerHTML=`<div class="played-preview ${card.who}"><span class="played-label">${label}</span><div class="played-cards">${cardHTML(card.id,'','',card.who)}${partner?cardHTML(partner.id,'','',partner.who||'npc'):''}</div></div>`;
  effectTimer=setTimeout(clearPlayEffect,1400);
 }
 let wolfTimer=null;
@@ -45,14 +45,14 @@ function render(){
  const playedName=s.lastPlay&&DECK.find(c=>c[0]===s.lastPlay.id)[1]+(s.lastPlay.partner?'＋'+DECK.find(c=>c[0]===s.lastPlay.partner)[1]:'');
  $('message').textContent=s.ended?(s.completed?'ふたりの時間を終えました':'カードを仕舞いました'):s.lastPlay?`${s.lastPlay.who==='npc'?'相手':'自分'}が「${playedName}」を出しました · ${turnMessage}`:turnMessage;
  $('npcHand').innerHTML=s.npcHand.map((id,i)=>{
-  if(id){const card=DECK.find(c=>c[0]===id);return cardHTML(id,'opponent-face',`style="--order:${i}" data-npc-index="${i}" aria-description="相手の${card[1]}を引き抜く" ${!pcTurn?'disabled':''}`)}
+  if(id){const card=DECK.find(c=>c[0]===id);return cardHTML(id,'opponent-face',`style="--order:${i}" data-npc-index="${i}" aria-description="相手の${card[1]}を引き抜く" ${!pcTurn?'disabled':''}`,'npc')}
   return `<button class="card empty-hand" style="--order:${i}" data-npc-index="${i}" aria-label="${s.drawn?.index===i?'引き抜いた札を戻す':'札なし'}" ${!pcTurn||s.drawn?.index!==i?'disabled':''}>${s.drawn?.index===i?'戻す':''}</button>`;
  }).join('');
  $('npcHand').querySelectorAll('[data-npc-index]').forEach(e=>e.onclick=()=>drawNPC(+e.dataset.npcIndex));
  $('hand').innerHTML=DECK.map((c,i)=>{
   let html=cardHTML(c[0],`${s.selected===c[0]?'selected':''} ${!canCard(c[0])?'unavailable':''}`,`style="--order:${i}" data-card="${c[0]}" aria-pressed="${s.selected===c[0]}" ${!canCard(c[0])||!pcTurn?'disabled':''}`);
   const partner=s.drawn||s.stack.find(p=>p.seq===s.pair&&p.who==='npc'&&!p.pairedWith);
-  if(s.selected===c[0]&&partner){const other=DECK.find(d=>d[0]===partner.id);html=html.replace('</button>',`<span class="borrowed-card">${cardArt(other)}<small>${other[1]}</small></span></button>`)}
+  if(s.selected===c[0]&&partner){const other=DECK.find(d=>d[0]===partner.id);html=html.replace('</button>',`<span class="borrowed-card">${cardArt(other,'npc')}<small>${other[1]}</small></span></button>`)}
   return html;
  }).join('');
  $('hand').querySelectorAll('[data-card]').forEach(e=>e.onclick=()=>{s.selected=e.dataset.card;render()});
@@ -62,7 +62,7 @@ function render(){
  const recent=s.history.slice(-24);
  $('history').innerHTML=recent.length?recent.map(c=>{
   const deck=DECK.find(d=>d[0]===c.id),available=pcTurn&&c.who==='npc'&&s.stack.some(p=>p.seq===c.seq&&!p.pairedWith);
-  return `<button class="history-icon ${c.who} ${s.pair===c.seq?'picked':''}" aria-label="${c.who==='npc'?'相手':'自分'}：${deck[1]}" data-history-seq="${c.seq}" ${available?'':'disabled'}>${cardArt(deck)}</button>`;
+  return `<button class="history-icon ${c.who} ${s.pair===c.seq?'picked':''}" aria-label="${c.who==='npc'?'相手':'自分'}：${deck[1]}" data-history-seq="${c.seq}" ${available?'':'disabled'}>${cardArt(deck,c.who)}</button>`;
  }).join(''):'<span class="history-empty">—</span>';
  $('history').querySelectorAll('[data-history-seq]').forEach(e=>e.onclick=()=>selectPair(+e.dataset.historySeq));
  const inviting=pendingCard();
