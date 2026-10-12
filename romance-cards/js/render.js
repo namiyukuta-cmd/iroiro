@@ -32,6 +32,9 @@ function showWolfEffect(who){
 }
 function render(){
  const inactive=s.paused||s.ended,pcTurn=s.turn==='pc'&&!inactive;
+ const handCount=DECK.filter(c=>canCard(c[0])).length;
+ $('npcHand').style.setProperty('--hand-count',handCount);
+ $('hand').style.setProperty('--hand-count',handCount);
  $('scene').classList.toggle('private',s.mode==='private');
  $('scene').classList.toggle('wolf-active',s.wolf.npc||s.wolf.pc);
  $('gameDate').textContent='日付 '+(s.date||'—');
@@ -49,7 +52,7 @@ function render(){
   return `<button class="card empty-hand" style="--order:${i}" data-npc-index="${i}" aria-label="${s.drawn?.index===i?'引き抜いた札を戻す':'札なし'}" ${!pcTurn||s.drawn?.index!==i?'disabled':''}>${s.drawn?.index===i?'戻す':''}</button>`;
  }).join('');
  $('npcHand').querySelectorAll('[data-npc-index]').forEach(e=>e.onclick=()=>drawNPC(+e.dataset.npcIndex));
- $('hand').innerHTML=DECK.map((c,i)=>{
+ $('hand').innerHTML=DECK.filter(c=>canCard(c[0])).map((c,i)=>{
   let html=cardHTML(c[0],`${s.selected===c[0]?'selected':''} ${!canCard(c[0])?'unavailable':''}`,`style="--order:${i}" data-card="${c[0]}" aria-pressed="${s.selected===c[0]}" ${!canCard(c[0])||!pcTurn?'disabled':''}`);
   const partner=s.drawn||s.stack.find(p=>p.seq===s.pair&&p.who==='npc'&&!p.pairedWith);
   if(s.selected===c[0]&&partner){const other=DECK.find(d=>d[0]===partner.id);html=html.replace('</button>',`<span class="borrowed-card">${cardArt(other,'npc')}<small>${other[1]}</small></span></button>`)}

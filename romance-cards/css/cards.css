@@ -1,7 +1,7 @@
 .card{background:var(--card);color:var(--card-ink);border:1px solid #b99b7c;border-radius:4px;box-shadow:0 2px 4px #0005;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:3px;min-height:0}
 .card svg{width:100%;height:calc(100% - 14px);min-height:0}
 .card span{font-size:10px;white-space:nowrap}
-.hand{display:grid;grid-template-columns:repeat(8,minmax(0,1fr));padding-right:12px;align-items:center;height:calc(var(--hand-height) + 5px)}
+.hand{display:grid;grid-template-columns:repeat(var(--hand-count,8),minmax(0,1fr));padding-right:12px;align-items:center;height:calc(var(--hand-height) + 5px)}
 .hand .card{width:calc(100% + 12px);height:var(--hand-height);position:relative;z-index:var(--order);transform:none}
 .hand .card.selected{z-index:12;outline:2px solid #dfad68;outline-offset:1px;transform:translateY(-4px)}
 .hand .card:disabled{opacity:1}

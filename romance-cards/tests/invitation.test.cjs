@@ -5,7 +5,7 @@ const path=require('node:path');
 const vm=require('node:vm');
 function game(){
  const nodes=new Map(),timers=new Map();let timerId=0,clock=0,choices;
- const node=id=>{if(!nodes.has(id))nodes.set(id,{innerHTML:'',textContent:'',classList:{toggle(){}},querySelectorAll(){return []}});return nodes.get(id)};
+ const node=id=>{if(!nodes.has(id))nodes.set(id,{innerHTML:'',textContent:'',style:{setProperty(){}},classList:{toggle(){}},querySelectorAll(){return []}});return nodes.get(id)};
  const ctx=vm.createContext({document:{getElementById:node},setTimeout(fn,delay=0){timers.set(++timerId,{fn,time:clock+delay});return timerId},clearTimeout(id){timers.delete(id)},Math:Object.assign(Object.create(Math),{random:()=>0})});
  for(const file of ['cards.js','render.js','game.js'])vm.runInContext(fs.readFileSync(path.join(__dirname,'../js',file),'utf8'),ctx);
  ctx.capture=items=>choices=items;
@@ -119,4 +119,15 @@ test('completion pauses on an afterglow screen until replay is explicitly chosen
  const g=game();g.run('exitCards(true)');assert.deepEqual(Array.from(g.choices(),c=>c[0]),['余韻のまま閉じる','もう一度遊ぶ']);
  g.choices()[0][1]();assert.equal(g.run('s.ended'),true);assert.equal(g.run('s.completed'),true);
  g.run('menu()');assert.equal(g.choices()[1][0],'もう一度遊ぶ');g.choices()[1][1]();assert.equal(g.choices()[0][0],'自分から · 先攻');
+});
+
+test('normal table deals five unique cards and private table deals eight',()=>{
+ const g=game();
+ assert.equal(g.run('s.npcHand.length'),5);
+ assert.equal(g.run('new Set(s.npcHand).size'),5);
+ assert.equal((g.node('hand').innerHTML.match(/data-card=/g)||[]).length,5);
+ g.run("enter('pc',true)");
+ assert.equal(g.run('s.npcHand.length'),8);
+ assert.equal(g.run('new Set(s.npcHand).size'),8);
+ assert.equal((g.node('hand').innerHTML.match(/data-card=/g)||[]).length,8);
 });

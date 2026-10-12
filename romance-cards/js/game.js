@@ -7,7 +7,7 @@ function canCard(id){const c=DECK.find(c=>c[0]===id);return !!c&&(s.mode==='priv
 function dealNPC(){
  const cards=DECK.filter(c=>canCard(c[0])).map(c=>c[0]);
  for(let i=cards.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[cards[i],cards[j]]=[cards[j],cards[i]]}
- s.npcHand=Array.from({length:8},(_,i)=>cards[i%cards.length]);
+ s.npcHand=cards;
 }
 function eligible(){return DECK.filter(c=>s.npcHand.includes(c[0])&&canCard(c[0])&&c[2]<=s.npcMood)}
 function chooseNPC(){
