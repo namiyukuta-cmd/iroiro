@@ -11,9 +11,14 @@ function dialog(title,body,choices){
  box.querySelector('button')?.focus();
 }
 function stackHTML(cards,interactive){
- if(!cards.length)return '<div class="empty-pile" aria-label="札なし"></div>';
- const visible=cards.slice(-5);
- return visible.map((c,i)=>cardHTML(c.id,`${c.who} ${c.pairedWith?'combined-top':cards.some(p=>p.pairedWith===c.seq)?'combined-base':''} ${c.seq===s.lastPlay?.seq?'latest-card':''} ${s.pair===c.seq?'picked':''}`,`style="--x:${(i-visible.length+1)*-2}px;--y:${(i-visible.length+1)*-2}px;z-index:${i}" data-seq="${c.seq}" ${!interactive||(c.who!=='npc'||c.pairedWith)||s.turn!=='pc'||s.paused||s.ended?'disabled':''}`,c.who)).join('');
+ if(!cards.length)return '<div class="empty-pile" aria-label="行為の記録なし"></div>';
+ const actions=cards.filter(c=>!c.pairedWith);
+ return actions.map((c,i)=>{
+  const partner=cards.find(p=>p.pairedWith===c.seq);
+  const disabled=!interactive||c.who!=='npc'||c.usedForPair||s.turn!=='pc'||s.paused||s.ended;
+  const attrs=`data-seq="${c.seq}" ${disabled?'disabled':''}`;
+  return `<div class="action-group ${partner?'paired-action':''}" style="--x:${(i-actions.length+1)*Math.min(2,24/Math.max(1,actions.length-1))}px;--y:${(i-actions.length+1)*Math.min(2,24/Math.max(1,actions.length-1))}px;z-index:${i}">${cardHTML(c.id,`${c.who} ${partner?'combined-base':''} ${c.seq===s.lastPlay?.seq?'latest-card':''} ${s.pair===c.seq?'picked':''}`,attrs,c.who)}${partner?cardHTML(partner.id,`${partner.who} combined-top`,'disabled',partner.who):''}</div>`;
+ }).join('');
 }
 let effectTimer=null;
 function clearPlayEffect(){clearTimeout(effectTimer);$('playEffect').innerHTML=''}
@@ -48,13 +53,13 @@ function render(){
  const playedName=s.lastPlay&&DECK.find(c=>c[0]===s.lastPlay.id)[1]+(s.lastPlay.partner?'＋'+DECK.find(c=>c[0]===s.lastPlay.partner)[1]:'');
  $('message').textContent=s.ended?(s.completed?'ふたりの時間を終えました':'カードを仕舞いました'):s.lastPlay?`${s.lastPlay.who==='npc'?'相手':'自分'}が「${playedName}」を出しました · ${turnMessage}`:turnMessage;
  $('npcHand').innerHTML=s.npcHand.map((id,i)=>{
-  if(id){const card=DECK.find(c=>c[0]===id);return cardHTML(id,'opponent-face',`style="--order:${i}" data-npc-index="${i}" aria-description="相手の${card[1]}を引き抜く" ${!pcTurn?'disabled':''}`,'npc')}
+  if(id){const card=DECK.find(c=>c[0]===id);return cardHTML(id,`opponent-face ${s.drawn?.index===i?'picked':''}`,`style="--order:${i}" data-npc-index="${i}" aria-description="相手の${card[1]}を引き抜く" ${!pcTurn?'disabled':''}`,'npc')}
   return `<button class="card empty-hand" style="--order:${i}" data-npc-index="${i}" aria-label="${s.drawn?.index===i?'引き抜いた札を戻す':'札なし'}" ${!pcTurn||s.drawn?.index!==i?'disabled':''}>${s.drawn?.index===i?'戻す':''}</button>`;
  }).join('');
  $('npcHand').querySelectorAll('[data-npc-index]').forEach(e=>e.onclick=()=>drawNPC(+e.dataset.npcIndex));
  $('hand').innerHTML=DECK.filter(c=>canCard(c[0])).map((c,i)=>{
   let html=cardHTML(c[0],`${s.selected===c[0]?'selected':''} ${!canCard(c[0])?'unavailable':''}`,`style="--order:${i}" data-card="${c[0]}" aria-pressed="${s.selected===c[0]}" ${!canCard(c[0])||!pcTurn?'disabled':''}`);
-  const partner=s.drawn||s.stack.find(p=>p.seq===s.pair&&p.who==='npc'&&!p.pairedWith);
+  const partner=s.drawn||s.stack.find(p=>p.seq===s.pair&&p.who==='npc'&&!p.pairedWith&&!p.usedForPair);
   if(s.selected===c[0]&&partner){const other=DECK.find(d=>d[0]===partner.id);html=html.replace('</button>',`<span class="borrowed-card">${cardArt(other,'npc')}<small>${other[1]}</small></span></button>`)}
   return html;
  }).join('');
@@ -62,9 +67,9 @@ function render(){
  $('pile').innerHTML=stackHTML(s.stack,true);
  $('discard').innerHTML=stackHTML(s.discard,false);
  $('pile').querySelectorAll('[data-seq]').forEach(e=>e.onclick=()=>selectPair(+e.dataset.seq));
- const recent=s.history.slice(-24);
+ const recent=s.history;
  $('history').innerHTML=recent.length?recent.map(c=>{
-  const deck=DECK.find(d=>d[0]===c.id),available=pcTurn&&c.who==='npc'&&s.stack.some(p=>p.seq===c.seq&&!p.pairedWith);
+  const deck=DECK.find(d=>d[0]===c.id),available=pcTurn&&c.who==='npc'&&s.stack.some(p=>p.seq===c.seq&&!p.pairedWith&&!p.usedForPair);
   return `<button class="history-icon ${c.who} ${s.pair===c.seq?'picked':''}" aria-label="${c.who==='npc'?'相手':'自分'}：${deck[1]}" data-history-seq="${c.seq}" ${available?'':'disabled'}>${cardArt(deck,c.who)}</button>`;
  }).join(''):'<span class="history-empty">—</span>';
  $('history').querySelectorAll('[data-history-seq]').forEach(e=>e.onclick=()=>selectPair(+e.dataset.historySeq));

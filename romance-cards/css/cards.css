@@ -64,3 +64,12 @@
 .borrowed-card:has(>.card-art){padding:0;background:#fff;border-radius:0}
 .borrowed-card:has(>.card-art)>small{display:none}
 .history-icon .card-art{width:100%;height:100%;object-fit:contain}
+
+/* Each layer records one action; paired cards remain in the same layer. */
+.pile .action-group{position:absolute;height:min(var(--pile-height),calc(100% - 10px));aspect-ratio:595/842;transform:translate(var(--x),var(--y))}
+.pile .action-group .card{inset:0;width:100%;height:100%;transform:none;margin:0;rotate:0}
+.pile .action-group.paired-action{translate:-8px 0}
+.pile .action-group .combined-top{left:16px;top:-6px;rotate:8deg}
+.opponent-hand .card.picked{outline:2px solid #e7b355;outline-offset:1px}
+.history-icons{overflow-x:auto;flex-wrap:nowrap}
+.history-icon{flex-shrink:0}

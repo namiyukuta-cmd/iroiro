@@ -83,9 +83,9 @@ test('restarting clears the animation and the previous play label',()=>{
  assert.equal(g.node('message').textContent,'あなたの番');
 });
 
-test('pulling a card moves it out of the opponent hand and supports returning it',()=>{
+test('selecting an opponent body card preserves it and supports cancelling',()=>{
  const g=game();const id=g.run('s.npcHand[0]');g.run('drawNPC(0)');
- assert.equal(g.run('s.drawn.id'),id);assert.equal(g.run('s.npcHand[0]'),null);
+ assert.equal(g.run('s.drawn.id'),id);assert.equal(g.run('s.npcHand[0]'),id);
  assert.equal(g.run('s.turn'),'pc');assert.equal(g.run('s.round'),0);assert.match(g.node('playEffect').innerHTML,/引き抜いた札/);
  g.run('drawNPC(0)');assert.equal(g.run('s.drawn'),null);assert.equal(g.run('s.npcHand[0]'),id);
 });
@@ -98,7 +98,7 @@ test('a borrowed card is visibly paired with the player card and strengthens its
 });
 test('a card pulled from the table can be paired only once',()=>{
  const g=game();g.run("s.npcMood=70;s.pcMood=60;s.stack=[{id:'neck',who:'npc',seq:300}];selectPair(300);play('lips','pc')");
- assert.equal(g.run('s.stack.length'),2);assert.equal(g.run('s.stack[1].pairedWith'),g.run('s.stack[0].seq'));
+ assert.equal(g.run('s.stack.length'),3);assert.equal(g.run('s.stack[0].seq'),300);assert.equal(g.run('s.stack[2].pairedWith'),g.run('s.stack[1].seq'));
  g.run("s.turn='pc';selectPair(300)");assert.equal(g.run('s.pair'),null);
 });
 test('NPC avoids mirroring the player or repeating itself when alternatives exist',()=>{
@@ -130,4 +130,16 @@ test('normal table deals five unique cards and private table deals eight',()=>{
  assert.equal(g.run('s.npcHand.length'),8);
  assert.equal(g.run('new Set(s.npcHand).size'),8);
  assert.equal((g.node('hand').innerHTML.match(/data-card=/g)||[]).length,8);
+});
+
+test('body cards persist after repeated actions and all action layers remain',()=>{
+ const g=game();const initial=g.run('JSON.stringify(s.npcHand)');
+ for(let i=0;i<10;i++){g.run("s.npcMood=100;s.pcMood=100;s.turn='npc';play('hand','npc')")}
+ assert.equal(g.run('JSON.stringify(s.npcHand)'),initial);
+ assert.equal(g.run('s.stack.length'),10);
+ assert.equal((g.node('pile').innerHTML.match(/class="action-group /g)||[]).length,10);
+ assert.equal((g.node('history').innerHTML.match(/data-history-seq=/g)||[]).length,10);
+ g.run("s.turn='pc';drawNPC(0);s.selected='hand';play('hand','pc')");
+ assert.equal(g.run('JSON.stringify(s.npcHand)'),initial);
+ assert.match(g.node('pile').innerHTML,/paired-action/);
 });
