@@ -24,7 +24,7 @@ let effectTimer=null;
 function clearPlayEffect(){clearTimeout(effectTimer);$('playEffect').innerHTML=''}
 function showPlayed(card,partner=null,labelOverride=null){
  clearPlayEffect();
- const label=labelOverride||(partner?'重ねた札':card.who==='npc'?'相手が出した札':'自分が出した札');
+ const label=labelOverride||(partner?(card.who==='npc'?'相手がこちらの札を重ねた':'重ねた札'):card.who==='npc'?'相手が出した札':'自分が出した札');
  $('playEffect').innerHTML=`<div class="played-preview ${card.who}"><span class="played-label">${label}</span><div class="played-cards">${cardHTML(card.id,'','',card.who)}${partner?cardHTML(partner.id,'','',partner.who||'npc'):''}</div></div>`;
  effectTimer=setTimeout(clearPlayEffect,1400);
 }

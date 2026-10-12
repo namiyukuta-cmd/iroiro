@@ -3,11 +3,12 @@ const assert=require('node:assert/strict');
 const fs=require('node:fs');
 const path=require('node:path');
 const vm=require('node:vm');
-function game(){
+function game({pairing=false}={}){
  const nodes=new Map(),timers=new Map();let timerId=0,clock=0,choices;
  const node=id=>{if(!nodes.has(id))nodes.set(id,{innerHTML:'',textContent:'',style:{setProperty(){}},classList:{toggle(){},add(){},remove(){}},querySelectorAll(){return []}});return nodes.get(id)};
  const ctx=vm.createContext({document:{getElementById:node},setTimeout(fn,delay=0){timers.set(++timerId,{fn,time:clock+delay});return timerId},clearTimeout(id){timers.delete(id)},Math:Object.assign(Object.create(Math),{random:()=>0})});
  for(const file of ['cards.js','render.js','game.js'])vm.runInContext(fs.readFileSync(path.join(__dirname,'../js',file),'utf8'),ctx);
+ if(!pairing)vm.runInContext('chooseNPCPartner=()=>null',ctx);
  ctx.capture=items=>choices=items;
  vm.runInContext('dialog=(title,body,items)=>capture(items)',ctx);
  return {run:code=>vm.runInContext(code,ctx),random:fn=>ctx.Math.random=fn,node,choices:()=>choices,tick(){const [id,timer]=[...timers.entries()].sort((a,b)=>a[1].time-b[1].time)[0];timers.delete(id);clock=timer.time;timer.fn()}};
@@ -29,7 +30,7 @@ test('invitation bet stacks without consuming a turn or disappearing after a han
 });
 test('NPC keeps playing normal cards and adds bets to an existing invitation',()=>{
  const g=game();g.run("s.invitation='npc';s.npcDesire=50;play('hand','pc')");g.tick();
- assert.equal(g.run('s.inviteBets.npc'),1);assert.equal(g.run('s.history.length'),2);assert.equal(g.run('s.npcDesire'),54);
+ assert.equal(g.run('s.inviteBets.npc'),1);assert.equal(g.run('s.history.length'),2);assert.equal(g.run('s.npcDesire'),55);
  assert.equal(g.node('bet').disabled,true);
 });
 test('waiting keeps the invitation; accepting removes it in private mode',()=>{
@@ -154,4 +155,28 @@ test('teasing appears on the first declined invitation hand before wolf mode',()
 test('stacking an invitation bet raises visible desire immediately',()=>{
  const g=game();g.run("s.invitation='pc';s.teasing.pc=true;$('bet').onclick()");
  assert.equal(g.run('s.pcDesire'),1);assert.match(g.node('teaseStatus').innerHTML,/自分の欲求 1/);
+});
+
+test('NPC combines a player body card without removing either hand',()=>{
+ const g=game({pairing:true});g.run("s.npcMood=70;s.pcMood=60;s.turn='npc';play('lips','npc','neck')");
+ assert.equal(g.run('s.stack[0].who'),'npc');
+ assert.equal(g.run('s.stack[1].who'),'pc');
+ assert.equal(g.run('s.stack[1].pairedWith'),g.run('s.stack[0].seq'));
+ assert.match(g.node('message').textContent,/唇＋首/);
+ assert.match(g.node('playEffect').innerHTML,/played-cards/);
+ assert.equal(g.run('s.npcHand.length'),5);
+ assert.equal((g.node('hand').innerHTML.match(/data-card=/g)||[]).length,5);
+});
+test('NPC automatically adds a bet and pairs a card when its invitation is teased',()=>{
+ const g=game({pairing:true});g.run("s.npcMood=70;s.pcMood=60;s.invitation='npc';play('hand','pc')");
+ g.tick();
+ assert.equal(g.run('s.inviteBets.npc'),1);
+ assert.equal(g.run('s.lastPlay.who'),'npc');
+ assert.ok(g.run('s.lastPlay.partner'));
+ assert.match(g.node('pile').innerHTML,/paired-action/);
+});
+test('wolf mode makes NPC combinations more likely',()=>{
+ const g=game({pairing:true});g.random(()=>.6);g.run('s.npcMood=100;s.wolf.npc=false');
+ assert.equal(g.run("chooseNPCPartner('lips')"),null);
+ g.run('s.wolf.npc=true');assert.ok(g.run("chooseNPCPartner('lips')"));
 });
