@@ -55,3 +55,12 @@
 @keyframes wolf-burst{0%{opacity:0;transform:scale(.6)}15%,80%{opacity:1;transform:scale(1)}100%{opacity:0;transform:scale(1.1)}}
 
 .opponent-hand .card.opponent-face{background:var(--card);color:var(--card-ink);border-color:#c98591;padding:3px}
+
+/* Uploaded artwork already includes its white ground and gold/black frame. */
+.card-art{display:block;width:100%;height:100%;object-fit:contain;min-height:0;pointer-events:none}
+.card:has(>.card-art){position:relative;padding:0;background:#fff;border-radius:0;overflow:hidden}
+.card:has(>.card-art)>span:not(.borrowed-card){position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
+.hand .card.selected:has(>.card-art){overflow:visible}
+.borrowed-card:has(>.card-art){padding:0;background:#fff;border-radius:0}
+.borrowed-card:has(>.card-art)>small{display:none}
+.history-icon .card-art{width:100%;height:100%;object-fit:contain}

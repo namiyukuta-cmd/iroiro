@@ -1,7 +1,8 @@
 'use strict';
 const $=id=>document.getElementById(id);
 function svg(path){return `<svg viewBox="0 0 100 100" aria-hidden="true"><path d="${path}" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>`}
-function cardHTML(id,cls='',extra=''){const c=DECK.find(c=>c[0]===id);return `<button class="card ${cls}" ${extra} aria-label="${c[1]}">${svg(c[3])}<span>${c[1]}</span></button>`}
+function cardArt(c){return CARD_ART[c[0]]?`<img class="card-art" src="${CARD_ART[c[0]]}" alt="" draggable="false">`:svg(c[3])}
+function cardHTML(id,cls='',extra=''){const c=DECK.find(c=>c[0]===id);return `<button class="card ${cls}" ${extra} aria-label="${c[1]}">${cardArt(c)}<span>${c[1]}</span></button>`}
 function feeling(npc){let f=npc?s.npcFeeling:s.pcFeeling,v=npc?s.npcMood:s.pcMood;if(f==='calm'&&v>=55)f='warm';return `${s.wolf[npc?'npc':'pc']?'🐺 ':''}${FEEL[f][0]} · ♡ ${v}${pendingCard()===(npc?'npc':'pc')?' · 欲求 '+(npc?s.npcDesire:s.pcDesire):''}`}
 function dialog(title,body,choices){
  $('modal').innerHTML=`<div class="overlay"><section class="dialog" role="dialog" aria-modal="true" aria-label="${title}"><h2>${title}</h2><p>${body}</p><div class="choices"></div></section></div>`;
@@ -51,7 +52,7 @@ function render(){
  $('hand').innerHTML=DECK.map((c,i)=>{
   let html=cardHTML(c[0],`${s.selected===c[0]?'selected':''} ${!canCard(c[0])?'unavailable':''}`,`style="--order:${i}" data-card="${c[0]}" aria-pressed="${s.selected===c[0]}" ${!canCard(c[0])||!pcTurn?'disabled':''}`);
   const partner=s.drawn||s.stack.find(p=>p.seq===s.pair&&p.who==='npc'&&!p.pairedWith);
-  if(s.selected===c[0]&&partner){const other=DECK.find(d=>d[0]===partner.id);html=html.replace('</button>',`<span class="borrowed-card">${svg(other[3])}<small>${other[1]}</small></span></button>`)}
+  if(s.selected===c[0]&&partner){const other=DECK.find(d=>d[0]===partner.id);html=html.replace('</button>',`<span class="borrowed-card">${cardArt(other)}<small>${other[1]}</small></span></button>`)}
   return html;
  }).join('');
  $('hand').querySelectorAll('[data-card]').forEach(e=>e.onclick=()=>{s.selected=e.dataset.card;render()});
@@ -61,7 +62,7 @@ function render(){
  const recent=s.history.slice(-24);
  $('history').innerHTML=recent.length?recent.map(c=>{
   const deck=DECK.find(d=>d[0]===c.id),available=pcTurn&&c.who==='npc'&&s.stack.some(p=>p.seq===c.seq&&!p.pairedWith);
-  return `<button class="history-icon ${c.who} ${s.pair===c.seq?'picked':''}" aria-label="${c.who==='npc'?'相手':'自分'}：${deck[1]}" data-history-seq="${c.seq}" ${available?'':'disabled'}>${svg(deck[3])}</button>`;
+  return `<button class="history-icon ${c.who} ${s.pair===c.seq?'picked':''}" aria-label="${c.who==='npc'?'相手':'自分'}：${deck[1]}" data-history-seq="${c.seq}" ${available?'':'disabled'}>${cardArt(deck)}</button>`;
  }).join(''):'<span class="history-empty">—</span>';
  $('history').querySelectorAll('[data-history-seq]').forEach(e=>e.onclick=()=>selectPair(+e.dataset.historySeq));
  const inviting=pendingCard();
