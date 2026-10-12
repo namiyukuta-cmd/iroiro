@@ -43,7 +43,10 @@ function render(){
  const turnMessage=s.turn==='npc'?'相手の番…':'あなたの番';
  const playedName=s.lastPlay&&DECK.find(c=>c[0]===s.lastPlay.id)[1]+(s.lastPlay.partner?'＋'+DECK.find(c=>c[0]===s.lastPlay.partner)[1]:'');
  $('message').textContent=s.ended?(s.completed?'ふたりの時間を終えました':'カードを仕舞いました'):s.lastPlay?`${s.lastPlay.who==='npc'?'相手':'自分'}が「${playedName}」を出しました · ${turnMessage}`:turnMessage;
- $('npcHand').innerHTML=s.npcHand.map((id,i)=>id?`<button class="card" style="--order:${i}" data-npc-index="${i}" aria-label="相手の手札${i+1}を引き抜く" ${!pcTurn?'disabled':''}><i class="card-back" aria-hidden="true"></i></button>`:`<button class="card empty-hand" style="--order:${i}" data-npc-index="${i}" aria-label="${s.drawn?.index===i?'引き抜いた札を戻す':'札なし'}" ${!pcTurn||s.drawn?.index!==i?'disabled':''}>${s.drawn?.index===i?'戻す':''}</button>`).join('');
+ $('npcHand').innerHTML=s.npcHand.map((id,i)=>{
+  if(id){const card=DECK.find(c=>c[0]===id);return cardHTML(id,'opponent-face',`style="--order:${i}" data-npc-index="${i}" aria-description="相手の${card[1]}を引き抜く" ${!pcTurn?'disabled':''}`)}
+  return `<button class="card empty-hand" style="--order:${i}" data-npc-index="${i}" aria-label="${s.drawn?.index===i?'引き抜いた札を戻す':'札なし'}" ${!pcTurn||s.drawn?.index!==i?'disabled':''}>${s.drawn?.index===i?'戻す':''}</button>`;
+ }).join('');
  $('npcHand').querySelectorAll('[data-npc-index]').forEach(e=>e.onclick=()=>drawNPC(+e.dataset.npcIndex));
  $('hand').innerHTML=DECK.map((c,i)=>{
   let html=cardHTML(c[0],`${s.selected===c[0]?'selected':''} ${!canCard(c[0])?'unavailable':''}`,`style="--order:${i}" data-card="${c[0]}" aria-pressed="${s.selected===c[0]}" ${!canCard(c[0])||!pcTurn?'disabled':''}`);
