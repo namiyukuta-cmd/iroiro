@@ -12,7 +12,15 @@ function dialog(title,body,choices){
 function stackHTML(cards,interactive){
  if(!cards.length)return '<div class="empty-pile" aria-label="札なし"></div>';
  const visible=cards.slice(-5);
- return visible.map((c,i)=>cardHTML(c.id,`${c.who} ${s.pair===c.seq?'picked':''}`,`style="--x:${(i-visible.length+1)*-2}px;--y:${(i-visible.length+1)*-2}px;z-index:${i}" data-seq="${c.seq}" ${!interactive||c.who!=='npc'||s.turn!=='pc'||s.paused||s.ended?'disabled':''}`)).join('');
+ return visible.map((c,i)=>cardHTML(c.id,`${c.who} ${c.seq===s.lastPlay?.seq?'latest-card':''} ${s.pair===c.seq?'picked':''}`,`style="--x:${(i-visible.length+1)*-2}px;--y:${(i-visible.length+1)*-2}px;z-index:${i}" data-seq="${c.seq}" ${!interactive||c.who!=='npc'||s.turn!=='pc'||s.paused||s.ended?'disabled':''}`)).join('');
+}
+let effectTimer=null;
+function clearPlayEffect(){clearTimeout(effectTimer);$('playEffect').innerHTML=''}
+function showPlayed(card){
+ clearPlayEffect();
+ const label=card.who==='npc'?'相手が出した札':'自分が出した札';
+ $('playEffect').innerHTML=`<div class="played-preview ${card.who}"><span class="played-label">${label}</span>${cardHTML(card.id)}</div>`;
+ effectTimer=setTimeout(clearPlayEffect,1400);
 }
 function render(){
  const inactive=s.paused||s.ended,pcTurn=s.turn==='pc'&&!inactive;
@@ -24,7 +32,9 @@ function render(){
  $('npcFeeling').textContent=feeling(true);
  $('pcFeeling').textContent=feeling(false);
  $('tableNote').textContent=s.mode==='private'?'私的卓':'通常卓';
- $('message').textContent=s.ended?(s.completed?'ふたりの時間を終えました':'カードを仕舞いました'):s.turn==='npc'?'相手の番…':'あなたの番';
+ const turnMessage=s.turn==='npc'?'相手の番…':'あなたの番';
+ const playedName=s.lastPlay&&DECK.find(c=>c[0]===s.lastPlay.id)[1];
+ $('message').textContent=s.ended?(s.completed?'ふたりの時間を終えました':'カードを仕舞いました'):s.lastPlay?`${s.lastPlay.who==='npc'?'相手':'自分'}が「${playedName}」を出しました · ${turnMessage}`:turnMessage;
  $('npcHand').innerHTML=DECK.map((c,i)=>`<div class="card" style="--order:${i}" aria-label="相手の手札・裏向き"><i class="card-back" aria-hidden="true"></i></div>`).join('');
  $('hand').innerHTML=DECK.map((c,i)=>cardHTML(c[0],`${s.selected===c[0]?'selected':''} ${!canCard(c[0])?'unavailable':''}`,`style="--order:${i}" data-card="${c[0]}" aria-pressed="${s.selected===c[0]}" ${!canCard(c[0])||!pcTurn?'disabled':''}`)).join('');
  $('hand').querySelectorAll('[data-card]').forEach(e=>e.onclick=()=>{s.selected=e.dataset.card;render()});

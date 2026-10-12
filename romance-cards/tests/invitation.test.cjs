@@ -4,13 +4,13 @@ const fs=require('node:fs');
 const path=require('node:path');
 const vm=require('node:vm');
 function game(){
- const nodes=new Map(),timers=new Map();let timerId=0,choices;
+ const nodes=new Map(),timers=new Map();let timerId=0,clock=0,choices;
  const node=id=>{if(!nodes.has(id))nodes.set(id,{innerHTML:'',textContent:'',classList:{toggle(){}},querySelectorAll(){return []}});return nodes.get(id)};
- const ctx=vm.createContext({document:{getElementById:node},setTimeout(fn){timers.set(++timerId,fn);return timerId},clearTimeout(id){timers.delete(id)},Math:Object.assign(Object.create(Math),{random:()=>0})});
+ const ctx=vm.createContext({document:{getElementById:node},setTimeout(fn,delay=0){timers.set(++timerId,{fn,time:clock+delay});return timerId},clearTimeout(id){timers.delete(id)},Math:Object.assign(Object.create(Math),{random:()=>0})});
  for(const file of ['cards.js','render.js','game.js'])vm.runInContext(fs.readFileSync(path.join(__dirname,'../js',file),'utf8'),ctx);
  ctx.capture=items=>choices=items;
  vm.runInContext('dialog=(title,body,items)=>capture(items)',ctx);
- return {run:code=>vm.runInContext(code,ctx),node,choices:()=>choices,tick(){const [id,fn]=timers.entries().next().value;timers.delete(id);fn()}};
+ return {run:code=>vm.runInContext(code,ctx),node,choices:()=>choices,tick(){const [id,timer]=[...timers.entries()].sort((a,b)=>a[1].time-b[1].time)[0];timers.delete(id);clock=timer.time;timer.fn()}};
 }
 test('only one invitation: NPC invitation cannot be overwritten or duplicated',()=>{
  const g=game();g.run("s.invitation='npc';render();invitePrivate()");
@@ -68,4 +68,17 @@ test('player confirmation may be accepted later and completes after fade',()=>{
  const g=game();g.run("enter('pc',true);confirmFinish();s.npcMood=80;s.pcMood=80;play('hand','pc')");g.tick();
  assert.equal(g.run('s.paused'),true);assert.equal(g.run('s.ended'),false);g.choices()[0][1]();g.tick();
  assert.equal(g.run('s.completed'),true);assert.equal(g.run('s.ended'),true);
+});
+
+test('NPC plays after inviting: a large preview and persistent card name identify its hand',()=>{
+ const g=game();g.run("s.invitation='npc';play('hand','pc')");g.tick();
+ assert.equal(g.run('s.lastPlay.who'),'npc');assert.match(g.node('playEffect').innerHTML,/相手が出した札/);
+ assert.match(g.node('message').textContent,/相手が「手」を出しました/);
+ g.run('render()');assert.match(g.node('message').textContent,/相手が「手」を出しました/);
+ g.tick();assert.equal(g.node('playEffect').innerHTML,'');assert.equal(g.run('s.history.length'),2);
+});
+test('restarting clears the animation and the previous play label',()=>{
+ const g=game();g.run("play('hand','pc');newGame('pc')");
+ assert.equal(g.node('playEffect').innerHTML,'');assert.equal(g.run('s.lastPlay'),null);
+ assert.equal(g.node('message').textContent,'あなたの番');
 });

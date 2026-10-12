@@ -1,12 +1,12 @@
 'use strict';
-const fresh=()=>({pcMood:38,npcMood:40,pcFeeling:'calm',npcFeeling:'calm',mode:'public',turn:'pc',stack:[],discard:[],history:[],round:0,selected:null,pair:null,bet:0,paused:false,ended:false,invitation:null,confirmation:null,completed:false,inviteBets:{pc:0,npc:0},pcDesire:0,npcDesire:0,date:null,time:null});
+const fresh=()=>({pcMood:38,npcMood:40,pcFeeling:'calm',npcFeeling:'calm',mode:'public',turn:'pc',stack:[],discard:[],history:[],lastPlay:null,round:0,selected:null,pair:null,bet:0,paused:false,ended:false,invitation:null,confirmation:null,completed:false,inviteBets:{pc:0,npc:0},pcDesire:0,npcDesire:0,date:null,time:null});
 let s=fresh(),timer=null,generation=0,sequence=0;
 const clamp=n=>Math.max(0,Math.min(100,n));
 function change(k,n){s[k]=clamp(s[k]+n)}
 function canCard(id){const c=DECK.find(c=>c[0]===id);return !!c&&(s.mode==='private'||!['leg','back','outfit'].includes(id))}
 function eligible(){return DECK.filter(c=>canCard(c[0])&&c[2]<=s.npcMood)}
 function enter(first,privateMode=false){
- generation++;clearTimeout(timer);s.mode=privateMode?'private':'public';s.round=0;s.selected=null;s.pair=null;s.bet=0;s.turn=first;s.paused=false;s.ended=false;s.invitation=null;s.confirmation=null;s.completed=false;s.inviteBets={pc:0,npc:0};render();if(first==='npc')scheduleNPC();
+ generation++;clearTimeout(timer);clearPlayEffect();s.lastPlay=null;s.mode=privateMode?'private':'public';s.round=0;s.selected=null;s.pair=null;s.bet=0;s.turn=first;s.paused=false;s.ended=false;s.invitation=null;s.confirmation=null;s.completed=false;s.inviteBets={pc:0,npc:0};render();if(first==='npc')scheduleNPC();
 }
 function pendingCard(){return s.mode==='public'?s.invitation:s.confirmation}
 function readyForFinish(){return s.npcMood>=80&&s.pcMood>=80}
@@ -30,12 +30,12 @@ function play(id,who){
  let gain=risky?-7:5;if(chosen)gain+=risky?0:pairBonus(id,chosen.id);
  gain*=1+(who==='pc'?s.bet:0)*.5;change('npcMood',Math.round(gain));change('pcMood',Math.round(gain*.7));
  if(chosen){s.stack=s.stack.filter(c=>c.seq!==chosen.seq);s.stack.push(chosen)}
- const played={id,who,seq:++sequence};s.stack.push(played);s.history.push({...played});
+ const played={id,who,seq:++sequence};s.stack.push(played);s.history.push({...played});s.lastPlay=played;
  s.round++;s.selected=null;s.pair=null;s.bet=0;s.turn=who==='pc'?'npc':'pc';
  if(s.round%2===0&&pendingCard())change(pendingCard()+'Desire',3+Math.min(7,s.inviteBets[pendingCard()]));
  if(who==='npc'&&s.mode==='public'&&s.npcMood>=60&&s.pcMood>=50&&s.invitation===null)s.invitation='npc';
  if(who==='npc'&&s.mode==='private'&&readyForFinish()&&s.confirmation===null)s.confirmation='npc';
- render();if(risky)$('message').textContent='💦';
+ render();showPlayed(played);if(risky)$('message').textContent+=' 💦';
  if(s.npcMood<25){exitCards();return}
  if(s.turn==='npc')scheduleNPC();
 }
@@ -69,11 +69,11 @@ function acceptFinish(){
  dialog('ふたりの時間','“OK?”<br>「この先へ進んでも？」',[['OK',()=>blackout(()=>exitCards(true)),true],['卓で続ける',resume]]);
 }
 function blackout(next){
- generation++;clearTimeout(timer);s.paused=true;render();const g=generation;
+ generation++;clearTimeout(timer);clearPlayEffect();s.paused=true;render();const g=generation;
  $('fade').innerHTML='<div class="fade">ふたりの時間</div>';
  timer=setTimeout(()=>{if(g!==generation)return;$('fade').innerHTML='';next()},1500);
 }
-function exitCards(completed=false){generation++;clearTimeout(timer);s.selected=null;s.pair=null;s.bet=0;s.completed=completed;s.ended=true;s.paused=true;render();startMenu()}
+function exitCards(completed=false){generation++;clearTimeout(timer);clearPlayEffect();s.selected=null;s.pair=null;s.bet=0;s.completed=completed;s.ended=true;s.paused=true;render();startMenu()}
 function newGame(first){s=fresh();enter(first)}
 function startMenu(){dialog(s.completed?'ふたりの時間を終えました':'カードを仕舞いました','次のカードゲームの先攻・後攻を選べます。',[['自分から · 先攻',()=>newGame('pc'),true],['相手から · 後攻',()=>newGame('npc')]])}
 function resume(){s.paused=false;render();if(s.turn==='npc')scheduleNPC()}

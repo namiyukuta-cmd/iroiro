@@ -12,7 +12,7 @@
 .card-back:before{top:0;left:2px}
 .card-back:after{bottom:0;right:2px}
 .pile{flex:1;width:100%;min-height:0;position:relative;display:flex;align-items:center;justify-content:center}
-.pile .card{position:absolute;height:min(var(--pile-height),calc(100% - 10px));aspect-ratio:595/842;width:auto;transform:translate(var(--x),var(--y));animation:deal .2s ease-out}
+.pile .card{position:absolute;height:min(var(--pile-height),calc(100% - 10px));aspect-ratio:595/842;width:auto;transform:translate(var(--x),var(--y))}
 .pile .card:disabled{opacity:1}
 .pile .card.npc{border-color:#b56d78}
 .pile .card.picked{outline:2px solid #e7b355;outline-offset:1px}
@@ -26,3 +26,13 @@
 .bet-card{font-size:14px;font-variant-numeric:tabular-nums}
 .bet-card.has-bet{background:#dec3a0;color:#30251d}
 @keyframes deal{from{opacity:0;translate:0 10px}to{opacity:1;translate:0 0}}
+
+.pile .card.latest-card{border-width:2px;box-shadow:0 0 0 2px #e7b35555,0 3px 8px #0008}
+.play-effect{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;pointer-events:none;z-index:15}
+.played-preview{display:flex;flex-direction:column;align-items:center;gap:8px;animation:played-preview 1.4s both}
+.played-label{padding:5px 12px;border:1px solid var(--line);border-radius:5px;background:#211c16f2;color:var(--ink);font-size:13px;box-shadow:0 3px 12px #0008}
+.played-preview .card{width:112px;height:158px;box-shadow:0 8px 25px #000a,0 0 24px #e7b35544;border-width:2px}
+.played-preview .card span{font-size:16px}
+.played-preview.npc .card{border-color:#c98591}
+@keyframes played-preview{0%{opacity:0;transform:translateY(-45px) scale(.75)}18%,75%{opacity:1;transform:translateY(0) scale(1)}100%{opacity:0;transform:translateY(24px) scale(.8)}}
+@media(max-height:620px){.played-preview .card{width:92px;height:130px}}
