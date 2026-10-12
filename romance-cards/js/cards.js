@@ -18,5 +18,5 @@ const CARD_ART={
 // 主人公は女性、相手役は男性。場に移っても札の持ち主で絵柄を選ぶ。
 const CARD_ART_BY_OWNER={
  pc:{outfit:'asset/dress-female.webp',cheek:'../sticker/images/87e5c039e84914ce350e12066bd19adbb6d8c56195327a4e94983a9ed5b0ae84.png',neck:'../sticker/images/318ab0b188f39ef232364fd37f5c9149637f0b9f8706874db75febff08c72e64.png',back:CARD_ART.back},
- npc:{outfit:CARD_ART.outfit,cheek:'../sticker/images/8fce0e043fe4a8219ead916df2fcbbd94a5b4dd6f4dd98749c9a86af4fa674cb.png',neck:CARD_ART.neck,back:null}
+ npc:{outfit:'asset/clothes-male.webp',cheek:'../sticker/images/8fce0e043fe4a8219ead916df2fcbbd94a5b4dd6f4dd98749c9a86af4fa674cb.png',neck:CARD_ART.neck,back:CARD_ART.outfit}
 };
