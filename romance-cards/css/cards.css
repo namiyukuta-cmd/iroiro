@@ -36,3 +36,20 @@
 .played-preview.npc .card{border-color:#c98591}
 @keyframes played-preview{0%{opacity:0;transform:translateY(-45px) scale(.75)}18%,75%{opacity:1;transform:translateY(0) scale(1)}100%{opacity:0;transform:translateY(24px) scale(.8)}}
 @media(max-height:620px){.played-preview .card{width:92px;height:130px}}
+
+.opponent-hand .card.empty-hand{background:transparent;border-style:dashed;color:var(--muted);box-shadow:none;font-size:10px}
+.hand .card.selected{overflow:visible}
+.borrowed-card{position:absolute;right:-16px;bottom:12px;display:flex;flex-direction:column;align-items:center;width:42px;height:60px;padding:3px;background:var(--card);color:var(--card-ink);border:2px solid #c98591;border-radius:4px;transform:rotate(12deg);box-shadow:0 3px 8px #0008;pointer-events:none}
+.borrowed-card svg{flex:1;width:100%;height:40px}
+.borrowed-card small{font-size:9px}
+.pile .card.combined-base{margin-left:-16px}
+.pile .card.combined-top{margin-left:16px;margin-top:-8px;border-width:2px;border-color:#c98591;rotate:8deg}
+.played-cards{display:flex;align-items:center;justify-content:center}
+.played-cards .card+.card{margin-left:-40px;transform:translateY(-6px) rotate(9deg);border-color:#c98591}
+.wolf-active{border-color:#cf9b64;box-shadow:inset 0 0 24px #d0904533,0 0 12px #d0904533}
+.wolf-effect{position:absolute;inset:10px 12px auto;display:flex;justify-content:center;pointer-events:none;z-index:16}
+.wolf-burst{display:flex;flex-direction:column;align-items:center;padding:8px 16px;background:#211c16f5;border:1px solid #cf9b64;border-radius:8px;box-shadow:0 0 22px #cf9b6466;animation:wolf-burst 2.4s both}
+.wolf-burst>span:first-child{font-size:38px;line-height:1.1}
+.wolf-burst strong{font-size:14px;color:#e2b47f}
+.wolf-burst>span:last-child{font-size:10px;color:var(--muted)}
+@keyframes wolf-burst{0%{opacity:0;transform:scale(.6)}15%,80%{opacity:1;transform:scale(1)}100%{opacity:0;transform:scale(1.1)}}

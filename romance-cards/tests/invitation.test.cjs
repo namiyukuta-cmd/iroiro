@@ -10,7 +10,7 @@ function game(){
  for(const file of ['cards.js','render.js','game.js'])vm.runInContext(fs.readFileSync(path.join(__dirname,'../js',file),'utf8'),ctx);
  ctx.capture=items=>choices=items;
  vm.runInContext('dialog=(title,body,items)=>capture(items)',ctx);
- return {run:code=>vm.runInContext(code,ctx),node,choices:()=>choices,tick(){const [id,timer]=[...timers.entries()].sort((a,b)=>a[1].time-b[1].time)[0];timers.delete(id);clock=timer.time;timer.fn()}};
+ return {run:code=>vm.runInContext(code,ctx),random:fn=>ctx.Math.random=fn,node,choices:()=>choices,tick(){const [id,timer]=[...timers.entries()].sort((a,b)=>a[1].time-b[1].time)[0];timers.delete(id);clock=timer.time;timer.fn()}};
 }
 test('only one invitation: NPC invitation cannot be overwritten or duplicated',()=>{
  const g=game();g.run("s.invitation='npc';render();invitePrivate()");
@@ -73,12 +73,50 @@ test('player confirmation may be accepted later and completes after fade',()=>{
 test('NPC plays after inviting: a large preview and persistent card name identify its hand',()=>{
  const g=game();g.run("s.invitation='npc';play('hand','pc')");g.tick();
  assert.equal(g.run('s.lastPlay.who'),'npc');assert.match(g.node('playEffect').innerHTML,/相手が出した札/);
- assert.match(g.node('message').textContent,/相手が「手」を出しました/);
- g.run('render()');assert.match(g.node('message').textContent,/相手が「手」を出しました/);
+ assert.match(g.node('message').textContent,/相手が「.+」を出しました/);
+ g.run('render()');assert.match(g.node('message').textContent,/相手が「.+」を出しました/);
  g.tick();assert.equal(g.node('playEffect').innerHTML,'');assert.equal(g.run('s.history.length'),2);
 });
 test('restarting clears the animation and the previous play label',()=>{
  const g=game();g.run("play('hand','pc');newGame('pc')");
  assert.equal(g.node('playEffect').innerHTML,'');assert.equal(g.run('s.lastPlay'),null);
  assert.equal(g.node('message').textContent,'あなたの番');
+});
+
+test('pulling a card moves it out of the opponent hand and supports returning it',()=>{
+ const g=game();const id=g.run('s.npcHand[0]');g.run('drawNPC(0)');
+ assert.equal(g.run('s.drawn.id'),id);assert.equal(g.run('s.npcHand[0]'),null);
+ assert.equal(g.run('s.turn'),'pc');assert.equal(g.run('s.round'),0);assert.match(g.node('playEffect').innerHTML,/引き抜いた札/);
+ g.run('drawNPC(0)');assert.equal(g.run('s.drawn'),null);assert.equal(g.run('s.npcHand[0]'),id);
+});
+test('a borrowed card is visibly paired with the player card and strengthens its effect',()=>{
+ const g=game();g.run("s.npcHand[0]='neck';s.npcMood=70;s.pcMood=60;drawNPC(0);s.selected='lips';render()");
+ assert.match(g.node('hand').innerHTML,/borrowed-card/);g.run("play('lips','pc')");
+ assert.equal(g.run('s.stack.length'),2);assert.equal(g.run('s.stack[1].pairedWith'),g.run('s.stack[0].seq'));
+ assert.equal(g.run('s.npcMood'),84);assert.equal(g.run('s.drawn'),null);
+ assert.match(g.node('pile').innerHTML,/combined-top/);assert.match(g.node('message').textContent,/唇＋首/);
+});
+test('a card pulled from the table can be paired only once',()=>{
+ const g=game();g.run("s.npcMood=70;s.pcMood=60;s.stack=[{id:'neck',who:'npc',seq:300}];selectPair(300);play('lips','pc')");
+ assert.equal(g.run('s.stack.length'),2);assert.equal(g.run('s.stack[1].pairedWith'),g.run('s.stack[0].seq'));
+ g.run("s.turn='pc';selectPair(300)");assert.equal(g.run('s.pair'),null);
+});
+test('NPC avoids mirroring the player or repeating itself when alternatives exist',()=>{
+ const g=game();g.run("s.npcMood=100;s.npcHand=['hand','lips','neck'];s.history=[{id:'hand',who:'pc'},{id:'lips',who:'npc'}]");
+ for(const value of [0,.25,.5,.99]){g.random(()=>value);assert.equal(g.run('chooseNPC()[0]'),'neck')}
+});
+test('teasing activates the wolf effect and it survives moving to the private table',()=>{
+ const g=game();g.run("s.turn='npc';s.round=1;s.invitation='npc';s.npcDesire=19;play('hand','npc')");
+ assert.equal(g.run('s.wolf.npc'),true);assert.match(g.node('wolfEffect').innerHTML,/相手の狼効果/);
+ assert.match(g.node('npcFeeling').textContent,/🐺/);g.run("enter('pc',true)");assert.equal(g.run('s.wolf.npc'),true);
+});
+test('wolf mode increases the chance of an assertive card',()=>{
+ const g=game();g.run("s.npcMood=100;s.npcHand=['hand','lips','neck','cheek','ear'];s.history=[]");
+ function assertive(wolf){g.run('s.wolf.npc='+wolf);let count=0;for(let i=0;i<100;i++){g.random(()=>i/100);if(['lips','neck','ear'].includes(g.run('chooseNPC()[0]')))count++}return count}
+ assert.ok(assertive(true)>assertive(false));
+});
+test('completion pauses on an afterglow screen until replay is explicitly chosen',()=>{
+ const g=game();g.run('exitCards(true)');assert.deepEqual(Array.from(g.choices(),c=>c[0]),['余韻のまま閉じる','もう一度遊ぶ']);
+ g.choices()[0][1]();assert.equal(g.run('s.ended'),true);assert.equal(g.run('s.completed'),true);
+ g.run('menu()');assert.equal(g.choices()[1][0],'もう一度遊ぶ');g.choices()[1][1]();assert.equal(g.choices()[0][0],'自分から · 先攻');
 });
